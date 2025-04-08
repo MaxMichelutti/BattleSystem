@@ -1,0 +1,197 @@
+1: -1 ATK Opponent
+2: +1 ATK +1 SPATK User
+3: Seed Opponent
+4: Poison Opponent
+5: Sleep Opponent
+6: Recoil 1/4 Damage User
+7: -2 Evasiveness Opponent
+8: Heal 50% User, 66% under sun, 25% under rain/sandstorm/snow
+9: locks the user into SOLAR_BEAM charging
+10: locks the user into Petal Dancing
+11: User loses 1/4 of its HP (STRUGGLE)
+12: locks the user into Outraging
+13: change ability to Insomnia opponent
+14: burn opponent
+15: -1 accuracy opponent 
+16: paralyze opponent
+17: increased critical hit ratio
+18: -2 SPEED opponent
+19: Fire Spin opponent
+20: 1/3 recoil + burn opponent
+21: flinch opponent
+22: -1 DEF opponent
+23: +1 DEF user
+24: remove leech seed + wrap + bind + ENTRY HAZARDS, + 1 Speed user
+25: confusion opponent
+26: protect user
+27: change weather to rain
+28: +2 ATK SPATK SPD user, -1 DEF SPDEF user
+29: +2 DEF user
+30: +1 SPD user, 33% recoil damage
+31: -1 SPDEF opponent
+32: force target to switch out to a random monster
+33: safeguard -> cannot add permanent status and confusion
+34: tailwind -> doubles speed of monsters on one side oif the field
+35: +1 SPATK SPDEF SPD user
+36: multi hit move HITS-% -> 2-35% 3-35% 4-15% 5-15%
+37: if used consecutively power doubles (up to 4 * POWER)
+38: critical hit next turn
+39: critical hits 50% of the time
+40: doubles power if target is poisoned
+41: set up toxic spikes
+42: +2 SPEED user
+43: Endeavor
+44: if opponent faints -> + 2 ATT user
+45: hits monster that is using FLY, BOUNCE or SKY DROP + 20% flinch
+46: -2 ATT opponent
+47: roost
+48: fly
+49: fails if target has already perform its action and action is not status move
+50: deals 50% target current HP
+51: recoil 1/3
+52: +2 ATT user
+53: wrap
+54: -2 SPDEF opponent
+55: stockpile (also +1 DEF SPDEF)
+56: swallow
+57: spit up
+58: suppress ability
+59: cancels all stat changes, also cancels focus energy
+60: +1 ATT DEF ACCURACY user
+61: freeze opponent
+62: +2 SPATT user
+63: +1 Evasivenes user
+64: Damage depends on Speed delta
+65: hits through protect
+66: light screen
+67: paralysis, bypass accuracy during rain and worse accuracy during sun
+68: rollout
+69: -1 SPEED opponent, damage halved under Grassy Terrain
+70: dig
+71: gyro ball
+72: start sandstorm
+73: hits dig pokemon, damage halved under Grassy Terrain
+74: sand tomb
+75: hits twice
+76: bad poison opponent
+77: +1 SPATT opponent and confusion
+78: -1 ATT DEF user
+79: does nothing
+80: copycat
+81: power depends on stat changes (+20 for each increased stat)
+82: 3 turns of encore
+83: heals 25% damage
+84: select random move and use that instead
+85: gravity
+86: +1 ATT user
+87: +1 DEF SPDEF user
+88: -1 SPATT opponent
+89: user dies and switchs out, switched in monster is fully healed
+90: disable one move of the target
+91: remove 4 PP from opponent last used move
+92: imprison
+93: mimic
+94: power doubles if it was already used this turn
+95: heals user's HP and status and then user falls asleep
+96: trap opponent
+97: heal 50% of damage dealt
+98: protects from positive priority non status moves
+99: sets Grassy Terrain
+100: user faints after use
+101: heal permanent status
+102: transform into opponent
+103: one hit KO -> Fissure & Guillotine & Horn Drill
+104: one condition among Burn Paralysis and Freeze
+105: fails if not used at first turn + flinch
+106: taunts opponent for 5 turns
+107: turns enemy into pure water type
+108: copy target stat changes
+109: +2 SPDEF user
+110: wonder room
+111: power depends on target weight
+112: deals damage equal to user level
+113: confusion and +2 ATT opponent
+114: thrash
+115: -1 def spdef user
+116: power doubles if last move failed
+117: deals damage equal to user currentHP, user dies
+118: power increases as the user receives hits
+119: power double if opponent has killed laast turn
+120: power depends on user % of HP
+121: user halves its Hp and maximizes attack (+12 attack)
+122: -1 speed opponent
+123: force target to switch out, opponent selects new active
+124: user switches to a chosen Monster if not trapped
+125: reflect
+126: heal 50% of HP user
+127: user copies target ability
+128: use defense instead of spdef for damage calc
+129: +1 DEF SPDEF user
+130: future sight
+131: power doubles if user has been hit this turn
+132: +1 ATT DEF user
+133: -2 SPATT user
+134: power is doubles if opponent has Permanent Status
+135: hits diving opponent and does double damage
+136: dive
+137: user becomes same type as target
+138: smacks target on ground
+139: adds stealth rocks to enemy side
+140: power depends on weight % relative of target relative to user
+141: flinch + if opponent has used MINIMIZE bypass accuracy
+142: +1 SPEED user
+143: drowsy opponent
+144: curse
+145: heal 50% target
+146: infatuate opponent
+147: lock on target
+148: set up electric terrain
+149: magnet rise
+150: damage caps at currentHP - 1 (never KOs)
+151: uproar
+152: raise a random stat by +2
+153: start snowstorm
+154: aqua ring
+155: power doubled if currentHP < 50%
+156: one hit KO -> sheer cold
+157: user faints -> opponents ATT and SPATT go to the bottom (-12)
+158: whirlpool
+159: spikes
+160: power doubles if user moves second and opponent does not switch
+161: Destiny Bond
+162: fails if opponent is not sleeping, restores 50% of damage dealt
+163: perish song
+164: bind
+165: flail -> power depends on HP % of user
+166: -1 speed user
+167: charge user, +1 spdef user
+168: reflect double special damage taken
+169: +1 SPATT user
+170: +1 DEF SPDEF user iff ability is PLUS or MINUS
+171: if attack misses, user takes 50% maxHP recoil
+172: removes Light Screen and Reflect before dealing damage
+173: user endures all hit during the turn it is used, surviving with 1 HP
+174: if attack misses, user takes 50% maxHP recoil + confusion chance
+175: reflect double physical damage taken
+176: user focuses at turn start, if it loses focus before attacking no damage is dealt, focus ids lost if hit by non status moves
+177: reset target stat changes
+178: last resort
+179: user ingrain
+180: +1 ATT DEF SPATT SPDEF SPEED user
+181: -1 ATT DEF opponent
+182: +1 ATT SPEED user
+183: swap att spatt stat changes with target
+184: swap def spdef stat changes with target
+185: user switches out, entering Monster keeps stat changes and volatiles
+186: always hits under hail or snow
+187: user recharges next turn
+188: set sun weather
+189: always critical hit
+190: mist
+191: user change type to its first move type
+192: change type to resist opponent last attack
+193: block opponent
+194: use another move known by the monster, only works while sleeping
+195: only usable while sleeping, 30% flinch opponent
+196: supereffective against water
+197: sky attack, flinch opponent, incresaed critical hit

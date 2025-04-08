@@ -1,0 +1,56 @@
+Comments with lines starting with %
+
+########################################################################
+Attacks
+########################################################################
+
+Attacks are separated by lines starting with "#"
+Each attack may have the following fields, marked with [R] if they are required:
+
+NAME[R] : the name of the attack
+DESCRIPTION[R] : the description of the attack
+CATEGORY[R] : a value among PHYSICAL, SPECIAL and STATUS
+TYPE[R] : the attacks's type in capital letters
+PP : the max amount of PP for the move. Defaults to 0
+ACCURACY : accuracy of the move in %. 200 for moves that cannot miss. Defaults to 100
+EFFECT : the ID of the effect, moves with the same effect ID have the same effect. Defaults to 0 = no effect
+EFFECTCHANCE : chance to have the effect in %. Defaults to 0
+EFFECTTARGET : SELF if the move only affects the user
+POWER : the attacks power. Defaults to 0
+PRIORITY : the level of priority of the move between -10 (lowest) and 10 (highest). Defaults to 0
+CONTACT -> moves that make contact
+SOUND -> sound based moves
+NO_METRONOME -> moves that cannot be copied by Metronome
+PUNCHING -> moves boosted by Iron Fists
+
+########################################################################
+Species
+########################################################################
+
+Species are separated by lines starting with "#"
+Each species may have the following fields, marked with [R] if they are required:
+
+NAME[R] : the name of the species
+TYPE1[R] : the species' first type in capital letters
+TYPE2 : the species' second type in capital letters. Defaults to NONE
+BASESTATS[R] : the species base stats separated by spaces in following order: HP ATK DEF SPATK SPDEF SPD
+ATTACKS[R] : a list of pairs level attackID separated by spaces, there must always be at least one level 1 attack
+EXPCURVE[R] : the XP curve for the species among ERRATIC, FAST, MEDIUM_FAST, MEDIUM_SLOW, SLOW and FLUCTUATING 
+WEIGHT[R] : the weight of the Monster in hg
+HEIGHT[R] : the height of the Monster in dm
+ABILITY1[R] : the first normal ability in caps
+ABILITY2 : the second normal ability in caps
+HIDDENABILITY : the hidden ability in caps
+GENDER : the gender rule for the species among HALF_MALE_HALF_FEMALE, FEMALE_ONE_EIGHT, MALE_ONE_EIGHT,
+            ALWAYS_MALE, ALWAYS_FEMALE, FEMALE_ONE_FOURTH, MALE_ONE_FOURH, NO_GENDER. 
+            Defaults to HALF_MALE_HALF_FEMALE
+FRIENDSHIP : the base friendship value for the species, between 0 and 255. Defaults to 70
+CATCHRATE : the catch rate value for the species, between 0 and 255. Defaults to 3
+EXPYIELD : the base exp yielded by defeating the monster. Defaults to 64
+EVYIELD : the species ev yield once defeated separated by spaces in following order: HP ATK DEF SPATK SPDEF SPD.
+            Defaults to all zeros
+EVOLUTIONS : a list of triples speciesID EvoMethod EvoCondition 
+EVOLUTIONATTACKS: a list of attackIDs that are learnt when some Monster evolves into this species.
+            These attacks hould also be specified as level 1 attacks
+
+

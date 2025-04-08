@@ -1,0 +1,3471 @@
+# 1 TACKLE
+NAME:Tackle
+DESCRIPTION:A physical attack in which the user charges and slams into the target with its whole body.
+POWER:30
+PP:40
+ACCURACY:100
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+CONTACT
+# 2 SCRATCH
+NAME:Scratch
+DESCRIPTION:Hard, pointed, sharp claws rake the target to inflict damage.
+POWER:40
+PP:35
+ACCURACY:100
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+CONTACT
+# 3 GROWL
+NAME:Growl
+DESCRIPTION:The user growls in an endearing way, making opposing Pokémon less wary. This lowers their Attack stats.
+PP:40
+ACCURACY:100
+EFFECT:1
+CATEGORY:STATUS
+TYPE:NORMAL
+SOUND
+# 4 VINE WHIP
+NAME:Vine Whip
+DESCRIPTION:The target is struck with slender, whiplike vines to inflict damage.
+PP:25
+CONTACT
+ACCURACY:100
+CATEGORY:PHYSICAL
+TYPE:GRASS
+POWER:45
+# 5 GROWTH
+NAME:Growth
+DESCRIPTION:The user's body grows all at once, boosting the Attack and Sp. Atk stats. 
+PP:20
+ACCURACY:200
+EFFECT:2
+EFFECTTARGET:SELF
+CATEGORY:STATUS
+TYPE:NORMAL
+TARGET:SELF
+# 6 LEECH SEED
+NAME:Leech Seed
+DESCRIPTION:A seed is planted on the target. It steals some HP from the target every turn. 
+PP:10
+ACCURACY:90
+EFFECT:3
+CATEGORY:STATUS
+TYPE:GRASS
+# 7 RAZOR LEAF
+NAME:Razor Leaf
+DESCRIPTION:Sharp-edged leaves are launched to slash at opposing Pokémon. This move has a heightened chance of landing a critical hit. 
+PP:25
+ACCURACY:95
+CATEGORY:PHYSICAL
+TYPE:GRASS
+POWER:55
+# 8 POISON POWDER
+NAME:Poison Powder
+DESCRIPTION:The user scatters a cloud of poisonous dust that poisons the target.
+PP:35
+ACCURACY:75
+EFFECT:4
+CATEGORY:STATUS
+TYPE:POISON
+# 9 SLEEP POWDER
+NAME:Sleep Powder
+DESCRIPTION:The user scatters a big cloud of sleep-inducing dust around the target.
+PP:15
+ACCURACY:75
+EFFECT:5
+CATEGORY:STATUS
+TYPE:GRASS
+# 10 SEED BOMB
+NAME:Seed Bomb
+DESCRIPTION:The user attacks by slamming a barrage of hard-shelled seeds down on the target from above.
+PP:15
+CATEGORY:PHYSICAL
+TYPE:GRASS
+POWER:80
+# 11 TAKE DOWN
+NAME:Take Down
+DESCRIPTION:A reckless, full-body charge attack for slamming into the target. This also damages the user a little.
+PP:20
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:6
+EFFECTTARGET:SELF
+TYPE:NORMAL
+POWER:90
+ACCURACY:85
+# 12 SWEET SCENT
+NAME:Sweet Scent
+DESCRIPTION:A sweet scent that harshly lowers opposing Pokémon's evasiveness.
+PP:20
+CATEGORY:STATUS
+EFFECT:7
+TYPE:NORMAL
+# 13 SYNTHESIS
+NAME:Synthesis
+DESCRIPTION:The user restores its own HP. The amount of HP regained varies with the weather.
+PP:5
+CATEGORY:STATUS
+EFFECT:8
+EFFECTTARGET:SELF
+TYPE:GRASS
+ACCURACY:200
+TARGET:SELF
+# 14 POWER WHIP
+NAME:Power Whip
+DESCRIPTION:The user violently whirls its vines, tentacles, or the like to harshly lash the target.
+PP:10
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:GRASS
+POWER:120
+ACCURACY:85
+# 15 SOLAR BEAM
+NAME:Solar Beam
+DESCRIPTION:In this two-turn attack, the user gathers light, then blasts a bundled beam on the next turn.
+PP:10
+CATEGORY:SPECIAL
+TYPE:GRASS
+POWER:120
+EFFECT:9
+EFFECTTARGET:SELF
+# 16 PETAL BLIZZARD
+NAME:Petal Blizzard
+DESCRIPTION:The user stirs up a violent petal blizzard and attacks everything around it.
+PP:15
+CATEGORY:PHYSICAL
+TYPE:GRASS
+POWER:90
+# 17 PETAL DANCE
+NAME:Petal Dance
+DESCRIPTION:The user attacks the target by scattering petals for two to three turns. The user then becomes confused.
+CATEGORY:SPECIAL
+PP:10
+CONTACT
+POWER:120
+EFFECT:10
+EFFECTTARGET:SELF
+TYPE:GRASS
+# 18 STRUGGLE
+NAME:Struggle
+DESCRIPTION:The user struggles to hit the opponent harshly damaging itself in the process.
+POWER:50
+EFFECT:11
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:NONE
+NO_METRONOME
+# 19 OUTRAGE
+NAME:OUTRAGE
+DESCRIPTION:The user rampages and attacks for two to three turns. The user then becomes confused. 
+POWER:120
+CONTACT
+PP:10
+TYPE:DRAGON
+EFFECT:12
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+# 20 WORRY SEED
+NAME:Worry Seed
+DESCRIPTION:A seed that causes worry is planted on the target. It prevents sleep by making the target's Ability Insomnia.
+CATEGORY:STATUS
+TYPE:GRASS
+EFFECT:13
+PP:10
+# 21 EMBER
+NAME:Ember
+DESCRIPTION:The target is attacked with small flames. This may also leave the target with a burn.
+TYPE:FIRE
+PP:25
+POWER:40
+CATEGORY:SPECIAL
+EFFECT:14
+EFFECTCHANCE:10
+# 22 SMOKESCREEN
+NAME:Smokescreen
+DESCRIPTION:The user releases an obscuring cloud of smoke or ink. This lowers the target's accuracy.
+CATEGORY:STATUS
+PP:20
+EFFECT:15
+TYPE:NORMAL
+# 23 DRAGON BREATH
+NAME:Dragon Breath
+DESCRIPTION:The user exhales a mighty gust that inflicts damage. This may also leave the target with paralysis.
+TYPE:DRAGON
+PP:20
+CATEGORY:SPECIAL
+POWER:60
+EFFECT:16
+EFFECTCHANCE:30
+# 24 FIRE FANG
+NAME:Fire Fang
+%DESCRIPTION:The user bites with flame-cloaked fangs. This may also make the target flinch or leave it with a burn.
+DESCRIPTION:The user bites with flame-cloaked fangs. This may also leave the target with a burn.
+TYPE:FIRE
+CONTACT
+PP:15
+POWER:65
+ACCURACY:95
+CATEGORY:PHYSICAL
+EFFECT:14
+EFFECTCHANCE:10
+# 25 SLASH
+NAME:Slash
+DESCRIPTION:The target is attacked with a slash of claws or blades. Critical hits land more easily.
+PP:20
+CONTACT
+POWER:70
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+EFFECT:17
+EFFECTTARGET:SELF
+# 26 FLAMETHROWER
+NAME:Flamethrower
+DESCRIPTION:The target is scorched with an intense blast of fire. This may also leave the target with a burn.
+CATEGORY:SPECIAL
+PP:15
+POWER:90
+TYPE:FIRE
+EFFECTCHANCE:10
+EFFECT:14
+# 27 SCARY FACE
+NAME:Scary Face
+DESCRIPTION:The user frightens the target with a scary face to harshly lower its Speed stat.
+PP:10
+EFFECT:18
+CATEGORY:STATUS
+TYPE:NORMAL
+# 28 FIRE SPIN
+NAME:Fire Spin
+DESCRIPTION:The target becomes trapped within a fierce vortex of fire that rages for four to five turns.
+PP:15
+POWER:35
+CATEGORY:SPECIAL
+TYPE:FIRE
+CONTACT
+EFFECT:19
+EFFECTTARGET:SELF
+ACCURACY:85
+# 29 INFERNO
+NAME:Inferno
+DESCRIPTION:The user attacks by engulfing the target in an intense fire. This leaves the target with a burn.
+PP:5
+CATEGORY:SPECIAL
+TYPE:FIRE
+ACCURACY:50
+POWER:100
+EFFECT:14
+# 30 FLARE BLITZ
+NAME:Flare Blitz
+DESCRIPTION:The user cloaks itself in fire and charges the target. This also damages the user quite a lot. This attack may leave the target with a burn.
+PP:15
+CONTACT
+POWER:120
+TYPE:FIRE
+CATEGORY:PHYSICAL
+EFFECT:20
+EFFECTCHANCE:10
+# 31 DRAGON CLAW
+NAME:Dragon Claw
+DESCRIPTION:The user slashes the target with huge, sharp claws.
+TYPE:DRAGON
+PP:15
+POWER:80
+CONTACT
+CATEGORY:PHYSICAL
+# 32 HEAT WAVE
+NAME:Heat Wave
+DESCRIPTION:The user attacks by exhaling hot breath on the opposing Pokémon. This may also leave those Pokémon with a burn.
+TYPE:FIRE
+CATEGORY:SPECIAL
+PP:10
+ACCURACY:90
+POWER:95
+EFFECT:14
+EFFECTCHANCE:10
+# 33 AIR SLASH
+NAME:Air Slash
+DESCRIPTION:The user attacks with a blade of air that slices even the sky. This may also make the target flinch.
+TYPE:FLYING
+PP:15
+ACCURACY:95
+POWER:75
+CATEGORY:SPECIAL
+EFFECT:21
+EFFECTCHANCE:30
+# 34 TAIL WHIP
+NAME:Tail Whip
+DESCRIPTION:The user wags its tail cutely, making opposing Pokémon less wary and lowering their Defense stat.
+PP:25
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:22
+# 35 WATER GUN
+NAME:Water Gun
+DESCRIPTION:The target is blasted with a forceful shot of water.
+PP:25
+TYPE:WATER
+POWER:40
+CATEGORY:SPECIAL
+# 36 WITHDRAW
+NAME:Withdraw
+DESCRIPTION:The user withdraws its body into its hard shell, raising its Defense stat.
+PP:40
+TYPE:WATER
+CATEGORY:STATUS
+EFFECT:23
+EFFECTTARGET:SELF
+TARGET:SELF
+# 37 RAPID SPIN
+NAME:Rapid Spin
+DESCRIPTION:A spin attack that can also eliminate such moves as Bind, Wrap, Leech Seed, and Spikes. 
+PP:40
+TYPE:NORMAL
+CONTACT
+EFFECT:24
+EFFECTTARGET:SELF
+POWER:50
+CATEGORY:PHYSICAL
+# 38 BITE
+NAME:Bite
+DESCRIPTION:The target is bitten with viciously sharp fangs. This may also make the target flinch.
+PP:25
+POWER:60
+CONTACT
+TYPE:DARK
+CATEGORY:PHYSICAL
+EFFECT:21
+EFFECTCHANCE:10
+# 39 WATER PULSE
+NAME:Water Pulse
+DESCRIPTION:The user attacks the target with a pulsing blast of water. This may also confuse the target.
+PP:20
+POWER:60
+CATEGORY:SPECIAL
+TYPE:WATER
+EFFECT:25
+EFFECTCHANCE:20
+# 40 PROTECT
+NAME:Protect
+DESCRIPTION:Enables the user to evade all attacks. Its chance of failing rises if it is used in succession.
+EFFECT:26
+EFFECTTARGET:SELF
+TARGET:SELF
+PRIORITY:4
+PP:10
+TYPE:NORMAL
+CATEGORY:STATUS
+# 41 RAIN DANCE
+NAME:Rain Dance
+DESCRIPTION:The user summons a heavy rain that falls for five turns, powering up Water-type moves.
+EFFECT:27
+TARGET:SELF
+EFFECTTARGET:SELF
+PP:5
+CATEGORY:STATUS
+TYPE:WATER
+# 42 AQUA TAIL
+NAME:Aqua Tail
+DESCRIPTION:The user attacks by swinging its tail as if it were a vicious wave in a raging storm.
+PP:10
+ACCURACY:90
+POWER:90
+TYPE:WATER
+CATEGORY:SPECIAL
+# 43 SHELL SMASH
+NAME:Shell Smash
+DESCRIPTION:The user breaks its shell, which lowers Defense and Sp. Def stats but sharply raises its Attack, Sp. Atk, and Speed stats.
+EFFECT:28
+EFFECTTARGET:SELF
+TARGET:SELF
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:15
+# 44 IRON DEFENSE
+NAME:Iron Defense
+DESCRIPTION:The user hardens its body's surface like iron, sharply raising its Defense stat.
+TYPE:STEEL
+EFFECT:29
+EFFECTTARGET:SELF
+TARGET:SELF
+CATEGORY:STATUS
+PP:15
+# 45 HYDRO PUMP
+NAME:Hydro Pump
+DESCRIPTION:The target is blasted by a huge volume of water launched under great pressure.
+TYPE:WATER
+PP:5
+ACCURACY:80
+CATEGORY:SPECIAL
+POWER:110
+# 46 WAVE CRASH
+NAME:Wave Crash
+DESCRIPTION:The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user quite a lot.
+TYPE:WATER
+PP:10
+CONTACT
+CATEGORY:PHYSICAL
+POWER:120
+EFFECT:30
+EFFECTTARGET:SELF
+# 47 FLASH CANNON
+NAME:Flash Cannon
+DESCRIPTION:The user gathers all its light energy and releases it at once. This may also lower the target's Sp. Def stat.
+PP:10
+POWER:80
+CATEGORY:SPECIAL
+TYPE:STEEL
+EFFECT:31
+EFFECTCHANCE:10
+# 48 STRING SHOT
+NAME:String Shot
+DESCRIPTION:The opposing Pokémon are bound with silk blown from the user's mouth that harshly lowers the Speed stat.
+PP:40
+ACCURACY:95
+CATEGORY:STATUS
+TYPE:BUG
+EFFECT:18
+TYPE:BUG
+# 49 BUG BITE 
+NAME:Bug Bite
+DESCRIPTION:The user bites the target. If the target is holding a Berry, the user eats it and gains its effect.
+PP:20
+POWER:60
+CONTACT
+CATEGORY:PHYSICAL
+TYPE:BUG
+% EFFECT: STEAL AND EAT OPPONENT BERRY
+# 50 HARDEN
+NAME:Harden
+DESCRIPTION:The user stiffens all the muscles in its body to raise its Defense stat.
+PP:30
+TARGET:SELF
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:23
+# 51 GUST
+NAME:Gust
+DESCRIPTION:A gust of wind is whipped up by wings and launched at the target to inflict damage.
+PP:35
+CATEGORY:SPECIAL
+TYPE:FLYING
+POWER:40
+# 52 SUPERSONIC
+NAME:Supersonic
+DESCRIPTION:The user generates odd sound waves from its body that confuse the target.
+TYPE:NORMAL
+CATEGORY:STATUS
+ACCURACY:55
+PP:20
+EFFECT:25
+SOUND
+# 53 CONFUSION
+NAME:Confusion
+DESCRIPTION:The target is hit by a weak telekinetic force. This may also confuse the target.
+PP:25
+TYPE:PSYCHIC
+POWER:50
+CATEGORY:SPECIAL
+EFFECT:25
+EFFECTCHANCE:10
+# 54 STUN SPORE
+NAME:Stun Spore
+DESCRIPTION:The user scatters a cloud of numbing powder that paralyzes the target.
+CATEGORY:STATUS
+PP:30
+EFFECT:16
+ACCURACY:75
+TYPE:GRASS
+# 55 PSYBEAM
+NAME:Psybeam
+DESCRIPTION:The target is attacked with a peculiar ray. This may also leave the target confused.
+CATEGORY:SPECIAL
+PP:20
+TYPE:PSYCHIC
+POWER:65
+EFFECT:25
+EFFECTCHANCE:10
+# 56 WHIRLWIND
+NAME:Whirlwind
+DESCRIPTION:The target is blown away, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
+PP:20
+ACCURACY:200
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:32
+PRIORITY:-6
+TARGET:SELF
+# 57 SAFEGUARD
+NAME:Safeguard
+DESCRIPTION:The user creates a protective field that prevents status conditions for five turns.
+EFFECT:33
+TARGET:SELF
+EFFECTTARGET:SELF
+TARGET:SELF
+PP:25
+CATEGORY:STATUS
+TYPE:NORMAL
+# 58 BUG BUZZ
+NAME:Bug Buzz
+DESCRIPTION:The user vibrates its wings to generate a damaging sound wave. This may also lower the target's Sp. Def stat.
+CATEGORY:SPECIAL
+TYPE:BUG
+PP:10
+POWER:90
+EFFECT:31
+EFFECTCHANCE:10
+SOUND
+# 59 TAILWIND
+EFFECT:34
+EFFECTTARGET:SELF
+NAME:Tailwind
+DESCRIPTION:The user whips up a turbulent whirlwind that ups the Speed stat of the user and its allies for four turns.
+TARGET:SELF
+TYPE:FLYING
+CATEGORY:STATUS
+PP:15
+# 60 QUIVER DANCE
+NAME:Quiver Dance
+DESCRIPTION:The user lightly performs a beautiful, mystic dance. This boosts the user's Sp. Atk, Sp. Def, and Speed stats.
+PP:20
+TARGET:SELF
+CATEGORY:STATUS
+TYPE:BUG
+EFFECT:35
+EFFECTTARGET:SELF
+# 61 POISON STING
+NAME:Poison Sting
+DESCRIPTION:The user stabs the target with a poisonous stinger. This may also poison the target.
+EFFECT:4
+EFFECTCHANCE:20
+TYPE:POISON
+CATEGORY:PHYSICAL
+PP:35
+POWER:15
+# 62 FURY ATTACK
+NAME:Fury Attack
+DESCRIPTION:The target is jabbed repeatedly with a horn or beak two to five times in a row.
+TYPE:NORMAL
+PP:20
+POWER:15
+ACCURACY:85
+CONTACT
+EFFECT:36
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+# 63 FURY CUTTER
+NAME:Fury Cutter
+DESCRIPTION:The target is slashed with scythes or claws. This attack becomes more powerful if it hits in succession.
+PP:20
+CONTACT
+POWER:40
+ACCURACY:95
+TYPE:BUG
+CATEGORY:PHYSICAL
+EFFECT:37
+# 64 LASER FOCUS
+NAME:Laser Focus
+DESCRIPTION:The user concentrates intensely. The attack on the next turn always results in a critical hit.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:30
+EFFECT:38
+EFFECTTARGET:SELF
+TARGET:SELF
+# 65 FOCUS ENERGY
+NAME:Focus Energy
+DESCRIPTION:The user takes a deep breath and focuses so that critical hits land more easily.
+PP:30
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:39
+EFFECTTARGET:SELF
+TARGET:SELF
+# 66 VENOSHOCK
+NAME:Venoshock
+DESCRIPTION:The user drenches the target in a special poisonous liquid. This move's power is doubled if the target is poisoned.
+PP:10
+POWER:65
+CATEGORY:SPECIAL
+TYPE:POISON
+EFFECT:40
+EFFECTTARGET:SELF
+# 67 ASSURANCE
+NAME:Assurance
+% DESCRIPTION:If the target has already taken some damage in the same turn, this attack's power is doubled.
+DESCRIPTION:The user violently slaps the target inflicting physical damage.
+POWER:60
+CONTACT
+PP:10
+TYPE:DARK
+CATEGORY:PHYSICAL
+# 68 TOXIC SPIKES
+NAME:Toxic Spikes
+DESCRIPTION:The user lays a trap of poison spikes at the opposing team's feet. They poison opposing Pokémon that switch into battle.
+EFFECT:41
+EFFECTTARGET:SELF
+TARGET:SELF
+PP:20
+CATEGORY:STATUS
+TYPE:POISON
+# 69 PIN MISSILE
+NAME:Pin Missile
+DESCRIPTION:Sharp spikes are shot at the target in rapid succession. They hit two to five times in a row.
+PP:20
+POWER:25
+EFFECT:36
+EFFECTTARGET:SELF
+TYPE:BUG
+CATEGORY:PHYSICAL
+ACCURACY:95
+# 70 POISON JAB
+NAME:Poison Jab
+DESCRIPTION:The target is stabbed with a tentacle or arm steeped in poison. This may also poison the target.
+PP:20
+POWER:80
+CONTACT
+CATEGORY:PHYSICAL
+TYPE:POISON
+EFFECT:4
+EFFECTCHANCE:30
+# 71 AGILITY
+NAME:Agility
+DESCRIPTION:The user relaxes and lightens its body to move faster. This sharply raises the Speed stat.
+PP:30
+CATEGORY:STATUS
+TYPE:PSYCHIC
+EFFECT:42
+EFFECTTARGET:SELF
+TARGET:SELF
+# 72 ENDEAVOR
+NAME:Endeavor
+DESCRIPTION:An attack move that cuts down the target's HP to equal the user's HP.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+CONTACT
+EFFECT:43
+EFFECTTARGET:SELF
+# 73 FELL STINGER
+NAME:Fell Stinger
+DESCRIPTION:When the user knocks out a target with this move, the user's Attack stat rises sharply.
+TYPE:BUG
+PP:25
+CONTACT
+POWER:50
+CATEGORY:PHYSICAL
+EFFECT:44
+EFFECTTARGET:SELF
+# 74 SAND ATTACK
+NAME:Sand Attack
+DESCRIPTION:Sand is hurled in the target's face, reducing the target's accuracy.
+CATEGORY:STATUS
+PP:15
+EFFECT:15
+TYPE:GROUND
+# 75 QUICK ATTACK
+NAME:Quick Attack
+DESCRIPTION:The user lunges at the target at a speed that makes it almost invisible. This move always goes first.
+POWER:40
+PP:30
+CONTACT
+PRIORITY:1
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+# 76 TWISTER
+NAME:Twister
+DESCRIPTION:The user whips up a vicious tornado to tear at the opposing Pokémon. This may also make them flinch.
+TYPE:DRAGON
+PP:20
+POWER:40
+CATEGORY:SPECIAL
+EFFECT:45
+EFFECTCHANCE:20
+# 77 FEATHER DANCE
+NAME:Feather Dance
+DESCRIPTION:The user covers the target's body with a mass of down that harshly lowers its Attack stat.
+TYPE:FLYING
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:46
+PP:15
+# 78 WING ATTACK
+NAME:Wing Attack
+DESCRIPTION:The target is struck with large, imposing wings spread wide to inflict damage.
+TYPE:FLYING
+POWER:60
+PP:35
+CONTACT
+CATEGORY:PHYSICAL
+# 79 ROOST
+NAME:Roost
+DESCRIPTION:The user lands and rests its body. It restores the user's HP by up to half of its max HP.
+TYPE:FLYING
+CATEGORY:STATUS
+TARGET:SELF
+PP:5
+EFFECT:47
+# 80 AERIAL ACE
+NAME:Aerial Ace
+DESCRIPTION:The user confounds the target with speed, then slashes. This attack never misses.
+TYPE:FLYING
+CATEGORY:PHYSICAL
+PP:20
+CONTACT
+ACCURACY:200
+POWER:60
+# 81 HURRICANE
+NAME:Hurricane
+DESCRIPTION:The user attacks by wrapping its opponent in a fierce wind that flies up into the sky. This may also confuse the target.
+TYPE:FLYING
+CATEGORY:SPECIAL
+POWER:110
+ACCURACY:70
+PP:10
+EFFECT:25
+EFFECTCHANCE:30
+# 82 FLY
+NAME:Fly
+DESCRIPTION:The user soars and then strikes its target on the next turn.
+PP:15
+CONTACT
+POWER:90
+ACCURACY:95
+TYPE:FLYING
+EFFECT:48
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+# 83 CRUNCH
+NAME:Crunch
+DESCRIPTION:The user crunches up the target with sharp fangs. This may also lower the target's Defense stat.
+TYPE:DARK
+POWER:80
+PP:15
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:22
+EFFECTCHANCE:20
+# 84 SUCKER PUNCH
+NAME:Sucker Punch
+DESCRIPTION:This move enables the user to attack first. This move fails if the target is not readying an attack.
+PRIORITY:1
+TYPE:DARK
+CATEGORY:PHYSICAL
+PP:5
+CONTACT
+POWER:70
+EFFECT:49
+EFFECTTARGET:SELF
+# 85 SUPER FANG
+NAME:Super Fang
+DESCRIPTION:The user chomps hard on the target with its sharp front fangs. This cuts the target's HP in half.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+ACCURACY:90
+PP:10
+CONTACT
+EFFECT:50
+EFFECTTARGET:SELF
+# 86 DOUBLE EDGE
+NAME:Double-Edge
+DESCRIPTION:A reckless, life-risking tackle in which the user rushes the target. This also damages the user quite a lot.
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+CONTACT
+PP:15
+POWER:120
+EFFECT:51
+EFFECTTARGET:SELF
+# 87 SWORDS DANCE
+NAME:Swords Dance
+DESCRIPTION:A frenetic dance to uplift the fighting spirit. This sharply raises the user's Attack stat.
+EFFECT:52
+TYPE:NORMAL
+PP:20
+CATEGORY:STATUS
+TARGET:SELF
+# 88 PECK
+NAME:Peck
+DESCRIPTION:The target is jabbed with a sharply pointed beak or horn.
+TYPE:FLYING
+PP:35
+CONTACT
+POWER:25
+CATEGORY:PHYSICAL
+# 89 LEER
+NAME:Leer
+DESCRIPTION:The user gives opposing Pokémon an intimidating leer that lowers the Defense stat.
+CATEGORY:STATUS
+EFFECT:22
+TYPE:NORMAL
+PP:30
+# 90 DRILL PECK
+NAME:Drill Peck
+DESCRIPTION:A corkscrewing attack with a sharp beak acting as a drill.
+PP:20
+CONTACT
+POWER:80
+CATEGORY:PHYSICAL
+TYPE:FLYING
+# 91 DRILL RUN
+NAME:Drill Run
+DESCRIPTION:The user crashes into its target while rotating its body like a drill. Critical hits land more easily.
+TYPE:GROUND
+PP:10
+ACCURACY:95
+CONTACT
+POWER:80
+CATEGORY:PHYSICAL
+EFFECT:17
+EFFECTTARGET:SELF
+# 92 PLUCK
+NAME:Pluck
+DESCRIPTION:The user pecks the target. If the target is holding a Berry, the user eats it and gains its effect.
+TYPE:FLYING
+PP:20
+CONTACT
+POWER:60
+CATEGORY:PHYSICAL
+% EFFECT: STEAL AND EAT OPPONENT BERRY
+# 93 WRAP
+NAME:Wrap
+DESCRIPTION:A long body or vines are used to wrap and squeeze the target for four to five turns.
+TYPE:NORMAL
+PP:20
+CONTACT
+POWER:15
+ACCURACY:90
+EFFECT:53
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+# 94 GLARE
+NAME:Glare
+DESCRIPTION:The user intimidates the target with the pattern on its belly to cause paralysis.
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:16
+PP:30
+# 95 SCREECH
+NAME:Screech
+DESCRIPTION:An earsplitting screech harshly lowers the target's Defense stat.
+EFFECT:54
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:40
+ACCURACY:85
+SOUND
+# 96 ACID
+NAME:Acid
+DESCRIPTION:The opposing Pokémon are attacked with a spray of harsh acid. This may also lower their Sp. Def stats.
+TYPE:POISON
+CATEGORY:SPECIAL
+PP:30
+POWER:40
+EFFECT:31
+EFFECTCHANCE:10
+# 97 STOCKPILE
+NAME:Stockpile
+DESCRIPTION:The user charges up power and raises both its Defense and Sp. Def stats. The move can be used up to three times.
+TYPE:NORMAL
+PP:20
+CATEGORY:STATUS
+EFFECT:55
+TARGET:SELF
+# 98 SWALLOW
+NAME:Swallow
+DESCRIPTION:The power stored using the move Stockpile is absorbed by the user to heal its HP. Storing more power heals more HP.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+EFFECT:56
+TARGET:SELF
+# 99 SPIT UP
+NAME:Spit Up
+DESCRIPTION:The power stored using the move Stockpile is released at once in an attack. The more power is stored, the greater the move's power.
+EFFECT:57
+EFFECTTARGET:SELF
+PP:10
+TYPE:NORMAL
+CATEGORY:SPECIAL
+# 100 ACID SPRAY
+NAME:Acid Spray
+DESCRIPTION:The user spits fluid that works to melt the target. This harshly lowers the target's Sp. Def stat.
+TYPE:POISON
+CATEGORY:SPECIAL
+PP:20
+POWER:40
+EFFECT:54
+EFFECTCHANCE:200
+# 101 SLUDGE BOMB
+NAME:Sludge Bomb
+DESCRIPTION:Unsanitary sludge is hurled at the target. This may also poison the target.
+TYPE:POISON
+CATEGORY:SPECIAL
+POWER:90
+PP:10
+EFFECT:4
+EFFECTCHANCE:30
+# 102 GASTRO ACID
+NAME:Gastro Acid
+DESCRIPTION:The user hurls up its stomach acids on the target. The fluid eliminates the effect of the target's Ability.
+TYPE:POISON
+CATEGORY:STATUS
+PP:10
+EFFECT:58
+# 103 BELCH
+NAME:Belch
+DESCRIPTION:The user lets out a damaging belch at the target. 
+% actual DESCRIPTION:The user lets out a damaging belch at the target. The user must eat a held Berry to use this move. 
+TYPE:POISON
+CATEGORY:SPECIAL
+POWER:120
+ACCURACY:90
+PP:10
+% EFFECT: FAILS IF NO BERRY HAS BEEN EATEN YET
+# 104 HAZE
+NAME:Haze
+DESCRIPTION:The user creates a haze that eliminates every stat change among all the Pokémon engaged in battle.
+TYPE:ICE
+CATEGORY:STATUS
+PP:30
+EFFECT:59
+TARGET:SELF
+# 105 COIL
+NAME:Coil
+DESCRIPTION:The user coils up and concentrates. This raises its Attack and Defense stats as well as its accuracy.
+EFFECT:60
+EFFECTTARGET:SELF
+PP:20
+TYPE:POISON
+CATEGORY:STATUS
+TARGET:SELF
+# 106 GUNK SHOT
+NAME:Gunk Shot
+DESCRIPTION:The user shoots filthy garbage at the target to attack. This may also poison the target.
+PP:5
+POWER:120
+ACCURACY:80 
+TYPE:POISON
+CATEGORY:PHYSICAL
+EFFECT:4
+EFFECTCHANCE:30
+# 107 ICE FANG
+NAME:Ice Fang
+%DESCRIPTION:The user bites with cold-infused fangs. This may also make the target flinch or leave it frozen.
+DESCRIPTION:The user bites with cold-infused fangs. This may also leave the target frozen.
+TYPE:ICE
+PP:15
+CONTACT
+POWER:65
+ACCURACY:95
+CATEGORY:PHYSICAL
+EFFECT:61
+EFFECTCHANCE:10
+# 108 THUNDER FANG
+NAME:Thunder Fang
+%DESCRIPTION:The user bites with electrified fangs. This may also make the target flinch or leave it with paralysis. 
+DESCRIPTION:The user bites with electrified fangs. This may also leave the target with paralysis.
+TYPE:ELECTRIC
+PP:15
+POWER:65
+ACCURACY:95
+CATEGORY:PHYSICAL
+EFFECT:16
+CONTACT
+EFFECTCHANCE:10
+# 109 PLAY NICE
+NAME:Play Nice
+DESCRIPTION:The user and the target become friends, and the target loses its will to fight. This lowers the target's Attack stat.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:20
+ACCURACY:200
+EFFECT:1
+# 110 SWEET KISS
+NAME:Sweet Kiss
+DESCRIPTION:The user kisses the target with a sweet, angelic cuteness that causes confusion.
+ACCURACY:75
+PP:10
+CATEGORY:STATUS
+EFFECT:25
+TYPE:FAIRY
+# 111 NUZZLE
+NAME:Nuzzle
+DESCRIPTION:The user attacks by nuzzling its electrified cheeks against the target. This also leaves the target with paralysis.
+TYPE:ELECTRIC
+PP:20
+POWER:20
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:16
+# 112 NASTY PLOT
+NAME:Nasty Plot
+DESCRIPTION:The user stimulates its brain by thinking bad thoughts. This sharply raises the user's Sp. Atk.
+TYPE:DARK
+CATEGORY:STATUS
+EFFECT:62
+PP:20
+TARGET:SELF
+# 113 CHARM
+NAME:Charm
+DESCRIPTION:The user gazes at the target rather charmingly, making it less wary. This harshly lowers its Attack stat.
+CATEGORY:STATUS
+PP:20
+TYPE:FAIRY
+EFFECT:46
+# 114 THUNDER SHOCK
+NAME:Thunder Shock
+DESCRIPTION:A jolt of electricity crashes down on the target to inflict damage. This may also leave the target with paralysis.
+PP:30
+POWER:40
+CATEGORY:SPECIAL
+EFFECT:16
+TYPE:ELECTRIC
+EFFECTCHANCE:10
+# 115 THUNDER WAVE
+NAME:Thunder Wave
+DESCRIPTION:The user launches a weak jolt of electricity that paralyzes the target.
+CATEGORY:STATUS
+TYPE:ELECTRIC
+EFFECT:16
+ACCURACY:90
+PP:20
+# 116 DOUBLE TEAM
+NAME:Double Team
+DESCRIPTION:By moving rapidly, the user makes illusory copies of itself to raise its evasiveness.
+CATEGORY:STATUS
+TARGET:SELF
+TYPE:NORMAL
+EFFECT:63
+PP:15
+# 117 ELECTRO BALL
+NAME:Electro Ball
+DESCRIPTION:The user hurls an electric orb at the target. The faster the user is than the target, the greater the move's power.
+CATEGORY:SPECIAL
+TYPE:ELECTRIC
+PP:10
+EFFECT:64
+EFFECTTARGET:SELF
+# 118 FEINT
+NAME:Feint
+DESCRIPTION:This attack hits a target using a move such as Protect or Detect. This also lifts the effects of those moves.
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+PP:10
+POWER:30
+PRIORITY:2
+EFFECT:65
+EFFECTTARGET:SELF
+# 119 SPARK
+NAME:Spark
+DESCRIPTION:The user throws an electrically charged tackle at the target. This may also leave the target with paralysis.
+CATEGORY:PHYSICAL
+TYPE:ELECTRIC
+PP:20
+POWER:65
+CONTACT
+EFFECT:16
+EFFECTCHANCE:30
+# 120 IRON TAIL
+NAME:Iron Tail
+DESCRIPTION:The target is slammed with a steel-hard tail. This may also lower the target's Defense stat.
+TYPE:STEEL
+POWER:100
+ACCURACY:75
+PP:15
+CONTACT
+EFFECT:22
+EFFECTCHANCE:30
+CATEGORY:PHYSICAL
+# 121 DISCHARGE
+NAME:Discharge
+DESCRIPTION:The user strikes everything around it by letting loose a flare of electricity. This may also cause paralysis.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+POWER:80
+PP:15
+EFFECT:16
+EFFECTCHANCE:30
+# 122 THUNDERBOLT
+NAME:Thunderbolt
+DESCRIPTION:A strong electric blast crashes down on the target. This may also leave the target with paralysis.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+POWER:90
+PP:15
+EFFECT:16
+EFFECTCHANCE:10
+# 123 LIGHT SCREEN
+NAME:Light Screen
+DESCRIPTION:A wondrous wall of light is put up to reduce damage from special attacks for five turns.
+CATEGORY:STATUS
+TYPE:PSYCHIC
+EFFECT:66
+PP:30
+TARGET:SELF
+# 124 THUNDER 
+NAME:Thunder
+DESCRIPTION:A wicked thunderbolt is dropped on the target to inflict damage. This may also leave the target with paralysis.
+CATEGORY:SPECIAL
+POWER:110
+ACCURACY:70
+PP:10
+EFFECT:67
+EFFECTCHANCE:30
+TYPE:ELECTRIC
+# 125 THUNDER PUNCH
+NAME:Thunder Punch
+DESCRIPTION:The target is punched with an electrified fist. This may also leave the target with paralysis.
+TYPE:ELECTRIC
+PP:15
+POWER:75
+EFFECT:16
+EFFECTCHANCE:10
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+# 126 DEFENSE CURL
+NAME:Defense Curl
+DESCRIPTION:The user curls up to conceal weak spots and raise its Defense stat.
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:23
+EFFECTTARGET:SELF
+TARGET:SELF
+PP:40
+# 127 ROLLOUT
+NAME:Rollout
+DESCRIPTION:The user continually rolls into the target over five turns. It becomes more powerful each time it hits.
+TYPE:ROCK
+ACCURACY:90
+POWER:30
+PP:20
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:68
+EFFECTTARGET:SELF
+# 128 BULLDOZE
+NAME:Bulldoze
+DESCRIPTION:The user strikes everything around it by stomping down on the ground. This lowers the Speed stat of those hit.
+TYPE:GROUND
+POWER:60
+PP:20
+CATEGORY:PHYSICAL
+EFFECT:69
+# 129 SWIFT
+NAME:Swift
+DESCRIPTION:Star-shaped rays are shot at the opposing Pokémon. This attack never misses.
+TYPE:NORMAL
+POWER:60
+ACCURACY:200
+PP:20
+CATEGORY:SPECIAL
+# 130 FURY SWIPES
+NAME:Fury Swipes
+DESCRIPTION:The target is raked with sharp claws or scythes quickly two to five times in a row.
+TYPE:NORMAL
+POWER:18
+ACCURACY:80
+PP:15
+CATEGORY:PHYSICAL
+EFFECT:36
+EFFECTTARGET:SELF
+CONTACT
+# 131 DIG
+NAME:Dig
+DESCRIPTION:The user burrows into the ground, then attacks on the next turn.
+EFFECT:70
+EFFECTTARGET:SELF
+TYPE:GROUND
+POWER:80
+PP:10
+CONTACT
+CATEGORY:PHYSICAL
+# 132 GYRO BALL
+NAME:Gyro Ball
+DESCRIPTION:The user tackles the target with a high-speed spin. The slower the user compared to the target, the greater the move's power.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+EFFECT:71
+EFFECTTARGET:SELF
+CONTACT
+PP:5
+# 133 SANDSTORM
+NAME:Sandstorm
+DESCRIPTION:A five-turn sandstorm is summoned to hurt all combatants except the Rock, Ground, and Steel types.
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:72
+PP:10
+TYPE:ROCK
+# 134 EARTHQUAKE
+NAME:Earthquake
+DESCRIPTION:The user sets off an earthquake that strikes every Pokémon around it.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+PP:10
+POWER:100
+EFFECT:73
+EFFECTTARGET:SELF
+# 135 CRUSH CLAW
+NAME:Crush Claw
+DESCRIPTION:The user slashes the target with hard and sharp claws. This may also lower the target's Defense stat.
+POWER:75
+ACCURACY:95
+PP:10
+CONTACT
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+EFFECTCHANCE:50
+EFFECT:22
+# 136 SAND TOMB
+NAME:Sand Tomb
+DESCRIPTION:The user traps the target inside a harshly raging sandstorm for four to five turns.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+POWER:35
+PP:15
+ACCURACY:85
+EFFECT:74
+EFFECTTARGET:SELF
+# 137 DOUBLE KICK
+NAME:Double Kick
+DESCRIPTION:The target is quickly kicked twice in succession using both feet.
+TYPE:FIGHTING
+POWER:30
+CATEGORY:PHYSICAL
+PP:30
+EFFECT:75
+EFFECTTARGET:SELF
+CONTACT
+# 138 TOXIC
+NAME:Toxic
+DESCRIPTION:A move that leaves the target badly poisoned. Its poison damage worsens every turn.
+EFFECT:76
+TYPE:POISON
+PP:10
+ACCURACY:90
+CATEGORY:STATUS
+# 139 FLATTER
+NAME:Flatter
+DESCRIPTION:Flattery is used to confuse the target. However, this also raises the target's Sp. Atk stat.
+TYPE:DARK
+CATEGORY:STATUS
+PP:15
+EFFECT:77
+# 140 EARTH POWER
+NAME:Earth Power
+DESCRIPTION:The user makes the ground under the target erupt with power. This may also lower the target's Sp. Def stat. 
+TYPE:GROUND
+CATEGORY:SPECIAL
+PP:10
+POWER:90
+EFFECT:31
+EFFECTCHANCE:10
+# 141 SLUDGE WAVE
+NAME:Sludge Wave
+DESCRIPTION:The user strikes everything around it by swamping the area with a giant sludge wave. This may also poison those hit.
+TYPE:POISON
+CATEGORY:SPECIAL
+POWER:95
+PP:10
+EFFECT:4
+EFFECTCHANCE:10
+# 142 SUPERPOWER
+NAME:Superpower
+DESCRIPTION:The user attacks the target with great power. However, this also lowers the user's Attack and Defense stats.
+TYPE:FIGHTING
+POWER:120
+PP:5
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:78
+EFFECTTARGET:SELF
+# 143 HORN ATTACK
+NAME:Horn Attack
+DESCRIPTION:The target is jabbed with a sharply pointed horn to inflict damage.
+PP:25
+POWER:65
+CONTACT
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+# 144 MEGAHORN
+NAME:Megahorn
+DESCRIPTION:Using its tough and impressive horn, the user rams into the target with no letup.
+TYPE:BUG
+CONTACT
+CATEGORY:PHYSICAL
+PP:10
+POWER:120
+ACCURACY:85
+# 145 SING
+NAME:Sing
+DESCRIPTION:A soothing lullaby is sung in a calming voice that puts the target into a deep slumber.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:15
+ACCURACY:55
+EFFECT:5
+SOUND
+# 146 DISARMING VOICE
+NAME:Disarming Voice
+DESCRIPTION:Letting out a charming cry, the user does emotional damage to opposing Pokémon. This attack never misses.
+TYPE:FAIRY
+CATEGORY:SPECIAL
+ACCURACY:200
+PP:15
+POWER:40
+SOUND
+# 147 SPLASH
+NAME:Splash
+DESCRIPTION:The user just flops and splashes around to no effect at all...
+PP:40
+TARGET:SELF
+EFFECT:79
+EFFECTTARGET:SELF
+TYPE:NORMAL
+CATEGORY:STATUS
+# 148 POUND
+NAME:Pound
+DESCRIPTION:The target is physically pounded with a long tail, a foreleg, or the like.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:35
+POWER:10
+CONTACT
+# 149 COPYCAT
+NAME:COPYCAT
+DESCRIPTION:The user mimics the move used immediately before it. The move fails if no other move has been used yet.
+PP:20
+EFFECT:80
+CATEGORY:STATUS
+TARGET:SELF
+TYPE:NORMAL
+NO_METRONOME
+# 150 STORED POWER
+NAME:Stored Power
+DESCRIPTION:The user attacks the target with stored power. The more the user's stats are raised, the greater the move's power.
+TYPE:PSYCHIC
+PP:10
+POWER:20
+CATEGORY:SPECIAL
+EFFECT:81
+EFFECTTARGET:SELF
+# 151 ENCORE
+NAME:Encore
+DESCRIPTION:The user compels the target to keep using only the move it last used for three turns.
+EFFECT:82
+EFFECTTARGET:SELF
+TYPE:NORMAL
+PP:5
+CATEGORY:STATUS
+# 152 LIFE DEW
+NAME:Life Dew
+DESCRIPTION:The user scatters mysterious water around and restores the HP of itself and its ally Pokémon in the battle.
+EFFECT:83
+TYPE:WATER
+TARGET:SELF
+CATEGORY:STATUS
+PP:10
+# 153 METRONOME
+NAME:Metronome
+DESCRIPTION:The user waggles a finger and stimulates its brain into randomly using nearly any move.
+PP:10
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:84
+TARGET:SELF
+NO_METRONOME
+# 154 MOONLIGHT
+NAME:Moonlight
+DESCRIPTION:The user restores its own HP. The amount of HP regained varies with the weather.
+PP:5
+TYPE:FAIRY
+CATEGORY:STATUS
+EFFECT:8
+TARGET:SELF
+# 155 GRAVITY
+NAME:Gravity
+DESCRIPTION:This move enables Flying-type Pokémon or Pokémon with the Levitate Ability to be hit by Ground-type moves. Moves that involve flying can't be used.
+TYPE:PSYCHIC
+PP:5
+CATEGORY:STATUS
+EFFECT:85
+TARGET:SELF
+# 156 METEOR MASH
+NAME:Meteor Mash
+DESCRIPTION:The target is hit with a hard punch fired like a meteor. This may also raise the user's Attack stat.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+PP:10
+ACCURACY:90
+CONTACT
+EFFECT:86
+EFFECTCHANCE:20
+EFFECTTARGET:SELF
+PUNCHING
+# 157 COSMIC POWER
+NAME:Cosmic Power
+DESCRIPTION:The user absorbs a mystical power from space to raise its Defense and Sp. Def stats.
+PP:20
+TYPE:PSYCHIC
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:87
+# 158 MOONBLAST
+NAME:Moonblast
+DESCRIPTION:Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.
+CATEGORY:SPECIAL
+POWER:95
+PP:15
+TYPE:FAIRY
+EFFECTCHANCE:30
+EFFECT:88
+# 159 HEALING WISH
+NAME:Healing Wish
+DESCRIPTION:The user faints. In return, the Pokémon taking its place will have its HP restored and status conditions cured.
+EFFECT:89
+PP:10
+TARGET:SELF
+TYPE:PSYCHIC
+CATEGORY:STATUS
+# 160 DISABLE
+NAME:Disable
+DESCRIPTION:For four turns, this move prevents the target from using the move it last used.
+EFFECT:90
+PP:20
+CATEGORY:STATUS
+TYPE:NORMAL
+# 161 SPITE
+NAME:Spite
+DESCRIPTION:The user unleashes its grudge on the move last used by the target by cutting 4 PP from it.
+TYPE:GHOST
+PP:10
+CATEGORY:STATUS
+EFFECT:91
+# 162 INCINERATE
+NAME:incinerate
+DESCRIPTION:The user attacks opposing Pokémon with fire. If a Pokémon is holding a certain item, such as a Berry, the item becomes burned up and unusable.
+% EFFECT: delete berry from target
+TYPE:FIRE
+POWER:60
+PP:15
+CATEGORY:SPECIAL
+# 163 CONFUSE RAY
+NAME:Confuse Ray
+DESCRIPTION:The target is exposed to a sinister ray that causes confusion.
+PP:10
+TYPE:GHOST
+EFFECT:25
+CATEGORY:STATUS
+# 164 WILL O WISP
+NAME:Will-O-Wisp
+DESCRIPTION:The user shoots a sinister flame at the target to inflict a burn.
+PP:15
+ACCURACY:85
+TYPE:FIRE
+EFFECT:14
+CATEGORY:STATUS
+# 165 EXTRASENSORY
+NAME:Extrasensory
+DESCRIPTION:The user attacks with an odd, unseeable power. This may also make the target flinch.
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+POWER:80
+PP:20
+EFFECT:21
+EFFECTCHANCE:10
+# 166 IMPRISON
+NAME:Imprison
+DESCRIPTION:If opposing Pokémon know any move also known by the user, they are prevented from using it.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+EFFECT:92
+PP:10
+# 167 FIRE BLAST
+NAME:Fire Blast
+DESCRIPTION:The target is attacked with an intense blast of all-consuming fire. This may also leave the target with a burn.
+TYPE:FIRE
+CATEGORY:SPECIAL
+PP:5
+POWER:110
+ACCURACY:85
+EFFECT:14
+EFFECTCHANCE:30
+# 168 MIMIC
+NAME:Mimic
+DESCRIPTION:The user copies the target's last move. The move can be used during battle until the Pokémon is switched out.
+EFFECT:93
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+TARGET:SELF
+NO_METRONOME
+# 169 ECHOED VOICE
+NAME:Echoed Voice
+DESCRIPTION:The user attacks the target with an echoing voice. If this move is used every turn, its power is increased.
+PP:15
+POWER:40
+CATEGORY:SPECIAL
+TYPE:NORMAL
+EFFECT:37
+EFFECTTARGET:SELF
+SOUND
+# 170 COVET
+NAME:Covet
+DESCRIPTION:The user endearingly approaches the target, then steals the target's held item.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:25
+POWER:60
+CONTACT
+% EFFECT: steals item
+# 171 ROUND
+NAME:Round
+DESCRIPTION:The user attacks the target with a song. Others can join in the Round and make the attack do greater damage.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:15
+POWER:60
+EFFECT:94
+EFFECTTARGET:SELF
+SOUND
+# 172 REST
+NAME:Rest
+DESCRIPTION:The user goes to sleep for two turns. This fully restores the user's HP and heals any status conditions.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+EFFECT:95
+PP:5
+# 173 BODY SLAM
+NAME:Body Slam
+DESCRIPTION:The user drops onto the target with its full body weight. This may also leave the target with paralysis.
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+POWER:85
+PP:15
+CONTACT
+EFFECT:16
+EFFECTCHANCE:30
+# 174 HYPER VOICE
+NAME:Hyper Voice
+DESCRIPTION:The user lets loose a horribly echoing shout with the power to inflict damage.
+POWER:90
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:10
+SOUND
+# 175 PLAY ROUGH
+NAME:Play Rough
+DESCRIPTION:The user plays rough with the target and attacks it. This may also lower the target's Attack stat.
+POWER:90
+PP:10
+ACCURACY:90
+TYPE:FAIRY
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:1
+EFFECTCHANCE:10
+# 176 MEAN LOOK
+NAME:Mean Look
+DESCRIPTION:The user pins the target with a dark, arresting look. The target becomes unable to flee.
+ACCURACY:200
+PP:5
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:96
+TARGET:SELF
+# 177 ABSORB
+NAME:Absorb
+DESCRIPTION:A nutrient-draining attack. The user's HP is restored by half the damage taken by the target.
+TYPE:GRASS
+PP:25
+POWER:20
+CATEGORY:SPECIAL
+EFFECT:97
+EFFECTTARGET:SELF
+# 178 ASTONISH
+NAME:Astonish
+DESCRIPTION:The user attacks the target while shouting in a startling fashion. This may also make the target flinch.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+PP:15
+POWER:30
+CONTACT
+EFFECT:21
+EFFECTCHANCE:30
+# 179 POISON FANG
+NAME:Poison Fang
+DESCRIPTION:The user bites the target with toxic fangs. It may also leave the target badly poisoned.
+CATEGORY:PHYSICAL
+TYPE:POISON
+PP:15
+POWER:50
+EFFECT:76
+EFFECTCHANCE:30
+CONTACT
+# 180 QUICK GUARD
+NAME:Quick Guard
+DESCRIPTION:The user protects itself and its allies from priority moves.
+EFFECT:98
+TARGET:SELF
+TYPE:FIGHTING
+CATEGORY:STATUS
+PP:15
+PRIORITY:3
+# 181 LEECH LIFE
+NAME:Leech Life
+DESCRIPTION:The user drains the target's blood. The user's HP is restored by half the damage taken by the target.
+PP:10
+POWER:80
+TYPE:BUG
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:97
+EFFECTTARGET:SELF
+# 182 AIR CUTTER
+NAME:Air Cutter
+DESCRIPTION:The user launches razor-like wind to slash opposing Pokémon. Critical hits land more easily.
+TYPE:FLYING
+CATEGORY:SPECIAL
+PP:25
+ACCURACY:95
+POWER:60
+EFFECTTARGET:SELF
+EFFECT:17
+# 183 MEGA DRAIN
+NAME:Mega Drain
+DESCRIPTION:A nutrient-draining attack. The user's HP is restored by half the damage taken by the target.
+PP:15
+POWER:40
+CATEGORY:SPECIAL
+TYPE:GRASS
+EFFECT:97
+EFFECTTARGET:SELF
+# 184 GIGA DRAIN
+NAME:Giga Drain
+DESCRIPTION:A powerful nutrient-draining attack. The user's HP is restored by half the damage taken by the target.
+PP:10
+POWER:75
+CATEGORY:SPECIAL
+TYPE:GRASS
+EFFECT:97
+EFFECTTARGET:SELF
+# 185 GRASSY TERRAIN
+NAME:Grassy Terrain
+DESCRIPTION:The user turns the ground to grass for five turns. This restores the HP of Pokémon on the ground a little every turn and powers up Grass-type moves.
+PP:10
+TYPE:GRASS
+EFFECT:99
+TARGET:SELF
+CATEGORY:STATUS
+TYPE:GRASS
+# 186 SPORE
+NAME:Spore
+DESCRIPTION:The user scatters bursts of spores that induce sleep.
+TYPE:GRASS
+CATEGORY:GRASS
+PP:15
+EFFECT:5
+# 187 AROMATHERAPY
+NAME:Aromatherapy
+DESCRIPTION:The user releases a soothing scent that heals all status conditions affecting the user's party.
+TYPE:GRASS
+PP:5
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:101
+# 188 X SCISSOR
+NAME:X-Scissor
+DESCRIPTION:The user slashes at the target by crossing its scythes or claws as if they were a pair of scissors.
+PP:15
+POWER:80
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:BUG
+# 189 CROSS POISON
+NAME:Cross Poison
+DESCRIPTION:A slashing attack with a poisonous blade that may also poison the target. Critical hits land more easily.
+PP:20
+POWER:70
+CATEGORY:PHYSICAL
+TYPE:POISON
+CONTACT
+EFFECT:4
+EFFECTCHANCE:10
+# 190 ZEN HEADBUTT
+NAME:Zen Headbutt
+DESCRIPTION:The user focuses its willpower to its head and attacks the target. This may also make the target flinch.
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:PSYCHIC
+PP:15
+POWER:80
+ACCURACY:90
+EFFECT:21
+EFFECTCHANCE:20
+# 191 PSYCHIC
+NAME:Psychic
+DESCRIPTION:The target is hit by a strong telekinetic force. This may also lower the target's Sp. Def stat.
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+PP:10
+POWER:90
+EFFECT:31
+EFFECTCHANCE:10
+# 192 TRANSFORM
+NAME:Transform
+DESCRIPTION:The user transforms into a copy of the target right down to having the same move set.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+EFFECT:102
+TARGET:SELF
+NO_METRONOME
+# 193 NIGHT SLASH
+NAME:Night Slash
+DESCRIPTION:The user slashes the target the instant an opportunity arises. Critical hits land more easily.
+TYPE:DARK
+CATEGORY:PHYSICAL
+CONTACT
+PP:15
+POWER:70
+EFFECT:17
+EFFECTTARGET:SELF
+# 194 TRI ATTACK
+NAME:Tri Attack
+DESCRIPTION:The user strikes with a simultaneous three-beam attack. This may also burn, freeze, or paralyze the target.
+PP:10
+POWER:80
+CATEGORY:SPECIAL
+TYPE:NORMAL
+EFFECT:104
+EFFECTCHANCE:20
+TYPE:NORMAL
+# 195 MUD SLAP
+NAME:Mud-Slap
+DESCRIPTION:The user hurls mud in the target's face to inflict damage and lower its accuracy.
+TYPE:GROUND
+CATEGORY:SPECIAL
+PP:10
+POWER:20
+EFFECT:15
+# 196 FISSURE
+NAME:Fissure
+DESCRIPTION:The user opens up a fissure in the ground and drops the target in. The target faints instantly if this attack hits.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+PP:5
+ACCURACY:30
+EFFECT:103
+EFFECTTARGET:SELF
+# 197 FAKE OUT
+NAME:Fake Out
+DESCRIPTION:This attack hits first and makes the target flinch. It only works the first turn the user is in battle.
+TYPE:NORMAL
+CONTACT
+CATEGORY:PHYSICAL
+PP:10
+POWER:40
+PRIORITY:3
+EFFECT:105
+# 198 TAUNT
+NAME:Taunt
+DESCRIPTION:The foe is taunted into a rage that allows it to use only attack moves for two to four turns.
+TYPE:DARK
+CATEGORY:STATUS
+PP:20
+EFFECT:106
+# 199 POWER GEM
+NAME:Power Gem
+DESCRIPTION:The user attacks with a ray of light that sparkles as if it were made of gemstones.
+TYPE:ROCK
+CATEGORY:SPECIAL
+PP:20
+POWER:80
+# 200 PAY DAY
+NAME:Pay Day
+DESCRIPTION:Numerous coins are hurled at the target to inflict damage. Money is earned after the battle.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+PP:20
+POWER:40
+% EFFECT: drop money five times the user level
+# 201 SOAK
+NAME:Soak
+DESCRIPTION:The user shoots a torrent of water that changes the target's type to Water.
+PP:20
+TYPE:WATER
+EFFECT:107
+CATEGORY:STATUS
+# 202 PSYCH UP
+NAME:Psych Up
+DESCRIPTION:The user hypnotizes itself into copying any stat change made by the target.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+EFFECT:108
+ACCURACY:200
+# 203 AMNESIA
+NAME:Amnesia
+DESCRIPTION:The user temporarily empties its mind to forget its concerns. This sharply boosts the user's Sp. Def stat.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:20
+EFFECT:109
+TARGET:SELF
+# 204 WONDER ROOM
+NAME:Wonder Room
+DESCRIPTION:The user creates a bizarre area in which Pokémon's Defense and Sp. Def stats are swapped for five turns.
+EFFECT:110
+TARGET:SELF
+PP:10
+TYPE:PSYCHIC
+CATEGORY:STATUS
+# 205 AQUA JET
+NAME:Aqua Jet
+DESCRIPTION:The user lunges at the target at a speed that makes it almost invisible. This move always goes first.
+CONTACT
+TYPE:WATER
+CATEGORY:PHYSICAL
+PP:20
+POWER:40
+PRIORITY:1
+# 206 LOW KICK
+NAME:Low Kick
+DESCRIPTION:A powerful low kick that makes the target fall over. The heavier the target, the greater the move's power.
+EFFECT:111
+EFFECTTARGET:SELF
+TYPE:FIGHTING
+PP:20
+POWER:20
+CONTACT
+CATEGORY:PHYSICAL
+# 207 SEISMIC TOSS
+NAME:Seismic Toss
+DESCRIPTION:The target is thrown using the power of gravity. It inflicts damage equal to the user's level.
+EFFECT:112
+PP:20
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+TYPE:FIGHTING
+CONTACT
+# 208 SWAGGER
+NAME:Swagger
+DESCRIPTION:The user enrages and confuses the target. However, this also sharply raises the target's Attack stat.
+EFFECT:113
+PP:15
+ACCURACY:85
+TYPE:NORMAL
+CATEGORY:STATUS
+# 209 CROSS CHOP
+NAME:Cross Chop
+DESCRIPTION:The user delivers a double chop with its forearms crossed. This move has a heightened chance of landing a critical hit.
+TYPE:FIGHTING
+PP:5
+POWER:100
+ACCURACY:80
+EFFECT:17
+TYPE:FIGHTING
+CONTACT
+CATEGORY:
+# 210 THRASH
+NAME:Thrash
+DESCRIPTION:The user rampages and attacks for two to three turns. The user then becomes confused.
+EFFECT:114
+EFFECTTARGET:SELF
+PP:10
+POWER:120
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+# 211 CLOSE COMBAT
+NAME:Close Combat
+DESCRIPTION:The user fights the target up close, inflicting damage without guarding itself. This also lowers the user's Defense and Sp. Def stats.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+CONTACT
+PP:5
+POWER:120
+EFFECT:115
+EFFECTTARGET:SELF
+# 212 STOMPING TANTRUM
+NAME:Stomping Tantrum
+DESCRIPTION:Driven by frustration, the user attacks the target. If the user's previous move has failed, the power of this move doubles.
+TYPE:GROUND
+EFFECT:116
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+PP:10
+CONTACT
+POWER:75
+# 213 FINAL GAMBIT
+NAME:Final Gambit
+DESCRIPTION:The user risks everything to attack the target. The user faints but inflicts damage equal to its own HP.
+PP:5
+CATEGORY:SPECIAL
+TYPE:FIGHTING
+EFFECT:117
+EFFECTTARGET:SELF
+# 214 RAGE FIST
+NAME:Rage Fist
+DESCRIPTION:The user converts its rage into energy to attack. The more times the user has been hit by attacks, the greater the move's power.
+PP:10
+POWER:50
+TYPE:GHOST
+CATEGORY:PHYSICAL
+EFFECT:118
+EFFECTTARGET:SELF
+PUNCHING
+CONTACT
+# 215 RETALIATE
+NAME:Retaliate
+DESCRIPTION:The user takes revenge for a fainted ally. This move's power is boosted if an ally fainted in the previous turn.
+POWER:70
+TYPE:NORMAL
+EFFECT:119
+EFFECTTARGET:SELF
+CATEGORY:PHYSICAL
+PP:5
+CONTACT
+# 216 REVERSAL
+NAME:Reversal
+DESCRIPTION:An all-out attack that becomes more powerful the less HP the user has.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:15
+CONTACT
+EFFECT:119
+EFFECTTARGET:SELF
+# 217 ROCK SLIDE
+NAME:Rock Slide
+DESCRIPTION:Large boulders are hurled at opposing Pokémon to inflict damage. This may also make the opposing Pokémon flinch.
+PP:10
+POWER:75
+ACCURACY:90
+TYPE:ROCK
+CATEGORY:PHYSICAL
+EFFECT:21
+EFFECTCHANCE:30
+# 218 FLAME WHEEL
+NAME:Flame Wheel
+DESCRIPTION:The user cloaks itself in fire and charges at the target. This may also leave the target with a burn.
+TYPE:FIRE
+PP:25
+POWER:60
+CATEGORY:PHYSICAL
+EFFECT:14
+EFFECTCHANCE:10
+CONTACT
+# 219 HOWL
+NAME:Howl
+DESCRIPTION:The user howls loudly to raise the spirit of itself and allies. This raises their Attack stats.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:40
+EFFECT:86
+TARGET:SELF
+SOUND
+# 220 EXTREME SPEED
+NAME:Extreme Speed
+DESCRIPTION:The user charges the target at blinding speed. This move always goes first.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+POWER:80
+PRIORITY:2
+CONTACT
+# 221 ROAR
+NAME:Roar
+DESCRIPTION:The target is scared off, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
+CATEGORY:STATUS
+PP:20
+PRIORITY:-6
+TYPE:NORMAL
+EFFECT:32
+ACCURACY:200
+TARGET:SELF
+SOUND
+# 222 BELLY DRUM
+NAME:Belly Drum
+DESCRIPTION:The user maximizes its Attack stat in exchange for HP equal to half its max HP.
+TYPE:NORMAL
+CATEGORY:STATUS
+TARGET:SELF
+PP:10
+EFFECT:121
+# 223 HYPNOSIS
+NAME:Hypnosis
+DESCRIPTION:The user employs hypnotic suggestion to make the target fall into a deep sleep.
+CATEGORY:STATUS
+PP:20
+EFFECT:5
+ACCURACY:60
+TYPE:PSYCHIC
+# 224 BUBBLE BEAM
+NAME:Bubble Beam
+DESCRIPTION:A spray of bubbles is forcefully ejected at the target. This may also lower its Speed stat.
+TYPE:WATER
+CATEGORY:SPECIAL
+PP:20
+POWER:65
+EFFECT:122
+EFFECTCHANCE:10
+# 225 MUD SHOT
+NAME:Mud Shot
+DESCRIPTION:The user attacks by hurling a blob of mud at the target. This also lowers the target's Speed stat.
+ACCURACY:95
+TYPE:GROUND
+CATEGORY:SPECIAL
+PP:15
+POWER:55
+EFFECT:122
+# 226 CIRCLE THROW
+NAME:Circle Throw
+DESCRIPTION:The target is thrown, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
+TYPE:FIGHTING
+PP:10
+POWER:60
+CATEGORY:PHYSICAL
+CONTACT
+PRIORITY:-6
+ACCURACY:90
+EFFECT:123
+EFFECTTARGET:SELF
+# 227 TELEPORT
+NAME:Teleport
+DESCRIPTION:The user switches places with a party Pokémon in waiting, if any. If a wild Pokémon uses this move, it flees.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:20
+PRIORITY:-6
+EFFECT:124
+TARGET:SELF
+# 228 KINESIS
+NAME:Kinesis
+DESCRIPTION:The user distracts the target by bending a spoon. This lowers the target's accuracy.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:15
+EFFECT:15
+ACCURACY:80
+# 229 REFLECT
+NAME:Reflect
+DESCRIPTION:A wondrous wall of light is put up to reduce damage from physical attacks for five turns.
+CATEGORY:STATUS
+PP:20
+EFFECT:125
+TARGET:SELF
+TYPE:PSYCHIC
+# 230 PSYCHO CUT 
+NAME:Psycho Cut
+DESCRIPTION:The user tears at the target with blades formed by psychic power. Critical hits land more easily.
+PP:20
+POWER:70
+CATEGORY:PHYSICAL
+TYPE:PSYCHIC
+EFFECT:17
+# 231 RECOVER
+NAME:Recover
+DESCRIPTION:Restoring its own cells, the user restores its own HP by half of its max HP.
+TYPE:NORMAL
+EFFECT:126
+TARGET:SELF
+CATEGORY:STATUS
+PP:5
+# 232 ROLE PLAY
+NAME:Role Play
+DESCRIPTION:The user mimics the target completely, copying the target's natural Ability.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:10
+EFFECT:127
+ACCURACY:200
+# 233 PSYSHOCK
+NAME:Psyshock
+DESCRIPTION:The user materializes an odd psychic wave to attack the target. This attack does physical damage.
+PP:10
+POWER:80
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+# 234 CALM MIND
+NAME:Calm Mind
+DESCRIPTION:The user quietly focuses its mind and calms its spirit to raise its Sp. Atk and Sp. Def stats.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:20
+EFFECT:129
+TARGET:SELF
+# 235 FUTURE SIGHT
+NAME:Future Sight
+DESCRIPTION:Two turns after this move is used, a hunk of psychic energy attacks the target.
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+PP:10
+POWER:120
+EFFECT:130
+EFFECTTARGET:SELF
+# 236 REVENGE
+NAME:Revenge
+DESCRIPTION:This attack move's power is doubled if the user has been hurt by the opponent in the same turn.
+EFFECT:131
+EFFECTTARGET:SELF
+POWER:60
+PRIORITY:-4
+PP:10
+CATEGORY:PHYSICAL
+TYPE:FIGHTING
+# 237 LOW SWEEP
+NAME:Low Sweep
+DESCRIPTION:The user makes a swift attack on the target's legs, which lowers the target's Speed stat.
+CATEGORY:PHYSICAL
+PP:20
+POWER:65
+CONTACT
+TYPE:FIGHTING
+EFFECT:122
+# 238 KNOCK OFF
+NAME: Knocf Off
+DESCRIPTION:The user slaps down the target's held item, and that item can't be used in that battle. The move does more damage if the target has a held item.
+PP:20
+POWER:65
+TYPE:DARK
+CONTACT
+CATEGORY:PHYSICAL
+% EFFECT: removes target held item
+# 239 VITAL THROW
+NAME:Vital Throw
+DESCRIPTION:The user attacks last. In return, this throw move never misses.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:10
+POWER:70
+PRIORITY:-1
+ACCURACY:200
+# 240 STRENGTH
+NAME:Strength
+DESCRIPTION:The target is slugged with a punch thrown at maximum power.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:15
+POWER:80
+CONTACT
+# 241 DUAL CHOP
+NAME:Dual Chop
+DESCRIPTION:The user attacks its target by hitting it with brutal strikes. The target is hit twice in a row.
+EFFECT:75
+EFFECTTARGET:SELF
+TYPE:DRAGON
+PP:15
+POWER:40
+CONTACT
+CATEGORY:PHYSICAL
+ACCURACY:90
+# 242 BULK UP
+NAME:Bulk Up
+DESCRIPTION:The user tenses its muscles to bulk up its body, raising both its Attack and Defense stats.
+TYPE:FIGHTING
+CATEGORY:STATUS
+PP:20
+EFFECT:132
+TARGET:SELF
+# 243 SLAM
+NAME:Slam
+DESCRIPTION:The target is slammed with a long tail, vines, or the like to inflict damage.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:20
+POWER:80
+CONTACT
+ACCURACY:75
+# 244 LEAF BLADE
+NAME:Leaf Blade
+DESCRIPTION:The user handles a sharp leaf like a sword and attacks by cutting its target. Critical hits land more easily.
+PP:15
+POWER:90
+CONTACT
+EFFECT:17
+CATEGORY:PHYSICAL
+TYPE:GRASS
+# 245 LEAF STORM 
+NAME:Leaf Storm
+DESCRIPTION:The user whips up a storm of leaves around the target. The attack's recoil harshly lowers the user's Sp. Atk stat.
+PP:5
+POWER:130
+ACCURACY:90
+CATEGORY:SPECIAL
+TYPE:GRASS
+EFFECT:133
+EFFECTTARGET:SELF
+# 246 HEX
+NAME:Hex
+DESCRIPTION:This relentless attack does massive damage to a target affected by status conditions.
+TYPE:GHOST
+CATEGORY:SPECIAL
+PP:10
+POWER:65
+EFFECT:134
+EFFECTTARGET:SELF
+# 247 ACID ARMOR
+NAME:Acid Armor
+DESCRIPTION:The user alters its cellular structure to liquefy itself, sharply raising its Defense stat.
+PP:20
+CATEGORY:STATUS
+TARGET:SELF
+TYPE:POISON
+EFFECT:29
+# 248 SURF
+NAME:Surf
+DESCRIPTION:The user attacks everything around it by swamping its surroundings with a giant wave.
+TYPE:WATER
+CATEGORY:SPECIAL
+PP:15
+POWER:90
+EFFECT:
+EFFECTTARGET:SELF
+# 249 DIVE
+NAME:Dive
+DESCRIPTION:Diving on the first turn, the user floats up and attacks on the next turn.
+PP:10
+POWER:80
+TYPE:WATER
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:136
+EFFECTTARGET:SELF
+# 250 REFLECT TYPE
+NAME:Reflect Type
+DESCRIPTION:The user reflects the target's type, making the user the same type as the target.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:15
+EFFECT:137
+TARGET:SELF
+# 251 ROCK POLISH
+NAME:Rock Polish
+DESCRIPTION:The user polishes its body to reduce drag. This sharply raises the Speed stat.
+TYPE:ROCk
+CATEGORY:STATUS
+PP:20
+EFFECT:42
+TARGET:SELF
+# 252 ROCK THROW
+NAME:Rock Throw
+DESCRIPTION:The user picks up and throws a small rock at the target to attack.
+TYPE:ROCK
+PP:15
+POWER:50
+CATEGORY:PHYSICAL
+ACCURACY:90
+# 253 SMACK DOWN
+NAME:Smack Down
+DESCRIPTION:The user throws a stone or similar projectile to attack the target. A flying Pokémon will fall to the ground when it's hit.
+PP:15
+POWER:50
+CATEGORY:PHYSICAL
+TYPE:ROCK
+EFFECT:138
+# 254 SELF DESTRUCT
+NAME:Self-Destruct
+DESCRIPTION:The user attacks everything around it by causing an explosion. The user faints upon using this move. 
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+POWER:200
+EFFECT:100
+EFFECTTARGET:SELF
+# 255 EXPLOSION
+NAME:Explosion
+DESCRIPTION:The user attacks everything around it by causing a tremendous explosion. The user faints upon using this move.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+POWER:250
+EFFECT:100
+EFFECTTARGET:SELF
+# 256 STEALTH ROCK
+NAME:Stealth Rock
+DESCRIPTION:The user lays a trap of levitating stones around the opposing team. The trap hurts opposing Pokémon that switch into battle.
+TYPE:ROCK
+CATEGORY:STATUS
+EFFECT:139
+TARGET:SELF
+PP:20
+# 257 ROCK BLAST
+NAME:Rock Blast
+DESCRIPTION:The user hurls hard rocks at the target. Two to five rocks are launched in a row.
+PP:10
+POWER:25
+CATEGORY:PHYSICAL
+TYPE:ROCK
+ACCURACY:90
+EFFECT:36
+EFFECTTARGET:SELF
+# 258 STONE EDGE
+NAME:Stone Edge
+DESCRIPTION:The user stabs the target from below with sharpened stones. Critical hits land more easily.
+TYPE:ROCK
+PP:5
+POWER:100
+CATEGORY:PHYSICAL
+ACCURACY:80
+EFFECT:17
+EFFECTTARGET:SELF
+# 259 HEAVY SLAM
+NAME:Heavy Slam
+DESCRIPTION:The user slams into the target with its heavy body. The more the user outweighs the target, the greater the move's power.
+PP:10
+TYPE:STEEL
+CATEGORY:PHYSICAL
+EFFECT:140
+EFFECTTARGET:SELF
+# 260 STOMP
+NAME:Stomp
+DESCRIPTION:The target is stomped with a big foot. This may also make the target flinch.
+PP:20
+POWER:65
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:NORMAL
+EFFECT:141
+EFFECTCHANCE:30
+% effectchance only applies to flinching
+# 261 MINIMIZE
+NAME:Minimize
+DESCRIPTION:The user compresses its body to make itself look smaller, which sharply raises its evasiveness.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:10
+TARGET:SELF
+EFFECT:63
+# 262 FLAME CHARGE
+NAME:Flame Charge
+DESCRIPTION:Cloaking itself in flame, the user attacks the target. Then, building up more power, the user raises its Speed stat.
+POWER:50
+PP:20
+CATEGORY:PHYSICAL
+TYPE:FIRE
+CONTACT
+EFFECT:142
+EFFECTTARGET:SELF
+# 263 SMART STRIKE
+NAME:Smart Strike
+DESCRIPTION:The user stabs the target with a sharp horn. This attack never misses.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+ACCURACY:200
+CONTACT
+PP:10
+POWER:70
+# 264 YAWN
+NAME:Yawn
+DESCRIPTION:The user lets loose a huge yawn that lulls the target into falling asleep on the next turn.
+EFFECT:143
+PP:10
+CATEGORY:STATUS
+TYPE:NORMAL
+# 265 CURSE
+NAME:Curse
+DESCRIPTION:A move that works differently for the Ghost type than for all other types.
+TYPE:GHOST
+EFFECT:144
+TARGET:SELF
+CATEGORY:STATUS
+PP:10
+# 266 HEADBUTT
+NAME:Headbutt
+DESCRIPTION:The user sticks out its head and attacks by charging straight into the target. This may also make the target flinch.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:15
+POWER:70
+CONTACT
+EFFECT:21
+EFFECTCHANCE:30
+# 267 SLACK OFF
+NAME:Slack Off
+DESCRIPTION:The user slacks off, restoring its own HP by up to half of its max HP.
+CATEGORY:STATUS
+PP:5
+EFFECT:126
+TARGET:SELF
+TYPE:NORMAL
+# 268 HEAL PULSE
+NAME:Heal Pulse
+DESCRIPTION:The user emits a healing pulse that restores the target's HP by up to half of its max HP.
+PP:10
+EFFECT:145
+TYPE:PSYCHIC
+CATEGORY:STATUS
+# 269 ATTRACT
+NAME:Attract
+DESCRIPTION:If it is the opposite gender of the user, the target becomes infatuated and less likely to attack
+EFFECT:146
+PP:15
+TYPE:NORMAL
+CATEGORY:STATUS
+# 270 METAL SOUND
+NAME:Metal Sound
+DESCRIPTION:A horrible sound like scraping metal harshly lowers the target's Sp. Def stat.
+TYPE:STEEL
+PP:40
+ACCURACY:85
+CATEGORY:STATUS
+EFFECT:54
+SOUND
+# 271 LOCK ON
+NAME:Lock-On
+DESCRIPTION:The user takes sure aim at the target. This ensures the next attack does not miss the target.
+PP:5
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:147
+TARGET:SELF
+# 272 ZAP CANNON
+NAME:Zap Cannon
+DESCRIPTION:The user fires an electric blast like a cannon to inflict damage and cause paralysis.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+PP:5
+POWER:120
+ACCURACY:50
+EFFECT:16
+# 273 ELECTRIC TERRAIN
+NAME:Electric Terrain
+DESCRIPTION:The user turns the ground into Electric Terrain for five turns, powering up Electric-type moves. Pokémon on the ground can no longer fall asleep.
+TYPE:ELECTRIC
+EFFECT:148
+TARGET:SELF
+PP:10
+CATEGORY:STATUS
+# 274 MAGNET RISE
+NAME:Magnet Rise
+DESCRIPTION:The user levitates using electrically generated magnetism for five turns.
+TYPE:ELECTRIC
+CATEGORY:NORMAL
+PP:10
+EFFECT:149
+TARGET:SELF
+# 275 CUT
+NAME:Cut
+DESCRIPTION:The target is cut with a scythe or claw.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:30
+POWER:50
+ACCURACY:95
+CONTACT
+# 276 FALSE SWIPE
+NAME:False Swipe
+DESCRIPTION:A restrained attack that prevents the target from fainting. The target is left with at least 1 HP.
+TYPE:NORMAL
+PP:40
+POWER:40
+CATEGORY:PHYSICAL
+CONTACT
+# 277 BRAVE BIRD
+NAME:Brave Bird
+DESCRIPTION:The user tucks in its wings and charges at a low altitude. This also damages the user quite a lot.
+PP:15
+POWER:120
+TYPE:FLYING
+CATEGORY:PHYSICAL
+EFFECT:51
+EFFECTTARGET:SELF
+CONTACT
+# 278 DOUBLE HIT
+NAME:Double Hit
+DESCRIPTION:The user slams the target with a long tail, vines, or a tentacle. The target is hit twice in a row.
+PP:10
+ACCURACY:90
+POWER:35
+CONTACT
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+EFFECT:75
+EFFECTTARGET:SELF
+# 279 UPROAR
+NAME:Uproar
+DESCRIPTION:The user attacks in an uproar for three turns. During that time, no Pokémon can fall asleep.
+PP:10
+POWER:90
+CATEGORY:SPECIAL
+TYPE:NORMAL
+EFFECT:151
+EFFECTTARGET:SELF
+SOUND
+# 280 ACUPRESSURE
+NAME:Acupressure
+DESCRIPTION:The user applies pressure to stress points, sharply boosting one of its or its allies' stats.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:30
+EFFECT:152
+TARGET:SELF
+# 281 SNOWSCAPE
+NAME:Snowscape
+DESCRIPTION:The user summons a snowstorm lasting five turns. This boosts the Defense stats of Ice types.
+TYPE:ICE
+CATEGORY:STATUS
+EFFECT:153
+TARGET:SELF
+# 282 ICY WIND
+NAME:Icy Wind
+DESCRIPTION:The user attacks with a gust of chilled air. This also lowers opposing Pokémon's Speed stats.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:15
+POWER:55
+EFFECT:122
+ACCURACY:95
+# 283 ICE SHARD
+NAME:Ice Shard
+DESCRIPTION:The user flash-freezes chunks of ice and hurls them at the target. This move always goes first.
+TYPE:ICE
+PP:30
+POWER:40
+CATEGORY:PHYSICAL
+PRIORITY:1
+# 284 AQUA RING
+NAME:Aqua Ring
+DESCRIPTION:The user envelops itself in a veil made of water. It regains some HP every turn.
+TYPE:WATER
+CATEGORY:STATUS
+EFFECT:154
+TARGET:SELF
+PP:20
+# 285 AURORA BEAM
+NAME:Aurora Beam
+DESCRIPTION:The target is hit with a rainbow-colored beam. This may also lower the target's Attack stat.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:20
+POWER:65
+EFFECT:1
+EFFECTCHANCE:10
+# 286 BRINE
+NAME:Brine
+DESCRIPTION:If the target's HP is half or less, this attack will hit with double the power.
+PP:10
+POWER:65
+CATEGORY:SPECIAL
+TYPE:WATER
+EFFECT:155
+EFFECTTARGET:SELF
+# 287 ICE BEAM
+NAME:Ice Beam
+DESCRIPTION:The target is struck with an icy-cold beam of energy. This may also leave the target frozen.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:10
+POWER:90
+EFFECT:61
+EFFECTCHANCE:10
+# 288 SHEER COLD
+NAME:Sheer Cold
+DESCRIPTION:The target faints instantly. It's less likely to hit the target if it's used by Pokémon other than Ice types.
+PP:5
+ACCURACY:30
+TYPE:ICE
+CATEGORY:SPECIAL
+EFFECT:156
+# 289 SLUDGE
+NAME:Sludge
+DESCRIPTION:Unsanitary sludge is hurled at the target. This may also poison the target.
+PP:20
+POWER:65
+CATEGORY:SPECIAL
+TYPE:POISON
+EFFECT:4
+EFFECTCHANCE:30
+# 290 MEMENTO
+NAME:Memento
+DESCRIPTION:The user faints when using this move. In return, this harshly lowers the target's Attack and Sp. Atk stats.
+PP:10
+TYPE:DARK
+CATEGORY:STATUS
+EFFECT:157
+# 291 POISON GAS
+NAME:Poison Gas
+DESCRIPTION:A cloud of poison gas is sprayed in the face of opposing Pokémon, poisoning those it hits.
+PP:40
+CATEGORY:STATUS
+ACCURACY:90
+TYPE:POISON
+EFFECT:4
+# 292 ICICLE CRASH
+NAME:Icicle Crash
+DESCRIPTION:The user attacks by harshly dropping large icicles onto the target. This may also make the target flinch.
+PP:10
+POWER:85
+ACCURACY:90
+TYPE:ICE
+CATEGORY:PHYSICAL
+EFFECT:21
+EFFECTCHANCE:30
+# 293 RAZOR SHELL
+NAME:Razor Shell
+DESCRIPTION:The user cuts its target with sharp shells. This may also lower the target's Defense stat.
+PP:10
+POWER:75
+ACCURACY:95
+TYPE:WATER
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:22
+EFFECTCHANCE:50
+# 294 WHIRLPOOL
+NAME:Whirlpool
+DESCRIPTION:The user traps the target in a violent swirling whirlpool for four to five turns.
+TYPE:WATER
+CATEGORY:SPECIAL
+EFFECT:158
+PP:15
+POWER:35
+EFFECTTARGET:SELF
+# 295 SPIKES
+NAME:Spikes
+DESCRIPTION:The user lays a trap of spikes at the opposing team's feet. The trap hurts Pokémon that switch into battle.
+EFFECT:159
+TARGET:SELF
+PP:20
+CATEGORY:STATUS
+TYPE:GROUND
+# 296 ICICLE SPEAR
+NAME:Icicle Spear
+DESCRIPTION:The user launches sharp icicles at the target two to five times in a row.
+TYPE:ICE
+CATEGORY:PHYSICAL
+PP:30
+POWER:25
+EFFECT:36
+EFFECTTARGET:SELF
+# 297 LICK
+NAME:Lick
+DESCRIPTION:The target is licked with a long tongue, causing damage. This may also leave the target with paralysis.
+TYPE:GHOST
+PP:30
+POWER:30
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:16
+EFFECTCHANCE:30
+# 298 PAYBACK
+NAME:Payback
+DESCRIPTION:The user stores power, then attacks. If the user moves after the target, this attack's power will be doubled.
+TYPE:DARK
+PP:10
+POWER:50
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:160
+EFFECTTARGET:SELF
+# 299 NIGHT SHADE
+NAME:Night Shade
+DESCRIPTION:The user makes the target see a frightening mirage. It inflicts damage matching the user's level.
+PP:15
+TYPE:GHOST
+CATEGORY:SPECIAL
+EFFECT:112
+EFFECTTARGET:SELF
+# 300 DARK PULSE
+NAME:Dark Pulse
+DESCRIPTION:The user releases a horrible aura imbued with ill intent. This may also make the target flinch.
+TYPE:DARK
+PP:15
+POWER:80
+CATEGORY:SPECIAL
+EFFECT:21
+EFFECTCHANCE:20
+# 301 SHADOW BALL
+NAME:Shadow Ball
+DESCRIPTION:The user attacks by hurling a shadowy blob at the target. This may also lower the target's Sp. Def stat.
+TYPE:GHOST
+POWER:80
+PP:15
+CATEGORY:SPECIAL
+EFFECT:31
+EFFECTCHANCE:20
+# 302 DESTINY BOND
+NAME:Destiny Bond
+DESCRIPTION:If the user is knocked out after using this move, the Pokèmon that knocked it out will also faint. This move's chance of failing rises if it is used in succession. 
+TYPE:GHOST
+CATEGORY:STATUS
+PP:5
+EFFECT:161
+TARGET:SELF
+# 303 DREAM EATER
+NAME:Dream Eater
+DESCRIPTION:The user eats the dreams of a sleeping target. The user's HP is restored by up to half the damage taken by the target.
+PP:15
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+POWER:100
+EFFECT:162
+EFFECTTARGET:SELF
+# 304 SHADOW PUNCH
+NAME:Shadow Punch
+DESCRIPTION:The user throws a punch from the shadows. Thi attack never misses.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+POWER:60
+ACCURACY:200
+CONTACT
+PUNCHING
+PP:20
+# 305 PERISH SONG
+NAME:Perish Song
+DESCRIPTION:Any Pokèmon that hears this song faints in three turns, unless it switches out of battle.
+TYPE:NORMAL
+TARGET:SELF
+PP:5
+CATEGORY:STATUS
+EFFECT:163
+TARGET:SELF
+SOUND
+# 306 BIND
+NAME:Bind
+DESCRIPTION:A long body, tentacles, or the like are used to bind and squeeze the target for four to five turns.
+PP:20
+POWER:15
+ACCURACY:85
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+EFFECT:164
+EFFECTTARGET:SELF
+CONTACT
+# 307 DYNAMIC PUNCH
+NAME:Dynamic Punch
+DESCRIPTION:The user punches the target with full, concentrated power. This confuses the target if it hits.
+TYPE:FIGHTING
+CONTACT
+EFFECT:25
+PP:5
+PUNCHING
+CATEGORY:PHYSICAL
+POWER:100
+ACCURACY:50
+# 308 METAL CLAW
+NAME:Metal Claw
+DESCRIPTION:The target is raked with steel claws. This may also boost the user's Attack stat.
+TYPE:STEEL
+PP:35
+POWER:50
+CATEGORY:PHYSICAL
+ACCURACY:95
+CONTACT
+EFFECT:86
+EFFECTCHANCE:10
+EFFECTTARGET:SELF
+# 309 FLAIL
+NAME:Flail
+DESCRIPTION:The user flails about aimlessly to attack. The less HP the user has, the greater the move's power.
+PP:15
+TYPE:NORMAL
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:165
+EFFECTTARGET:SELF
+# 310 CRABHAMMER
+NAME:Crabhammer
+DESCRIPTION: 	The target is hammered with a large pincer. This move has a heightened chance of landing a critical hit.
+TYPE:WATER
+PP:10
+POWER:100
+CATEGORY:PHYSICAL
+ACCURACY:90
+CONTACT
+EFFECT:17
+EFFECTTARGET:SELF
+# 311 GUILLOTINE
+NAME:Guillotine
+DESCRIPTION:A vicious tearing attack with big pincers. The target faints instantly if this attack hits.
+TYPE:NORMAL
+PP:5
+ACCURACY:30
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:103
+EFFECTTARGET:SELF
+# 312 HAMMER ARM
+NAME:Hammer Arm
+DESCRIPTION:The user swings its strong, heavy fist at the target to inflict damage. This also lowers the user's Speed stat.
+TYPE:FIGHTING
+PP:10
+ACCURACY:90
+POWER:100
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+EFFECT:166
+EFFECTTARGET:SELF
+# 313 CHARGE
+NAME:Charge
+DESCRIPTION:The user becomes charged, boosting the power of the next Electric-type move it uses. This also boosts the user's Sp. Def stat.
+TYPE:ELECTRIC
+CATEGORY:STATUS
+PP:20
+EFFECT:167
+TARGET:SELF
+# 314 MIRROR COAT
+NAME:Mirror Coat
+DESCRIPTION:A retaliation move that counters any special attack, inflicting double the damage taken.
+PP:20
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+EFFECT:168
+PRIORITY:-5
+EFFECTTARGET:SELF
+# 315 CHARGE BEAM
+NAME:Charge Beam
+DESCRIPTION:The user attacks the target with an electric charge. The residual electricity may also boost the user's Sp. Atk stat.
+TYPE:ELECTRIC
+PP:10
+POWER:50
+ACCURACY:90
+CATEGORY:SPECIAL
+EFFECT:169
+EFFECTCHANCE:10
+EFFECTTARGET:SELF
+# 316 EERIE IMPULSE
+NAME:Eerie Impulse
+DESCRIPTION:The user's body generates an eerie impulse. Exposing the target to it harshly lowers the target's Sp. Atk stat.
+CATEGORY:STATUS
+PP:15
+TYPE:ELECTRIC
+EFFECT:133
+# 317 MAGNETIC FLUX
+NAME:Magnetic Flux
+DESCRIPTION:The user manipulates magnetic fields, which boosts the Defense and Sp. Def stats of ally Pokémon with the Plus Ability or the Minus Ability.
+PP:20
+TYPE:ELECTRIC
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:170
+# 318 BULLET SEED
+NAME:Bullet Seed
+DESCRIPTION:The user attacks by forcefully shooting seeds at the target. This move hits two to five times in a row.
+CATEGORY:PHYSICAL
+PP:30
+POWER:25
+TYPE:GRASS
+EFFECT:36
+EFFECTTARGET:SELF
+# 319 WOOD HAMMER
+NAME:Wood Hammer
+DESCRIPTION:The user slams its rugged body into the target to attack. This also damages the user quite a lot.
+TYPE:GRASS
+PP:15
+POWER:120
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:51
+EFFECTTARGET:SELF
+# 320 BONE RUSH
+NAME:Bone Rush
+DESCRIPTION:The user attacks by striking the target with a hard bone. This move hits two to five times in a row.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+PP:10
+POWER:25
+ACCURACY:90
+EFFECT:36
+EFFECTTARGET:SELF
+# 321 BONEMERANG
+NAME:Bonemerang
+DESCRIPTION:The user throws the bone it holds. The bone loops around to damage the target twice—coming and going.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+PP:10
+POWER:50
+ACCURACY:90
+EFFECTTARGET:SELF
+EFFECT:75
+# 322 HIGH JUMP KICK
+NAME:High Kump Kick
+DESCRIPTION:The target is attacked with a knee kick from a jump. If this move misses, the user takes damage instead.
+EFFECT:171
+EFFECTTARGET:SELF
+PP:10
+POWER:130
+ACCURACY:90
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+CONTACT
+# 323 BRICK BREAK
+NAME:Brick Break
+DESCRIPTION:The user attacks with a swift chop. This move can also break barriers, such as Light Screen and Reflect.
+CATEGORY:PHYSICAL
+TYPE:FIGHTING
+EFFECT:172
+EFFECTTARGET:SELF
+CONTACT
+PP:15
+POWER:75
+# 324 ENDURE
+NAME:Endure
+DESCRIPTION:The user endures any attack with at least 1 HP. Its chance of failing rises if it is used in succession.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+PRIORITY:4
+EFFECT:173
+EFFECTTARGET:SELF
+# 325 BLAZE KICK
+NAME:Blaze Kick
+DESCRIPTION:The user launches a kick that has a heightened chance of landing a critical hit. This may also leave the target with a burn.
+PP:10
+POWER:85
+ACCURACY:90
+TYPE:FIRE
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:14
+EFFECTCHANCE:10
+# 326 MEGA KICK
+NAME:Mega Kick
+DESCRIPTION:The target is attacked by a kick launched with muscle-packed power.
+PP:5
+POWER:120
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+ACCURACY:75
+# 327 AXE KICK
+NAME:Axe Kick
+DESCRIPTION:The user attacks by kicking up into the air and slamming its heel down upon the target. This may also confuse the target. If it misses, the user takes damage instead.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:10
+POWER:120
+ACCURACY:90
+CONTACT
+EFFECT:174
+EFFECTCHANCE:30
+# 328 MEGA PUNCH
+NAME:Mega Punch
+DESCRIPTION:The target is slugged by a punch thrown with muscle-packed power.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+PP:20
+POWER:80
+ACCURACY:85
+# 329 COUNTER
+NAME:Counter
+DESCRIPTION:A retaliatory attack that counters any physical move, inflicting double the damage taken.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:20
+PRIORITY:-5
+CONTACT
+EFFECT:175
+EFFECTTARGET:SELF
+# 330 FOCUS PUNCH
+NAME:Focus Punch
+DESCRIPTION:The user focuses its mind before launching a punch. This move fails if the user is hit before using the move.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:20
+POWER:150
+PRIORITY:-3
+CONTACT
+PUNCHING
+EFFECT:176
+EFFECTTARGET:SELF
+# 331 MACH PUNCH
+NAME:Mach Punch
+DESCRIPTION:The user throws a punch at blinding speed. This move always goes first.
+TYPE:FIGHTING
+PP:30
+POWER:40
+PRIORITY:1
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+# 332 VACUUM WAVE
+NAME:Vacuum Wave
+DESCRIPTION:The user whirls its fists to send a wave of pure vacuum at the target. This move always goes first.
+TYPE:FIGHTING
+CATEGORY:SPECIAL
+PP:30
+POWER:40
+PRIORITY:1 
+# 333 DETECT
+NAME:Detect
+DESCRIPTION:This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession.
+TYPE:FIGHTING
+PP:5
+PRIORITY:4
+CATEGORY:STATUS
+EFFECT:26
+TARGET:SELF
+# 334 BULLETPUNCH
+NAME:Bullet Punch
+DESCRIPTION:The user strikes the target with tough punches as fast as bullets. This move always goes first.
+TYPE:STEEL
+PP:30
+POWER:40
+PRIORITY:1
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+# 335 ICE PUNCH
+NAME:Ice Punch
+DESCRIPTION:The target is punched with an icy punch. This may also leave the target frozen.
+PP:15
+POWER:75
+TYPE:ICE
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+EFFECT:61
+EFFECTCHANCE:10
+# 336 FIRE PUNCH
+NAME:Fire Punch
+DESCRIPTION:The target is attacked with a fiery punch. This may also leave the target with a burn.
+PP:15
+POWER:75
+TYPE:FIRE
+CATEGORY:PHYSICAL
+CONTACT
+PUNCHING
+EFFECT:14
+EFFECTCHANCE:10
+# 337 DRAIN PUNCH
+NAME:Drain Punch
+DESCRIPTION:The user attacks with an energy-draining punch. The user's HP is restored by up to half the damage taken by the target.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:10
+POWER:75
+EFFECT:97
+EFFECTTARGET:SELF
+CONTACT
+PUNCHING
+# 338 SMOG
+NAME:Smog
+DESCRIPTION:The target is attacked with a discharge of filthy gases. This may also poison the target.
+TYPE:POISON
+CATEGORY:SPECIAL
+ACCURACY:70
+PP:20
+POWER:30
+EFFECT:4
+EFFECTCHANCE:40
+# 339 CLEAR SMOG
+NAME:Clear Smog
+DESCRIPTION:The user attacks the target by throwing a clump of special mud. All stat changes are eliminated.
+PP:15
+TYPE:POISON
+CATEGORY:SPECIAL
+POWER:50
+ACCURACY:200
+EFFECT:177
+# 340 HORN DRILL
+NAME:Horn Drill
+DESCRIPTION:The user stabs the target with a horn that rotates like a drill. The target faints instantly if this attack hits.
+CATEGORY:PHYSICAL
+ACCURACY:30
+TYPE:NORMAL
+PP:5
+CONTACT
+EFFECT:103
+EFFECTTARGET:SELF
+# 341 SOFT BOILED
+NAME:Soft-Boiled
+DESCRIPTION:The user restores its own HP by up to half its max HP. 
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:5
+EFFECT:126
+TARGET:SELF
+CATEGORY:STATUS
+# 342 LAST RESORT
+NAME:Last Resort
+DESCRIPTION:This move can be used only after the user has used all the other moves it knows in the battle.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+POWER:140
+CONTACT
+EFFECT:178
+EFFECTTARGET:SELF
+# 343 INGRAIN
+NAME:Ingrain
+DESCRIPTION:The user lays roots that restore its own HP every turn. Because the user is now rooted, it can't switch out.
+TYPE:GRASS
+CATEGORY:STATUS
+PP:20
+EFFECT:179
+TARGET:SELF
+# 344 ANCIENT POWER
+NAME:Ancient Power
+DESCRIPTION:The user attacks with a prehistoric power. This may also boost all the user's stats at once.
+TYPE:ROCK
+CATEGORY:SPECIAL
+PP:5
+POWER:60
+EFFECT:180
+EFFECTCHANCE:10
+EFFECTTARGET:SELF
+# 345 TICKLE
+NAME:Tickle
+DESCRIPTION:The user tickles the target into laughing, lowering its Attack and Defense stats.
+PP:20
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:181
+# 346 DRAGON PULSE
+NAME:Dragon Pulse
+DESCRIPTION:The target is attacked with a shock wave generated by the user's gaping mouth.
+TYPE:DRAGON
+PP:10
+POWER:85
+CATEGORY:SPECIAL
+# 347 DRAGON DANCE
+NAME:Dragon Dance
+DESCRIPTION:The user vigorously performs a mystic, powerful dance that raises its Attack and Speed stats.
+PP:20
+CATEGORY:STATUS
+TYPE:DRAGON
+EFFECT:182
+TARGET:SELF
+# 348 WATERFALL
+NAME:Waterfall
+DESCRIPTION:The user charges at the target and may make it flinch.
+TYPE:WATER
+CATEGORY:PHYSICAL
+PP:15
+POWER:80
+CONTACT
+EFFECT:21
+EFFECTCHANCE:20
+# 349 POWER SWAP
+NAME:Power Swap
+DESCRIPTION:The user employs its psychic power to switch changes to its Attack and Sp. Atk stats with the target.
+TYPE:PSYCHIC
+PP:10
+CATEGORY:STATUS
+EFFECT:183
+# 350 GUARD SWAP
+NAME:Guard Swap
+DESCRIPTION:The user employs its psychic power to switch changes to its Defense and Sp. Def stats with the target.
+TYPE:PSYCHIC
+PP:10
+CATEGORY:STATUS
+EFFECT:184
+# 351 TEETER DANCE
+NAME:Teeter Dance
+DESCRIPTION:The user performs a wobbly dance that confuses every Pokémon around it.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:20
+EFFECT:25
+# 352 BATON PASS
+NAME:Baton Pass
+DESCRIPTION:The user switches places with a party Pokémon in waiting and passes along any stat changes.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:40
+EFFECT:185
+# 353 DAZZLING GLEAM
+NAME:Dazzling Gleam
+DESCRIPTION:The user damages opposing Pokémon by emitting a powerful flash.
+TYPE:FAIRY
+PP:10
+CATEGORY:SPECIAL
+POWER:80
+# 354 POWDER SNOW
+NAME:Powder Snow
+DESCRIPTION:The user attacks with a chilling gust of powdery snow. This may also leave opposing Pokémon frozen.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:25
+POWER:40
+EFFECT:61
+EFFECTCHANCE:10
+# 355 BLIZZARD
+NAME:Blizzard
+DESCRIPTION:A howling blizzard is summoned to strike opposing Pokémon. This may also leave the opposing Pokémon frozen.
+PP:5
+POWER:110
+ACCURACY:70
+TYPE:ICE
+CATEGORY:SPECIAL
+EFFECT:186
+EFFECTTARGET:SELF
+# 356 FAKE TEARS
+NAME:Fake Tears
+DESCRIPTION:The user feigns crying to fluster the target. This harshly lowers the target's Sp. Def stat.
+PP:20
+TYPE:DARK
+CATEGORY:STATUS
+EFFECT:54
+# 357 LOVELY KISS
+NAME:Lovely Kiss
+DESCRIPTION:With a scary face, the user tries to kiss the target. If it succeeds, the target falls asleep
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:5
+PP:10
+ACCURACY:75
+# 358 SHOCK WAVE
+NAME:Shock Wave
+DESCRIPTION:The user strikes the target with a quick jolt of electricity. This attack never misses.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+PP:20
+ACCURACY:200
+POWER:60
+# 359 GIGA IMPACT
+NAME:Giga Impact
+DESCRIPTION:The user charges at the target using every bit of its power. The user can't move on the next turn.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+POWER:150
+ACCURACY:90
+CONTACT
+EFFECT:187
+EFFECTTARGET:SELF
+# 360 LAVA PLUME
+NAME:Lava Plume
+DESCRIPTION:The user torches everything around it in an inferno of scarlet flames. This may also leave those it hits with a burn.
+TYPE:FIRE
+CATEGORY:SPECIAL
+PP:15
+POWER:80
+EFFECT:14
+EFFECTCHANCE:30
+# 361 HYPER BEAM
+NAME:Hyper Beam
+DESCRIPTION:The target is attacked with a powerful beam. The user can't move on the next turn.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:5
+POWER:150
+ACCURACY:90
+EFFECT:187
+EFFECTTARGET:SELF
+# 362 SUNNY DAY
+NAME:Sunny Day
+DESCRIPTION:The user intensifies the sun for five turns, powering up Fire-type attacks. The sunlight also lowers the power of Water-type attacks.
+CATEGORY:STATUS
+TYPE:FIRE
+PP:5
+TARGET:SELF
+EFFECT:188
+# 363 VISE GRIP
+NAME:Vise Grip
+DESCRIPTION:The target is gripped and squeezed from both sides to inflict damage.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:30
+POWER:55
+CONTACT
+# 364 STORM THROW
+NAME:Storm Throw
+DESCRIPTION:The user attacks by striking the target with a fierce blow. This move always lands a critical hit.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:10
+POWER:60
+CONTACT
+EFFECT:189
+EFFECTTARGET:SELF
+# 365 SUBMISSION
+NAME:Submission
+DESCRIPTION:The user grabs the target and recklessly dives for the ground. This also damages the user a little.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:20
+POWER:80
+ACCURACY:80
+CONTACT
+EFFECT:6
+EFFECTTARGET:SELF
+# 366 WORK UP
+NAME:Work Up
+DESCRIPTION:The user is roused, and its Attack and Sp. Atk stats are boosted.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:30
+TARGET:SELF
+EFFECT:2
+# 367 RAGING BULL
+NAME:Raging Bull
+DESCRIPTION:The user performs a tackle like a raging bull. This move's type depends on the user's form. It can also break barriers, such as Light Screen and Reflect.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+PP:10
+POWER:90
+EFFECT:172
+EFFECTTARGET:SELF
+# 368 MIST
+NAME:Mist
+DESCRIPTION:The user cloaks itself and its allies in a white mist that prevents any of their stats from being lowered for five turns.
+PP:30
+TYPE:ICE
+CATEGORY:STATUS
+EFFECT:190
+TARGET:SELF
+# 369 BABY DOLL EYES
+NAME:Baby-Doll Eyes
+DESCRIPTION:The user stares at the target with its baby-doll eyes, which lowers the target's Attack stat. This move always goes first.
+TYPE:FAIRY
+CATEGORY:STATUS
+PP:30
+PRIORITY:1
+ACCURACY:200
+EFFECT:1
+# 370 MUDDY WATER
+NAME:Muddy Water
+DESCRIPTION:The user attacks by shooting muddy water at opposing Pokémon. This may also lower their accuracy.
+TYPE:WATER
+CATEGORY:SPECIAL
+PP:10
+POWER:90
+ACCURACY:85
+EFFECT:15
+EFFECTCHANCE:30
+# 371 CONVERSION
+NAME:Conversion
+DESCRIPTION:The user changes its type to become the same type as the move at the top of the list of moves it knows.
+PP:30
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:191
+TARGET:SELF
+# 372 CONVERSION 2
+NAME:Conversion 2
+DESCRIPTION:The user changes its type to make itself resistant to the type of the move the target used last.
+PP:30
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:192
+TARGET:SELF
+# 373 LIQUIDATION
+NAME:Liquidation
+DESCRIPTION:The user slams into the target using a full-force blast of water. This may also lower the target's Defense stat.
+TYPE:WATER
+CATEGORY:PHYSICAL
+PP:10
+POWER:85
+EFFECT:22
+EFFECTCHANCE:20
+# 374 IRON HEAD
+NAME:Iron Head
+DESCRIPTION:The user slams the target with its steel-hard head. This may also make the target flinch.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+CONTACT
+PP:15
+POWER:80
+EFFECT:21
+EFFECTCHANCE:30
+# 375 BLOCK
+NAME:Block
+DESCRIPTION:The user blocks the target's way with arms spread wide to prevent the target from fleeing.
+PP:5
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:193
+# 376 SLEEP TALK
+NAME:Sleep Talk
+DESCRIPTION:The user randomly uses one of the moves it knows. This move can only be used while the user is asleep.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+TARGET:SELF
+EFFECT:194
+# 377 SNORE
+NAME:Snore
+DESCRIPTION:This attack can be used only if the user is asleep. The harsh noise may also make the target flinch.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:15
+POWER:50
+EFFECT:195
+EFFECTCHANCE:30
+# 378 HIGH HORSEPOWER
+NAME:High Horsepower
+DESCRIPTION:The user fiercely attacks the target using its entire body.
+TYPE:GROUND
+CATEGORY:PHYSICAL
+PP:10
+POWER:95
+ACCURACY:95
+# 379 FREEZE DRY
+NAME:Freeze Dry
+DESCRIPTION:The user rapidly cools the target. This may also leave the target frozen. This move is super effective on Water types.
+TYPE:ICE
+CATEGORY:SPECIAL
+POWER:70
+PP:20
+EFFECT:196
+EFFECTTARGET:SELF
+# 380 SKY ATTACK
+NAME:Sky Attack
+DESCRIPTION:The user attacks the turn after using this move. This move has a heightened chance of landing a critical hit and may also make the target flinch.
+TYPE:FLYING
+CATEGORY:PHYSICAL
+PP:5
+POWER:140
+ACCURACY:90
+EFFECT:197
+EFFECTCHANCE:30
+# 381 OVERHEAT
+NAME:Overheat
+DESCRIPTION:The user attacks the target with all its might. The recoil from this move harshly lowers the user's Sp. Atk stat.
+PP:5
+POWER:130
+CATEGORY:SPECIAL
+TYPE:FIRE
+ACCURACY:90
+EFFECT:133
+EFFECTTARGET:SELF
+# 382 DRAGON TAIL
+NAME:Dragon Tail
+DESCRIPTION:The target is knocked away, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
+TYPE:DRAGON
+CATEGORY:PHYSICAL
+CONTACT
+PP:10
+POWER:60
+ACCURACY:90
+PRIORITY:-6
+EFFECT:32
+EFFECTTARGET:SELF
+# 383 DRAGON RUSH
+NAME:Dragon Rush
+DESCRIPTION:The user tackles the target while exhibiting overwhelming menace. This may also make the target flinch.
+TYPE:DRAGON
+PP:10
+POWER:100
+ACCURACY:75
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:21
+EFFECTCHANCE:20
+# 384 AURA SPHERE
+NAME:Aura Sphere
+DESCRIPTION:The user lets loose a pulse of aura power from deep within its body at the target. This attack never misses.
+TYPE:FIGHTING
+CATEGORY:SPECIAL
+PP:20
+POWER:80
+ACCURACY:200
+# 385 PSYSTRIKE
+NAME:Psystrike
+DESCRIPTION:The user materializes an odd psychic wave to attack the target. This move deals physical damage.
+CATEGORY:SPECIAL
+TYPE:PSYCHIC
+PP:10
+POWER:100
+EFFECT:128
+EFFECTTARGET:SELF

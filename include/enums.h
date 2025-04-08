@@ -1,0 +1,326 @@
+#ifndef __INCLUDE_ENUMS_H_____
+#define __INCLUDE_ENUMS_H_____
+
+enum Weather{
+    CLEAR,
+    RAIN,
+    SUN,
+    SANDSTORM,
+    HAIL,
+    SNOWSTORM
+};
+enum Terrain{
+    NO_TERRAIN,
+    GRASSY_FIELD,
+    MISTY_FIELD,
+    ELECTRIC_FIELD,
+    PSYCHIC_FIELD
+};
+enum FieldEffect{
+    NO_FIELD_EFFECT,
+    // FIRE_SPIN,
+    TAILWIND,
+    SAFEGUARD,
+    TOXIC_SPIKES,
+    BAD_TOXIC_SPIKES,
+    LIGHT_SCREEN,
+    REFLECT,
+    // SAND_TOMB,
+    GRAVITY,
+    WONDER_ROOM,
+    STEALTH_ROCKS,
+    SPIKES,
+    SPIKES_2,
+    SPIKES_3,
+    MIST
+    // AURORA_VEIL,
+    // MAGIC_COAT,
+    // TRICK_ROOM,
+};
+enum BattleActionActor{
+    PLAYER,
+    OPPONENT
+};
+enum BattleActionType{
+    ATTACK,
+    SWITCH,
+    PETAL_DANCE,
+    OUTRAGE,
+    THRASH,
+    SOLAR_BEAM,
+    FLY,
+    ROLLOUT,
+    DIG,
+    DIVE,
+    UPROAR,
+    RECHARGE_TURN,
+    SKY_ATTACK
+};
+enum PermanentStatusCondition{
+    NO_PERMANENT_CONDITION,
+    BURN,
+    FREEZE,
+    PARALYSIS,
+    POISONED,
+    BAD_POISON,
+    SLEEP_1,
+    SLEEP_2,
+    SLEEP_3,
+    SLEEP_4,
+    KO
+};
+enum VolatileStatusCondition{
+    CONFUSION,
+    FLINCH,
+    INFATUATION,
+    LEECH_SEED,
+    PERISH_SONG,
+    CHARGING_SOLARBEAM,
+    CHARGING_SKYATTACK,
+    RECHARGING,
+    GROUNDED,
+    PETAL_DANCING,
+    OUTRAGING,
+    THRASHING,
+    PROTECT,
+    LASER_FOCUS,
+    FOCUS_ENERGY,
+    FLYING_HIGH,
+    WRAP,
+    BIND,
+    FIRESPIN,
+    SANDTOMB,
+    ROLLINGOUT,
+    UNDERGROUND,
+    UNDERWATER,
+    ENCORE,
+    IMPRISON,
+    MEAN_LOOK,
+    QUICK_GUARD,
+    TAUNTED,
+    SMACKED_DOWN,
+    DROWSY,
+    CURSED,
+    MAGNET_RISE,
+    UPROARING,
+    AQUA_RING,
+    WHIRLPOOL,
+    DESTINY_BOND,
+    CHARGED,
+    CHARGED_2, // used to apply charged effect that specific turn only
+    ENDURE,
+    FOCUSED,
+    INGRAINED,
+    BLOCKED
+};
+
+enum Gender{
+    MALE,
+    FEMALE,
+    GENDERLESS
+};
+
+enum GenderRule{
+    NO_GENDER,
+    HALF_MALE_HALF_FEMALE,
+    FEMALE_ONE_EIGHT,
+    MALE_ONE_EIGHT,
+    ALWAYS_MALE,
+    ALWAYS_FEMALE,
+    MALE_ONE_FOURTH,
+    FEMALE_ONE_FOURTH
+};
+
+enum Nature{
+    HARDY,
+    LONELY,
+    BRAVE,
+    ADAMANT,
+    NAUGHTY,
+    BOLD,
+    DOCILE,
+    RELAXED,
+    IMPISH,
+    LAX,
+    TIMID,
+    HASTY,
+    SERIOUS,
+    JOLLY,
+    NAIVE,
+    MODEST,
+    MILD,
+    QUIET,
+    BASHFUL,
+    RASH,
+    CALM,
+    GENTLE,
+    SASSY,
+    CAREFUL,
+    QUIRKY
+};
+
+enum Type{
+    NO_TYPE,
+    NORMAL,
+    FIRE,
+    WATER,
+    ELECTRIC,
+    GRASS,
+    ICE,
+    FIGHTING,
+    POISON,
+    GROUND,
+    FLYING,
+    PSYCHIC,
+    BUG,
+    ROCK,
+    GHOST,
+    DRAGON,
+    DARK,
+    STEEL,
+    FAIRY
+};
+enum AttackType{
+    PHYSICAL,
+    SPECIAL,
+    STATUS
+};
+enum AttackTarget{
+    TARGET_SELF,
+    TARGET_OPPONENT
+};
+enum ExpCurve{
+    ERRATIC,
+    FAST,
+    MEDIUM_FAST,
+    MEDIUM_SLOW,
+    SLOW,
+    FLUCTUATING
+};
+enum EvolutionMethod{
+    LEVEL,
+    USE_ITEM,
+    TRADE
+};
+
+enum Ability{
+    NO_ABILITY,
+    OVERGROW,
+    CHLOROPHYL,
+    BLAZE,
+    SOLAR_POWER,
+    TORRENT,
+    SWIFT_SWIM,
+    INSOMNIA,
+    RAIN_DISH,
+    SHED_SKIN,
+    SHIELD_DUST,
+    RUN_AWAY,
+    COMPOUND_EYES,
+    TINTED_LENS,
+    SNIPER,
+    SWARM,
+    KEEN_EYE,
+    TANGLED_FEET,
+    BIG_PECKS,
+    GUTS,
+    HUSTLE,
+    INTIMIDATE,
+    UNNERVE,
+    STATIC,
+    LIGHTNING_ROD,
+    SAND_VEIL,
+    SAND_RUSH,
+    POISON_POINT,
+    RIVALRY,
+    SHEER_FORCE,
+    CUTE_CHARM,
+    MAGIC_GUARD,
+    FRIEND_GUARD,//only works in doubles
+    UNAWARE,
+    FLASH_FIRE,
+    DROUGHT,
+    COMPETITIVE,
+    FRISK,//only works with items
+    INFILTRATOR,
+    INNER_FOCUS,
+    STENCH,//no battle effect
+    EFFECT_SPORE,
+    DAMP,
+    DRY_SKIN,
+    WONDER_SKIN,
+    ARENA_TRAP,
+    IMPOSTOR,
+    LIMBER,
+    SAND_FORCE,
+    PICKUP,// does nothing in battle
+    TECHNICIAN,
+    CLOUD_NINE,
+    VITAL_SPIRIT,
+    ANGER_POINT,
+    DEFIANT,
+    JUSTIFIED,
+    WATER_ABSORB,
+    SYNCHRONIZE,
+    NO_GUARD,
+    STEADFAST,
+    GLUTTONY,//only works with items (berries)
+    LIQUID_OOZE,
+    CLEAR_BODY,
+    STURDY,
+    ROCK_HEAD,
+    FLAME_BODY,
+    OWN_TEMPO,
+    OBLIVIOUS,
+    REGENERATOR,
+    MAGNET_PULL,
+    ANALYTIC,
+    EARLY_BIRD,
+    THICK_FAT,
+    HYDRATION,
+    ICE_BODY,
+    STICKY_HOLD,//only works with items
+    POISON_TOUCH,
+    SHELL_ARMOR,
+    SKILL_LINK,
+    OVERCOAT,
+    LEVITATE,
+    CURSED_BODY,
+    WEAK_ARMOR,
+    FOREWARN,
+    HYPER_CUTTER,
+    SOUNDPROOF,
+    AFTERMATH,
+    PLUS,
+    MINUS,
+    HARVEST, //only works with items
+    BATTLE_ARMOR,
+    RECKLESS,
+    UNBURDEN,//only works with items
+    IRON_FIST,
+    NEUTRALIZING_GAS,
+    NATURAL_CURE,
+    SERENE_GRACE,
+    HEALER, //only works in doubles
+    LEAF_GUARD,
+    SCRAPPY,
+    WATER_VEIL,
+    ILLUMINATE,//no battle effect
+    FILTER,
+    MOLD_BREAKER,
+    MOXIE,
+    RATTLED,
+    ADAPTABILITY,
+    ANTICIPATION,
+    VOLT_ABSORB,
+    QUICK_FEET,
+    TRACE,
+    DOWNLOAD,
+    PRESSURE,
+    IMMUNITY,
+    SNOW_CLOAK,
+    MULTISCALE,
+    MARVEL_SCALE
+};
+
+#endif
