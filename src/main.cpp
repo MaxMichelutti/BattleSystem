@@ -8,7 +8,7 @@
 int main(int argc, char** argv) {
     Attack::loadAttacks();
     Species::loadSpecies();
-    Monster* monster_p1 = Monster::generateRandomMonster(94,50);
+    Monster* monster_p1 = Monster::generateRandomMonster(9,50);
     // for(int i=0;i<100;i++){
     //     monster_p1->forgetAttack(i);
     // }
@@ -16,13 +16,13 @@ int main(int argc, char** argv) {
     // monster_p1->learnAttack(226);
     // monster_p1->learnAttack(161);
     // monster_p1->printSummary();
-    Monster* monster_p2 = Monster::generateRandomMonster(14,50);
+    Monster* monster_p2 = Monster::generateRandomMonster(20,50);
     // monster_p2->printSummary();
-    Monster* monster_p3 = Monster::generateRandomMonster(15,50);
+    Monster* monster_p3 = Monster::generateRandomMonster(31,50);
     // monster_p3->printSummary();
-    Monster* monster_o1 = Monster::generateRandomMonster(18,50);
-    Monster* monster_o2 = Monster::generateRandomMonster(25,50);
-    Monster* monster_o3 = Monster::generateRandomMonster(8,50);
+    Monster* monster_o1 = Monster::generateRandomMonster(40,50);
+    Monster* monster_o2 = Monster::generateRandomMonster(51,50);
+    Monster* monster_o3 = Monster::generateRandomMonster(62,50);
     MonsterTeam* player_team = new MonsterTeam();
     player_team->addMonster(monster_p1);
     player_team->addMonster(monster_p2);

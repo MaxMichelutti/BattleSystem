@@ -1643,8 +1643,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     event_handler->displayMsg(user_mon_name+" is stockpiling!");
                     active_user->incrementStockpiles();
-                    active_user->changeDefenseModifier(+1);
-                    active_user->changeSpecialDefenseModifier(+1);
+                    // active_user->changeDefenseModifier(+1);
+                    // active_user->changeSpecialDefenseModifier(+1);
                 }
                 break;
             }
