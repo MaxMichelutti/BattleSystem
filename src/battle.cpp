@@ -1427,9 +1427,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being confused!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
-                }else if(field->getTerrain() == MISTY_FIELD && attack->getCategory() == STATUS && effect==25){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                }else if(field->getTerrain() == MISTY_FIELD){
+                    if(attack->getCategory() == STATUS && effect==25){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed(); 
+                    }
                 }else{  
                     active_target->addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
                 }

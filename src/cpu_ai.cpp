@@ -1189,17 +1189,20 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
     }
     Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
+    BattleAction struggle_action(
+        OPPONENT,
+        ATTACK,
+        STRUGGLE_ID, 
+        0, 
+        active_monster->getModifiedSpeed(), 
+        0);
     if(attack_choice == nullptr && switch_choice == nullptr){
-        return BattleAction(
-            OPPONENT,
-            ATTACK,
-            STRUGGLE_ID, 
-            0, 
-            active_monster->getModifiedSpeed(), 
-            0);
+        return struggle_action;
     }else if(attack_choice == nullptr){
         unsigned int switch_id = switch_choice->choice_id;
         delete switch_choice;
+        if(!active_monster->canSwitchOut(enemy_active))
+            return struggle_action;
         return BattleAction(
             OPPONENT,
             SWITCH,
@@ -1218,7 +1221,7 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             attack->getPriorityLevel(), 
             active_monster->getModifiedSpeed(), 
             0);
-    }else if(attack_choice->utility >= switch_choice->utility){
+    }else if(attack_choice->utility >= switch_choice->utility || !active_monster->canSwitchOut(enemy_active)){
         unsigned int attack_id = attack_choice->choice_id;
         delete attack_choice;
         delete switch_choice;
