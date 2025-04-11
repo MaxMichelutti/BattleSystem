@@ -527,8 +527,10 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
             forgetMoveVolatiles(active_user);
             if(attack->getEffectId()!=194 && attack->getEffectId()!=195)
                 return;
-        }else// wakes up now
+        }else{// wakes up now
             active_user->clearPermanentStatus();
+            event_handler->displayMsg(user_mon_name+" woke up!");
+        }
     } 
     // apply flinch
     if(active_user->hasVolatileCondition(FLINCH)){
