@@ -4088,96 +4088,18 @@ bool Battle::checkIfAttackFails(Attack* attack,
             return true;
         }
     }
+
+    bool attack_failed = false;
     // check if attack fails due to dark types being immune to prankster boosts
     if(active_target->hasType(DARK) && 
         attack->getCategory() == STATUS &&
         attack->getPriorityLevel() < action.getPriority()){
-        event_handler->displayMsg("But it failed!");
-        decrementVolatiles(active_user);
-        active_user->setLastAttackFailed();
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        return true;
-    }
-    // check if attack fails due to not having taken any Special damage
-    if(attack->getEffectId() == 168 && active_user->getSpecialDamageTakenThisTurn() == 0){
-        event_handler->displayMsg("But it failed!");
-        decrementVolatiles(active_user);
-        active_user->setLastAttackFailed();
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        return true;
-    }
-    // check if attack fails due to not having taken any Physical damage
-    if(attack->getEffectId() == 175 && active_user->getPhysicalDamageTakenThisTurn() == 0){
-        event_handler->displayMsg("But it failed!");
-        decrementVolatiles(active_user);
-        active_user->setLastAttackFailed();
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        return true;
+        attack_failed = true;
     }
     // check if move fails due to imprison
     if((active_user->hasVolatileCondition(IMPRISON))&&
         active_target->knowsAttack(action.getAttackId())){ 
-        event_handler->displayMsg("But it failed!");
-        decrementVolatiles(active_user);
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        active_user->setLastAttackFailed();
-        return true;
-    }
-    // check if endeavor fails
-    if(attack->getEffectId() == 43){
-        unsigned int current_hp_user = active_user->getCurrentHP();
-        unsigned int current_hp_target = active_target->getCurrentHP();
-        if(current_hp_user >= current_hp_target){
-            event_handler->displayMsg("But it failed!");
-            decrementVolatiles(active_user);
-            active_user->removeVolatileCondition(LASER_FOCUS);
-            active_user->setLastAttackFailed();
-            return true;
-        }
-    }
-    // check if snore fails
-    if(attack->getEffectId()==195 && !active_user->isAsleep()){
-        event_handler->displayMsg("But it failed!");
-        decrementVolatiles(active_user);
-        active_user->setLastAttackFailed();
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        return true;
-    }
-    //check if sucker punch fails
-    if(attack->getEffectId() == 49){
-        if(other_action.getActionType() == SWITCH || // opponent is not attacking
-            action.getOrder() > other_action.getOrder() || // opponent action comes before
-            Attack::getAttack(other_action.getAttackId())->getCategory()==STATUS){ // opponent is using status move
-            event_handler->displayMsg("But it failed!");
-            active_user->setLastAttackUsed(action.getAttackId());
-            last_attack_used_id = attack_id;
-            decrementVolatiles(active_user);
-            active_user->setLastAttackFailed();
-            active_user->removeVolatileCondition(LASER_FOCUS);
-            return true;
-        }
-    }
-    // check if fake out fails
-    if(attack->getEffectId() == 105){
-        if(active_user->getTurnsInBattle() != 1){
-            event_handler->displayMsg("But it failed!");
-            active_user->setLastAttackUsed(action.getAttackId());
-            last_attack_used_id = attack_id;
-            decrementVolatiles(active_user);
-            active_user->setLastAttackFailed();
-            active_user->removeVolatileCondition(LASER_FOCUS);
-            return true;
-        }
-    }
-    // check if dream eater fails
-    if(attack->getEffectId()==162 && !active_target->isAsleep()){
-        event_handler->displayMsg("But it failed!");
-        active_user->setLastAttackUsed(action.getAttackId());
-        last_attack_used_id = attack_id;
-        decrementVolatiles(active_user);
-        active_user->setLastAttackFailed();
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        return true;
+        attack_failed = true;
     }
     // check if OHKO fails
     if((attack->getEffectId() == 103 || attack->getEffectId() == 156) && active_target->getAbility() == STURDY){
@@ -4189,8 +4111,88 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->removeVolatileCondition(LASER_FOCUS);
         return true;
     }
-    //check if focus punch fails
-    if(attack->getEffectId()==176 && !active_user->hasVolatileCondition(FOCUSED)){
+    switch(attack->getEffectId()){
+        case 168:{// check if attack fails due to not having taken any Special damage
+            if(active_user->getSpecialDamageTakenThisTurn() == 0){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 175:{// check if attack fails due to not having taken any Physical damage
+            if(active_user->getPhysicalDamageTakenThisTurn() == 0){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 43: {//endeavor
+            unsigned int current_hp_user = active_user->getCurrentHP();
+            unsigned int current_hp_target = active_target->getCurrentHP();
+            if(current_hp_user >= current_hp_target){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 195:{//snore
+            if(!active_user->isAsleep()){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 49:{//sucker punch
+            if(other_action.getActionType() == SWITCH || // opponent is not attacking
+                action.getOrder() > other_action.getOrder() || // opponent action comes before
+                Attack::getAttack(other_action.getAttackId())->getCategory()==STATUS){ // opponent is using status move
+                attack_failed = true;
+            }
+            break;
+        }
+        case 105:{//fake out
+            if(active_user->getTurnsInBattle() != 1){
+                active_user->setLastAttackUsed(action.getAttackId());
+                last_attack_used_id = attack_id;
+                attack_failed = true;
+            }
+            break;
+        }
+        case 162:{//dream eater
+            if(!active_target->isAsleep()){
+                active_user->setLastAttackUsed(action.getAttackId());
+                last_attack_used_id = attack_id;
+                attack_failed = true;
+            }
+            break;
+        }
+        case 176:{//focus punch
+            if(!active_user->hasVolatileCondition(FOCUSED)){
+                active_user->setLastAttackUsed(action.getAttackId());
+                last_attack_used_id = attack_id;
+                attack_failed = true;
+            }
+            break;
+        }
+        case 178:{//last resort
+            auto usable_attacks = active_user->getAttacks();
+            bool has_not_used_attack = false;
+            for(auto usable_attack: usable_attacks){
+                int att_id = usable_attack.first;   
+                if(att_id == 0 || att_id==STRUGGLE_ID)
+                    continue;
+                Attack* other_attack = Attack::getAttack(att_id);
+                if(other_attack->getEffectId() == 178)
+                    continue;
+                if(active_user->hasUsedAttack(att_id)){
+                    continue;
+                }
+                has_not_used_attack = true;
+                break;
+            }
+            if(has_not_used_attack){
+                active_user->setLastAttackUsed(action.getAttackId());
+                attack_failed = true;
+            }
+        }
+    }
+    if(attack_failed){
         event_handler->displayMsg("But it failed!");
         active_user->setLastAttackUsed(action.getAttackId());
         last_attack_used_id = attack_id;
@@ -4198,33 +4200,6 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->setLastAttackFailed();
         active_user->removeVolatileCondition(LASER_FOCUS);
         return true;
-    }
-    //check if last resort fails
-    if(attack->getEffectId()==178){
-        auto usable_attacks = active_user->getAttacks();
-        bool has_not_used_attack = false;
-        for(auto usable_attack: usable_attacks){
-            int att_id = usable_attack.first;   
-            if(att_id == 0 || att_id==STRUGGLE_ID)
-                continue;
-            Attack* other_attack = Attack::getAttack(att_id);
-            if(other_attack->getEffectId() == 178)
-                continue;
-            if(active_user->hasUsedAttack(att_id)){
-                continue;
-            }
-            has_not_used_attack = true;
-            break;
-        }
-        if(has_not_used_attack){
-            event_handler->displayMsg("But it failed!");
-            active_user->setLastAttackUsed(action.getAttackId());
-            last_attack_used_id = attack_id;
-            decrementVolatiles(active_user);
-            active_user->setLastAttackFailed();
-            active_user->removeVolatileCondition(LASER_FOCUS);
-            return true;
-        }
     }
 
 
@@ -4305,7 +4280,6 @@ bool Battle::checkIfAttackFails(Attack* attack,
         event_handler->displayMsg("But it failed!");
         decrementVolatiles(active_user);
         active_user->removeVolatileCondition(LASER_FOCUS);
-        active_user->removeVolatileCondition(ROLLINGOUT);
         active_user->setLastAttackFailed();
         return true;
     }
@@ -4365,26 +4339,6 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->setLastAttackFailed();
         return true;
     }
-    // lightning rod -> drew in electric type attack and increase SPATT
-    if(active_target->getAbility()== LIGHTNING_ROD && 
-        attack->getType()==ELECTRIC &&
-        attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
-        event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
-        active_target->changeSpecialAttackModifier(1);
-        decrementVolatiles(active_user);
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        active_user->setLastAttackHit();
-        if(attack->getEffectId()==100){
-            //user dies
-            active_user->addDirectDamage(active_user->getMaxHP());
-        }
-        if(attack->getEffectId()==187){
-            //user dies
-            active_user->addVolatileCondition(RECHARGING,-1);
-        }
-        return true;
-    }
     // damp prevents explosion and self-destruct
     if(active_target->getAbility()==DAMP && 
         attack->getEffectId() == 100 &&
@@ -4395,29 +4349,28 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->setLastAttackHit();
         return true;
     }
+    bool attack_absorbed = false;
+    // lightning rod -> drew in electric type attack and increase SPATT
+    if(active_target->getAbility()== LIGHTNING_ROD && 
+        attack->getType()==ELECTRIC &&
+        attack->getCategory()!=STATUS && 
+        attack->getTarget()==TARGET_OPPONENT){
+        event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
+        active_target->changeSpecialAttackModifier(1);
+        attack_absorbed = true;
+    }
     // dry skin and water absorb prevent water type moves from hitting and restores 25% of max HP
+    unsigned int heal_amount = max((active_target->getMaxHP() + 3)/ 4,1);
+    unsigned int actual_heal_amount = 0;
     if((active_target->getAbility()==DRY_SKIN ||
         active_target->getAbility()==WATER_ABSORB) && 
         attack->getType()==WATER &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" absorbed the water attack!");
-        unsigned int heal_amount = max((active_target->getMaxHP() + 3)/ 4,1);
-        unsigned int actual_heal_amount = active_target->removeDamage(heal_amount);
-        if(actual_heal_amount>0)
-            event_handler->displayMsg(opponent_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
-        decrementVolatiles(active_user);
-        active_user->removeVolatileCondition(LASER_FOCUS);
-        active_user->setLastAttackHit();
-        if(attack->getEffectId()==100){
-            //user dies
-            active_user->addDirectDamage(active_user->getMaxHP());
-        }
-        if(attack->getEffectId()==187){
-            //user dies
-            active_user->addVolatileCondition(RECHARGING,-1);
-        }
-        return true;
+        actual_heal_amount = active_target->removeDamage(heal_amount);
+        event_handler->displayMsg(opponent_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+        attack_absorbed = true;
     }
     // volt absorb prevents electric type moves from hitting and restores 25% of max HP
     if((active_target->getAbility()==VOLT_ABSORB) && 
@@ -4425,10 +4378,13 @@ bool Battle::checkIfAttackFails(Attack* attack,
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" absorbed the electric attack!");
-        unsigned int heal_amount = max((active_target->getMaxHP() + 3)/ 4,1);
-        unsigned int actual_heal_amount = active_target->removeDamage(heal_amount);
-        if(actual_heal_amount>0)
-            event_handler->displayMsg(opponent_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+        actual_heal_amount = active_target->removeDamage(heal_amount);
+        attack_absorbed = true;
+    }
+    if(actual_heal_amount>0)
+        event_handler->displayMsg(opponent_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+
+    if(attack_absorbed){
         decrementVolatiles(active_user);
         active_user->removeVolatileCondition(LASER_FOCUS);
         active_user->setLastAttackHit();
@@ -4437,7 +4393,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
             active_user->addDirectDamage(active_user->getMaxHP());
         }
         if(attack->getEffectId()==187){
-            //user dies
+            //user recharges next turn
             active_user->addVolatileCondition(RECHARGING,-1);
         }
         return true;
@@ -4465,35 +4421,24 @@ void Battle::removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor 
 }
 
 void Battle::forceSwitch(BattleActionActor actor_switching_out){
+    Battler* old_active = getActorBattler(actor_switching_out);
+    unsigned int old_active_maxHP = old_active->getMaxHP();
+    field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor_switching_out);
+    if(old_active->getAbility() == REGENERATOR && !old_active->isFainted()){
+        //regenerate 1/3 of user HP
+        old_active->removeDamage(max((old_active_maxHP+2) / 3,1));
+    }
+    if(old_active->getAbility() == NATURAL_CURE && !old_active->isFainted()){
+        //remove status
+        old_active->clearPermanentStatus();
+    }
     if(actor_switching_out == PLAYER){
-        field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,PLAYER);
-        if(player_active->getAbility() == REGENERATOR && !player_active->isFainted()){
-            //regenerate 1/3 of user HP
-            unsigned int maxHP = player_active->getMaxHP();
-            unsigned int heal_amount = max((maxHP+2) / 3,1);
-            player_active->removeDamage(heal_amount);
-        }
-        if(player_active->getAbility() == NATURAL_CURE && !player_active->isFainted()){
-            //remove status
-            player_active->clearPermanentStatus();
-        }
         unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
         player_team->swapActiveMonster(new_active_index);
         delete player_active;
         player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,event_handler);
         event_handler->displayMsg("Player switched in "+player_active->getNickname());
     }else{
-        field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,OPPONENT);
-        if(opponent_active->getAbility() == REGENERATOR && !opponent_active->isFainted()){
-            //regenerate 1/3 of user HP
-            unsigned int maxHP = opponent_active->getMaxHP();
-            unsigned int heal_amount = max((maxHP+2) / 3,1);
-            opponent_active->removeDamage(heal_amount);
-        }
-        if(opponent_active->getAbility()==NATURAL_CURE && !opponent_active->isFainted()){
-            //clear status
-            opponent_active->clearPermanentStatus();
-        }
         unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
         opponent_team->swapActiveMonster(new_active_index);
         delete opponent_active;
