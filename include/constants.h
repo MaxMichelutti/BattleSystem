@@ -24,8 +24,8 @@ const unsigned int DEFENSE_CURL_ID = 126;
 const unsigned int FOCUS_PUNCH_ID = 330;
 
 // stat modifiers
-const unsigned int MAX_MODIFIER = 6;
-const unsigned int MIN_MODIFIER = -6;
+const int MAX_MODIFIER = 6;
+const int MIN_MODIFIER = -6;
 
 // FILES
 const std::string ATTACK_FILE = "data/attacks.data";

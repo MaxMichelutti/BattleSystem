@@ -912,6 +912,13 @@ Ability Battler::getAbility()const {
         return NO_ABILITY;
     return battler_ability;
 }
+
+bool Battler::hasAbility(Ability ability)const{
+    if(getAbility() == ability)
+        return true;
+    return false;
+}
+
 Ability Battler::getNonNeutralizedAbility()const{
     if(has_ability_suppressed)
         return NO_ABILITY;

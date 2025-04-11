@@ -143,6 +143,7 @@ class Battler{
     void increaseBadPoisonCounter();
     void resetBadPoisonCounter();
     Ability getAbility()const;
+    bool hasAbility(Ability ability)const;
     Ability getNonNeutralizedAbility()const;
     void neutralizeAbility();
     void cancelAbilityNeutralization();

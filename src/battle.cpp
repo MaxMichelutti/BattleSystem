@@ -491,16 +491,15 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         event_handler->displayMsg(user_mon_name+" woke up!");
         active_user->clearPermanentStatus();
     }
-    // remove sleep from vital spirit holders
-    if(active_user->getAbility() == VITAL_SPIRIT && active_user->isAsleep())
+    // remove sleep from vital spirit and insomnia holders
+    if((active_user->hasAbility(VITAL_SPIRIT) || active_user->hasAbility(INSOMNIA)) && active_user->isAsleep()){
+        event_handler->displayMsg(user_mon_name+" woke up!");
         active_user->clearPermanentStatus();
-    // remove sleep from insomnia holders
-    if(active_user->getAbility() == INSOMNIA && active_user->isAsleep())
-        active_user->clearPermanentStatus();
+    }
     if(active_user->isAsleep()){
         PermanentStatusCondition new_condition = decrementSleep(status);
         active_user->setPermanentStatusForced(new_condition);
-        if(active_user->getAbility()==EARLY_BIRD && new_condition != SLEEP_1){
+        if(active_user->hasAbility(EARLY_BIRD) && new_condition != SLEEP_1){
             // early bird users wake up twice as fast
             new_condition = decrementSleep(status);
             active_user->setPermanentStatusForced(new_condition);
@@ -516,7 +515,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // apply flinch
     if(active_user->hasVolatileCondition(FLINCH)){
         event_handler->displayMsg(user_mon_name+" flinched!");
-        if(active_user->getAbility() == STEADFAST)
+        if(active_user->hasAbility(STEADFAST))
             active_user->changeSpeedModifierForced(1);
         forgetMoveVolatiles(active_user);
         active_user->setLastAttackFailed();
@@ -536,7 +535,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     
     // apply paralysis
     if(active_user->isParalyzed() && 
-        !(active_user->getAbility()==MAGIC_GUARD) &&//magic guard prevents from being fully paralyzed
+        !active_user->hasAbility(MAGIC_GUARD) &&//magic guard prevents from being fully paralyzed
         RNG::oneFourth()){
         event_handler->displayMsg(user_mon_name+" is paralyzed and cannot move!");
         forgetMoveVolatiles(active_user);
@@ -544,10 +543,10 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         return;
     }
     // apply infatuation
-    if(active_user->getAbility()==OBLIVIOUS)
+    if(active_user->hasAbility(OBLIVIOUS))
         active_user->removeVolatileCondition(INFATUATION);
     if(active_user->hasVolatileCondition(INFATUATION) && 
-        !(active_user->getAbility()==MAGIC_GUARD)){//magic guard prevents the user to be affected by infatuation
+        !active_user->hasAbility(MAGIC_GUARD)){//magic guard prevents the user to be affected by infatuation
         event_handler->displayMsg(user_mon_name+" is infatuated!");
         if(RNG::coinFlip()){
             active_user->setLastAttackFailed();
@@ -559,7 +558,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     }
 
     // apply confusion
-    if(active_user->getAbility()==OWN_TEMPO)
+    if(active_user->hasAbility(OWN_TEMPO))
         active_user->removeVolatileCondition(CONFUSION);
     if(active_user->hasVolatileCondition(CONFUSION)){
         active_user->decrementVolatileCondition(CONFUSION);
@@ -602,7 +601,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(action.getActionType() == ATTACK && attack_id != STRUGGLE_ID){
         // cannot remove PP to struggle
         unsigned int PP_amount = 1;
-        if(active_target->getAbility()==PRESSURE)
+        if(active_target->hasAbility(PRESSURE))
             PP_amount = 2;
         active_user->usePP(attack_id, PP_amount);
     }
@@ -727,7 +726,7 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
     AttackTarget target = attack->getTarget();
     //no guard bypasses accuracy check and moves never miss
-    if(active_user->getAbility()==NO_GUARD)
+    if(active_user->hasAbility(NO_GUARD))
         return false;
     // if the user is locked onto thew target, it cannot miss
     // (even in case of semi-invulnerable moves)
@@ -760,14 +759,14 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
     if(attack_accuracy != ALWAYS_HITS && target == TARGET_OPPONENT){
         unsigned int base_modified_accuracy;
         unsigned int base_modified_evasion;
-        if(active_user->getAbility() == UNAWARE){//UNAWARE ignores Accuracy and Evasion stats changes
+        if(active_user->hasAbility(UNAWARE)){//UNAWARE ignores Accuracy and Evasion stats changes
             base_modified_accuracy = 100;
             base_modified_evasion = 100;
         }else{
             base_modified_accuracy = active_user->getModifiedAccuracy();
             base_modified_evasion = active_target->getModifiedEvasion();
         }
-        if(active_target->getAbility()==WONDER_SKIN && attack->getCategory() == STATUS){
+        if(active_target->hasAbility(WONDER_SKIN) && attack->getCategory() == STATUS){
             // WONDER SKIN drops accuracy of status moves that apply permanent conditions
             switch(attack->getEffectId()){
                 case 4:case 5:case 14:
@@ -831,21 +830,21 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
             if(field->getWeather() == HAIL || field->getWeather() == SNOWSTORM)
                 modified_evasion = 0;
         }
-        if(active_user->getAbility()==KEEN_EYE && modified_evasion > 100){
+        if(active_user->hasAbility(KEEN_EYE) && modified_evasion > 100){
             modified_evasion = 100;
         }
-        if(active_target->getAbility()==SAND_VEIL && 
+        if(active_target->hasAbility(SAND_VEIL) && 
             field->getWeather() == SANDSTORM &&
             !thereIsaCloudNine()){
             modified_accuracy = modified_accuracy * 3277.0/4096;
         }
-        if(active_target->getAbility()==SNOW_CLOAK && 
+        if(active_target->hasAbility(SNOW_CLOAK) && 
             (field->getWeather() == HAIL || field->getWeather() == SNOWSTORM)&&
             !thereIsaCloudNine()){
             modified_accuracy = modified_accuracy * 4.0/5;
         }
         // TANGLED FEET effect
-        if(active_target->getAbility() == TANGLED_FEET && active_target->hasVolatileCondition(CONFUSION)){
+        if(active_target->hasAbility(TANGLED_FEET) && active_target->hasVolatileCondition(CONFUSION)){
             modified_accuracy *= 0.5;
         }
         if(modified_accuracy < modified_evasion){
@@ -876,7 +875,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             number_of_hits = 3;
         else
             number_of_hits = 2;
-        if(active_user->getAbility() == SKILL_LINK)//skill link always guarantees 5 shots
+        if(active_user->hasAbility(SKILL_LINK))//skill link always guarantees 5 shots
             number_of_hits = 5;
     }else if(attack->getEffectId()==75){//double hitting moves
         number_of_hits = 2;
@@ -886,7 +885,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     unsigned int total_actual_damage = 0;
     unsigned int actual_hits = 0;
     if(attack->getCategory() != STATUS){
-        bool can_hit_ghosts = (active_user->getAbility()==SCRAPPY);
+        bool can_hit_ghosts = active_user->hasAbility(SCRAPPY);
         float effectiveness = getTypeEffectiveness(
             attack->getType(), 
             active_target->getTypes(),
@@ -899,7 +898,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             effectiveness = 0;
         }
         // check for immunity for soundproof
-        if(attack->isSoundBased() && active_target->getAbility()==SOUNDPROOF){
+        if(attack->isSoundBased() && active_target->hasAbility(SOUNDPROOF)){
             effectiveness = 0;
         }
         // check immunity
@@ -919,7 +918,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         for(int i=0;i<number_of_hits;i++){
             actual_hits++;
             // TINTED LENS doubles effectiveness of not very effective moves
-            if(effectiveness < 0.9 && active_user->getAbility() == TINTED_LENS){
+            if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
                 effectiveness *= 2;
             }
             //check for critical hit;
@@ -927,7 +926,8 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(active_user->hasVolatileCondition(LASER_FOCUS)){// laser focus guarantees crit
                 is_critical_hit = true;
                 active_user->removeVolatileCondition(LASER_FOCUS);
-            }else if((attack->getEffectId() == 17 || attack->getEffectId()==197) && active_user->getAbility()!=SHEER_FORCE){ // Moves with increased crit chance
+            }else if((attack->getEffectId() == 17 || attack->getEffectId()==197) && !active_user->hasAbility(SHEER_FORCE)){ 
+                // Moves with increased crit chance
                 if(active_user->hasVolatileCondition(FOCUS_ENERGY))//focus energy + increse crit chance = guaranteed crit
                     is_critical_hit = true;
                 else if(RNG::oneEight())
@@ -939,8 +939,8 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(attack->getEffectId()==189)//always crits unless abilities deny it
                 is_critical_hit = true;
             // check for crit immunity
-            if(active_target->getAbility()==SHELL_ARMOR || //shell armor blocks crits
-                active_target->getAbility()==BATTLE_ARMOR){//battle armor blocks crits
+            if(active_target->hasAbility(SHELL_ARMOR) || //shell armor blocks crits
+                active_target->hasAbility(BATTLE_ARMOR)){//battle armor blocks crits
                 is_critical_hit = false;
             }
             if(is_critical_hit && attack->getCategory() != STATUS){
@@ -973,13 +973,13 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 break;
             }
             // justified increase attack by 1 when hit by a dark move
-            if(attack->getType() == DARK && active_user->getAbility() == JUSTIFIED){
+            if(attack->getType() == DARK && active_user->hasAbility(JUSTIFIED)){
                 event_handler->displayMsg(user_mon_name+"'s Justified triggers!");
                 active_user->changeAttackModifierForced(1);
             }
 
             //anger point raises attack of taget when hit by a crit
-            if(is_critical_hit && active_target->getAbility() == ANGER_POINT){
+            if(is_critical_hit && active_target->hasAbility(ANGER_POINT)){
                 event_handler->displayMsg(opponent_mon_name+"'s Anger Point triggers!");
                 active_target->changeAttackModifierForced(12);
             }
@@ -1010,15 +1010,15 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 event_handler->displayMsg(opponent_mon_name+" takes "+user_mon_name+" with it!");
                 active_user->addDirectDamage(active_user->getMaxHP());
             }
-            if(active_target->getAbility()==AFTERMATH &&
-                active_user->getAbility() != DAMP &&
+            if(active_target->hasAbility(AFTERMATH) &&
+                !active_user->hasAbility(DAMP) &&
                 !active_user->isFainted()){
                 event_handler->displayMsg(opponent_mon_name+"'s Aftermath triggers!");
                 unsigned int aftermath_damage = active_user->getMaxHP() / 4;
                 unsigned int actual_aftermath_damage = active_user->addDirectDamage(aftermath_damage);
                 event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_aftermath_damage)+" damage!");
             }
-            if(!active_user->isFainted() && active_user->getAbility()==MOXIE && active_user->getAttackModifier()!=MAX_MODIFIER){
+            if(!active_user->isFainted() && active_user->hasAbility(MOXIE) && active_user->getAttackModifier()!=MAX_MODIFIER){
                 // moxie increases attack by 1 when a target is KOed by a user's attack
                 event_handler->displayMsg(user_mon_name+"'s Moxie triggers!");
                 active_user->changeAttackModifier(1);
@@ -1042,8 +1042,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
     if(active_user->isFainted())
         return;
     //Magic Guard and Rock Head prevent non-struggle recoil
-    if((active_user->getAbility()==MAGIC_GUARD ||
-        active_user->getAbility()==ROCK_HEAD) && 
+    if((active_user->hasAbility(MAGIC_GUARD) ||
+        active_user->hasAbility(ROCK_HEAD)) && 
         effect !=11 && //struggle recoil
         effect != 97 && // heal
         effect != 162 && // heal
@@ -1079,7 +1079,7 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
             }
             case 97:case 162:{//heal 50% of damage dealt (negative recoil)
                 unsigned int heal_amount = max((actual_damage+1) / 2,1);
-                if(active_target->getAbility() != LIQUID_OOZE){
+                if(!active_target->hasAbility(LIQUID_OOZE)){
                     unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
                     if(actual_heal_amount>0)
                         event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
@@ -1117,7 +1117,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
         return;
     bool effect_is_applied=true;
     if (effect_chance!=ALWAYS_HITS){
-        if(active_user->getAbility() == SERENE_GRACE)
+        if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up ,ikelihood of applying effects
             effect_chance*= 2;
         unsigned int random = RNG::getRandomInteger(1,100);
         if(random > effect_chance){
@@ -1125,19 +1125,19 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
         }
     }
     // SHIELD DUST PROTECTS OPPONENT FROM SECONDARY EFFECTS
-    if(active_target->getAbility() == SHIELD_DUST && 
+    if(active_target->hasAbility(SHIELD_DUST) && 
         attack->getCategory() != STATUS &&
         attack->getEffectTarget() == TARGET_OPPONENT){
         effect_is_applied = false;
     }
     // SHEER FORCE PREVENTS INFLICTING SECONDARY EFFECTS TO OPPONENT
-    if(active_user->getAbility()==SHEER_FORCE &&
+    if(active_user->hasAbility(SHEER_FORCE) &&
         attack->getCategory() != STATUS &&
         attack->getEffectTarget() == TARGET_OPPONENT){
         effect_is_applied = false;
     }
     // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
-    if(active_target->getAbility() == SOUNDPROOF && 
+    if(active_target->hasAbility(SOUNDPROOF) && 
         attack->isSoundBased() &&
         attack->getEffectTarget() == TARGET_OPPONENT){
         effect_is_applied = false;
@@ -1170,7 +1170,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 4:{//poison opponent
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being poisoned!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1183,7 +1183,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     }
                 }else{
-                    if(active_target->getAbility()==SYNCHRONIZE && 
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
                         event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(POISONED);
@@ -1193,7 +1193,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 76:{//bad poison opponent
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being badly poisoned!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1206,7 +1206,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     }
                 }else{
-                    if(active_target->getAbility()==SYNCHRONIZE && 
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
                         event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(BAD_POISON);
@@ -1223,7 +1223,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     break;
                 }
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from falling asleep!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1274,7 +1274,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 13:{ // Worry Seed
-                if(active_target->getAbility() == INSOMNIA){
+                if(active_target->hasAbility(INSOMNIA)){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
                 }else{
@@ -1293,7 +1293,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 14:case 20:{//burn opponent
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1312,7 +1312,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                     }
                 }else{
-                    if(active_target->getAbility()==SYNCHRONIZE && 
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
                         event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(BURN);
@@ -1331,7 +1331,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     break;
                 }
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from the paralysis!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1344,7 +1344,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     }
                 }else{
-                    if(active_target->getAbility()==SYNCHRONIZE && 
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
                         event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(PARALYSIS);
@@ -1405,7 +1405,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     }
                 }else if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                        active_user->getAbility()!=INFILTRATOR){
+                        !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being confused!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1474,13 +1474,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     }
                 }else{
                     field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
-                    if(active_target->getAbility() == REGENERATOR){
+                    if(active_target->hasAbility(REGENERATOR)){
                         //regenerate 1/3 of user HP
                         unsigned int maxHP = active_target->getMaxHP();
                         unsigned int heal_amount = max((maxHP+2) / 3,1);
                         active_target->removeDamage(heal_amount);
                     }
-                    if(active_target->getAbility() == NATURAL_CURE){
+                    if(active_target->hasAbility(NATURAL_CURE)){
                         //remove permanent status
                         active_target->clearPermanentStatus();
                     }
@@ -1691,7 +1691,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 61:{//freeze opponent
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being frozen!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1927,7 +1927,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             case 104:{//tri attack
                 if(!active_target->hasPermanentStatus()){
                     if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                        active_user->getAbility()!=INFILTRATOR){
+                        !active_user->hasAbility(INFILTRATOR)){
                         break;
                     }
                     unsigned int random_number = RNG::getRandomInteger(1,3);
@@ -1935,7 +1935,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         && !active_target->hasType(FIRE)){// try to burn
                         active_target->setPermanentStatus(BURN);
                         event_handler->displayMsg(opponent_mon_name+" was burned!");
-                        if(active_target->getAbility()==SYNCHRONIZE && 
+                        if(active_target->hasAbility(SYNCHRONIZE) && 
                             !active_user->hasPermanentStatus()){
                             event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                             active_user->setPermanentStatus(BURN);
@@ -1944,7 +1944,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_target->canBeParalyzed()){ //try to paralyze
                         active_target->setPermanentStatus(PARALYSIS);
                         event_handler->displayMsg(opponent_mon_name+" was paralyzed!");
-                        if(active_target->getAbility()==SYNCHRONIZE && 
+                        if(active_target->hasAbility(SYNCHRONIZE) && 
                             !active_user->hasPermanentStatus()){
                             event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                             active_user->setPermanentStatus(PARALYSIS);
@@ -2097,7 +2097,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 127:{
                 // copy target ability
-                if(active_user->getAbility() == active_target->getAbility()){
+                if(active_user->getAbility() == active_target->getAbility() || active_target->hasAbility(NO_ABILITY)){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else{
@@ -2153,6 +2153,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     }
                     event_handler->displayMsg(user_mon_name+" became the same type as "+opponent_mon_name+"!");
                 }
+                break;
             }
             case 138:{
                 //smacks target down
@@ -2187,7 +2188,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             case 143:{
                 //opponent drowsy
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
-                    active_user->getAbility()!=INFILTRATOR){
+                    !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
                 }else if(!active_target->canFallAsleep() ||
@@ -2235,7 +2236,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 //infatuation opponent
                 Gender user_gender = active_user->getGender();
                 Gender target_gender = active_target->getGender();
-                if(active_target->getAbility() == OBLIVIOUS ||
+                if(active_target->hasAbility(OBLIVIOUS) ||
                     !areMaleAndFemale(user_gender,target_gender) ||
                     active_target->hasVolatileCondition(INFATUATION)){
                     event_handler->displayMsg("But it failed!");
@@ -2401,7 +2402,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->addVolatileCondition(PERISH_SONG,4);
                 if(!active_target->hasVolatileCondition(PERISH_SONG) && 
                     !active_target->isFainted() &&
-                    active_target->getAbility() != SOUNDPROOF)
+                    !active_target->hasAbility(SOUNDPROOF))
                     active_target->addVolatileCondition(PERISH_SONG,4);
                 break;
             }
@@ -2427,8 +2428,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 170:{
                 // +1 DEF SPDEF user iff ability is PLUS or MINUS
-                if(active_user->getAbility() == PLUS || 
-                    active_user->getAbility() == MINUS){
+                if(active_user->hasAbility(PLUS) || 
+                    active_user->hasAbility(MINUS)){
                     active_user->changeDefenseModifier(+1);
                     active_user->changeSpecialDefenseModifier(+1);
                 }else{
@@ -2518,13 +2519,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                     break;
                 }
-                if(active_user->getAbility() == REGENERATOR){
+                if(active_user->hasAbility(REGENERATOR)){
                     //regenerate 1/3 of user HP
                     unsigned int maxHP = active_user->getMaxHP();
                     unsigned int heal_amount = max((maxHP+2) / 3,1);
                     active_user->removeDamage(heal_amount);
                 }
-                if(active_user->getAbility() == NATURAL_CURE){
+                if(active_user->hasAbility(NATURAL_CURE)){
                     //remove status
                     active_user->clearPermanentStatus();
                 }
@@ -2706,13 +2707,13 @@ void Battle::performSwitch(BattleAction action){
         // std::cout<<"Player switched to monster " << action.getSwitchId() << std::endl;
         field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,PLAYER);
         old_active_monster_name = player_active->getNickname();
-        if(player_active->getAbility() == REGENERATOR){
+        if(player_active->hasAbility(REGENERATOR)){
             //regenerate 173 of user HP
             unsigned int maxHP = player_active->getMaxHP();
             unsigned int heal_amount = max((maxHP+2) / 3,1);
             player_active->removeDamage(heal_amount);
         }
-        if(player_active->getAbility() == NATURAL_CURE){
+        if(player_active->hasAbility(NATURAL_CURE)){
             //remove permanent status
             player_active->clearPermanentStatus();
         }
@@ -2727,13 +2728,13 @@ void Battle::performSwitch(BattleAction action){
             return;
         // std::cout<<"Opponent switched to monster " << action.getSwitchId() << std::endl;
         field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,OPPONENT);
-        if(opponent_active->getAbility() == REGENERATOR){
+        if(opponent_active->hasAbility(REGENERATOR)){
             //regenerate 1/3 of user HP
             unsigned int maxHP = opponent_active->getMaxHP();
             unsigned int heal_amount = max((maxHP+2) / 3,1);
             opponent_active->removeDamage(heal_amount);
         }
-        if(opponent_active->getAbility()==NATURAL_CURE)
+        if(opponent_active->hasAbility(NATURAL_CURE))
             opponent_active->clearPermanentStatus();
         old_active_monster_name = opponent_active->getNickname();
         delete opponent_active;
@@ -2774,7 +2775,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     double attack_stat;
     double defense_stat;
     //check immunity
-    bool can_hit_ghosts = (user_monster->getAbility()==SCRAPPY);
+    bool can_hit_ghosts = (user_monster->hasAbility(SCRAPPY));
     float effectiveness = getTypeEffectiveness(attack->getType(), 
         enemy_monster->getTypes(),
         enemy_monster->isTouchingGround(),
@@ -2790,7 +2791,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     // check for soundproof immunity
     if(attack->isSoundBased() && 
         attack->getCategory() != STATUS &&
-        enemy_monster->getAbility() == SOUNDPROOF){
+        enemy_monster->hasAbility(SOUNDPROOF)){
         return 0;
     }
     // check for endeavor
@@ -2821,14 +2822,16 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     unsigned int special_attack_stat;
     unsigned int special_defense_stat;
     // get stats for calculation
-    if(critical_hit || enemy_monster->getAbility() == UNAWARE){
+    // attack stats
+    if(critical_hit || enemy_monster->hasAbility(UNAWARE)){
         physical_attack_stat = user_monster->getStats().getAtk();
         special_attack_stat = user_monster->getStats().getSpatk();
     }else{
         physical_attack_stat = user_monster->getModifiedAttack();
         special_attack_stat = user_monster->getModifiedSpecialAttack();
     }
-    if(user_monster->getAbility() == UNAWARE){//UNAWARE uses base stats instead of modified
+    //defense stats
+    if(user_monster->hasAbility(UNAWARE)){//UNAWARE uses base stats instead of modified
         physical_defense_stat = enemy_monster->getStats().getDef();
         special_defense_stat = enemy_monster->getStats().getSpdef();
     }else{
@@ -2847,7 +2850,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
             defense_stat = special_defense_stat;
         else
             defense_stat = physical_defense_stat;   
-        if(user_monster->isBurned() && user_monster->getAbility()!=GUTS){
+        if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
             burn_multiplier *= 0.5;
         }
     }else{
@@ -2857,7 +2860,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
             defense_stat = physical_defense_stat;
         else
             defense_stat = special_defense_stat; 
-        if(user_monster->isBurned() && user_monster->getAbility()!=GUTS){
+        if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
             burn_multiplier *= 0.5;
         }
     }
@@ -2866,7 +2869,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         defense_stat *= 0.5;
     }
     if((attack->getType()==FIRE || attack->getType()==ICE) &&
-        enemy_monster->getAbility() == THICK_FAT){
+        enemy_monster->hasAbility(THICK_FAT)){
         //THICK FAT reduces damage from fire and ice moves by 50%
         attack_stat *= 0.5;
     }
@@ -2876,7 +2879,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     unsigned int level = user_monster->getLevel();
     float stab_multiplier = 1;
     if(user_monster->hasType(attack->getType())){
-        if(user_monster->getAbility() == ADAPTABILITY)//adaptability boosts STAB
+        if(user_monster->hasAbility(ADAPTABILITY))//adaptability boosts STAB
             stab_multiplier = 2;
         else
             stab_multiplier = 1.5;
@@ -2896,7 +2899,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     float crit_multiplier = 1;
     if(critical_hit){
         crit_multiplier = 1.5;
-        if(user_monster->getAbility() == SNIPER){ // SNIPER EFFECT
+        if(user_monster->hasAbility(SNIPER)){ // SNIPER boosts critical hit damage
             crit_multiplier *= 1.5;
         }
     }
@@ -2914,12 +2917,12 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     //apply field effects
     if(field->hasFieldEffect(LIGHT_SCREEN, otherBattleActionActor(user)) && 
         attack->getCategory()==SPECIAL &&
-        user_monster->getAbility()!=INFILTRATOR){
+        !user_monster->hasAbility(INFILTRATOR)){
         damage -= damage * 2732.0 / 4096;
     }
     if(field->hasFieldEffect(REFLECT, otherBattleActionActor(user)) && 
         attack->getCategory()==PHYSICAL  &&
-        user_monster->getAbility()!=INFILTRATOR){
+        !user_monster->hasAbility(INFILTRATOR)){
         damage -= damage * 2732.0 / 4096;
     }
     // apply solar beam modifiers
@@ -2934,11 +2937,11 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         damage *= 0.5;
     }
     // dry skin opponents take 25% more damage
-    if(enemy_monster->getAbility() == DRY_SKIN && attack->getType() == FIRE){
+    if(enemy_monster->hasAbility(DRY_SKIN) && attack->getType() == FIRE){
         damage *= 1.25;
     }
     // filter reduces damage from supereffective attacks
-    if(effectiveness>1.1 && enemy_monster->getAbility()==FILTER){
+    if(effectiveness>1.1 && enemy_monster->hasAbility(FILTER)){
         damage *= 3.0 / 4.0;
     }
 
@@ -3411,7 +3414,7 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
         active_user->resetBadPoisonCounter();
     }
     // check shed skin
-    if(active_user->getAbility() == SHED_SKIN &&  
+    if(active_user->hasAbility(SHED_SKIN) &&  
         (active_user->isPoisoned() || active_user->isBurned() || active_user->isParalyzed())){
         if(RNG::getRandomInteger(0,2) == 0){
             event_handler->displayMsg(mon_name+" Shed Skin activates!");
@@ -3420,7 +3423,7 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
         }
     }
     // apply permanent status damage
-    if(active_user->getAbility() == MAGIC_GUARD)//MAGIC GUARD prevents status damage
+    if(active_user->hasAbility(MAGIC_GUARD))//MAGIC GUARD prevents status damage
         return;
     switch(status){
         case BURN:{
@@ -3475,95 +3478,87 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_ingrain_heal)+" HP thanks to Ingrain!");
     }
     // apply leech seed
-    if(active_user->hasVolatileCondition(LEECH_SEED) && !active_opponent->isFainted() &&
-        active_user->getAbility() != MAGIC_GUARD){//magic guard prevents leech seed damage
-        unsigned int leech_seed_damage = max(active_user->getMaxHP() / 8,1);
-        unsigned int actual_leech_seed_damage = active_user->addDirectDamage(leech_seed_damage);
-        event_handler->displayMsg(mon_name+" took "+std::to_string(actual_leech_seed_damage)+" leech seed damage!");
-        if(active_user->getAbility() == LIQUID_OOZE){
-            event_handler->displayMsg(opponent_name+" is hurt by Liquid Ooze!");
-            unsigned int liquid_ooze_damage = actual_leech_seed_damage;
-            unsigned int actual_liquid_ooze_damage = active_opponent->addDirectDamage(liquid_ooze_damage);
-            event_handler->displayMsg(opponent_name+" took "+std::to_string(actual_liquid_ooze_damage)+" Liquid Ooze damage!");
+    if(!active_user->hasAbility(MAGIC_GUARD)){//magic guard prevents effect damage
+        if(active_user->hasVolatileCondition(LEECH_SEED) && !active_opponent->isFainted()){
+            unsigned int leech_seed_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_leech_seed_damage = active_user->addDirectDamage(leech_seed_damage);
+            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_leech_seed_damage)+" leech seed damage!");
+            if(active_user->hasAbility(LIQUID_OOZE)){// if user has liquid ooze, user takes dmg instead of recovering health
+                event_handler->displayMsg(opponent_name+" is hurt by Liquid Ooze!");
+                unsigned int liquid_ooze_damage = actual_leech_seed_damage;
+                unsigned int actual_liquid_ooze_damage = active_opponent->addDirectDamage(liquid_ooze_damage);
+                event_handler->displayMsg(opponent_name+" took "+std::to_string(actual_liquid_ooze_damage)+" Liquid Ooze damage!");
+            }
+            else{
+                unsigned int actual_heal_amount = active_opponent->removeDamage(actual_leech_seed_damage);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(opponent_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+            }
+            if(active_user->isFainted())
+                return;
         }
-        else{
-            unsigned int actual_heal_amount = active_opponent->removeDamage(actual_leech_seed_damage);
-            if(actual_heal_amount>0)
-                event_handler->displayMsg(opponent_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
-        }
-        if(active_user->isFainted())
-            return;
-    }
-    if(active_user->isFainted()){return;}
-    //apply WRAP
-    if(active_user->hasVolatileCondition(WRAP) 
-        && !active_opponent->isFainted()){
-        if(active_user->getAbility() != MAGIC_GUARD){//magic guard prevents wrap damage
+        if(active_user->isFainted()){return;}
+        //apply WRAP
+        if(active_user->hasVolatileCondition(WRAP) && !active_opponent->isFainted()){
             event_handler->displayMsg(mon_name+" is hurt by Wrap!");
             unsigned int wrap_damage = max(active_user->getMaxHP() / 16,1);
             unsigned int actual_wrap_damage = active_user->addDirectDamage(wrap_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_wrap_damage)+" Wrap damage!");
             if(active_user->isFainted())
                 return;
+            active_user->decrementVolatileCondition(WRAP);
+        }else{
+            active_user->removeVolatileCondition(WRAP);
         }
-        active_user->decrementVolatileCondition(WRAP);
-    }else{
-        active_user->removeVolatileCondition(WRAP);
-    }
-    //apply BIND
-    if(active_user->hasVolatileCondition(BIND) 
-        && !active_opponent->isFainted()){
-        if(active_user->getAbility() != MAGIC_GUARD){//magic guard prevents wrap damage
+        if(active_user->isFainted()){return;}
+        //apply BIND
+        if(active_user->hasVolatileCondition(BIND) && !active_opponent->isFainted()){
             event_handler->displayMsg(mon_name+" is hurt by Bind!");
             unsigned int bind_damage = max(active_user->getMaxHP() / 16,1);
             unsigned int actual_bind_damage = active_user->addDirectDamage(bind_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_bind_damage)+" Bind damage!");
             if(active_user->isFainted())
                 return;
+            active_user->decrementVolatileCondition(BIND);
+        }else{
+            active_user->removeVolatileCondition(BIND);
         }
-        active_user->decrementVolatileCondition(BIND);
-    }else{
-        active_user->removeVolatileCondition(BIND);
-    }
-    //fire spin
-    if(active_user->hasVolatileCondition(FIRESPIN)){
-        event_handler->displayMsg(mon_name+" is trapped in a Fire Spin!");
-        if(active_user->getAbility()!=MAGIC_GUARD){
+        if(active_user->isFainted()){return;}
+        //fire spin
+        if(active_user->hasVolatileCondition(FIRESPIN)){
+            event_handler->displayMsg(mon_name+" is trapped in a Fire Spin!");
             unsigned int fire_spin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" fire spin damage!");
             if(active_user->isFainted())
                 return;
+            active_user->decrementVolatileCondition(FIRESPIN);
         }
-        active_user->decrementVolatileCondition(FIRESPIN);
-    }
-    //whirlpool
-    if(active_user->hasVolatileCondition(WHIRLPOOL)){
-        event_handler->displayMsg(mon_name+" is trapped in a Whirlpool!");
-        if(active_user->getAbility()!=MAGIC_GUARD){
+        if(active_user->isFainted()){return;}
+        //whirlpool
+        if(active_user->hasVolatileCondition(WHIRLPOOL)){
+            event_handler->displayMsg(mon_name+" is trapped in a Whirlpool!");
             unsigned int fire_spin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" Whirlpool damage!");
             if(active_user->isFainted())
                 return;
+            active_user->decrementVolatileCondition(WHIRLPOOL);
         }
-        active_user->decrementVolatileCondition(WHIRLPOOL);
-    }
-    //sand tomb
-    if(active_user->hasVolatileCondition(SANDTOMB)){
-        event_handler->displayMsg(mon_name+" is trapped in a vortex of sand!");
-        if(active_user->getAbility()!=MAGIC_GUARD){
+        if(active_user->isFainted()){return;}
+        //sand tomb
+        if(active_user->hasVolatileCondition(SANDTOMB)){
+            event_handler->displayMsg(mon_name+" is trapped in a vortex of sand!");
             unsigned int sand_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_sand_damage = active_user->addDirectDamage(sand_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_sand_damage)+" sand tomb damage!");
             if(active_user->isFainted())
                 return;
+            active_user->decrementVolatileCondition(SANDTOMB);
         }
-        active_user->decrementVolatileCondition(SANDTOMB);
-    }
-    //curse
-    if(active_user->hasVolatileCondition(CURSED)){
-        if(active_user->getAbility()!=MAGIC_GUARD){
+        if(active_user->isFainted()){return;}
+        //curse
+        if(active_user->hasVolatileCondition(CURSED)){
             event_handler->displayMsg(mon_name+" is hurt by the curse!");
             unsigned int curse_damage = max(active_user->getMaxHP() / 4,1);
             unsigned int actual_curse_damage = active_user->addDirectDamage(curse_damage);
@@ -3571,6 +3566,7 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             if(active_user->isFainted())
                 return;
         }
+        if(active_user->isFainted()){return;}
     }
     // perish song
     if(active_user->hasVolatileCondition(PERISH_SONG)){
@@ -3579,6 +3575,7 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             active_user->addDirectDamage(active_user->getMaxHP());// user dies from perish song
         }
     }
+    if(active_user->isFainted()){return;}
     // remove flinch
     if(active_user->hasVolatileCondition(FLINCH)){
         active_user->removeVolatileCondition(FLINCH);
@@ -3630,11 +3627,11 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
         case SANDSTORM:{
             if(!(active_user->hasType(ROCK) || active_user->hasType(GROUND) || 
             active_user->hasType(STEEL) || 
-            active_user->getAbility() == SAND_RUSH ||
-            active_user->getAbility() == SAND_VEIL ||
-            active_user->getAbility() == MAGIC_GUARD ||
-            active_user->getAbility() == OVERCOAT ||
-            active_user->getAbility() == SAND_FORCE)){
+            active_user->hasAbility(SAND_RUSH) ||
+            active_user->hasAbility(SAND_VEIL) ||
+            active_user->hasAbility(MAGIC_GUARD) ||
+            active_user->hasAbility(OVERCOAT) ||
+            active_user->hasAbility(SAND_FORCE))){
                 event_handler->displayMsg(mon_name+" is buffeted by the sandstorm!");
                 unsigned int sandstorm_damage = max(active_user->getMaxHP() / 16,1);
                 unsigned int actual_sandstorm_damage = active_user->addDirectDamage(sandstorm_damage);
@@ -3646,10 +3643,10 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
         }
         case HAIL:{
             if(!(active_user->hasType(ICE)||
-                active_user->getAbility() == OVERCOAT ||
-                active_user->getAbility() == ICE_BODY ||
-                active_user->getAbility() == SNOW_CLOAK ||
-                active_user->getAbility() == MAGIC_GUARD)){
+                active_user->hasAbility(OVERCOAT) ||
+                active_user->hasAbility(ICE_BODY) ||
+                active_user->hasAbility(SNOW_CLOAK) ||
+                active_user->hasAbility(MAGIC_GUARD))){
                 event_handler->displayMsg(mon_name+" is buffeted by the hail!");
                 unsigned int hail_damage = max(active_user->getMaxHP() / 16,1);
                 unsigned int actual_hail_damage = active_user->addDirectDamage(hail_damage);
@@ -3657,7 +3654,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
                 if(active_user->isFainted())
                     return;
             }
-            if(active_user->getAbility() == ICE_BODY && 
+            if(active_user->hasAbility(ICE_BODY) && 
                 !active_user->isAtFullHP()){
                 event_handler->displayMsg(mon_name+" is healed by the hail!");
                 unsigned int ice_body_heal = max((active_user->getMaxHP()+15) / 16,1);
@@ -3668,7 +3665,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case SNOWSTORM:{
-            if(active_user->getAbility() == ICE_BODY && 
+            if(active_user->hasAbility(ICE_BODY) && 
                 !active_user->isAtFullHP()){
                 event_handler->displayMsg(mon_name+" is healed by the snow!");
                 unsigned int ice_body_heal = max((active_user->getMaxHP()+15) / 16,1);
@@ -3679,7 +3676,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case SUN:{
-            if (active_user->getAbility() == SOLAR_POWER || active_user->getAbility()==DRY_SKIN){ // SOLAR POWER DAMAGE
+            if (active_user->hasAbility(SOLAR_POWER) || active_user->hasAbility(DRY_SKIN)){ // SOLAR POWER DAMAGE
                 std::string ability_name = abilityToString(active_user->getAbility());
                 event_handler->displayMsg(mon_name+" is losing HP due to "+ability_name+"!");
                 unsigned int solar_power_damage = max(active_user->getMaxHP()+7 / 8,1);
@@ -3691,22 +3688,21 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case RAIN:{
-            Ability ability = active_user->getAbility();
-            if((ability==RAIN_DISH || 
-                ability==DRY_SKIN) &&
+            if((active_user->hasAbility(RAIN_DISH) || 
+                active_user->hasAbility(DRY_SKIN)) &&
                 !active_user->isAtFullHP()){ // RAIN DISH HEAL
                 event_handler->displayMsg(mon_name+" is healed by the rain!");
                 unsigned int rain_heal = 0;
-                if(ability == DRY_SKIN)
+                if(active_user->hasAbility(DRY_SKIN))
                     rain_heal = max((active_user->getMaxHP()+7)/ 8,1);
-                else if(ability == RAIN_DISH)
+                else if(active_user->hasAbility(RAIN_DISH))
                     rain_heal = max((active_user->getMaxHP()+15)/ 16,1);
                 unsigned int actual_rain_heal = active_user->removeDamage(rain_heal);
                 if(actual_rain_heal>0)
                     event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_rain_heal)+" HP!");
             }
             // hydration heals permentent statuses during rain
-            if(ability == HYDRATION && 
+            if(active_user->hasAbility(HYDRATION) && 
                 !active_user->isFainted() &&
                 active_user->hasPermanentStatus()){
                 event_handler->displayMsg(mon_name+" is cured of its status condition!");
@@ -3860,7 +3856,7 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                     if(effect == 103 || effect==156){//OHKO
                         most_dangerous_attack = current_attack;
                     }else if(getTypeEffectiveness(current_attack->getType(), user_active->getTypes(),
-                        user_active->isTouchingGround(), target_active->getAbility()==SCRAPPY,current_attack->getEffectId() == 196) > 1.1 &&
+                        user_active->isTouchingGround(), false, current_attack->getEffectId() == 196) > 1.1 &&
                         current_attack->getCategory()!=STATUS){//super effective moves
                         most_dangerous_attack = current_attack;
                     }
@@ -3898,7 +3894,7 @@ void Battle::applyImpostorSwitchIn(BattleActionActor actor){
     std::string target_name = getActorBattlerName(otherBattleActionActor(actor));
     if(user_active->isFainted() || target_active->isFainted())
         return;
-    if(user_active->getAbility() == IMPOSTOR){
+    if(user_active->hasAbility(IMPOSTOR)){
         user_active->transformInto(target_active->getMonster());
         event_handler->displayMsg(user_name+" transformed into "+target_name+"!");
         // apply effects again since ability may have changed
@@ -3939,12 +3935,12 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     std::string opponent_mon_name = active_target->getNickname();
     
     // POISON TOUCH ability effect
-    if(active_user->getAbility()==POISON_TOUCH && 
+    if(active_user->hasAbility(POISON_TOUCH) && 
         active_target->canBePoisoned() &&
         RNG::getRandomInteger(0,2)==0){
         event_handler->displayMsg(user_mon_name+"'s Poison Touch triggers!");
         active_target->setPermanentStatus(POISONED);
-        if(active_target->getAbility() == SYNCHRONIZE && 
+        if(active_target->hasAbility(SYNCHRONIZE) && 
             !active_user->hasPermanentStatus()){
             event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
             active_user->setPermanentStatus(POISONED);
@@ -3952,50 +3948,50 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     }
 
     // STATIC ability effect
-    if(active_target->getAbility()==STATIC && 
+    if(active_target->hasAbility(STATIC) && 
         active_user->canBeParalyzed() &&
         RNG::getRandomInteger(0,2)==0){
         event_handler->displayMsg(opponent_mon_name+"''s Static triggers!");
         active_user->setPermanentStatus(PARALYSIS);
-        if(active_user->getAbility() == SYNCHRONIZE && 
+        if(active_user->hasAbility(SYNCHRONIZE) && 
             !active_target->hasPermanentStatus()){
             event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
             active_target->setPermanentStatus(PARALYSIS);
         }
     }
     // POISON POINT ability effect
-    if(active_target->getAbility()==POISON_POINT && 
+    if(active_target->hasAbility(POISON_POINT) && 
         active_user->canBePoisoned() &&
         RNG::getRandomInteger(0,2)==0){
         event_handler->displayMsg(opponent_mon_name+"'s Poison Point triggers!");
         active_user->setPermanentStatus(POISONED);
-        if(active_user->getAbility() == SYNCHRONIZE && 
+        if(active_user->hasAbility(SYNCHRONIZE) && 
             !active_target->hasPermanentStatus()){
             event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
             active_target->setPermanentStatus(POISONED);
         }
     }
     // FLAME BODY ability effect
-    if(active_target->getAbility()==FLAME_BODY && 
+    if(active_target->hasAbility(FLAME_BODY) && 
         active_user->canBeBurned() &&
         RNG::getRandomInteger(0,2)==0){
         event_handler->displayMsg(opponent_mon_name+"'s Flame Body triggers!");
         active_user->setPermanentStatus(BURN);
-        if(active_user->getAbility() == SYNCHRONIZE && 
+        if(active_user->hasAbility(SYNCHRONIZE) && 
             !active_target->hasPermanentStatus()){
             event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
             active_target->setPermanentStatus(BURN);
         }
     }
     // EFFECT SPORE ability effect
-    if(active_target->getAbility()==EFFECT_SPORE && 
+    if(active_target->hasAbility(EFFECT_SPORE) && 
         !active_user->hasType(GRASS)){
         unsigned int random_number = RNG::getRandomInteger(1,100);
         if(random_number<10){//poison
             if(active_user->canBePoisoned()){
                 event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
                 active_user->setPermanentStatus(POISONED);
-                if(active_user->getAbility() == SYNCHRONIZE && 
+                if(active_user->hasAbility(SYNCHRONIZE) && 
                     !active_target->hasPermanentStatus()){
                     event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                     active_target->setPermanentStatus(POISONED);
@@ -4005,7 +4001,7 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
             if(active_user->canBeParalyzed()){
                 event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
                 active_user->setPermanentStatus(PARALYSIS);
-                if(active_user->getAbility() == SYNCHRONIZE && 
+                if(active_user->hasAbility(SYNCHRONIZE) && 
                     !active_target->hasPermanentStatus()){
                     event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
                     active_target->setPermanentStatus(PARALYSIS);
@@ -4025,7 +4021,7 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
         }
     }
     // CURSED BODY
-    if(active_target->getAbility() == CURSED_BODY && RNG::getRandomInteger(1,100)<=30){
+    if(active_target->hasAbility(CURSED_BODY) && RNG::getRandomInteger(1,100)<=30){
         unsigned int last_attack_used_id =active_user->getLastAttackUsed();
         Attack * last_attack_used = Attack::getAttack(last_attack_used_id);
         if(last_attack_used_id!=0 && 
@@ -4042,8 +4038,8 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     // CUTE CHARM ability effect
     Gender active_user_gender = active_user->getGender();
     Gender active_target_gender = active_target->getGender();
-    bool can_attract = areMaleAndFemale(active_user_gender,active_target_gender) && active_user->getAbility()!=OBLIVIOUS;
-    if(active_target->getAbility()==CUTE_CHARM && can_attract
+    bool can_attract = areMaleAndFemale(active_user_gender,active_target_gender) && !active_user->hasAbility(OBLIVIOUS);
+    if(active_target->hasAbility(CUTE_CHARM) && can_attract
         && RNG::getRandomInteger(0,2)==0){
         active_user->addVolatileCondition(INFATUATION, 5);
     }
@@ -4102,7 +4098,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         attack_failed = true;
     }
     // check if OHKO fails
-    if((attack->getEffectId() == 103 || attack->getEffectId() == 156) && active_target->getAbility() == STURDY){
+    if((attack->getEffectId() == 103 || attack->getEffectId() == 156) && active_target->hasAbility(STURDY)){
         event_handler->displayMsg(opponent_mon_name+" is protected by Sturdy!");
         active_user->setLastAttackUsed(action.getAttackId());
         last_attack_used_id = attack_id;
@@ -4340,7 +4336,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         return true;
     }
     // damp prevents explosion and self-destruct
-    if(active_target->getAbility()==DAMP && 
+    if(active_target->hasAbility(DAMP) && 
         attack->getEffectId() == 100 &&
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" prevented "+user_mon_name+"'s self-destructing move!");
@@ -4351,7 +4347,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     bool attack_absorbed = false;
     // lightning rod -> drew in electric type attack and increase SPATT
-    if(active_target->getAbility()== LIGHTNING_ROD && 
+    if(active_target->hasAbility(LIGHTNING_ROD) && 
         attack->getType()==ELECTRIC &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
@@ -4362,8 +4358,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     // dry skin and water absorb prevent water type moves from hitting and restores 25% of max HP
     unsigned int heal_amount = max((active_target->getMaxHP() + 3)/ 4,1);
     unsigned int actual_heal_amount = 0;
-    if((active_target->getAbility()==DRY_SKIN ||
-        active_target->getAbility()==WATER_ABSORB) && 
+    if((active_target->hasAbility(DRY_SKIN) ||
+        active_target->hasAbility(WATER_ABSORB)) && 
         attack->getType()==WATER &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
@@ -4373,7 +4369,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         attack_absorbed = true;
     }
     // volt absorb prevents electric type moves from hitting and restores 25% of max HP
-    if((active_target->getAbility()==VOLT_ABSORB) && 
+    if(active_target->hasAbility(VOLT_ABSORB) && 
         attack->getType()==ELECTRIC &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
@@ -4403,10 +4399,10 @@ bool Battle::checkIfAttackFails(Attack* attack,
 }
 
 bool Battle::thereIsaCloudNine(){
-    if(player_active->getAbility() == CLOUD_NINE && !player_active->isFainted()){
+    if(player_active->hasAbility(CLOUD_NINE) && !player_active->isFainted()){
         return true;
     }
-    if(opponent_active->getAbility() == CLOUD_NINE && !opponent_active->isFainted()){
+    if(opponent_active->hasAbility(CLOUD_NINE) && !opponent_active->isFainted()){
         return true;
     }
     return false;
@@ -4424,11 +4420,11 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     Battler* old_active = getActorBattler(actor_switching_out);
     unsigned int old_active_maxHP = old_active->getMaxHP();
     field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor_switching_out);
-    if(old_active->getAbility() == REGENERATOR && !old_active->isFainted()){
+    if(old_active->hasAbility(REGENERATOR) && !old_active->isFainted()){
         //regenerate 1/3 of user HP
         old_active->removeDamage(max((old_active_maxHP+2) / 3,1));
     }
-    if(old_active->getAbility() == NATURAL_CURE && !old_active->isFainted()){
+    if(old_active->hasAbility(NATURAL_CURE) && !old_active->isFainted()){
         //remove status
         old_active->clearPermanentStatus();
     }
@@ -4488,8 +4484,8 @@ void Battle::applyScheduledFutureSights(){
                 it.user_special_attack,
                 target_active->getModifiedSpecialDefense());
             bool critical_hit = RNG::getRandomInteger(0,23) == 0;
-            if(target_active->getAbility()==SHELL_ARMOR ||
-                target_active->getAbility()==BATTLE_ARMOR){
+            if(target_active->hasAbility(SHELL_ARMOR)||
+                target_active->hasAbility(BATTLE_ARMOR)){
                 // shell armor and battle armor prevent critical hits
                 critical_hit = false;
             }
@@ -4515,6 +4511,6 @@ void Battle::applyScheduledFutureSights(){
 }
 
 bool Battle::thereIsNeutralizingGas(){
-    return ((player_active->getAbility()==NEUTRALIZING_GAS) && !player_active->isFainted()) || 
-        ((opponent_active->getAbility()==NEUTRALIZING_GAS)&& !opponent_active->isFainted());
+    return (player_active->hasAbility(NEUTRALIZING_GAS) && !player_active->isFainted()) || 
+        (opponent_active->hasAbility(NEUTRALIZING_GAS) && !opponent_active->isFainted());
 }
