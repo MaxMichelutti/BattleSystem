@@ -1496,42 +1496,47 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
     return true;
 }
 bool Battler::setPermanentStatusForced(PermanentStatusCondition status){
+    PermanentStatusCondition old_status = monster->getPermanentStatus();
     monster->setPermanentStatus(status);
     if(status == BAD_POISON)
         bad_poison_counter = 1;
-        switch(status){
-            case BURN:
-                monster->setPermanentStatus(BURN);
-                handler->displayMsg(monster->getNickname()+" was burned!");
-                break;
-            case PARALYSIS:
-                monster->setPermanentStatus(PARALYSIS);
-                handler->displayMsg(monster->getNickname()+" was paralyzed!");
-                break;
-            case FREEZE:
-                monster->setPermanentStatus(FREEZE);
-                handler->displayMsg(monster->getNickname()+" was frozen!");
-                break;
-            case POISONED:
-                monster->setPermanentStatus(POISONED);
-                handler->displayMsg(monster->getNickname()+" was poisoned!");
-                break;
-            case BAD_POISON:
-                monster->setPermanentStatus(BAD_POISON);
-                bad_poison_counter = 1;
-                handler->displayMsg(monster->getNickname()+" was badly poisoned!");
-                break;
-            case SLEEP_1:
-            case SLEEP_2:
-            case SLEEP_3:
-            case SLEEP_4:
-                monster->setPermanentStatus(status);
+    switch(status){
+        case BURN:
+            monster->setPermanentStatus(BURN);
+            handler->displayMsg(monster->getNickname()+" was burned!");
+            break;
+        case PARALYSIS:
+            monster->setPermanentStatus(PARALYSIS);
+            handler->displayMsg(monster->getNickname()+" was paralyzed!");
+            break;
+        case FREEZE:
+            monster->setPermanentStatus(FREEZE);
+            handler->displayMsg(monster->getNickname()+" was frozen!");
+            break;
+        case POISONED:
+            monster->setPermanentStatus(POISONED);
+            handler->displayMsg(monster->getNickname()+" was poisoned!");
+            break;
+        case BAD_POISON:
+            monster->setPermanentStatus(BAD_POISON);
+            bad_poison_counter = 1;
+            handler->displayMsg(monster->getNickname()+" was badly poisoned!");
+            break;
+        case SLEEP_1:
+        case SLEEP_2:
+        case SLEEP_3:
+        case SLEEP_4:
+            monster->setPermanentStatus(status);
+            if(old_status != SLEEP_1 &&
+                old_status != SLEEP_2 &&
+                old_status != SLEEP_3 &&
+                old_status != SLEEP_4)//display msg only if it was not asleep before
                 handler->displayMsg(monster->getNickname()+" fell asleep!");
-                break;
-            default:
-                return false;
-                break;
-        }
+            break;
+        default:
+            return false;
+            break;
+    }
     return true;
 }
 

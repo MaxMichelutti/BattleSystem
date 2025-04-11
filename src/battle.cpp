@@ -1416,7 +1416,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 active_user->clearVolatilesSuchThat(&isVolatileConditionClearedByRapidSpin);
                 break;
             }
-            case 25:case 77:case 112:case 174:{ // confuse target
+            case 25:case 77:case 113:case 174:{ // confuse target
                 if(active_target->hasVolatileCondition(CONFUSION)){
                     if(attack->getCategory()==STATUS){
                         event_handler->displayMsg(opponent_mon_name+" is already confused!");
@@ -1435,7 +1435,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 if(effect==72)//flatter
                     active_target->changeSpecialAttackModifier(1);
-                if(effect==112)//swagger
+                if(effect==113)//swagger
                     active_target->changeAttackModifier(2);
                 break;
             }
