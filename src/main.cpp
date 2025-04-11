@@ -8,7 +8,7 @@
 int main(int argc, char** argv) {
     Attack::loadAttacks();
     Species::loadSpecies();
-    Monster* monster_p1 = Monster::generateRandomMonster(9,50);
+    Monster* monster_p1 = Monster::generateRandomMonster(150,50);
     // for(int i=0;i<100;i++){
     //     monster_p1->forgetAttack(i);
     // }

@@ -207,7 +207,10 @@ unsigned int TextEventHandler::getNumberFromCin(){
 void TextEventHandler::displayBattleSituation(Battler* user_active,MonsterTeam*user_team,Battler*enemy_active,MonsterTeam*enemy_team){
     std::string user_name = user_active->getNickname();
     std::string enemy_name = enemy_active->getNickname();
-    std::cout<<"Player:\t"<<user_name<<": "<<user_active->getCurrentHP()<<"/"<<user_active->getMaxHP()<<std::endl;
+    std::cout<<"Player:\t"<<user_name<<": "
+        <<user_active->getCurrentHP()<<"/"<<user_active->getMaxHP()<<"\t"
+        <<permanentStatusConditionToString(user_active->getPermanentStatus())
+        <<std::endl;
     auto monsters = user_team->getMonsters();
     unsigned int alive_amount = 0;
     unsigned int fainted_amount = 0;
@@ -226,7 +229,10 @@ void TextEventHandler::displayBattleSituation(Battler* user_active,MonsterTeam*u
         std::cout<<"X ";
     }
     std::cout<<std::endl;
-    std::cout<<"Opp.:\t"<<enemy_name<<": "<<enemy_active->getCurrentHP()<<"/"<<enemy_active->getMaxHP()<<std::endl;
+    std::cout<<"Opp.:\t"<<enemy_name<<": "
+        <<enemy_active->getCurrentHP()<<"/"<<enemy_active->getMaxHP()<<"\t"
+        <<permanentStatusConditionToString(enemy_active->getPermanentStatus())
+        <<std::endl;
     monsters = enemy_team->getMonsters();
     alive_amount = 0;
     fainted_amount = 0;
