@@ -37,1114 +37,1497 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
     if(accuracy==ALWAYS_HITS)
         accuracy = 100;
     int total_utility = 10;
-    int sleep_mult = 1;
+    float sleep_mult = 1;
     if(enemy_active->isAsleep())
-        sleep_mult=10;
+        sleep_mult=1.5;//incentivize hitting asleep opponents
     double screen_mult = 1;
+    // decentivize hitting screens, unless brick break is used
     if(field->hasFieldEffect(REFLECT,OPPONENT) && attack->getCategory() == PHYSICAL){
-        screen_mult = 0.5;
+        screen_mult = (effect==172)?1.1:0.5;
     }
     if(field->hasFieldEffect(LIGHT_SCREEN,OPPONENT) && attack->getCategory() == SPECIAL){
-        screen_mult = 0.5;
+        screen_mult = (effect==172)?1.1:0.5;
     }
-    if(attack->getPower() != 0){
-        bool can_hit_ghosts = (cpu_active->getAbility()==SCRAPPY);
-        float effectiveness = getTypeEffectiveness(attack->getType(), 
-            enemy_active->getTypes(),enemy_active->isTouchingGround(),
-            can_hit_ghosts,attack->getEffectId() == 196);
-        unsigned int damage = attack->getPower();
-        unsigned int unmodified_damage = damage;
-        if(attack->getEffectId() == 36)// triple expected damage for multi hit moves
-            damage*=3;
-        if(attack->getEffectId() == 37 && (cpu_active->getLastAttackUsed() == attack_id))//fury cutter
-            damage *= 2; // expect double damage from multiple uses of fury cutter
-        total_utility+= effectiveness * damage * accuracy / 90 * sleep_mult * screen_mult;
-        if(unmodified_damage > enemy_active->getCurrentHP()){
-            // I see a kill!!!
-            total_utility *= 50;
+    unsigned int power = attack->getPower();
+    switch(effect){//change power of particular attacks
+        case 81:{
+            // power depends on stat schanges
+            unsigned int attack_mod = max(0,cpu_active->getAttackModifier());
+            unsigned int special_attack_mod = max(0,cpu_active->getSpecialAttackModifier());
+            unsigned int defense_mod = max(0,enemy_active->getDefenseModifier());
+            unsigned int special_defense_mod = max(0,enemy_active->getSpecialDefenseModifier());
+            unsigned int speed_mod = max(0,cpu_active->getSpeedModifier());
+            unsigned int sum = attack_mod + special_attack_mod +
+                defense_mod + special_defense_mod + speed_mod;
+            power = 20 + sum * 20;
         }
-    }
-    double status_mult = 1;
-    unsigned int effect_probability = attack->getEffectChance();
-    if(attack->getCategory() == STATUS){
-        total_utility = 37;
-        status_mult = 8.3;
-    }
-    switch(effect){
-        case 1: { // lower attack by 1
-            int atk_modifier = enemy_active->getAttackModifier();
-            if(atk_modifier == -6)
-                total_utility -= 3*status_mult;
-            else
-                total_utility += (20 + atk_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 46: { // lower attack by 2
-            int atk_modifier = enemy_active->getAttackModifier();
-            if(atk_modifier == -6)
-                total_utility -= 3*status_mult;
-            else
-                total_utility += (20 + atk_modifier * 100 / 6)*0.66*status_mult;
-            break;
-        }
-        case 2: { // increase Att SpAtk by 1
-            int atk_modifier = cpu_active->getAttackModifier();
-            int sp_atk_modifier = cpu_active->getSpecialAttackModifier();
-            if(atk_modifier == 6 || sp_atk_modifier == 6)
-                total_utility -= 10 * status_mult;
-            else
-                total_utility = (20 - atk_modifier * 100 / 6 - sp_atk_modifier * 100 / 6) * status_mult * 0.25;
-            break;
-        }
-        case 3: { // leech seed
-            if((enemy_active->hasType(GRASS))||(enemy_active->hasVolatileCondition(LEECH_SEED)))
-                return -150;
-            else 
-                return 120;
-            break;
-        }
-        case 4: case 76: { // poison & bad poison
-            if(!enemy_active->canBePoisoned()||
-            (field->hasFieldEffect(SAFEGUARD,PLAYER) &&
-            cpu_active->getAbility()!=INFILTRATOR))
-                total_utility -= 15 * status_mult;
-            else 
-                total_utility += 20 * status_mult;
-            if(effect== 76)
-                total_utility += 2 * status_mult;
-            break;
-        }
-        case 5: { // sleep
-            Type move_type = attack->getType();
-            if((move_type==GRASS && enemy_active->hasType(GRASS)) || 
-                !enemy_active->canFallAsleep() ||
-                (field->hasFieldEffect(SAFEGUARD,PLAYER) &&
-                cpu_active->getAbility()!=INFILTRATOR))
-                total_utility -= 5 * status_mult;
-            else 
-                total_utility += 5 * status_mult;
-            break;
-        }
-        case 6: {//recoil 1/4
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 50)
-                total_utility -= 5;
-            else if(health_percent < 80)
-                total_utility -=20;
-            break;
-        }
-        case 7: { // decrease evasion by 2
-            int evasion_modifier = enemy_active->getEvasionModifier();
-            if(evasion_modifier == -6)
-                total_utility-=10*status_mult;
-            else 
-                total_utility += (10 + evasion_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 8: { // synthesis
-            unsigned int remaining_hp_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            Weather weather = field->getWeather();
-            float wheater_multiplier = 1.0;
-            if((weather != CLEAR)&&(weather!=SUN))
-                wheater_multiplier = 0.4;
-            else if(weather == SUN)
-                wheater_multiplier = 1.25;
-            if(remaining_hp_percent < 50)
-                total_utility += 50 * wheater_multiplier;
-            else if(remaining_hp_percent < 75)
-                total_utility += 25 * wheater_multiplier;
-            else
-                total_utility -= 30;
-            break;
-        }
-        case 13:{// Worry Seed
-            if(enemy_active->getAbility()!=INSOMNIA)
-                total_utility += 15;
-            else
-                total_utility -= 30;
-            break;
-        }
-        case 14:{//Burn
-            if(!enemy_active->canBeBurned() ||
-                (attack->getType() == FIRE && enemy_active->hasType(FIRE))||
-                (field->hasFieldEffect(SAFEGUARD,PLAYER) &&
-                cpu_active->getAbility()!=INFILTRATOR))
-                total_utility -= 10 * status_mult;
-            else
-                total_utility += 20 * status_mult;
-            break;
-        }
-        case 15:{//accuracy -1
-            int acc_modifier = enemy_active->getAccuracyModifier();
-            if(acc_modifier == -6)
-                total_utility-= 4 * status_mult;
-            else 
-                total_utility += (5 + acc_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 16:{// paralisis
-            if( !enemy_active->canBeParalyzed() ||
-                (enemy_active->hasType(GRASS) && attack->getType() == GRASS) ||
-                (field->hasFieldEffect(SAFEGUARD,PLAYER) &&
-                cpu_active->getAbility()!=INFILTRATOR))
-                total_utility -= 4 * status_mult;
-            else
-                total_utility += 10 * status_mult + effect_probability / 5;
-            break;
-        }
-        case 17:{ //increased crit
-            total_utility *= 1.25;
-            break;
-        }
-        case 18:{// speed -2 opponent
-            int spd_modifier = enemy_active->getSpeedModifier();
-            if(spd_modifier == -6)
-                total_utility-= 10 * status_mult;
-            else 
-                total_utility += (10 + spd_modifier * 100 / 6)*0.66*status_mult;
-            break;
-        }
-        case 19:{//Fire spin
-            if(!enemy_active->hasVolatileCondition(FIRESPIN))
-                total_utility += 30;
-            break;
-        }
-        case 74:{//Sand Tomb
-            if(!enemy_active->hasVolatileCondition(SANDTOMB))
-                total_utility += 30;
-            break;
-        }
-        case 20:{//recoil + burn
-            if(enemy_active->hasPermanentStatus() ||
-            (attack->getType() == FIRE && enemy_active->hasType(FIRE)))
-                total_utility -= 10;
-            else
-                total_utility += 20;
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 50)
-                total_utility -= 20;
-            else if(health_percent < 80)
-                total_utility -= 40;
-            break;
-        }
-        case 21:case 141:{//flinch
-            total_utility += 7 * effect_probability/10;
-        }
-        case 22:{// -1 def opponent
-            int def_modifier = enemy_active->getDefenseModifier();
-            if(def_modifier == -6)
-                total_utility-= 5 * status_mult;
-            else 
-                total_utility += (10 + def_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 23:{// +1 def user
-            int def_modifier = cpu_active->getDefenseModifier();
-            if(def_modifier == -6)
-                total_utility -= 3*status_mult;
-            else
-                total_utility += (20 + def_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 24:{ // rapid spin
-            int spd_modifier = cpu_active->getSpeedModifier();
-            if(spd_modifier == 6)
-                total_utility -= 3*status_mult;
-            else
-                total_utility += (20 - spd_modifier * 100 / 6)*0.25*status_mult;
-            if(field->hasFieldEffectsSuchThat(&isFieldEffectClearedByRapidSpin,OPPONENT))
-                total_utility += 50;
-            if(cpu_active->hasVolatilesSuchThat(&isVolatileConditionClearedByRapidSpin))
-                total_utility += 50;
-            break;
-        }
-        case 25:case 77:{ // confuse
-            if(!enemy_active->hasVolatileCondition(CONFUSION))
-                total_utility += 10 * status_mult;
-            else
-                total_utility -= 10 * status_mult;
-            if(effect==77)//confuse while raising spatt
-                total_utility -= 10;
-            break;
-        }
-        case 26:{ // PROTECT
-            if(cpu_active->getConsecutiveProtects() != 0){
-                total_utility -= 50;
+        // compute power for electro ball
+        case 64:{
+            unsigned int user_speed = cpu_active->getModifiedSpeed();
+            unsigned int enemy_speed = enemy_active->getModifiedSpeed();
+            double speed_comparison = 100.0 *  enemy_speed / user_speed;
+            if(speed_comparison>=100.0){
+                power = 40;
+            }else if(speed_comparison > 50.0){
+                power = 60;
+            }else if(speed_comparison > 33.34){
+                power = 80;
+            }else if(speed_comparison > 25.0){
+                power = 120;
             }else{
-                total_utility += 50;
-                if(enemy_active->isBurned() || enemy_active->isPoisoned() ||
-                    enemy_active->hasVolatileCondition(LEECH_SEED) || 
-                    enemy_active->hasVolatileCondition(WRAP) ||
-                    enemy_active->hasVolatileCondition(FIRESPIN) ||
-                    enemy_active->hasVolatileCondition(SANDTOMB) ||
-                    enemy_active->hasVolatileCondition(UNDERGROUND) ||
-                    enemy_active->hasVolatileCondition(ROLLINGOUT) ||
-                    enemy_active->hasVolatileCondition(OUTRAGING) ||
-                    enemy_active->hasVolatileCondition(THRASHING) ||
-                    enemy_active->hasVolatileCondition(UNDERWATER) ||
-                    enemy_active->hasVolatileCondition(FLYING_HIGH))
-                    total_utility+=100;
+                power = 160;
             }
             break;
         }
-        case 27:{// set rain
-            if(field->getWeather()==RAIN)
-                total_utility-=30*status_mult;
+        //base power for gyro ball
+        case 71:{
+            unsigned int user_speed = cpu_active->getModifiedSpeed();
+            unsigned int enemy_speed = enemy_active->getModifiedSpeed();
+            if(user_speed < 1)
+                power = 1;
             else
-                total_utility+=50*status_mult;
+                power = min(150,(25*enemy_speed/user_speed)+1);
             break;
         }
-        case 28:{// +2 ATT SPATT SPD, -1 DEF SPDEF
-            unsigned int attack_mod = cpu_active->getAttackModifier();
-            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
-            if(attack_mod <= 1 || special_attack_mod <= 1)
-                total_utility += 25 * status_mult;
-            else
-                total_utility -= 50 * status_mult;
-            break;
-        }
-        case 29:{// +2 def user
-            int def_modifier = cpu_active->getDefenseModifier();
-            if(def_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (20 - def_modifier * 100 / 6)*0.7*status_mult;
-            break;
-        }
-        case 30:{//+1 speed user, 33% recoil
-            int spd_modifier = cpu_active->getSpeedModifier();
-            if(spd_modifier == 6)
-                total_utility -= 3*status_mult;
-            else
-                total_utility += (20 - spd_modifier * 100 / 6)*0.25*status_mult;
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 50)
-                total_utility -= 20;
-            else if(health_percent < 80)
-                total_utility -= 40;
-            break;
-        }
-        case 31:{// -1 sp def opponent
-            int spdef_modifier = enemy_active->getSpecialDefenseModifier();
-            if(spdef_modifier == -6)
-                total_utility-= 5 * status_mult;
-            else 
-                total_utility += (10 + spdef_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 32:case 123:{//force switch
-            std::set<Type> enemy_types = enemy_active->getTypes();
-            bool has_effective_type = false;
-            for(auto enemy_type: enemy_types){
-                float effectiveness = getTypeEffectiveness(enemy_type,cpu_active->getTypes(),enemy_active->isTouchingGround(),false,false);
-                if(effectiveness>1.1)
-                    has_effective_type = true;
+        //check venoshock
+        case 40:{
+            if(enemy_active->isPoisoned()){ 
+                power *= 2.0;
             }
-            if(has_effective_type)
-                total_utility += 20;
-            else
-                total_utility -= 100;
-        }
-        case 33:{//safeguard
-            if(field->hasFieldEffect(SAFEGUARD,OPPONENT))
-                total_utility -= 120;
-            else
-                total_utility += 30;
-        }
-        case 34:{//tailwind
-            if(field->hasFieldEffect(TAILWIND,OPPONENT))
-                total_utility -= 120;
-            else
-                total_utility += 35;
-        }
-        case 35:{// +1 spatt spdef speed user
-            int spdef_modifier = cpu_active->getSpecialDefenseModifier();
-            int spatt_modifier = cpu_active->getSpecialAttackModifier();
-            int speed_modifier = cpu_active->getSpeedModifier();
-            if(spdef_modifier == 6 || spatt_modifier == 6 || speed_modifier==6)
-                total_utility -= 10 * status_mult;
-            else
-                total_utility = (40 - spdef_modifier * 100 / 6 - spatt_modifier * 100 / 6 - spdef_modifier*100/6 ) * status_mult * 0.8;
             break;
         }
-        case 37:{//fury cutter
-            total_utility += 20; // help set up fury cutter combo
-        }
-        case 38:{// laser focus
-            if(cpu_active->hasVolatileCondition(LASER_FOCUS))
-                total_utility -= 100;
-            else
-                total_utility += RNG::getRandomInteger(50,150);
-            break;
-        }
-        case 39:{// focus energy
-            if(cpu_active->hasVolatileCondition(FOCUS_ENERGY))
-                total_utility -= 156;
-            else
-                total_utility += 120;
-            break;
-        }
-        case 40:{//venoshock
-            if(enemy_active->isPoisoned())
-                total_utility *= 2;
-        }
-        case 41:{//Toxic spikes
-            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,OPPONENT))
-                total_utility -= 150;
-            else if (field->hasFieldEffect(TOXIC_SPIKES,OPPONENT))
-                total_utility += 75;
-            else
-                total_utility += 150;
-            break;
-        }
-        case 42:{// +2 SPEED user
-            int spd_modifier = cpu_active->getSpeedModifier();
-            if(spd_modifier == 6)
-                total_utility -= 20*status_mult;
-            else
-                total_utility += (20 - spd_modifier * 100 / 6)*0.2*status_mult;
-            break;
-        }
-        case 43:{ // Endeavor
-            unsigned int current_hp_active = cpu_active->getCurrentHP();
-            unsigned int current_hp_enemy = enemy_active->getCurrentHP();
-            if(current_hp_enemy <= current_hp_active)
-                total_utility -= 120;
-            else
-                total_utility += 2 * (current_hp_enemy - current_hp_active);
-            break;
-        }
-        case 44:{ // gain 2 ATT if kills
-            unsigned int current_hp_enemy = enemy_active->getCurrentHP();
-            unsigned int total_hp_enemy = enemy_active->getMaxHP();
-            if(current_hp_enemy < total_hp_enemy / 10)
-                total_utility += 100;
-            else
-                total_utility -= 10;
-            break;
-        }
-        case 45:{//hits monster that is using FLY, BOUNCE or SKY DROP + 20% flinch
-            total_utility += 15;// add utility for the chance of flinching
-            break;
-        }
-        case 47:{//roost
-            if(cpu_active->isAtFullHP()){
-                total_utility -= 100;
+        // spit up
+        case 57:{
+            // spit up power depends on stockpiles
+            unsigned int stockpiles = cpu_active->getStockpiles();
+            if(stockpiles == 0){
+                power = 0;
+            }else if(stockpiles == 1){
+                power = 100;
+            }else if(stockpiles == 2){
+                power = 200;
             }else{
-                if(cpu_active->getCurrentHP() < cpu_active->getMaxHP() * 0.25)
-                    total_utility += 100;
-                else if(cpu_active->getCurrentHP() < cpu_active->getMaxHP() * 0.5)
-                    total_utility += 55;
-                else
-                    total_utility -= 20;
+                power = 300;
             }
             break;
         }
-        case 50:{//halves target HP
-            unsigned int current_hp_enemy = enemy_active->getCurrentHP();
-            total_utility += current_hp_enemy * accuracy / 200;
-            break;
-        }
-        case 51:{// recoil 1/3
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 50)
-                total_utility -= 20;
-            else if(health_percent < 80)
-                total_utility -= 40;
-            break;
-        }
-        case 52:{ // +2 att
-            int att_modifier = cpu_active->getAttackModifier();
-            if(att_modifier == 6)
-                total_utility -= 10*status_mult;
+        case 111:{
+            //power depends on target weight
+            unsigned int weight = enemy_active->getWeight();
+            if(weight<100)
+                power = 20;
+            else if(weight<250)
+                power = 40;
+            else if(weight<500)
+                power = 60;
+            else if(weight<1000)
+                power = 80;
+            else if(weight<2000)
+                power = 100;
             else
-                total_utility += (40 - att_modifier * 100 / 6)*0.7*status_mult;
-            break;
-        }
-        case 53:{//wrap
-            if(!enemy_active->hasVolatileCondition(WRAP))
-                total_utility += 20;
-            else
-                total_utility -= 30;
-            break;
-        }
-        case 54:{//-2 SPDEF opponent
-            int spdef_modifier = enemy_active->getSpecialDefenseModifier();
-            if(spdef_modifier == -6)
-                total_utility-= 5 * status_mult;
-            else 
-                total_utility += (10 + spdef_modifier * 100 / 6)*0.45*status_mult;
-            break;
-        }
-        case 55:{//Stockpile
-            if(cpu_active->getStockpiles() == 3)
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 56:{//swallow
-            double health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(cpu_active->getStockpiles() == 0)
-                total_utility -= 100;
-            else if(cpu_active->getStockpiles() == 1)
-                total_utility += 1 * (100-health_percent);
-            else if(cpu_active->getStockpiles() == 2)
-                total_utility += 7 * (100-health_percent);
-            else
-                total_utility += 20 * (100-health_percent);
-        }
-        case 57:{//spit up
-            if(cpu_active->getStockpiles() == 0)
-                total_utility -= 100; 
-            else if(cpu_active->getStockpiles() == 2)
-                total_utility*=2;
-            else if(cpu_active->getStockpiles() == 3)
-                total_utility*=3;
-            break;
-        }
-        case 58:{//suppress ability
-            if(enemy_active->isAbilitySuppressed())
-                total_utility -= 200;
-            else
-                total_utility += 30;
-            break;
-        }
-        case 59:{//remove stat changes
-            int total_stat_changes_cpu = cpu_active->getAttackModifier() + 
-                cpu_active->getSpecialAttackModifier() +
-                cpu_active->getDefenseModifier() +
-                cpu_active->getSpecialDefenseModifier() +
-                cpu_active->getSpeedModifier();
-            int total_stat_changes_enemy = enemy_active->getAttackModifier() +
-                enemy_active->getSpecialAttackModifier() +
-                enemy_active->getDefenseModifier() +
-                enemy_active->getSpecialDefenseModifier() +
-                enemy_active->getSpeedModifier();
-            int diff = total_stat_changes_enemy - total_stat_changes_cpu;
-            total_utility += 25*diff;
-            break;
-        }
-        case 60:{// +1 ATT DEF ACC user
-            int att_modifier = cpu_active->getAttackModifier();
-            int def_modifier = cpu_active->getDefenseModifier();
-            int acc_modifier = cpu_active->getAccuracyModifier();
-            if(att_modifier == 6 || def_modifier == 6 || acc_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (60 - att_modifier * 100 / 6 - def_modifier * 100 / 6 - acc_modifier*100/6 ) * status_mult * 0.35;
-            break;
-        }
-        case 61:{//FREEZE OPPONENT
-            if(attack->getCategory() == STATUS){
-                if(enemy_active->canBeFrozen() && 
-                (!field->hasFieldEffect(SAFEGUARD,PLAYER) ||
-                cpu_active->getAbility()!=INFILTRATOR)){
-                    total_utility += 110 * accuracy / 100;
-                }else{
-                    total_utility -= 100;
-                }
-            }else
-                total_utility += 7;
-            break;
-        }
-        case 62:{// +2 spatt user
-            int spatt_modifier = cpu_active->getSpecialAttackModifier();
-            if(spatt_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (40 - spatt_modifier * 100 / 6)*0.7*status_mult;
-            break;
-        }
-        case 63:{//+1 evasiveness user
-            int evasion_modifier = cpu_active->getEvasionModifier();
-            if(evasion_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (40 - evasion_modifier * 100 / 6)*0.7*status_mult;
-            break;
-        }
-        case 64:{// damage depends on speed delta
-            int speed_delta = cpu_active->getModifiedSpeed() - enemy_active->getModifiedSpeed();
-            if(speed_delta > 0)
-                total_utility += 20 * speed_delta;
-            else
-                total_utility += 20;
-            break;
-        }
-        case 66:{//light screen
-            if(field->hasFieldEffect(LIGHT_SCREEN,OPPONENT))
-                total_utility -= 120;
-            else
-                total_utility += 160;
-            break;
-        }
-        case 67:{//paralyze + accuracy under rain
-            if(enemy_active->hasPermanentStatus() || enemy_active->hasType(ELECTRIC))
-                total_utility -= 10;
-            else
-                total_utility += 10;
-            if(field->getWeather() == RAIN)
-                total_utility *= 1.5;
-            else if(field->getWeather() == SUN)
-                total_utility /= 4.0;
-            break;
-        }
-        case 68:{// rollout
-            break;
-        }
-        case 69:{//- 1 spped opponent    
-            int spd_modifier = enemy_active->getSpeedModifier();
-            if(spd_modifier == -6)
-                total_utility-= 10 * status_mult;
-            else 
-                total_utility += (10 + spd_modifier * 100 / 6)*0.25*status_mult;
-            if(field->getTerrain()==GRASSY_FIELD)
-                total_utility *= 0.5;
-            break;        
-        }
-        case 70:{//dig
-            break;
-        }
-        case 71:{//gyro ball
-            int speed_delta = enemy_active->getModifiedSpeed() - cpu_active->getModifiedSpeed();
-            if(speed_delta > 0)
-                total_utility += 20 * speed_delta;
-            else
-                total_utility += 20;
-            break;
-        }
-        case 72:{//start sandstorm
-            if(field->getWeather()==SANDSTORM)
-                total_utility -= 170;
-            else
-                total_utility += 120;
-            break;
-        }
-        case 73:{// +1 sp def user
-            if(field->getTerrain()==GRASSY_FIELD)
-                total_utility *= 0.5;
-            break;
-        }
-        case 75:{//two hits
-            total_utility *= 2;
-            break;
-        }
-        case 78:{// -1 ATT DEF user
-            int att_modifier = cpu_active->getAttackModifier();
-            int def_modifier = cpu_active->getDefenseModifier();
-            total_utility -= (10 - att_modifier * 100 / 6 - def_modifier * 100 / 6) * status_mult * 0.1;
-            break;
-        }
-        case 79:{//do nothing
-            total_utility -= 200;
-            break;
-        }
-        case 80:{// copycat
-            total_utility += 10;
-        }
-        case 81:{// power depends on stat changes
-            int total_stat_changes = 1;//for base power
-            if(cpu_active->getAttackModifier() > 0)
-                total_stat_changes += cpu_active->getAttackModifier();
-            if(cpu_active->getSpecialAttackModifier() > 0)
-                total_stat_changes += cpu_active->getSpecialAttackModifier();
-            if(cpu_active->getDefenseModifier() > 0)
-                total_stat_changes += cpu_active->getDefenseModifier();
-            if(cpu_active->getSpecialDefenseModifier() > 0)
-                total_stat_changes += cpu_active->getSpecialDefenseModifier();
-            if(cpu_active->getSpeedModifier() > 0)
-                total_stat_changes += cpu_active->getSpeedModifier();
-            total_utility *= total_stat_changes;
-            break;
-        }
-        case 82:{// encore enemy
-            if(enemy_active->hasVolatileCondition(ENCORE))
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 83:{//heal 25%
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 25)
-                total_utility += 25;
-            else if(health_percent < 50)
-                total_utility += 12;
-            else
-                total_utility -= 5;
-            break;
-        }
-        case 84:{//metronome
-            total_utility += 100;
-            break;
-        }
-        case 85:{//gravity
-            if(field->hasFullFieldEffect(GRAVITY))
-                total_utility -= 120;
-            else
-                total_utility += 70;
-            break;
-        }
-        case 86:{// -1 ATT user
-            int att_modifier = cpu_active->getAttackModifier();
-            total_utility -= (20 + att_modifier * 60 / 6)*0.2*status_mult;
-            break;
-        }
-        case 87:{//+1 DEF SPEF user
-            int def_modifier = cpu_active->getDefenseModifier();
-            int spdef_modifier = cpu_active->getSpecialDefenseModifier();
-            if(def_modifier == 6 || spdef_modifier == 6)
-                total_utility -= 10 * status_mult;
-            else
-                total_utility = (40 - def_modifier * 100 / 6 - spdef_modifier * 100 / 6) * status_mult * 0.35;
-            break;
-        }
-        case 88:{//-1 spatt opponent
-            int spatt_modifier = enemy_active->getSpecialAttackModifier();
-            if(spatt_modifier == -6)
-                total_utility-= 5 * status_mult;
-            else 
-                total_utility += (10 + spatt_modifier * 100 / 6)*0.25*status_mult;
-            break;
-        }
-        case 89:{// user dies and wheìat comes in is fully healed
-            total_utility -= 50;
-            break;
-        }
-        case 90:{//disable move
-            if(enemy_active->hasDiabledAttack() || enemy_active->getLastAttackUsed() == 0)
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 91:{// - 4 PP opponent last move
-            total_utility += 20;
-            break;
-        }
-        case 92:{// imprison
-            if(enemy_active->hasVolatileCondition(IMPRISON))
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 93:{//mimic
-            total_utility+=40;
-            break;
-        }
-        case 95:{//rest
-            if(cpu_active->isAtFullHP()){
-                total_utility -= 100;
-            }else{
-                if(cpu_active->getCurrentHP() < cpu_active->getMaxHP() * 0.25)
-                    total_utility += 100;
-                else if(cpu_active->getCurrentHP() < cpu_active->getMaxHP() * 0.5)
-                    total_utility += 55;
-                else
-                    total_utility -= 20;
-            }
-            break;
-        }
-        case 96:{//mean look
-            if(enemy_active->hasVolatileCondition(MEAN_LOOK))
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 97:{//heal 50% damage dealt to opponent
-            total_utility *= 1.25;
-            break;
-        }
-        case 98:{// quick guard
-            total_utility += 15;
-            break;
-        }
-        case 99:{//set up grassy terrain
-            if(field->getTerrain()==GRASSY_FIELD)
-                total_utility -= 170;
-            else
-                total_utility += 120;
-            break;
-        }
-        case 100:{//user dies
-            double hp_percent = cpu_active->getCurrentHP() * 100.0 / cpu_active->getMaxHP();
-            if(hp_percent > 80)
-                total_utility *= -1;
-            else if(hp_percent > 50)
-                total_utility *= 0.1;
-            else if(hp_percent > 10)
-                total_utility *= 0.33;
-            else
-                total_utility *= 2;
-            break;
-        }
-        case 101:{//heal status
-            if(cpu_active->hasPermanentStatus())
-                total_utility += 70;
-            else
-                total_utility -= 200;
-            break;
-        }
-        case 102:{//transform
-            total_utility += 65;
-            break;
-        }
-        case 103:{//user dies
-            double hp_percent = cpu_active->getCurrentHP() * 100.0 / cpu_active->getMaxHP();
-            if(hp_percent > 80)
-                total_utility *= 0.3;
-            else if(hp_percent > 50)
-                total_utility *= 0.7;
-            else if(hp_percent > 10)
-                total_utility *= 1.1;
-            else
-                total_utility *= 2;
-            break;
-        }
-        case 104:{// tri attack
-            if(!enemy_active->hasPermanentStatus() && 
-                (!field->hasFieldEffect(SAFEGUARD,OPPONENT) || cpu_active->getAbility() == INFILTRATOR))
-                total_utility += 20;
-            break;
-        }
-        case 105:{//fake out
-            if(cpu_active->getTurnsInBattle() < 1)
-                total_utility *= 10;
-            else
-                total_utility *= -1;
-            break;
-        }
-        case 106:{//taunt
-            if(!enemy_active->hasVolatileCondition(TAUNTED))
-                total_utility+=50;
-            else
-                total_utility -= 130;
-            break;
-        }
-        case 107:{
-            // opponent becomes water type
-            if(enemy_active->hasType(WATER))
-                total_utility -= 100;
-            else
-                total_utility += 50;
-            break;
-        }
-        case 108:{
-            //copy target stat changes
-            int total_stat_changes_taget = 0;//for base power
-            total_stat_changes_taget += enemy_active->getAttackModifier();
-            total_stat_changes_taget += enemy_active->getSpecialAttackModifier();
-            total_stat_changes_taget += enemy_active->getDefenseModifier();
-            total_stat_changes_taget += enemy_active->getSpecialDefenseModifier();
-            total_stat_changes_taget += enemy_active->getSpeedModifier();
-            int total_stat_changes_cpu = 0;//for base power
-            total_stat_changes_cpu += cpu_active->getAttackModifier();
-            total_stat_changes_cpu += cpu_active->getSpecialAttackModifier();
-            total_stat_changes_cpu += cpu_active->getDefenseModifier();
-            total_stat_changes_cpu += cpu_active->getSpecialDefenseModifier();
-            total_stat_changes_cpu += cpu_active->getSpeedModifier();
-            int diff = total_stat_changes_taget - total_stat_changes_cpu;
-            total_utility += 20*diff;
-            break;
-        }
-        case 109:{
-            // +2 spdef user
-            int spdef_modifier = cpu_active->getSpecialDefenseModifier();
-            if(spdef_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (40 - spdef_modifier * 100 / 6)*0.7*status_mult;
-            break;
-        }
-        case 110:{
-            //wonder room
-            if(field->hasFullFieldEffect(WONDER_ROOM))
-                total_utility -= 47;
-            else
-                total_utility += 30;
-            break;
-        }
-        case 111:{//power depends on opp weight
-            unsigned int weight = cpu_active->getWeight();
-            if(weight > 200)
-                total_utility *= 10;
-            else if(weight > 100)
-                total_utility *= 5;
-            else
-                total_utility *= 2;
-            break;
-        }   
-        case 112:{
-            //damage = user level
-            unsigned int level = cpu_active->getLevel();
-            total_utility = level;
-            break;
-        }
-        case 113:{
-            // confuse opponent and +2 ATT opponent
-            if(!enemy_active->hasVolatileCondition(CONFUSION))
-                total_utility += 10 * status_mult;
-            else
-                total_utility -= 10 * status_mult;
-            if(enemy_active->getAttackModifier() == 6)
-                total_utility += 10*status_mult;
-            else
-                total_utility -= (40 + enemy_active->getAttackModifier() * 100 / 6)*0.21*status_mult;
-            break;
-        }
-        case 115:{
-            //- 1 def spdef user
-            int def_modifier = cpu_active->getDefenseModifier();
-            int spdef_modifier = cpu_active->getSpecialDefenseModifier();
-            total_utility -= (10 - def_modifier * 100 / 6 - spdef_modifier * 100 / 6) * status_mult * 0.1;
+                power = 120;
             break;
         }
         case 116:{
-            // power doubles if last move fails
-            if(cpu_active->lastAttackFailed())
-                total_utility *= 2;
-            break;
-        }
-        case 117:{
-            // damage equal current HP, then dies
-            total_utility = cpu_active->getCurrentHP();
-            total_utility -= 200;
+            //double power if last move failed
+            if(cpu_active->lastAttackFailed()){
+                power *= 2;
+            }
             break;
         }
         case 118:{
-            //power is higher if user was hit
-            auto hits_taken = cpu_active->numberOfHitsTaken();
-            if(hits_taken > 0)
-                total_utility *= min((hits_taken + 1),6);
+            // power increases as many times as the use has been hit
+            unsigned int hit_counter = cpu_active->numberOfHitsTaken();
+            power *= (min(hit_counter,6)+1);
             break;
         }
         case 120:{
-            // power depends on current % oh hp
-            unsigned int current_hp = cpu_active->getCurrentHP();
-            unsigned int max_hp = cpu_active->getMaxHP();
-            unsigned int hp_percent = current_hp * 100 / max_hp;
-            if(hp_percent > 80)
+            //power depends on user current % of HP
+            double current_hp_percentage = (double)cpu_active->getCurrentHP() / (double)cpu_active->getMaxHP() * 100;
+            if(current_hp_percentage < 4.2)
+                power = 200;
+            else if(current_hp_percentage < 10.4)
+                power = 150;
+            else if(current_hp_percentage < 20.8)
+                power = 100;
+            else if(current_hp_percentage < 35.4)
+                power = 80;
+            else if(current_hp_percentage < 68.8)
+                power = 40;
+            else
+                power = 20;
+            break;
+        }
+        case 134:{
+            // power doubles if target has Permanent status
+            if(enemy_active->hasPermanentStatus()){
+                power *= 2;
+            }
+            break;
+        }
+        case 140:{
+            //power depends on % oh weight
+            double weight_percentage = (double)enemy_active->getWeight() / (double)cpu_active->getWeight() * 100;
+            if(weight_percentage > 50){
+                power = 40;
+            }else if(weight_percentage > 33.34){
+                power = 60;
+            }else if(weight_percentage > 25){
+                power = 80;
+            }else if(weight_percentage > 20){
+                power = 100;
+            }else{
+                power = 120;
+            }
+            break;
+        }
+        case 155:{
+            // power doubles if HP < 50%
+            if(cpu_active->getCurrentHP() <= (cpu_active->getMaxHP()+1) / 2){
+                power *= 2;
+            }
+            break;
+        }
+        case 165:{
+            // power depends on current user %v of HP
+            double current_hp_percentage = (double)cpu_active->getCurrentHP() / (double)cpu_active->getMaxHP() * 100;
+            if(current_hp_percentage < 4.2)
+                power = 200;
+            else if(current_hp_percentage < 9.4)
+                power = 150;
+            else if(current_hp_percentage < 20.3)
+                power = 100;
+            else if(current_hp_percentage < 34.4)
+                power = 80;
+            else if(current_hp_percentage < 67.2)
+                power = 40;
+            else
+                power = 20;
+            break;
+        }
+    }
+    if(power != 0){
+        bool can_hit_ghosts = cpu_active->hasAbility(SCRAPPY);
+        float effectiveness = getTypeEffectiveness(attack->getType(), 
+            enemy_active->getTypes(),enemy_active->isTouchingGround(),
+            can_hit_ghosts,effect == 196);
+        unsigned int dmg = baseDamage(cpu_active->getLevel(),power,
+            cpu_active->getModifiedAttack(),enemy_active->getModifiedDefense());
+        if(effect == 36)// triple expected damage for multi hit moves
+            dmg*=3;
+        if(effect == 75)// double expected damage for twice hit moves
+            dmg*=2;
+        if(effect == 37 && (cpu_active->getLastAttackUsed() == attack_id))//fury cutter
+            dmg *= 2; // expect double damage from multiple uses of fury cutter
+        double final_expected_damage = effectiveness * dmg * screen_mult;
+        total_utility += final_expected_damage / enemy_active->getMaxHP() * 100;// % of HP that opponent will lose
+        if(final_expected_damage > enemy_active->getCurrentHP()){
+            // I see a kill!!!
+            total_utility *= 5;
+        }
+        total_utility*=sleep_mult;
+    }
+    unsigned int effect_probability = attack->getEffectChance();
+    if(effect_probability == ALWAYS_HITS || effect_probability == 0){
+        effect_probability = 100;
+    }
+    double effect_prob_mult = effect_probability / 100.0;
+    int actual_stat_zero = 0 - MIN_MODIFIER;
+    if(attack->getCategory() == STATUS)
+        total_utility = 0;
+    switch(effect){
+        case 1:{
+            // -1 att opponent
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            break;
+        }
+        case 2:{
+            // +1 att spatt user
+            unsigned int att_mod = cpu_active->getAttackModifier();
+            unsigned int spatt_mod = cpu_active->getSpecialAttackModifier();
+            total_utility += 5 * (actual_stat_zero - att_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - spatt_mod) * effect_prob_mult;
+            break;
+        }
+        case 3:{
+            //seed opponent
+            if(enemy_active->hasVolatileCondition(LEECH_SEED) || enemy_active->hasType(GRASS)){
+                total_utility -= 10;
+            }else{
+                total_utility += 50 * effect_prob_mult;
+            }
+            break;
+        }
+        case 4:{
+            // poison opp
+            if(enemy_active->canBePoisoned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 50 * effect_prob_mult;
+            }
+            break;
+        }
+        case 5:case 143:{
+            // sleep  opp
+            if(enemy_active->canFallAsleep() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD &&
+                !field->getTerrain()==ELECTRIC_FIELD){
+                total_utility += 70 * effect_prob_mult;
+            }
+            if(effect==143)
+                total_utility *= 0.8;
+            break;
+        }
+        case 6:{
+            //recoil 1/4 dmg
+            total_utility *= 0.9;
+            break;
+        }
+        case 7:{
+            //-2 evesiveness opponent
+            unsigned int evasion_mod = enemy_active->getEvasionModifier();
+            total_utility += 6 * effect_prob_mult * (actual_stat_zero + evasion_mod);
+            break;
+        }
+        case 8:{
+            // heal 50% user clear, 66% sun, 25% other
+            unsigned int HP_percent = enemy_active->getCurrentHP() * 100 / enemy_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 10;
+            else if(HP_percent >= 25)
+                total_utility += 25;
+            else if(HP_percent >= 10)
+                total_utility += 50;
+            else
+                total_utility += 100;
+            if(field->getWeather() == SUN)
+                total_utility *= 1.2;
+            else if(field->getWeather()!=CLEAR)
                 total_utility *= 0.5;
-            else if(hp_percent > 50)
-                total_utility *= 1.1;
-            else if(hp_percent > 10)
-                total_utility *= 2;
+            break;
+        }
+        case 13:{
+            // ability of opp becomes insomnia
+            if(enemy_active->hasAbility(INSOMNIA))
+                total_utility -= 10;
+            else
+                total_utility += 10;
+            break;
+        }
+        case 14:{
+            // burn opp
+            if(enemy_active->canBeBurned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 60 * effect_prob_mult;
+            }
+            break;
+        }
+        case 15:{
+            //-1 accuracy opp
+            unsigned int accuracy_mod = enemy_active->getAccuracyModifier();
+            total_utility += 3 * effect_prob_mult * (actual_stat_zero + accuracy_mod);
+            break;
+        }
+        case 16:case 67:{
+            // paralysis
+            if(enemy_active->canBeParalyzed() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 50 * effect_prob_mult;
+            }
+            if(effect==67 && field->getWeather() == RAIN){
+                total_utility *= 1.5;
+            }
+            break;
+        }
+        case 17:{
+            // crits are more likely
+            total_utility *= 1.15;
+            break;
+        }
+        case 18:{
+            // -2 Speed opp
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 10 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            break;
+        }
+        case 19:{
+            // fire spin
+            if(enemy_active->hasVolatileCondition(FIRESPIN)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
+        case 20:{
+            // recoil and burn opp
+            if(enemy_active->canBeBurned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 60 * effect_prob_mult;
+            }
+            total_utility *= 0.9;
+            break;
+        }
+        case 21:case 141:{
+            // flinch
+            total_utility += 80 * effect_prob_mult;
+            break;
+        }
+        case 22:{
+            // -1 def opp
+            unsigned int defense_mod = enemy_active->getDefenseModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            break;
+        }
+        case 23:{
+            // +1 def user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            break;
+        }
+        case 29:{
+            // +2 def user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            total_utility += 10 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            break;
+        }
+        case 24:{
+            // clear field and +1 speed user
+            if(cpu_active->hasVolatilesSuchThat(&isVolatileConditionClearedByRapidSpin))
+                total_utility += 50;
+            else
+                total_utility -= 10;
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 25:case 174:{
+            // confusion
+            if(!enemy_active->hasVolatileCondition(CONFUSION) &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 35 * effect_prob_mult;
+            }
+            if(effect==174){
+                // recoil risk
+                total_utility *= 0.7;
+            }
+            break;
+        }
+        case 26:{
+            // protect
+            if(cpu_active->getConsecutiveProtects() > 0)
+                total_utility -= 10;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 27:{
+            // set rain weather
+            if(field->getWeather() == RAIN)
+                total_utility -= 10;
+            else
+                total_utility += 90;
+            break;
+        }
+        case 28:{
+            // +2 att apatt spd -1 def spdef user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 10 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 10 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            total_utility -= 5 * effect_prob_mult;
+            total_utility -= 5 * effect_prob_mult;
+        }
+        case 30:{
+            // +1 spd user, recoil
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            total_utility *= 0.9;
+            break;
+        }
+        case 31:{
+            // -1 spdef opp
+            unsigned int special_defense_mod = enemy_active->getSpecialDefenseModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
+            break;
+        }
+        case 32:case 123:case 124:case 185:{
+            // involves switching
+            auto enemy_types = enemy_active->getTypes();
+            float effectiveness = 1;
+            for(auto type:enemy_types){
+                effectiveness *= getTypeEffectiveness(type, 
+                    cpu_active->getTypes(),cpu_active->isTouchingGround(),
+                    false,false);
+            }
+            total_utility += 20 * effectiveness + effect_prob_mult;
+            break;
+        }
+        case 33:{
+            // safeguard
+            if(field->hasFieldEffect(SAFEGUARD,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 34:{
+            // tailowind
+            if(field->hasFieldEffect(TAILWIND,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 35:{
+            // +1 spatt spdef spd user
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 36:{
+            // multi hit move from 2 to 5 times
+            if(cpu_active->hasAbility(SKILL_LINK))
+                total_utility *= 5;
             else
                 total_utility *= 3;
             break;
         }
-        case 121:{
-            //belly drum
-            if((cpu_active->getCurrentHP() < cpu_active->getMaxHP() * 0.5)||
-                (cpu_active->getAttackModifier() >= 3))
-                total_utility -= 150;
+        case 38:{
+            // setup crit for next turn
+            if(cpu_active->hasVolatileCondition(LASER_FOCUS))
+                total_utility -= 20;
             else
-                total_utility += 70;
+                total_utility += 30;
             break;
         }
-        case 122:{
-            //-1 speed opponent
-            int spd_modifier = enemy_active->getSpeedModifier();
-            if(spd_modifier == -6)
-                total_utility-= 5 * status_mult;
-            else 
-                total_utility += (10 + spd_modifier * 100 / 6)*0.25*status_mult;
+        case 39:{
+            // crits 50% of times
+            total_utility *= 1.25;
             break;
         }
-        case 124:{
-            // user switches out
-            total_utility += 30;
+        case 41:{
+            // toxic spikes
+            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 42:{
+            // +2 speed user
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 43:{
+            //endeavor
+            unsigned int enemy_current_hp = enemy_active->getCurrentHP();
+            unsigned int user_current_hp = cpu_active->getCurrentHP();
+            if(enemy_current_hp > user_current_hp)
+                total_utility += (enemy_current_hp - user_current_hp)*100/ enemy_active->getMaxHP();
+            else
+                total_utility -=  20;
+            break;
+        }
+        case 44:{
+            // if opponent faints user gains attack
+            unsigned int enemy_active_hp_percent = 
+                enemy_active->getCurrentHP() * 100 / enemy_active->getMaxHP();
+            if(enemy_active_hp_percent <= 10)
+                total_utility += 30;
+            break;
+        }
+        case 46:{
+            //-2 att opp
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            total_utility += 10 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            break;
+        }
+        case 47:case 126:{
+            // heal 50% and land
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 10;
+            else if(HP_percent >= 25)
+                total_utility += 25;
+            else if(HP_percent >= 10)
+                total_utility += 50;
+            else
+                total_utility += 100;
+            break;
+        }
+        case 50:{
+            //halves opponents HP
+            unsigned int enemy_current_hp_percent = 
+                enemy_active->getCurrentHP() * 100 / enemy_active->getMaxHP();
+            total_utility += (enemy_current_hp_percent / 2);
+            break;
+        }
+        case 51:{
+            //recoil
+            total_utility *= 0.9;
+            break;
+        }
+        case 52:{
+            //+2 ATT user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            total_utility += 10 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            break;
+        }
+        case 53:{
+            //wrap 
+            if(!enemy_active->hasVolatileCondition(WRAP))
+                total_utility += 25;
+            break;
+        }
+        case 164:{
+            //bind
+            if(!enemy_active->hasVolatileCondition(BIND))
+                total_utility += 25;
+            break;
+        }
+        case 54:{
+            // -2 spdef opp
+            unsigned int special_defense_mod = enemy_active->getSpecialDefenseModifier();
+            total_utility += 10 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
+            break;
+        }
+        case 55:{
+            // stockpile
+            if(cpu_active->getStockpiles() >= 3)
+                total_utility -= 10;
+            else
+                total_utility += 33;
+            break;
+        }
+        case 56:{
+            // swallow
+            unsigned int hp_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(cpu_active->getStockpiles() == 0)
+                total_utility -= 10;
+            else if(hp_percent >= 50)
+                total_utility -= 10;
+            else if(hp_percent >= 25)
+                total_utility += 25;
+            else if(hp_percent >= 10)
+                total_utility += 50;
+            else
+                total_utility += 100;
+            break;
+        }
+        case 57:{
+            // spit up
+            if(cpu_active->getStockpiles() == 0)
+                total_utility = -10;
+            break;
+        }
+        case 58:{
+            // suppress ability
+            if(enemy_active->isAbilitySuppressed())
+                total_utility -= 10;
+            else
+                total_utility += 50 * effect_prob_mult;
+            break;
+        }
+        case 59:{
+            // cancel all stat changes
+            unsigned int enemy_boosts = 0;
+            if(enemy_active->getAttackModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpecialAttackModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getDefenseModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpecialDefenseModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpeedModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getEvasionModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getAccuracyModifier() > 0)
+                enemy_boosts++;
+            unsigned int user_boosts = 0;
+            if(cpu_active->getAttackModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getSpecialAttackModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getDefenseModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getSpecialDefenseModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getSpeedModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getEvasionModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getAccuracyModifier() > 0)
+                user_boosts++;
+            if(enemy_boosts > user_boosts)
+                total_utility += 50 * effect_prob_mult;
+            else
+                total_utility -= 10;
+            break;
+        }
+        case 60:{
+            // +1 att def acc user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int accuracy_mod = cpu_active->getAccuracyModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 3 * (actual_stat_zero - accuracy_mod) * effect_prob_mult;
+            break;
+        } 
+        case 61:{
+            //freeze
+            if(enemy_active->canBeFrozen() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 40 * effect_prob_mult;
+            }
+            break;
+        }
+        case 62:{
+            //+2 spatt user
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            total_utility += 10 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            break;
+        }
+        case 63:{
+            // +1 evasivenss user
+            unsigned int evasion_mod = cpu_active->getEvasionModifier();
+            total_utility += 3 * (actual_stat_zero - evasion_mod) * effect_prob_mult;
+            break;
+        }
+        case 66:{
+            //light screen
+            if(field->hasFieldEffect(LIGHT_SCREEN,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 80;
             break;
         }
         case 125:{
             //reflect
             if(field->hasFieldEffect(REFLECT,OPPONENT))
-                total_utility -= 120;
+                total_utility -= 10;
             else
-                total_utility += 160;
+                total_utility += 80;
             break;
         }
-        case 126:{
-            //heal 50% HP
-            unsigned int health_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
-            if(health_percent < 25)
-                total_utility *= 3;
-            else if(health_percent < 50)
-                total_utility *= 1.5;
-            else
-                total_utility -= 50;
+        case 69:case 122:{
+            // -1 speed opp
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            if(effect == 69 && field->getTerrain()==GRASSY_FIELD)
+                total_utility *= 0.8;
             break;
         }
-        case 127:{
-            // copy target ability
-            if(cpu_active->getAbility() == enemy_active->getAbility())
-                total_utility -= 100;
+        case 72:{
+            //sandstorm
+            if(field->getWeather() == SANDSTORM)
+                total_utility -= 10;
+            else
+                total_utility += 90;
+            break;
+        }
+        case 73:{
+            //earthquake
+            if(enemy_active->hasVolatileCondition(UNDERGROUND))
+                total_utility *= 1,25;
+            if(effect == 69 && field->getTerrain()==GRASSY_FIELD)
+                total_utility *= 0.8;
+            break;
+        }
+        case 74:{
+            //sand tomb
+            if(enemy_active->hasVolatileCondition(SANDTOMB))
+                total_utility -= 10;
+            else
+                total_utility += 25;
+            break;
+        }
+        case 76:{
+            //bad poison
+            // poison opp
+            if(enemy_active->canBeBadlyPoisoned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 70 * effect_prob_mult;
+            }
+            break;
+        }
+        case 77:{
+            //+1 spatt opp + confusion
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            total_utility -= 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            if(!enemy_active->hasVolatileCondition(CONFUSION) &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 35 * effect_prob_mult;
+            }
+            break;
+        }
+        case 78:{
+            // -1 att def user
+            total_utility -= 10 * effect_prob_mult;
+            break;
+        }
+        case 79:{
+            //does nothing
+            total_utility -= 100;
+            break;
+        }
+        case 80:{
+            //copycat
+            total_utility += 30;
+            break;
+        }
+        case 82:{
+            //encore
+            if(enemy_active->hasVolatileCondition(ENCORE))
+                total_utility -= 10;
             else
                 total_utility += 50;
+            break;
         }
-        case 129:{
-            //+1 def spdef user
-            int def_modifier = cpu_active->getDefenseModifier();
-            int spdef_modifier = cpu_active->getSpecialDefenseModifier();
-            if(def_modifier == 6 || spdef_modifier == 6)
-                total_utility -= 10 * status_mult;
+        case 83:{
+            // heal 25% user
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 20;
+            else if(HP_percent >= 25)
+                total_utility += 12;
+            else if(HP_percent >= 10)
+                total_utility += 25;
             else
-                total_utility = (40 - def_modifier * 100 / 6 - spdef_modifier * 100 / 6) * status_mult * 0.35;
+                total_utility += 50;
             break;
         }
-        case 130:{
-            //future sight
-            total_utility /= 3.0;
+        case 84:{
+            // metronome
+            total_utility = RNG::getRandomInteger(1,110);
             break;
         }
-        case 132:{
-            //+1 att def user
-            int att_modifier = cpu_active->getAttackModifier();
-            int def_modifier = cpu_active->getDefenseModifier();
-            if(att_modifier == 6 || def_modifier == 6)
-                total_utility -= 10 * status_mult;
+        case 85:{
+            // gravity
+            if(field->hasFullFieldEffect(GRAVITY))
+                total_utility -= 10;
             else
-                total_utility += (40 - att_modifier * 100 / 6 - def_modifier * 100 / 6) * status_mult * 0.35;
+                total_utility += 50;
             break;
         }
-        case 133:{
-            //-2 spatt user
-            int spatt_modifier = cpu_active->getSpecialAttackModifier();
-            total_utility -= (40 + spatt_modifier * 100 / 6)*0.1*status_mult;
+        case 86:{
+            // +1 att user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
             break;
         }
-        case 134:{
-            // power doubles if target has perm status
-            if(enemy_active->hasPermanentStatus())
-                total_utility *= 2;
+        case 87:{
+            // +1 def spdef user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
             break;
         }
-        case 137:{
-            //user becomes same type as target
-            std::set<Type> enemy_types = enemy_active->getTypes();
-            std::set<Type> cpu_types = cpu_active->getTypes();
-            bool has_effective_type = false;
-            for(auto enemy_type: enemy_types){
-                float effectiveness = getTypeEffectiveness(enemy_type,cpu_types,enemy_active->isTouchingGround(),false,false);
-                if(effectiveness>1.1)
-                    has_effective_type = true;
-            }
-            if(has_effective_type)
-                total_utility += 20;
+        case 88:{
+            //-1 spatt opp
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
+            break;
+        }
+        case 89:{
+            //user dies and heal entering monster
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 20;
+            else if(HP_percent >= 25)
+                total_utility += 1;
+            else if(HP_percent >= 10)
+                total_utility += 10;
+            else
+                total_utility += 30;
+            break;
+        }
+        case 91:{
+            //remove 4 PP from enemy last used attack
+            if(enemy_active->getLastAttackUsed()==0)
+                total_utility -= 10;
+            else
+                total_utility += 25;
+            break; 
+        }
+        case 90:{
+            //disable
+            if(enemy_active->hasDiabledAttack())
+                total_utility -= 10;
+            else
+                total_utility += 45;
+            break;
+        }
+        case 92:{
+            //imprison
+            if(enemy_active->hasVolatileCondition(IMPRISON))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 93:{
+            // mimic
+            if(cpu_active->hasMimickedAttack())
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 95:{
+            // rest
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 10;
+            else if(HP_percent >= 25)
+                total_utility += 37;
+            else if(HP_percent >= 10)
+                total_utility += 45;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 96:{
+            // trap opponent (mean look)
+            if(enemy_active->hasVolatileCondition(MEAN_LOOK))
+                total_utility -= 10;
+            else
+                total_utility += 60;
+            break;
+        }
+        case 97:{
+            // heal 50% of damage dealt
+            total_utility *= 1.3;
+            break;
+        }
+        case 98:{
+            // quick guard
+            total_utility += 20;
+            break;
+        }
+        case 99:{
+            //set grassy field
+            if(field->getTerrain() == GRASSY_FIELD)
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 100:{
+            // user faints after use
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility *= 0.1;
+            else if(HP_percent >= 25)
+                total_utility *= 0.3;
+            else if(HP_percent >= 10)
+                total_utility *= 1.1;
+            else
+                total_utility *= 3.0;
+            break;
+        }
+        case 101:{
+            //heal perm status user
+            if(cpu_active->hasPermanentStatus() && !cpu_active->isAsleep())
+                total_utility += 40;
             else
                 total_utility -= 20;
             break;
         }
-        case 138:{
-            //smack target on ground
-            if(enemy_active->isTouchingGround())
-                total_utility += 20;
+        case 102:{
+            //transform
+            total_utility += 90;
             break;
         }
-        case 140:{
-            //power depends on weight %
-            double weight_percentage = (double)enemy_active->getWeight() / (double)cpu_active->getWeight() * 100;
-            if(weight_percentage > 50){
-                total_utility *= 4;
-            }else if(weight_percentage > 33.34){
-                total_utility *= 6;
-            }else if(weight_percentage > 25){
-                total_utility *= 8;
-            }else if(weight_percentage > 20){
-                total_utility *= 10;
-            }else{
-                total_utility *= 12;
+        case 103:case 156:{
+            //ohko
+            total_utility = 100;
+            break;
+        }
+        case 104:{
+            // spec condition
+            if(!enemy_active->hasPermanentStatus())
+                total_utility += 10;
+            break;
+        }
+        case 105:{
+            // fails if not used at first turn + flinch
+            if(cpu_active->isFirstTurn())
+                total_utility += 80;
+            else
+                total_utility -= 30;
+            break;
+        }
+        case 106:{
+            // taunt
+            if(!enemy_active->hasVolatileCondition(TAUNTED))
+                total_utility += 70;
+            else
+                total_utility -= 10;
+            break;
+        }
+        case 107:{
+            // turn enemy into water type
+            if(enemy_active->hasType(WATER))
+                total_utility -= 20;
+            else
+                total_utility += 30;
+            break;
+        }
+        case 108:{
+            // copy target stat changes
+            unsigned int target_boosts = 0;
+            target_boosts += enemy_active->getAttackModifier();
+            target_boosts += enemy_active->getDefenseModifier();
+            target_boosts += enemy_active->getSpecialAttackModifier();
+            target_boosts += enemy_active->getSpecialDefenseModifier();
+            target_boosts += enemy_active->getSpeedModifier();
+            unsigned int user_boosts = 0;
+            user_boosts += cpu_active->getAttackModifier();
+            user_boosts += cpu_active->getDefenseModifier();
+            user_boosts += cpu_active->getSpecialAttackModifier();
+            user_boosts += cpu_active->getSpecialDefenseModifier();
+            user_boosts += cpu_active->getSpeedModifier();
+            total_utility += (target_boosts - user_boosts) * 5;
+            break;
+        }
+        case 109:{
+            // +2 spdef user
+            unsigned int spdef_mod = cpu_active->getSpecialDefenseModifier();
+            total_utility += 10 * (actual_stat_zero - spdef_mod) * effect_prob_mult;
+            break;
+        }
+        case 110:{
+            // wonder room
+            if(field->hasFullFieldEffect(WONDER_ROOM))
+                total_utility -= 20;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 112:{
+            //damage equals user level
+            total_utility += cpu_active->getLevel() * 100 / enemy_active->getMaxHP();
+            break;
+        }
+        case 113:{
+            // confusion and +2 att opp
+            if(!enemy_active->hasVolatileCondition(CONFUSION) &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                !field->getTerrain()==MISTY_FIELD){
+                total_utility += 35 * effect_prob_mult;
             }
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            total_utility -= 10 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            break;
+        }
+        case 115:{
+            //-1 def spdef opp
+            unsigned int defense_mod = enemy_active->getDefenseModifier();
+            unsigned int special_defense_mod = enemy_active->getSpecialDefenseModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
+            break;
+        }
+        case 117:{
+            // just a bad dumb attack
+            total_utility += 10;
+            break;   
+        }
+        case 121:{
+            // -50% HP user, then attack maxed
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent < 50 || cpu_active->getAttackModifier() == MAX_MODIFIER)
+                total_utility -= 20;
+            else if(HP_percent < 75)
+                total_utility += 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 127:{
+            //copy target ability
+            if(cpu_active->hasAbility(enemy_active->getAbility()) || enemy_active->hasAbility(NO_ABILITY))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 129:{
+            //+1 def spdef user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            break;
+        }
+        case 132:{
+            //+1 ATT DEF USER
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            break;
+        }
+        case 133:{
+            // -2 spatt user
+            total_utility -= 10;
+            break;
+        }
+        case 135:{
+            //hits underwater
+            if(enemy_active->hasVolatileCondition(UNDERWATER))
+                total_utility *= 1.5;
+            break;
+        }
+        case 137:{
+            //user becomes opp type
+            auto enemy_types = enemy_active->getTypes();
+            auto user_types = cpu_active->getTypes();
+            float effectiveness = 1;
+            for(auto type:enemy_types){
+                effectiveness *= getTypeEffectiveness(type, 
+                    user_types,cpu_active->isTouchingGround(),
+                    false,false);
+            }
+            total_utility += 20 * effectiveness + effect_prob_mult;
+        }
+        case 138:{
+            // smack target on ground
+            if(!enemy_active->isTouchingGround())
+                total_utility += 10;
+            break;
+        }
+        case 139:{
+            //stealth rock
+            if(field->hasFieldEffect(STEALTH_ROCKS,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 50;
             break;
         }
         case 142:{
-            // +1 spd user
-            int spd_modifier = cpu_active->getSpeedModifier();
-            if(spd_modifier == 6)
-                total_utility -= 10*status_mult;
-            else
-                total_utility += (40 - spd_modifier * 100 / 6)*0.7*status_mult;
+            //+1 speed user
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
             break;
         }
         case 144:{
             //curse
             if(cpu_active->hasType(GHOST)){
-                //curse opponent
-                unsigned int current_hp = enemy_active->getCurrentHP();
-                unsigned int max_hp = enemy_active->getMaxHP();
-                unsigned int hp_percent = current_hp * 100 / max_hp;
+                unsigned int hp_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
                 if(hp_percent < 50)
-                    total_utility -= 200;
-                if(enemy_active->hasVolatileCondition(CURSED))
-                    total_utility -= 100;
+                    total_utility -= 10;
+                else if(!enemy_active->hasVolatileCondition(CURSED))
+                    total_utility -= 30;
                 else
-                    total_utility += 50;
+                    total_utility += 60;
             }else{
-                // -1 speed, +1 ATT +a DEF user
-                int spd_modifier = cpu_active->getSpeedModifier();
-                int att_modifier = cpu_active->getAttackModifier();
-                int def_modifier = cpu_active->getDefenseModifier();
-                if(att_modifier == 6 || def_modifier == 6)
-                    total_utility -= 10*status_mult;
-                else
-                    total_utility += (40 + spd_modifier * 100 / 6 - att_modifier * 100 / 6 - def_modifier*100/6 ) * status_mult * 0.35;
+                // +1 att def -1 spd user
+                unsigned int attack_mod = cpu_active->getAttackModifier();
+                unsigned int defense_mod = cpu_active->getDefenseModifier();
+                unsigned int speed_mod = cpu_active->getSpeedModifier();
+                total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+                total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+                total_utility -= 5 * effect_prob_mult;
             }
+            break;
         }
         case 145:{
-            // heal target
-            total_utility = -120;
+            // heal 50% target
+            total_utility -= 10;
+            break;
         }
         case 146:{
-            Gender cpu_gender = cpu_active->getGender();
+            //infatuate opponent
+            Gender user_gender = cpu_active->getGender();
             Gender enemy_gender = enemy_active->getGender();
-            if(areMaleAndFemale(cpu_gender,enemy_gender) && !enemy_active->hasVolatileCondition(INFATUATION)){
-                total_utility += 80;
-            }else{
-                total_utility -= 100;
-            }
+            if(!enemy_active->hasVolatileCondition(INFATUATION) && 
+                areMaleAndFemale(user_gender,enemy_gender))
+                total_utility += 50;
+            else
+                total_utility -= 10;
             break;
         }
         case 147:{
             //lock on target
-            if(!cpu_active->hasLockOn(enemy_active->getMonster())){
-                total_utility += 50;
-            }else{
-                total_utility -= 100;
-            }
+            if(cpu_active->hasLockOn(enemy_active->getMonster()))
+                total_utility -= 10;
+            else
+                total_utility += 30;
             break;
         }
         case 148:{
-            //set up electric terrain
-            if(field->getTerrain()==ELECTRIC_FIELD)
-                total_utility -= 170;
-            else
-                total_utility += 120;
-            break;
-        }
-        case 149:{
-            // magnet rise
-            if(cpu_active->hasVolatileCondition(MAGNET_RISE))
-                total_utility -= 100;
+            // set up electric field
+            if(field->getTerrain() == ELECTRIC_FIELD)
+                total_utility -= 10;
             else
                 total_utility += 50;
             break;
         }
-        case 150:{
-            //attack never kills, avoid it if possible
-            total_utility *= 0.1;
+        case 149:{
+            //magnet rise
+            if(enemy_active->isTouchingGround() && 
+                !enemy_active->hasVolatileCondition(MAGNET_RISE))
+                total_utility += 30;
+            else
+                total_utility -= 10;
             break;
         }
-        case 151:{
-            // avoid using this when opponent is asleep
-            if(enemy_active->isAsleep())
-                total_utility -= 20;
+        case 150:{
+            //cant KO
+            total_utility -= 10;
+            break;
+        }
+        case 152:{
+            //raise random stat by 2
+            total_utility += 20;
+            break;
+        }
+        case 153:{
+            //start snowstorm weather
+            if(field->getWeather() == SNOWSTORM)
+                total_utility -= 10;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 154:{
+            //aqua ring
+            if(cpu_active->hasVolatileCondition(AQUA_RING))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 157:{
+            //memento
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 10;
+            else if(HP_percent >= 25)
+                total_utility += 1;
+            else if(HP_percent >= 10)
+                total_utility += 10;
+            else
+                total_utility += 30;
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
+            break;
+        }
+        case 158:{
+            //whirlpool
+            if(enemy_active->hasVolatileCondition(WHIRLPOOL))
+                total_utility -= 10;
+            else
+                total_utility += 25;
+            break;
+        }
+        case 159:{
+            //spikes
+            if(field->hasFieldEffect(SPIKES_3,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 161:{
+            //destiny bond
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 30;
+            else if(HP_percent >= 25)
+                total_utility += 10;
+            else if(HP_percent >= 10)
+                total_utility += 50;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 162:{
+            //fails if opponent is not asleep
+            if(!enemy_active->isAsleep())
+                total_utility = -40;
+            else
+                total_utility *= 1.23;
+            break;
+        }
+        case 163:{
+            //perish song
+            if(enemy_active->hasVolatileCondition(PERISH_SONG))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 166:{
+            //-1 speed user
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility -= 5 * effect_prob_mult;
+            break;
+        }
+        case 167:{
+            //charge
+            if(cpu_active->hasVolatileCondition(CHARGED) || 
+                cpu_active->hasVolatileCondition(CHARGED_2))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 168:{
+            //reflect special damage taken
+            total_utility = 30;
+            break;
+        }
+        case 169:{
+            //+1 spatt user
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            break;
+        }
+        case 170:{
+            // bad move dont use
+            total_utility -= 30;
+            break;
+        }
+        case 171:{
+            // risk taking big recoil
+            total_utility *= 0.7;
+            break;
+        }
+        case 173:{
+            //endure
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 10;
+            else if(HP_percent >= 25)
+                total_utility += 1;
+            else if(HP_percent >= 10)
+                total_utility += 10;
+            else
+                total_utility += 30;
+            break;
+        }
+        case 175:{
+            total_utility = 30;
+            break;
+        }
+        case 177:{
+            //reset stat changes
+            unsigned int enemy_boosts = 0;
+            if(enemy_active->getAttackModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpecialAttackModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getDefenseModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpecialDefenseModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getSpeedModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getEvasionModifier() > 0)
+                enemy_boosts++;
+            if(enemy_active->getAccuracyModifier() > 0)
+                enemy_boosts++;
+            unsigned int user_boosts = 0;
+            if(cpu_active->getAttackModifier() > 0)
+                user_boosts++;  
+            if(cpu_active->getSpecialAttackModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getDefenseModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getSpecialDefenseModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getSpeedModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getEvasionModifier() > 0)
+                user_boosts++;
+            if(cpu_active->getAccuracyModifier() > 0)
+                user_boosts++;
+            if(enemy_boosts > user_boosts)
+                total_utility += 50 * effect_prob_mult;
+            else
+                total_utility -= 10;
+            break;
+        }
+        case 178:{
+            //avoid this move
+            total_utility *= 0.2;    
+            break;
+        }
+        case 179:{
+            //ingrain
+            if(cpu_active->hasVolatileCondition(INGRAINED))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 180:{
+            //omniboost
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 181:{
+            //-1 att def opp
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            unsigned int defense_mod = enemy_active->getDefenseModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            break;
+        }
+        case 182:{
+            //+1 att speed user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 183:{
+            //swap OFFENSIVE stat changes with target
+            unsigned int enemy_boosts = 0;
+            enemy_boosts += enemy_active->getAttackModifier();
+            enemy_boosts += enemy_active->getSpecialAttackModifier();
+            unsigned int user_boosts = 0;
+            user_boosts += cpu_active->getAttackModifier();
+            user_boosts += cpu_active->getSpecialAttackModifier();
+            total_utility += (enemy_boosts - user_boosts) * 5;
+            break;
+        }
+        case 184:{
+           //swap DEFENSIVE stat changes with target
+           unsigned int enemy_boosts = 0;
+           enemy_boosts += enemy_active->getDefenseModifier();
+           enemy_boosts += enemy_active->getSpecialDefenseModifier();
+           unsigned int user_boosts = 0;
+           user_boosts += cpu_active->getDefenseModifier();
+           user_boosts += cpu_active->getSpecialDefenseModifier();
+           total_utility += (enemy_boosts - user_boosts) * 5;
+           break; 
+        }
+        case 186:{
+            //always hits under snow or hail
+            if(field->getWeather() == SNOWSTORM || field->getWeather() == HAIL)
+                total_utility *= 1.5;
+            break;
+        }
+        case 187:{
+            //recharge next turn
+            total_utility *= 0.66;
+            break;
+        }
+        case 188:{
+            //set sunny weather
+            if(field->getWeather() == SUN)
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 189:{
+            //always crits
+            total_utility *= 2;
+            break;
+        }
+        case 190:{
+            // mist
+            if(field->hasFieldEffect(MIST,OPPONENT))
+                total_utility -= 10;
+            else
+                total_utility += 90;
+            break;
+        }
+        case 191:{
+            //user changes type to one of its attacks types
+            total_utility += 10;
+            break;
+        }
+        case 192:{
+            //user changes type to resist opponent
+            auto enemy_types = enemy_active->getTypes();
+            auto user_types = cpu_active->getTypes();
+            float effectiveness = 1;
+            for(auto type:enemy_types){
+                effectiveness *= getTypeEffectiveness(type, 
+                    user_types,cpu_active->isTouchingGround(),
+                    false,false);
+            }
+            total_utility += 20 * effectiveness + effect_prob_mult;
+            break;
+        }
+        case 193:{
+            //block opponent
+            if(enemy_active->hasVolatileCondition(BLOCKED))
+                total_utility -= 10;
+            else
+                total_utility += 30;
+            break;
+        }
+        case 194:{
+            // only used while sleeping selects another random attack
+            if(cpu_active->isAsleep())
+                total_utility+= RNG::getRandomInteger(1,110);
+            else
+                total_utility -= 10;
+            break;
+        }
+        case 195:{
+            //fails if user is not sleeping + flinch
+            if(!cpu_active->isAsleep())
+                total_utility = -40;
+            else
+                total_utility *= 1.23 * effect_prob_mult;
+            break;
+        }
+        case 196:{
+            //supereffective against water
+            if(enemy_active->hasType(WATER))
+                total_utility *= 3.33;
             break;
         }
         default: break;
     }
+    total_utility *= accuracy / 90.0;
+    // add some randomicity to the utility
+    total_utility *= RNG::getRandomInteger(90,110)/100.0;
+    // avoid selecting status when taunted
+    if(cpu_active->hasVolatileCondition(TAUNTED) && attack->getCategory()==STATUS)
+        total_utility = -20;
     return total_utility;
 }
 
@@ -1153,6 +1536,7 @@ unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
     std::vector<unsigned int> choices;
     for(auto it = available_attacks.begin(); it != available_attacks.end(); it++){
         if(it->second == 0){continue;}
+        if(active_monster->getDisabledAttack() == it->first){continue;}
         choices.push_back(it->first);
     }
     if(choices.empty()){
@@ -1189,6 +1573,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
     }
     Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
+    if(switch_choice != nullptr && active_monster->hasVolatileCondition(PERISH_SONG))
+        switch_choice->utility*=2.5;//increase utility of switching perish song condamned monster
     BattleAction struggle_action(
         OPPONENT,
         ATTACK,
@@ -1259,15 +1645,15 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
         unsigned int curr_pp = choice.second;
         if(choice.second == 0){continue;}
         if(attack_id==0){continue;}
+        if(active_user->getDisabledAttack() == attack_id){continue;}
         int utility = computeAttackUtility(attack_id,active_user,active_target,field);
         if(utility > best_utility){
             best_choice_id = attack_id;
             best_utility = utility;
         }
     }
-    if(best_utility == -100000){
+    if(best_utility == -100000)
         return nullptr;
-    }
     return new Choice(
         best_choice_id,
         best_utility,
