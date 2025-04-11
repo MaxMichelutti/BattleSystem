@@ -1205,7 +1205,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(POISONED);
                     }
                 }
@@ -1228,7 +1228,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(BAD_POISON);
                     }
                 }
@@ -1334,7 +1334,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(BURN);
                     }
                 }
@@ -1366,7 +1366,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     if(active_target->hasAbility(SYNCHRONIZE) && 
                         !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                         active_user->setPermanentStatus(PARALYSIS);
                     }
                 }
@@ -1959,7 +1959,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         event_handler->displayMsg(opponent_mon_name+" was burned!");
                         if(active_target->hasAbility(SYNCHRONIZE) && 
                             !active_user->hasPermanentStatus()){
-                            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                            event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                             active_user->setPermanentStatus(BURN);
                         }
                     }else if(random_number==2 && 
@@ -1968,7 +1968,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         event_handler->displayMsg(opponent_mon_name+" was paralyzed!");
                         if(active_target->hasAbility(SYNCHRONIZE) && 
                             !active_user->hasPermanentStatus()){
-                            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                            event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
                             active_user->setPermanentStatus(PARALYSIS);
                         }
                     }else if(active_target->canBeFrozen() && 

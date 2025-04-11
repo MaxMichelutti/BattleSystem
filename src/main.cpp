@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     // monster_p1->printSummary();
     Monster* monster_p2 = Monster::generateRandomMonster(20,50);
     // monster_p2->printSummary();
-    Monster* monster_p3 = Monster::generateRandomMonster(31,50);
+    Monster* monster_p3 = Monster::generateRandomMonster(151,50);
     // monster_p3->printSummary();
     Monster* monster_o1 = Monster::generateRandomMonster(40,50);
     Monster* monster_o2 = Monster::generateRandomMonster(51,50);
