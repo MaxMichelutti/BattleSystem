@@ -2235,6 +2235,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->changeAttackModifier(+1);
                     active_user->changeDefenseModifier(+1);
                 }
+                break;
             }
             case 145:{
                 //heal 50% target
@@ -3951,6 +3952,9 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     Battler * active_target = getActorBattler(otherBattleActionActor(actor));
     std::string user_mon_name = active_user->getNickname();
     std::string opponent_mon_name = active_target->getNickname();
+    if(!attack->makesContact()){
+        return;
+    }
     
     // POISON TOUCH ability effect
     if(active_user->hasAbility(POISON_TOUCH) && 
@@ -3969,7 +3973,7 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     if(active_target->hasAbility(STATIC) && 
         active_user->canBeParalyzed() &&
         RNG::getRandomInteger(0,2)==0){
-        event_handler->displayMsg(opponent_mon_name+"''s Static triggers!");
+        event_handler->displayMsg(opponent_mon_name+"'s Static triggers!");
         active_user->setPermanentStatus(PARALYSIS);
         if(active_user->hasAbility(SYNCHRONIZE) && 
             !active_target->hasPermanentStatus()){

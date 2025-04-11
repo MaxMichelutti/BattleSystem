@@ -1,5 +1,21 @@
 #include "cpu_ai.h"
 
+// Choice
+
+Choice::Choice(){
+    choice_id = 0;
+    utility = 0;
+    action_type = ATTACK;
+}
+Choice::Choice(unsigned int choice_id, int utility, BattleActionType action_type){
+    this->choice_id = choice_id;
+    this->utility = utility;
+    this->action_type = action_type;
+}
+Choice::~Choice(){}
+
+// CPUAI
+
 CPUAI::CPUAI(){
     skill = 0;
 }
@@ -11,17 +27,17 @@ unsigned int CPUAI::getSkill()const{
     return skill;
 }
 
-int CPUAI::computeUtility(unsigned int attack_id, Battler* cpu_active,Battler* enemy_active, Field* field)const{
+int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Battler* enemy_active, Field* field)const{
     Attack* attack = Attack::getAttack(attack_id);
     unsigned int effect = attack->getEffectId();
-    if(cpu_active->isFainted()){
-        return -10000;
-    }
+    // if(cpu_active->isFainted()){
+    //     return -10000;
+    // }
     unsigned int accuracy = attack->getAccuracy();
     if(accuracy==ALWAYS_HITS)
         accuracy = 100;
-    unsigned int total_utility = 10;
-    unsigned int sleep_mult = 1;
+    int total_utility = 10;
+    int sleep_mult = 1;
     if(enemy_active->isAsleep())
         sleep_mult=10;
     double screen_mult = 1;
@@ -327,7 +343,7 @@ int CPUAI::computeUtility(unsigned int attack_id, Battler* cpu_active,Battler* e
             if(has_effective_type)
                 total_utility += 20;
             else
-                total_utility -= 20;
+                total_utility -= 100;
         }
         case 33:{//safeguard
             if(field->hasFieldEffect(SAFEGUARD,OPPONENT))
@@ -1132,6 +1148,20 @@ int CPUAI::computeUtility(unsigned int attack_id, Battler* cpu_active,Battler* e
     return total_utility;
 }
 
+unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
+    auto available_attacks = active_monster->getAttacks();
+    std::vector<unsigned int> choices;
+    for(auto it = available_attacks.begin(); it != available_attacks.end(); it++){
+        if(it->second == 0){continue;}
+        choices.push_back(it->first);
+    }
+    if(choices.empty()){
+        return STRUGGLE_ID;
+    }
+    unsigned int random_choice = RNG::getRandomInteger(0,choices.size()-1);
+    return choices[random_choice];
+}
+
 BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_team, Battler* enemy_active,Field* field)const{
     BattleAction forced_action = forcedAction(OPPONENT, active_monster,field);
     if(forced_action.getActionType() != ATTACK){return forced_action;}
@@ -1157,166 +1187,135 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             0);
     }
-    unsigned int chosen_attack = chooseAttack(active_monster, enemy_active,field);
-    unsigned int chosen_switch = chooseSwitch(active_monster,monster_team, enemy_active,field);
-    unsigned int speed = active_monster->getModifiedSpeed();
-    if((chosen_switch == 0)&&(chosen_attack == STRUGGLE_ID)){
+    Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
+    Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
+    if(attack_choice == nullptr && switch_choice == nullptr){
         return BattleAction(
             OPPONENT,
             ATTACK,
             STRUGGLE_ID, 
             0, 
-            speed, 
+            active_monster->getModifiedSpeed(), 
             0);
-    }else if(chosen_switch == 0 || !active_monster->canSwitchOut(enemy_active) ){
-        Attack* attack = Attack::getAttack(chosen_attack);
-        return BattleAction(
-            OPPONENT,
-            ATTACK,
-            chosen_attack, 
-            attack->getPriorityLevel(), 
-            speed, 
-            0);
-    }else if(chosen_attack == STRUGGLE_ID){
+    }else if(attack_choice == nullptr){
+        unsigned int switch_id = switch_choice->choice_id;
+        delete switch_choice;
         return BattleAction(
             OPPONENT,
             SWITCH,
             0, 
             0, 
-            speed, 
-            chosen_switch);
+            active_monster->getModifiedSpeed(), 
+            switch_id);
+    }else if(switch_choice == nullptr){
+        unsigned int attack_id = attack_choice->choice_id;
+        delete attack_choice;
+        Attack* attack = Attack::getAttack(attack_id);
+        return BattleAction(
+            OPPONENT,
+            ATTACK,
+            attack_id, 
+            attack->getPriorityLevel(), 
+            active_monster->getModifiedSpeed(), 
+            0);
+    }else if(attack_choice->utility >= switch_choice->utility){
+        unsigned int attack_id = attack_choice->choice_id;
+        delete attack_choice;
+        delete switch_choice;
+        Attack* attack = Attack::getAttack(attack_id);
+        return BattleAction(
+            OPPONENT,
+            ATTACK,
+            attack_id, 
+            attack->getPriorityLevel(), 
+            active_monster->getModifiedSpeed(), 
+            0);
     }else{
-        Attack* attack = Attack::getAttack(chosen_attack);
-        int attack_utility = computeUtility(chosen_attack, active_monster, enemy_active, field);
-        auto switch_attacks = monster_team->getMonsters()[chosen_switch]->getAttacks();
-        unsigned int best_attack = 0;
-        int best_utility = -100000;
-        for(auto attack: switch_attacks){
+        unsigned int switch_id = switch_choice->choice_id;
+        delete switch_choice;
+        delete attack_choice;
+        return BattleAction(
+            OPPONENT,
+            SWITCH,
+            0, 
+            0, 
+            active_monster->getModifiedSpeed(), 
+            switch_id);
+    }
+}
+
+Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Field*field)const{
+    auto choices = active_user->getAttacks();
+    if(choices.empty()){
+        return nullptr;
+    }
+    unsigned int best_choice_id = 0;
+    int best_utility = -100000;
+    for(auto choice: choices){
+        unsigned int attack_id = choice.first;
+        unsigned int curr_pp = choice.second;
+        if(choice.second == 0){continue;}
+        if(attack_id==0){continue;}
+        int utility = computeAttackUtility(attack_id,active_user,active_target,field);
+        if(utility > best_utility){
+            best_choice_id = attack_id;
+            best_utility = utility;
+        }
+    }
+    if(best_utility == -100000){
+        return nullptr;
+    }
+    return new Choice(
+        best_choice_id,
+        best_utility,
+        ATTACK
+    );
+}
+
+Choice* CPUAI::getBestSwitchChoice(Battler*active_user,MonsterTeam*user_team,Battler*active_target,Field*field)const{
+    if(!user_team->hasAliveBackup()){
+        return nullptr;
+    }
+    auto choices = user_team->getMonsters();
+    unsigned int best_choice_id = 0;
+    int best_utility = -100000;
+    for(int i=1; i<choices.size();i++){
+        if(choices[i]->isFainted()){
+            continue;
+        }
+        auto monster_attacks = choices[i]->getAttacks();
+        int curr_utility = 0;
+        for(auto attack: monster_attacks){
             unsigned int attack_id = attack.first;
-            int current_utility = computeUtility(attack_id, active_monster, enemy_active, field);
-            if(current_utility > best_utility){
-                best_utility = current_utility;
-                best_attack = attack_id;
+            unsigned int curr_pps = attack.second;
+            if(attack_id == 0){continue;}
+            if(curr_pps == 0){continue;}
+            int attack_utility = computeAttackUtility(attack_id,active_user,active_target,field);
+            if(attack_utility > curr_utility){
+                curr_utility = attack_utility * 0.5;
             }
         }
-        int switch_attack_utility = computeUtility(best_attack, active_monster, enemy_active, field) * 0.4;
-        if(attack_utility >= switch_attack_utility){
-            return BattleAction(
-                OPPONENT,
-                ATTACK,
-                chosen_attack, 
-                attack->getPriorityLevel(), 
-                speed, 
-                0);
-        }else{
-            return BattleAction(
-                OPPONENT,
-                SWITCH,
-                0,
-                0, 
-                speed, 
-                chosen_switch);
+        if(curr_utility > best_utility){
+            best_choice_id = i;
+            best_utility = curr_utility;
         }
-
     }
+    if(best_utility == -100000){
+        return nullptr;
+    }
+    return new Choice(
+        best_choice_id,
+        best_utility,
+        SWITCH
+    );
 }
 
-unsigned int CPUAI::chooseAttack(Battler* active_monster, Battler* enemy_active, Field* field)const{
-    auto available_attacks = active_monster->getAttacks();
-    //remove disabled attack from those available
-    if(active_monster->hasDiabledAttack()){
-        unsigned int disabled_attack = active_monster->getDisabledAttack();
-        auto it = available_attacks.find(disabled_attack);
-        if(it != available_attacks.end()){
-            available_attacks.erase(it);
-        }
-    }
-    // if taunted, remove STATUS moves from those available
-    if(active_monster->hasVolatileCondition(TAUNTED)){
-        std::vector<unsigned int> options_to_remove;
-        for(auto it=available_attacks.begin();it!=available_attacks.end();it++){
-            Attack* attack = Attack::getAttack(it->first);
-            if(attack->getCategory()==STATUS)
-                options_to_remove.push_back(it->first);
-        }
-        for(unsigned int option: options_to_remove){
-            available_attacks.erase(option);
-        }
-    }
-    std::map<unsigned int, int> attacks_utility;
-    bool has_attack = false;
-    for(auto it = available_attacks.begin(); it != available_attacks.end(); it++){
-        unsigned int attack_id = it->first;
-        unsigned int current_pp = it->second;
-        if(current_pp > 0){
-            has_attack = true;
-            attacks_utility.insert({attack_id, computeUtility(attack_id, active_monster,enemy_active,field)});
-        }
-    }
-    if(!has_attack){return STRUGGLE_ID;}
-    unsigned int best_attack = 0;
-    int best_utility = -100000;
-    for(auto it = attacks_utility.begin(); it != attacks_utility.end(); it++){
-        if(it->second > best_utility){
-            best_utility = it->second;
-            best_attack = it->first;
-        }
-    }
-    return best_attack;
-}
-
-unsigned int CPUAI::chooseSwitch(Battler* active_battler,MonsterTeam* monster_team, Battler* enemy_active, Field* field)const{
-    auto opponent_monsters = monster_team->getMonsters();
-    std::vector<Monster*> available_monsters;
-    for(unsigned int i=1;i<opponent_monsters.size();i++){
-        Monster* switch_monster = opponent_monsters[i];
-        if(switch_monster->isFainted()){continue;}
-        available_monsters.push_back(switch_monster);
-    }
-    if(available_monsters.empty() || 
-        (!active_battler->canSwitchOut(enemy_active) && !active_battler->isFainted())){
+unsigned int CPUAI::chooseSwitch(Battler*active_user,MonsterTeam*user_team,Battler*active_target,Field*field)const{
+    Choice * choice = getBestSwitchChoice(active_user,user_team,active_target,field);
+    if(choice == nullptr){
         return 0;
     }
-    unsigned int best_switch = 0;
-    int best_utility = -10000;
-    for(unsigned int i=1;i<opponent_monsters.size();i++){
-        auto attacks = opponent_monsters[i]->getAttacks();
-        if(opponent_monsters[i]->isFainted()){continue;}
-        unsigned int current_utility = -1000;
-        for(auto it = attacks.begin(); it != attacks.end(); it++){
-            Attack* attack = Attack::getAttack(it->first);
-            unsigned int attack_id = it->first;
-            unsigned int current_pp = it->second;
-            if(current_pp == 0){continue;}
-            if(attack->getCategory() == STATUS){continue;}
-            bool can_hit_ghosts = (opponent_monsters[i]->getAbility()==SCRAPPY);
-            unsigned int move_utility = attack->getPower() * getTypeEffectiveness(attack->getType(), 
-                                                                enemy_active->getTypes(),
-                                                                enemy_active->isTouchingGround(),
-                                                                can_hit_ghosts,
-                                                                attack->getEffectId() == 196);
-            if(move_utility > current_utility){
-                current_utility = move_utility;
-            }
-        }
-        if(current_utility > best_utility){
-            best_utility = current_utility;
-            best_switch = i;
-        }
-    }
-    return best_switch;
-}
-
-unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
-    auto available_attacks = active_monster->getAttacks();
-    std::vector<unsigned int> choices;
-    for(auto it = available_attacks.begin(); it != available_attacks.end(); it++){
-        if(it->second == 0){continue;}
-        choices.push_back(it->first);
-    }
-    if(choices.empty()){
-        return STRUGGLE_ID;
-    }
-    unsigned int random_choice = RNG::getRandomInteger(0,choices.size()-1);
-    return choices[random_choice];
+    unsigned int choice_id = choice->choice_id;
+    delete choice;
+    return choice_id;
 }
