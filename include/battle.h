@@ -28,6 +28,8 @@ struct ScheduledFutureSight{
 
 BattleActionActor otherBattleActionActor(BattleActionActor actor);
 
+bool isAttackingActionType(BattleActionType action_type);
+
 class BattleAction{
     private:
     BattleActionActor actor;

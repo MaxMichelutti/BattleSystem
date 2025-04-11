@@ -9,6 +9,27 @@ BattleActionActor otherBattleActionActor(BattleActionActor actor) {
         return PLAYER;
 }
 
+// BattleActionType ------------------------------------------------------------------------------------------------------------
+
+bool isAttackingActionType(BattleActionType action_type){
+    switch(action_type){
+        case ATTACK:
+        case PETAL_DANCE:
+        case OUTRAGE:
+        case THRASH:
+        case SOLAR_BEAM:
+        case FLY:
+        case ROLLOUT:
+        case DIG:
+        case DIVE:
+        case UPROAR:
+        case SKY_ATTACK:
+            return true;
+        default:
+            return false;
+    }
+}
+
 // ScheduledFutureSight ------------------------------------------------------------------------------------------------------------
 ScheduledFutureSight::ScheduledFutureSight(unsigned int turns_left, 
         unsigned int user_special_attack, 
@@ -407,10 +428,7 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
     }
     // perform action
     BattleActionType atype = action.getActionType();
-    if((atype == ATTACK)||(atype == SOLAR_BEAM)||(atype == PETAL_DANCE)||
-        (atype==OUTRAGE)||(atype==FLY)||(atype==ROLLOUT)||
-        (atype==DIG)||(atype==THRASH)||(atype==DIVE)||
-        (atype==UPROAR)){
+    if(isAttackingActionType(atype)){
         performAttack(action,all_actions);
         // deactivate mold breaker
         active_user->deactivateMoldBreaker();
@@ -4135,7 +4153,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
             break;
         }
         case 49:{//sucker punch
-            if(other_action.getActionType() == SWITCH || // opponent is not attacking
+            if(!isAttackingActionType(other_action.getActionType()) || // opponent is not attacking
                 action.getOrder() > other_action.getOrder() || // opponent action comes before
                 Attack::getAttack(other_action.getAttackId())->getCategory()==STATUS){ // opponent is using status move
                 attack_failed = true;
