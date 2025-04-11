@@ -1046,6 +1046,7 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
         active_user->getAbility()==ROCK_HEAD) && 
         effect !=11 && //struggle recoil
         effect != 97 && // heal
+        effect != 162 && // heal
         effect != 100 && // death after use
         effect != 117) // death after use
         return;
@@ -1143,7 +1144,6 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
     }
     if(effect_is_applied){
         switch(effect){
-            case 0: break; // No effect
             case 1: { // lower attack by 1 opponent
                 active_target->changeAttackModifier(-1);
                 break;
@@ -2520,13 +2520,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 if(active_user->getAbility() == REGENERATOR){
                     //regenerate 1/3 of user HP
-                    unsigned int maxHP = player_active->getMaxHP();
+                    unsigned int maxHP = active_user->getMaxHP();
                     unsigned int heal_amount = max((maxHP+2) / 3,1);
-                    player_active->removeDamage(heal_amount);
+                    active_user->removeDamage(heal_amount);
                 }
-                if(player_active->getAbility() == NATURAL_CURE){
+                if(active_user->getAbility() == NATURAL_CURE){
                     //remove status
-                    player_active->clearPermanentStatus();
+                    active_user->clearPermanentStatus();
                 }
                 if(actor==PLAYER){
                     unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
