@@ -4147,7 +4147,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
             break;
         }
         case 105:{//fake out
-            if(active_user->getTurnsInBattle() != 1){
+            if(!active_user->isFirstTurn()){
                 active_user->setLastAttackUsed(action.getAttackId());
                 last_attack_used_id = attack_id;
                 attack_failed = true;
