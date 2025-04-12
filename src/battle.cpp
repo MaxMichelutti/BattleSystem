@@ -143,7 +143,9 @@ Battle::Battle() {
     turn = 0;
 }
 
-Battle::Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team) {
+Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
+        MonsterTeam* player_team, MonsterTeam* opponent_team,
+        Bag * user_bag, Bag* opponent_bag) {
     this->event_handler = handler;
     this->cpu_ai = new CPUAI(cpu_skill);
     this->player_team = new MonsterTeam(*player_team);
@@ -156,9 +158,14 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player
     rounds_used_this_turn = 0;
     turn_of_opponent_last_kill = -2;
     turn_of_player_last_kill = -2;
+    player_bag = user_bag;
+    opponent_bag = opponent_bag;
 }
 
-Battle::Battle(unsigned int cpu_skill, EventHandler* handler, MonsterTeam* player_team, MonsterTeam* opponent_team, Weather weather, Terrain terrain) {
+Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
+        MonsterTeam* player_team, MonsterTeam* opponent_team, 
+        Weather weather, Terrain terrain,
+        Bag * user_bag, Bag* opponent_bag) {
     this->event_handler = handler;
     this->cpu_ai = new CPUAI(cpu_skill);
     this->player_team = new MonsterTeam(*player_team);
@@ -173,6 +180,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler, MonsterTeam* playe
     rounds_used_this_turn = 0;
     turn_of_opponent_last_kill = -2;
     turn_of_player_last_kill = -2;
+    player_bag = user_bag;
+    opponent_bag = opponent_bag;
 }
 
 Battle::~Battle() {

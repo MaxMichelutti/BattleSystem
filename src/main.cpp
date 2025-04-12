@@ -36,7 +36,9 @@ int main(int argc, char** argv) {
     opponent_team->addMonster(monster_o2);
     opponent_team->addMonster(monster_o3);
     TextEventHandler* handler = new TextEventHandler();
-    Battle* battle = new Battle(1,handler,player_team, opponent_team);
+    Bag * user_bag = new Bag();
+    Bag * opponent_bag = new Bag();
+    Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);
     battle->startBattle();
     // Species::printAllSummaries();
     // Attack::printAllSummaries();

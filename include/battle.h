@@ -10,6 +10,7 @@
 #include "cpu_ai.h"
 #include "util.h"
 #include "items.h"
+#include "bag.h"
 
 class CPUAI;
 class EventHandler;
@@ -18,6 +19,7 @@ class MonsterTeam;
 class Attack;
 class Field;
 class ItemData;
+class Bag;
 
 struct ScheduledFutureSight{
     unsigned int turns_left;
@@ -79,6 +81,8 @@ class Battle{
     Battler* opponent_active;
     MonsterTeam* player_team;
     MonsterTeam* opponent_team;
+    Bag* player_bag;
+    Bag* opponent_bag;
     Field* field;
     CPUAI* cpu_ai;
     EventHandler* event_handler;
@@ -127,8 +131,8 @@ class Battle{
     void applyScheduledFutureSights();
     public:
     Battle();
-    Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team);
-    Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Weather weather, Terrain terrain);
+    Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
+    Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Weather weather, Terrain terrain, Bag * user_bag, Bag* opponent_bag);
     ~Battle();
     // void addEventHandler(EventHandler* event_handler);
     void startBattle();
