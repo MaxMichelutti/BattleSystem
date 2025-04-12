@@ -4,6 +4,7 @@
 #include "species.h"
 #include "attack.h"
 #include "expcurve.h"
+#include "abilities.h"
 #include <vector>
 #include <string>
 #include <iostream>

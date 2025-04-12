@@ -19,6 +19,26 @@ std::string oneDecimalIntegerToString(unsigned int integer){
     return std::to_string(integer/10) + "." + std::to_string(integer%10);
 }
 
+std::string internalToDisplay(std::string str){
+    std::string result = str;
+    bool is_first_letter = true;
+    for (size_t i = 0; i < result.length(); ++i) {
+        if(isalpha(result[i])){
+            if(is_first_letter){
+                result[i] = toupper(result[i]);
+                is_first_letter = false;
+            }else{
+                result[i] = tolower(result[i]);
+            }
+        }
+        if (result[i] == '_') {
+            result[i] = ' ';
+            is_first_letter = true;
+        }
+    }
+    return result;
+}
+
 bool is_number(const std::string& s)
 {
     std::string::const_iterator it = s.begin();

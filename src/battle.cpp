@@ -921,6 +921,10 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         if(attack->isSoundBased() && active_target->hasAbility(SOUNDPROOF)){
             effectiveness = 0;
         }
+        // check for immunity for overcoat
+        if(attack->isPowder() && active_target->hasAbility(OVERCOAT)){
+            effectiveness = 0;
+        }
         // check immunity
         if(effectiveness == 0){
             event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
@@ -1159,6 +1163,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
     // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
     if(active_target->hasAbility(SOUNDPROOF) && 
         attack->isSoundBased() &&
+        attack->getEffectTarget() == TARGET_OPPONENT){
+        effect_is_applied = false;
+    }
+    // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
+    if(active_target->hasAbility(OVERCOAT) && 
+        attack->isPowder() &&
         attack->getEffectTarget() == TARGET_OPPONENT){
         effect_is_applied = false;
     }
@@ -2817,6 +2827,12 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         enemy_monster->hasAbility(SOUNDPROOF)){
         return 0;
     }
+    // check for overcoat immunity
+    if(attack->isPowder() && 
+        attack->getCategory() != STATUS &&
+        enemy_monster->hasAbility(OVERCOAT)){
+        return 0;
+    }
     // check for endeavor
     if(effect == 43){
         int current_hp_user = user_monster->getCurrentHP();
@@ -3261,7 +3277,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case FLASH_FIRE:{
-            if(attack->getType() == FIRE){
+            if(attack->getType() == FIRE && active_user->hasVolatileCondition(FLASH_FIRED)){
                 base_power *= 3.0 / 2;
             }
             break;
@@ -3826,7 +3842,8 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
     user_ability = user_active->getAbility();
     switch(user_ability){
         case INTIMIDATE:{
-            if(!target_active->isFainted()){
+            if(!target_active->isFainted() && 
+                !doesAbilityIgnoreIntimidate(target_active->getAbility())){//inner focus, oblivious and scrappy give immunity to intimidate
                 event_handler->displayMsg(user_name+" intimidates its opponent!");
                 target_active->changeAttackModifier(-1);
             }
@@ -4011,7 +4028,8 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
     }
     // EFFECT SPORE ability effect
     if(active_target->hasAbility(EFFECT_SPORE) && 
-        !active_user->hasType(GRASS)){
+        !active_user->hasType(GRASS) &&
+        !active_user->hasAbility(OVERCOAT)){
         unsigned int random_number = RNG::getRandomInteger(1,100);
         if(random_number<10){//poison
             if(active_user->canBePoisoned()){
@@ -4379,6 +4397,15 @@ bool Battle::checkIfAttackFails(Attack* attack,
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         active_target->changeSpecialAttackModifier(1);
+        attack_absorbed = true;
+    }
+    // flash fire -> drew in fire type attack and get flash fired volatile
+    if(active_target->hasAbility(FLASH_FIRE) && 
+        attack->getType()==FIRE &&
+        attack->getCategory()!=STATUS && 
+        attack->getTarget()==TARGET_OPPONENT){
+        event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
+        active_target->addVolatileCondition(FLASH_FIRED, -1);
         attack_absorbed = true;
     }
     // dry skin and water absorb prevent water type moves from hitting and restores 25% of max HP

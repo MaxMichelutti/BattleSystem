@@ -4,6 +4,7 @@
 #include "expcurve.h"
 #include "enums.h"
 #include "attack.h"
+#include "abilities.h"
 #include <map>
 #include <string>
 #include <set>

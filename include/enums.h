@@ -111,7 +111,8 @@ enum VolatileStatusCondition{
     ENDURE,
     FOCUSED,
     INGRAINED,
-    BLOCKED
+    BLOCKED,
+    FLASH_FIRED
 };
 
 enum Gender{

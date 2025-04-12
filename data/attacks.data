@@ -68,6 +68,7 @@ ACCURACY:75
 EFFECT:4
 CATEGORY:STATUS
 TYPE:POISON
+POWDER
 # 9 SLEEP POWDER
 NAME:Sleep Powder
 DESCRIPTION:The user scatters a big cloud of sleep-inducing dust around the target.
@@ -76,6 +77,7 @@ ACCURACY:75
 EFFECT:5
 CATEGORY:STATUS
 TYPE:GRASS
+POWDER
 # 10 SEED BOMB
 NAME:Seed Bomb
 DESCRIPTION:The user attacks by slamming a barrage of hard-shelled seeds down on the target from above.
@@ -477,6 +479,7 @@ PP:30
 EFFECT:16
 ACCURACY:75
 TYPE:GRASS
+POWDER
 # 55 PSYBEAM
 NAME:Psybeam
 DESCRIPTION:The target is attacked with a peculiar ray. This may also leave the target confused.
@@ -1665,9 +1668,10 @@ TYPE:GRASS
 NAME:Spore
 DESCRIPTION:The user scatters bursts of spores that induce sleep.
 TYPE:GRASS
-CATEGORY:GRASS
+CATEGORY:STATUS
 PP:15
 EFFECT:5
+POWDER
 # 187 AROMATHERAPY
 NAME:Aromatherapy
 DESCRIPTION:The user releases a soothing scent that heals all status conditions affecting the user's party.

@@ -2,6 +2,7 @@
 #define __BATTLE_H___
 
 #include "common.h"
+#include "abilities.h"
 #include "team.h"
 #include "field.h"
 #include "battler.h"

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "species.h"
 #include "attack.h"
+#include "abilities.h"
 #include "monster.h"
 #include <map>
 #include "field.h"

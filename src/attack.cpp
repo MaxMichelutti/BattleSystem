@@ -126,6 +126,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     cannot_be_metronomed = (data.find("no_metronome") != data.end());
     is_sound_based = (data.find("sound") != data.end());
     is_punching = (data.find("punching") != data.end());
+    is_powder = (data.find("powder") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -196,6 +197,10 @@ bool Attack::isPunching()const {
     return is_punching;
 }
 
+bool Attack::isPowder()const {
+    return is_powder;
+}
+
 void Attack::loadAttacks(){
     static_attacks[0] = nullptr;
     std::ifstream file(ATTACK_FILE);
@@ -248,6 +253,8 @@ void Attack::loadAttacks(){
             parsed_data["sound"] = "true";
         }else if(line.rfind("NO_METRONOME",0)==0){
             parsed_data["no_metronome"] = "true";
+        }else if(line.rfind("POWDER",0)==0){
+            parsed_data["powder"] = "true";
         }else{
             std::cout<<"Error: Unknown line in attack file: " << line << std::endl;
         }

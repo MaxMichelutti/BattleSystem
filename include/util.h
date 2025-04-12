@@ -17,6 +17,7 @@ unsigned int min(unsigned int a, unsigned int b);
 unsigned int stringToInteger(std::string str);
 
 std::string oneDecimalIntegerToString(unsigned int integer);
+std::string internalToDisplay(std::string str);
 bool is_number(const std::string& s);
 
 double baseDamage(unsigned int level, unsigned int base_power, unsigned int attack, unsigned int defense);

@@ -40,6 +40,7 @@ class Attack{
     bool cannot_be_metronomed;
     bool is_sound_based;
     bool is_punching;
+    bool is_powder;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
@@ -61,6 +62,7 @@ class Attack{
     bool makesContact()const;
     bool isSoundBased()const;
     bool isPunching()const;
+    bool isPowder()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;

@@ -1,0 +1,232 @@
+OVERGROW
+Powers up Grass-type moves when the Pokémon's HP is low.
+CHLOROPHYLL
+Boosts the Pokémon's Speed stat in harsh sunlight.
+BLAZE
+Powers up Fire-type moves when the Pokémon's HP is low.
+SOLAR_POWER
+In harsh sunlight, the Pokémon's Sp. Atk stat is boosted, but its HP decreases every turn.
+TORRENT
+Powers up Water-type moves when the Pokémon's HP is low. 
+SWIFT_SWIM
+Boosts the Pokémon's Speed stat in rain.
+INSOMNIA
+The Pokémon's insomnia prevents it from falling asleep.
+RAIN_DISH
+The Pokémon gradually regains HP in rain.
+SHED_SKIN
+The Pokémon may cure its own status conditions by shedding its skin.
+SHIELD_DUST
+Protective dust shields the Pokémon from the additional effects of moves.
+RUN_AWAY
+Enables a sure getaway from wild Pokémon.
+COMPOUND_EYES
+The Pokémon's compound eyes boost its accuracy.
+TINTED_LENS
+The Pokémon can use "not very effective" moves to deal regular damage.
+SNIPER
+If the Pokémon's attack lands a critical hit, the attack is powered up even further.
+SWARM
+Powers up Bug-type moves when the Pokémon's HP is low.
+KEEN_EYE
+The Pokémon's keen eyes prevent its accuracy from being lowered.
+TANGLED_FEET
+Boosts the Pokémon's evasiveness if it is confused.
+BIG_PECKS
+Prevents the Pokémon from having its Defense stat lowered.
+GUTS
+It's so gutsy that having a status condition boosts the Pokémon's Attack stat.
+HUSTLE
+Boosts the Pokémon's Attack stat but lowers its accuracy.
+INTIMIDATE
+When the Pokémon enters a battle, it intimidates opposing Pokémon and makes them cower, lowering their Attack stats.
+UNNERVE
+Unnerves opposing Pokémon and makes them unable to eat Berries.
+STATIC
+The Pokémon is charged with static electricity and may paralyze attackers that make direct contact with it.
+LIGHTNING_ROD
+The Pokémon draws in all Electric-type moves. Instead of taking damage from them, its Sp. Atk stat is boosted.
+SAND_VEIL
+Boosts the Pokémon's evasiveness in a sandstorm.
+SAND_RUSH
+Boosts the Pokémon's Speed stat in a sandstorm.
+SHEER_FORCE
+Removes any additional effects from the Pokémon's moves, but increases the moves' power.
+POISON_POINT
+Contact with the Pokémon may poison the attacker.
+RIVALRY
+The Pokémon's competitive spirit makes it deal more damage to Pokémon of the same gender, but less damage to Pokémon of the opposite gender.
+CUTE_CHARM
+The Pokémon may infatuate attackers that make direct contact with it.
+MAGIC_GUARD
+The Pokémon only takes damage from attacks.
+FRIEND_GUARD
+Reduces damage dealt to allies.
+UNAWARE
+When attacking, the Pokémon ignores the target's stat changes.
+COMPETITIVE
+Boosts the Pokémon's Sp. Atk stat sharply when its stats are lowered by an opposing Pokémon.
+FLASH_FIRE
+If hit by a Fire-type move, the Pokémon absorbs the flames and uses them to power up its own Fire-type moves.
+DROUGHT
+Turns the sunlight harsh when the Pokémon enters a battle.
+FRISK
+When it enters a battle, the Pokémon can check an opposing Pokémon's held item.
+INNER_FOCUS
+The Pokémon's intense focus prevents it from flinching or being affected by Intimidate.
+INFILTRATOR
+The Pokémon's moves are unaffected by the target's barriers, substitutes, and the like.
+STENCH
+By releasing a stench when attacking, the Pokémon may cause the target to flinch.
+EFFECT_SPORE
+Contact with the Pokémon may inflict poison, sleep, or paralysis on the attacker.
+DAMP
+The Pokémon dampens its surroundings, preventing all Pokémon from using explosive moves such as Self-Destruct.
+DRY_SKIN
+Restores the Pokémon's HP in rain or when it is hit by Water-type moves. Reduces HP in harsh sunlight, and increases the damage received from Fire-type moves.
+WONDER_SKIN
+Makes status moves more likely to miss the Pokémon.
+ARENA_TRAP
+Prevents opposing Pokémon from fleeing from battle.
+IMPOSTER
+The Pokémon transforms itself into the Pokémon it's facing.
+LIMBER
+The Pokémon's limber body prevents it from being paralyzed.
+SAND_FORCE
+Boosts the power of Rock-, Ground-, and Steel-type moves in a sandstorm.
+PICKUP
+The Pokémon may pick up an item another Pokémon used during a battle. It may pick up items outside of battle, too.
+TECHNICIAN
+Powers up weak moves so the Pokémon can deal more damage with them.
+CLOUD_NINE
+Eliminates the effects of weather.
+VITAL_SPIRIT
+The Pokémon is full of vitality, and that prevents it from falling asleep.
+ANGER_POINT
+The Pokémon is angered when it takes a critical hit, and that maxes its Attack stat.
+DEFIANT
+If the Pokémon has any stat lowered by an opposing Pokémon, its Attack stat will be boosted sharply.
+JUSTIFIED
+When the Pokémon is hit by a Dark-type attack, its Attack stat is boosted by its sense of justice.
+WATER_ABSORB
+If hit by a Water-type move, the Pokémon has its HP restored instead of taking damage.
+SYNCHRONIZE
+If the Pokémon is burned, paralyzed, or poisoned by another Pokémon, that Pokémon will be inflicted with the same status condition.
+NO_GUARD
+The Pokémon employs no-guard tactics to ensure incoming and outgoing attacks always land.
+STEADFAST
+The Pokémon's determination boosts its Speed stat every time it flinches.
+GLUTTONY
+If the Pokémon is holding a Berry to be eaten when its HP is low, it will instead eat the Berry when its HP drops to half or less.
+LIQUID_OOZE
+The strong stench of the Pokémon's oozed liquid damages attackers that use HP-draining moves.
+CLEAR_BODY
+Prevents other Pokémon's moves or Abilities from lowering the Pokémon's stats.
+STURDY
+The Pokémon cannot be knocked out by a single hit as long as its HP is full. One-hit KO moves will also fail to knock it out.
+ROCK_HEAD
+Protects the Pokémon from recoil damage.
+FLAME_BODY
+Contact with the Pokémon may burn the attacker.
+OWN_TEMPO
+The Pokémon sticks to its own tempo, preventing it from becoming confused or being affected by Intimidate.
+OBLIVIOUS
+The Pokémon is oblivious, keeping it from being infatuated, falling for taunts, or being affected by Intimidate.
+REGENERATOR
+The Pokémon has a little of its HP restored when withdrawn from battle.
+MAGNET_PULL
+Prevents Steel-type Pokémon from fleeing by pulling them in with magnetism.
+ANALYTIC
+Boosts the power of the Pokémon's move if it is the last to act that turn.
+EARLY_BIRD
+The Pokémon awakens from sleep twice as fast as other Pokémon.
+THICK_FAT
+The Pokémon is protected by a layer of thick fat, which halves the damage taken from Fire- and Ice-type moves.
+HYDRATION
+Cures the Pokémon's status conditions in rain.
+ICE_BODY
+The Pokémon gradually regains HP in snow.
+STICKY_HOLD
+The Pokémon's held items cling to its sticky body and cannot be removed by other Pokémon.
+POISON_TOUCH
+May poison a target when the Pokémon makes contact.
+SHELL_ARMOR
+A hard shell protects the Pokémon from critical hits.
+SKILL_LINK
+Maximizes the number of times multistrike moves hit.
+OVERCOAT
+The Pokémon takes no damage from sandstorms. It is also protected from the effects of powders and spores.
+LEVITATE
+By floating in the air, the Pokémon receives full immunity to all Ground-type moves.
+CURSED_BODY
+May disable a move that has dealt damage to the Pokémon.
+WEAK_ARMOR
+The Pokémon's Defense stat is lowered when it takes damage from physical moves, but its Speed stat is sharply boosted.
+FOREWARN
+When it enters a battle, the Pokémon can tell one of the moves an opposing Pokémon has.
+HYPER_CUTTER
+The Pokémon's prized, mighty pincers prevent other Pokémon from lowering its Attack stat.
+SOUNDPROOF
+Soundproofing gives the Pokémon full immunity to all sound-based moves.
+AFTERMATH
+Damages the attacker if it knocks out the Pokémon with a move that makes direct contact.
+PLUS
+Boosts the Sp. Atk stat of the Pokémon if an ally with the Plus or Minus Ability is also in battle.
+MINUS
+Boosts the Sp. Atk stat of the Pokémon if an ally with the Plus or Minus Ability is also in battle.
+HARVEST
+May create another Berry after one is used.
+BATTLE_ARMOR
+Hard armor protects the Pokémon from critical hits.
+RECKLESS
+Powers up moves that have recoil damage.
+UNBURDEN
+Boosts the Speed stat if the Pokémon's held item is used or lost.
+IRON_FIST
+Powers up punching moves.
+NEUTRALIZING_GAS
+While the Pokémon is in the battle, the effects of all other Pokémon's Abilities will be nullified or will not be triggered.
+SERENE_GRACE
+Raises the likelihood of additional effects occurring when the Pokémon uses its moves.
+HEALER
+Sometimes cures the status conditions of the Pokémon's allies.
+LEAF_GUARD
+Prevents status conditions in harsh sunlight.
+SCRAPPY
+The Pokémon can hit Ghost-type Pokémon with Normal- and Fighting-type moves. It is also unaffected by Intimidate.
+WATER_VEIL
+The Pokémon's water veil prevents it from being burned.
+ILLUMINATE
+By illuminating its surroundings, the Pokémon prevents its accuracy from being lowered.
+FILTER
+Reduces the power of supereffective attacks that hit the Pokémon.
+MOLD_BREAKER
+The Pokémon's moves are unimpeded by the Ability of the target.
+MOXIE
+When the Pokémon knocks out a target, it shows moxie, which boosts its Attack stat.
+RATTLED
+The Pokémon gets scared when hit by a Dark-, Ghost-, or Bug-type attack or if intimidated, which boosts its Speed stat.
+ADAPTABILITY
+Powers up moves of the same type as the Pokémon.
+ANTICIPATION
+The Pokémon can sense an opposing Pokémon's dangerous moves.
+VOLT_ABSORB
+If hit by an Electric-type move, the Pokémon has its HP restored instead of taking damage.
+QUICK_FEET
+Boosts the Speed stat if the Pokémon has a status condition.
+TRACE
+When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.
+DOWNLOAD
+The Pokémon compares an opposing Pokémon's Defense and Sp. Def stats before raising its own Attack or Sp. Atk stat—whichever will be more effective.
+PRESSURE
+Puts other Pokémon under pressure, causing them to expend more PP to use their moves.
+IMMUNITY
+The Pokémon's immune system prevents it from being poisoned.
+SNOW_CLOAK
+Boosts the Pokémon's evasiveness in snow and hailstorms.
+MULTISCALE
+Reduces the amount of damage the Pokémon takes while its HP is full.
+MARVEL_SCALE
+The Pokémon's marvelous scales boost its Defense stat if it has a status condition.
+NATURAL_CURE
+The Pokémon's status conditions are cured when it switches out.
