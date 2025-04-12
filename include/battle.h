@@ -9,6 +9,7 @@
 #include "events.h"
 #include "cpu_ai.h"
 #include "util.h"
+#include "items.h"
 
 class CPUAI;
 class EventHandler;
@@ -16,6 +17,7 @@ class Battler;
 class MonsterTeam;
 class Attack;
 class Field;
+class ItemData;
 
 struct ScheduledFutureSight{
     unsigned int turns_left;
@@ -40,9 +42,16 @@ class BattleAction{
     int priority;
     int speed;
     unsigned int order;
+    ItemType item_to_use;
     public:
     BattleAction();
-    BattleAction(BattleActionActor actor,BattleActionType type,unsigned int attack_id, int priority, unsigned int speed, unsigned int switch_id);
+    BattleAction(BattleActionActor actor,
+        BattleActionType type,
+        unsigned int attack_id, 
+        int priority, 
+        unsigned int speed, 
+        unsigned int switch_id,
+        ItemType item_to_use);
     ~BattleAction();
 
     BattleActionActor getActor()const;
@@ -50,6 +59,7 @@ class BattleAction{
     unsigned int getSwitchId()const;
     unsigned int getAttackId()const;
     int getPriority()const;
+    ItemType getItemToUse()const;
 
     bool operator<=(const BattleAction& other) const;
     bool operator>=(const BattleAction& other) const;
@@ -107,6 +117,7 @@ class Battle{
     void performAction(BattleAction action, std::vector<BattleAction>& all_actions);
     void performAttack(BattleAction action, std::vector<BattleAction>& all_actions);
     void performSwitch(BattleAction action);
+    void performUseItem(BattleAction action);
     void performRechargeTurn(BattleAction action);
     unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target);
     void performEntryHazardCheck(BattleActionActor actor);

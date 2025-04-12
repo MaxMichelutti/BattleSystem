@@ -11,7 +11,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             15, 
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(CHARGING_SKYATTACK))
         return BattleAction(
             actor,
@@ -19,7 +20,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             380, 
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(PETAL_DANCING))
         return BattleAction(
             actor,
@@ -27,7 +29,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             17, 
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(THRASHING))
         return BattleAction(
             actor,
@@ -35,7 +38,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             209, 
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(OUTRAGING))
         return BattleAction(
             actor,
@@ -43,7 +47,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             19,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(FLYING_HIGH)){
         return BattleAction(
             actor,
@@ -51,7 +56,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             82,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     if(active->hasVolatileCondition(ROLLINGOUT)){
         return BattleAction(
@@ -60,7 +66,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             127,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     if(active->hasVolatileCondition(UNDERGROUND)){
         return BattleAction(
@@ -69,7 +76,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             131,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     if(active->hasVolatileCondition(UNDERWATER)){
         return BattleAction(
@@ -78,7 +86,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             249,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     if(active->hasVolatileCondition(UPROARING)){
         return BattleAction(
@@ -87,7 +96,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             279,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     if(active->hasVolatileCondition(RECHARGING)){
         return BattleAction(
@@ -96,7 +106,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0,
             0, 
             active->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     return BattleAction();
 }

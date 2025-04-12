@@ -1560,7 +1560,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             attack_id,
             attack->getPriorityLevel(), 
             active_monster->getModifiedSpeed(), 
-            0);   
+            0,
+            NO_ITEM_TYPE);   
     }
     if(skill==0){// unskilled opponenets never switch and always attack randomly
         return BattleAction(
@@ -1569,7 +1570,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             chooseRandomAttack(active_monster), 
             0, 
             active_monster->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }
     Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
@@ -1581,7 +1583,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         STRUGGLE_ID, 
         0, 
         active_monster->getModifiedSpeed(), 
-        0);
+        0,
+        NO_ITEM_TYPE);
     if(attack_choice == nullptr && switch_choice == nullptr){
         return struggle_action;
     }else if(attack_choice == nullptr){
@@ -1595,7 +1598,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             0, 
             0, 
             active_monster->getModifiedSpeed(), 
-            switch_id);
+            switch_id,
+            NO_ITEM_TYPE);
     }else if(switch_choice == nullptr){
         unsigned int attack_id = attack_choice->choice_id;
         delete attack_choice;
@@ -1606,7 +1610,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             attack_id, 
             attack->getPriorityLevel(), 
             active_monster->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }else if(attack_choice->utility >= switch_choice->utility || !active_monster->canSwitchOut(enemy_active)){
         unsigned int attack_id = attack_choice->choice_id;
         delete attack_choice;
@@ -1618,7 +1623,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             attack_id, 
             attack->getPriorityLevel(), 
             active_monster->getModifiedSpeed(), 
-            0);
+            0,
+            NO_ITEM_TYPE);
     }else{
         unsigned int switch_id = switch_choice->choice_id;
         delete switch_choice;
@@ -1629,7 +1635,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             0, 
             0, 
             active_monster->getModifiedSpeed(), 
-            switch_id);
+            switch_id,
+            NO_ITEM_TYPE);
     }
 }
 

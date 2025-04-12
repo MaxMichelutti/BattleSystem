@@ -54,7 +54,8 @@ enum BattleActionType{
     DIVE,
     UPROAR,
     RECHARGE_TURN,
-    SKY_ATTACK
+    SKY_ATTACK,
+    USE_ITEM
 };
 enum PermanentStatusCondition{
     NO_PERMANENT_CONDITION,
@@ -200,7 +201,7 @@ enum ExpCurve{
 };
 enum EvolutionMethod{
     LEVEL,
-    USE_ITEM,
+    USE_EVO_ITEM,
     TRADE
 };
 

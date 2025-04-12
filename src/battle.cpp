@@ -54,7 +54,9 @@ BattleAction::BattleAction() {
     actor = PLAYER;
 }
 
-BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsigned int attack_id, int priority, unsigned int speed, unsigned int switch_id) {
+BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsigned int attack_id, 
+    int priority, unsigned int speed, unsigned int switch_id, ItemType item_to_use) {
+    this->item_to_use = item_to_use;
     this->action_type = type;
     this->actor = actor;
     this->attack_id = attack_id;
@@ -63,11 +65,17 @@ BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsign
     this->switch_id = switch_id;
     if(action_type == SWITCH)
         this->priority = 10;
+    else if(action_type == USE_ITEM)
+        this->priority = 20;
 }
 BattleAction::~BattleAction() {}
 
 bool BattleAction::operator==(const BattleAction& other) const {
     return (speed == other.speed) && (priority == other.priority);
+}
+
+ItemType BattleAction::getItemToUse()const {
+    return item_to_use;
 }
 
 bool BattleAction::operator<=(const BattleAction& other) const {
@@ -437,7 +445,17 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
         performSwitch(action);
     }else if(atype==RECHARGE_TURN){
         performRechargeTurn(action);
+    }else if(atype == USE_ITEM){
+        performUseItem(action);
     }
+}
+
+void Battle::performUseItem(BattleAction action){
+    Battler* active_user = getActorBattler(action.getActor());
+    if(active_user->isFainted())
+        return;
+    std::string user_mon_name = getActorBattlerName(action.getActor());
+    ItemType item_to_use = action.getItemToUse();
 }
 
 void Battle::performRechargeTurn(BattleAction action){

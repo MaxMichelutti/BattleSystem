@@ -6,7 +6,7 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
     if(evo_method == "LEVEL")
         return LEVEL;
     if(evo_method == "USE_ITEM")
-        return USE_ITEM;
+        return USE_EVO_ITEM;
     if(evo_method == "TRADE")
         return TRADE;
     // return LEVEL as default
@@ -17,7 +17,7 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
     switch(evo_method){
         case LEVEL:
             return "LEVEL";
-        case USE_ITEM:
+        case USE_EVO_ITEM:
             return "USE_ITEM";
         case TRADE:
             return "TRADE";

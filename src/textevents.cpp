@@ -25,7 +25,8 @@ BattleAction TextEventHandler::chooseAction(Battler* player_active,MonsterTeam* 
                     attack_id,
                     attack->getPriorityLevel(), 
                     player_active->getModifiedSpeed(), 
-                    0);
+                    0,
+                    NO_ITEM_TYPE);
             }
             unsigned int attack_id = chooseAttack(player_active);
             if(attack_id == 0){
@@ -39,7 +40,8 @@ BattleAction TextEventHandler::chooseAction(Battler* player_active,MonsterTeam* 
                 attack_id, 
                 attack->getPriorityLevel(), 
                 player_active->getModifiedSpeed(), 
-                0);
+                0,
+                NO_ITEM_TYPE);
         }else if(choice==2){
             if(!player_active->canSwitchOut(opponent_active)){
                 displayMsg("You cannot switch! "+player_active->getNickname()+" is trapped!");
@@ -57,7 +59,8 @@ BattleAction TextEventHandler::chooseAction(Battler* player_active,MonsterTeam* 
                 0, 
                 0, 
                 player_active->getModifiedSpeed(), 
-                switch_id);
+                switch_id,
+                NO_ITEM_TYPE);
         }else{
             displayMsg("Invalid choice. Please try again.");
         }
