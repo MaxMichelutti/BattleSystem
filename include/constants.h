@@ -31,6 +31,7 @@ const int MIN_MODIFIER = -6;
 const std::string ATTACK_FILE = "data/attacks.data";
 const std::string SPECIES_FILE = "data/species.data";
 const std::string ABILITIES_FILE = "data/abilities.data";
+const std::string ITEMS_FILE = "data/items.data";
 
 // RETURN ERRORS
 const int SUCCESS = 0;

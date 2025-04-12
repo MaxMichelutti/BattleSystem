@@ -150,6 +150,7 @@ class AbilityItem{
     std::string getSerialName()const;
     std::string getDescription()const;
     static void initAbilities();
+    static AbilityItem* getAbilityItem(Ability ability);
 };
 
 static std::unordered_map<Ability,AbilityItem*> abilityMap;

@@ -1,0 +1,55 @@
+# 1 POTION
+NAME:Potion
+DESCRIPTION:A spray-type medicine for treating wounds. It can be used to restore 20 HP to an injured Pokémon.
+PRICE:200
+CATEGORY:MEDICINE
+# 2 SUPER POTION
+NAME:Super Potion
+DESCRIPTION:A spray-type medicine for treating wounds. It can be used to restore 60 HP to an injured Pokémon.
+PRICE:700
+CATEGORY:MEDICINE
+# 3 HYPER POTION
+NAME:Hyper Potion
+DESCRIPTION:A spray-type medicine for treating wounds. It can be used to restore 120 HP to an injured Pokémon. 
+PRICE:1500
+CATEGORY:MEDICINE
+# 4 MAX POTION
+NAME:Max Potion
+DESCRIPTION:A spray-type medicine for treating wounds. It can be used to fully restore the max HP of a Pokémon.
+PRICE:2500
+CATEGORY:MEDICINE
+# 5 FULL RESTORE
+NAME:Full Restore
+DESCRIPTION:A medicine that can be used to fully restore the max HP of a Pokémon and cure any status conditions it may have.
+PRICE:3000
+CATEGORY:MEDICINE
+# 6 ANTIDOTE
+NAME:Antidote
+DESCRIPTION:A spray-type medicine for treating poisoning. It can be used to lift the effects of being poisoned from a Pokémon.
+PRICE:200
+CATEGORY:MEDICINE
+# 7 AWAKENING
+NAME:Awakening
+DESCRIPTION:A spray-type medicine to wake the sleeping. It can be used to rouse a Pokémon from the clutches of sleep.
+PRICE:200
+CATEGORY:MEDICINE
+# 8 PARALYZE HEAL
+NAME:Paralyze Heal
+DESCRIPTION:A spray-type medicine for treating paralysis. It can be used to free a Pokémon that has been paralyzed.
+PRICE:200
+CATEGORY:MEDICINE
+# 9 BURN HEAL
+NAME:Burn Heal
+DESCRIPTION:A spray-type medicine for treating burns. It can be used to cure a Pokémon suffering from a burn.
+PRICE:200
+CATEGORY:MEDICINE
+# 10 ICE HEAL
+NAME:Ice Heal
+DESCRIPTION:A spray-type medicine for treating freezing. It can be used to thaw out a Pokémon that has been frozen solid.
+PRICE:200
+CATEGORY:MEDICINE
+# 11 FULL HEAL
+NAME:Full Heal
+DESCRIPTION:A spray-type medicine that is broadly effective. It can be used to cure any status condition a Pokémon may have.
+PRICE:400
+CATEGORY:MEDICINE

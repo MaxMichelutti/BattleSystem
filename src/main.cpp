@@ -5,11 +5,13 @@
 #include "battle.h"
 #include "textevents.h"
 #include "abilities.h"
+#include "items.h"
 
 int main(int argc, char** argv) {
     Attack::loadAttacks();
     Species::loadSpecies();
     AbilityItem::initAbilities();
+    ItemData::loadItems();
     Monster* monster_p1 = Monster::generateRandomMonster(150,50);
     // for(int i=0;i<100;i++){
     //     monster_p1->forgetAttack(i);

@@ -324,4 +324,31 @@ enum Ability{
     MARVEL_SCALE
 };
 
+enum ItemCategory{
+    NO_CATEGORY,
+    KEY_ITEM,
+    BERRY,
+    BALL,
+    MEDICINE,
+    EVOLUTION_ITEM,
+    TM,
+    HELD_ITEM,
+    GENERAL_ITEM
+};
+
+enum ItemType{
+    NO_ITEM_TYPE,
+    POTION,
+    SUPER_POTION,
+    HYPER_POTION,
+    MAX_POTION,
+    FULL_RESTORE,
+    ANTIDOTE,
+    AWAKENING,
+    PARALYZE_HEAL,
+    BURN_HEAL,
+    ICE_HEAL,
+    FULL_HEAL
+};
+
 #endif
