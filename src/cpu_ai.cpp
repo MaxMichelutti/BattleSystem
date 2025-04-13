@@ -1596,10 +1596,14 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         0,
         NO_ITEM_TYPE);
     if(attack_choice == nullptr && switch_choice == nullptr){
+        if(item_choice!=nullptr)
+            delete item_choice;
         return struggle_action;
     }else if(attack_choice == nullptr){
         unsigned int switch_id = switch_choice->choice_id;
         delete switch_choice;
+        if(item_choice!=nullptr)
+            delete item_choice;
         if(!active_monster->canSwitchOut(enemy_active))
             return struggle_action;
         return BattleAction(
@@ -1612,29 +1616,60 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             NO_ITEM_TYPE);
     }else if(switch_choice == nullptr){
         unsigned int attack_id = attack_choice->choice_id;
+        int attack_utility = attack_choice->utility;
         delete attack_choice;
-        Attack* attack = Attack::getAttack(attack_id);
-        return BattleAction(
-            OPPONENT,
-            ATTACK,
-            attack_id, 
-            attack->getPriorityLevel(), 
-            active_monster->getModifiedSpeed(), 
-            0,
-            NO_ITEM_TYPE);
+        if(item_choice==nullptr || attack_utility >= item_choice->utility){
+            if(item_choice!=nullptr)
+                delete item_choice;
+            Attack* attack = Attack::getAttack(attack_id);
+            return BattleAction(
+                OPPONENT,
+                ATTACK,
+                attack_id, 
+                attack->getPriorityLevel(), 
+                active_monster->getModifiedSpeed(), 
+                0,
+                NO_ITEM_TYPE);
+        }else{
+            ItemType item_id = item_choice->item;
+            delete item_choice;
+            return BattleAction(
+                OPPONENT,
+                USE_ITEM,
+                0, 
+                0, 
+                active_monster->getModifiedSpeed(), 
+                0,
+                item_id);
+        }
     }else if(attack_choice->utility >= switch_choice->utility || !active_monster->canSwitchOut(enemy_active)){
         unsigned int attack_id = attack_choice->choice_id;
+        int attack_utility = attack_choice->utility;
         delete attack_choice;
-        delete switch_choice;
-        Attack* attack = Attack::getAttack(attack_id);
-        return BattleAction(
-            OPPONENT,
-            ATTACK,
-            attack_id, 
-            attack->getPriorityLevel(), 
-            active_monster->getModifiedSpeed(), 
-            0,
-            NO_ITEM_TYPE);
+        if(item_choice==nullptr || attack_utility >= item_choice->utility){
+            if(item_choice!=nullptr)
+                delete item_choice;
+            Attack* attack = Attack::getAttack(attack_id);
+            return BattleAction(
+                OPPONENT,
+                ATTACK,
+                attack_id, 
+                attack->getPriorityLevel(), 
+                active_monster->getModifiedSpeed(), 
+                0,
+                NO_ITEM_TYPE);
+        }else{
+            ItemType item_id = item_choice->item;
+            delete item_choice;
+            return BattleAction(
+                OPPONENT,
+                USE_ITEM,
+                0, 
+                0, 
+                active_monster->getModifiedSpeed(), 
+                0,
+                item_id);
+        }
     }else{
         unsigned int switch_id = switch_choice->choice_id;
         delete switch_choice;
@@ -1730,7 +1765,61 @@ unsigned int CPUAI::chooseSwitch(Battler*active_user,MonsterTeam*user_team,Battl
 }
 
 int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
-    return 0;
+    if(item_id == NO_ITEM_TYPE)
+        return -100000;
+    if(!cpu_active->itemWouldHaveEffect(item_id))
+        return -10000;
+    int total_utility = 0;
+    //healing items
+    double heal_percent = 0;
+    switch(item_id){
+        case POTION:
+            heal_percent = min(100,2000 / cpu_active->getMaxHP());
+            break;
+        case SUPER_POTION:
+            heal_percent = min(100,6000 / cpu_active->getMaxHP());
+            break;
+        case HYPER_POTION:
+            heal_percent = min(100,12000 / cpu_active->getMaxHP());
+            break;
+        case MAX_POTION:
+        case FULL_RESTORE:
+            heal_percent = 100;
+            break;
+    }
+    double healable_HP_percent =  100.0 - (cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP());
+    double actual_heal = min(heal_percent,healable_HP_percent);
+    total_utility += actual_heal + (healable_HP_percent/5.0);//incentivize healing at low health
+    // status healing items
+    switch(item_id){
+        case ANTIDOTE:
+            if(cpu_active->isPoisoned())
+                total_utility += 100;
+            break;
+        case AWAKENING:
+            if(cpu_active->isAsleep())
+                total_utility += 100;
+            break;
+        case PARALYZE_HEAL:
+            if(cpu_active->isParalyzed())
+                total_utility += 100;
+            break;
+        case ICE_HEAL:
+            if(cpu_active->isFrozen())
+                total_utility += 100;
+            break;
+        case BURN_HEAL:
+            if(cpu_active->isBurned())
+                total_utility += 100;
+            break;
+        case FULL_HEAL:
+        case FULL_RESTORE:
+            if(cpu_active->hasPermanentStatus() || cpu_active->hasVolatileCondition(CONFUSION))
+                total_utility += 99;//1 minus of status specific in order to incentivize status specific item use
+            break;
+        default: break;
+    }
+    return total_utility;
 }
 
 Choice* CPUAI::getBestItemChoice(Battler*active_user,Bag*bag)const{
