@@ -3,11 +3,13 @@
 
 #include "common.h"
 #include "battle.h"
+#include "bag.h"
 
 class BattleAction;
 class Battler;
 class MonsterTeam;
 class Field;
+class Bag;
 // BattleAction choosePlayerAction(Battler*,MonsterTeam*);
 // unsigned int choosePlayerAttack(Battler*);
 // unsigned int choosePlayerSwitch(MonsterTeam*);
@@ -23,10 +25,11 @@ class EventHandler{
     public:
     EventHandler();
     ~EventHandler();
-    virtual BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*) = 0;
+    virtual BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*) = 0;
     virtual unsigned int chooseAttack(Battler*) = 0;
     virtual unsigned int chooseSwitch(MonsterTeam*) = 0;
     virtual unsigned int chooseSwitchForced(MonsterTeam*) = 0;
+    virtual ItemType chooseItem(Bag*) = 0;
     virtual void displayMsg(const std::string& msg) = 0;
     virtual void displayBattleSituation(Battler*,MonsterTeam*,Battler*,MonsterTeam*) = 0;
 };

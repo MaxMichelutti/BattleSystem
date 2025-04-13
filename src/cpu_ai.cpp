@@ -6,11 +6,19 @@ Choice::Choice(){
     choice_id = 0;
     utility = 0;
     action_type = ATTACK;
+    item = NO_ITEM_TYPE;
 }
 Choice::Choice(unsigned int choice_id, int utility, BattleActionType action_type){
     this->choice_id = choice_id;
     this->utility = utility;
     this->action_type = action_type;
+    this->item = NO_ITEM_TYPE;
+}
+Choice::Choice(ItemType item, int utility){
+    this->choice_id = 0;
+    this->utility = utility;
+    this->action_type = USE_ITEM;
+    this->item = item;
 }
 Choice::~Choice(){}
 
@@ -263,7 +271,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // poison opp
             if(enemy_active->canBePoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 50 * effect_prob_mult;
             }
             break;
@@ -272,8 +280,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // sleep  opp
             if(enemy_active->canFallAsleep() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD &&
-                !field->getTerrain()==ELECTRIC_FIELD){
+                field->getTerrain()!=MISTY_FIELD &&
+                field->getTerrain()!=ELECTRIC_FIELD){
                 total_utility += 70 * effect_prob_mult;
             }
             if(effect==143)
@@ -320,7 +328,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // burn opp
             if(enemy_active->canBeBurned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 60 * effect_prob_mult;
             }
             break;
@@ -335,7 +343,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // paralysis
             if(enemy_active->canBeParalyzed() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 50 * effect_prob_mult;
             }
             if(effect==67 && field->getWeather() == RAIN){
@@ -367,7 +375,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // recoil and burn opp
             if(enemy_active->canBeBurned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 60 * effect_prob_mult;
             }
             total_utility *= 0.9;
@@ -410,7 +418,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // confusion
             if(!enemy_active->hasVolatileCondition(CONFUSION) &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 35 * effect_prob_mult;
             }
             if(effect==174){
@@ -437,16 +445,17 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 28:{
             // +2 att apatt spd -1 def spdef user
-            unsigned int attack_mod = cpu_active->getAttackModifier();
-            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
-            unsigned int defense_mod = cpu_active->getDefenseModifier();
-            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
-            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            int attack_mod = cpu_active->getAttackModifier();
+            int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            // int defense_mod = cpu_active->getDefenseModifier();
+            // int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            int speed_mod = cpu_active->getSpeedModifier();
             total_utility += 10 * (actual_stat_zero - attack_mod) * effect_prob_mult;
             total_utility += 10 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
             total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
             total_utility -= 5 * effect_prob_mult;
             total_utility -= 5 * effect_prob_mult;
+            break;
         }
         case 30:{
             // +1 spd user, recoil
@@ -696,7 +705,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             //freeze
             if(enemy_active->canBeFrozen() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 40 * effect_prob_mult;
             }
             break;
@@ -748,8 +757,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         case 73:{
             //earthquake
             if(enemy_active->hasVolatileCondition(UNDERGROUND))
-                total_utility *= 1,25;
-            if(effect == 69 && field->getTerrain()==GRASSY_FIELD)
+                total_utility *= 1.25;
+            if(field->getTerrain()==GRASSY_FIELD)
                 total_utility *= 0.8;
             break;
         }
@@ -766,7 +775,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // poison opp
             if(enemy_active->canBeBadlyPoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 70 * effect_prob_mult;
             }
             break;
@@ -777,7 +786,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility -= 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
             if(!enemy_active->hasVolatileCondition(CONFUSION) &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 35 * effect_prob_mult;
             }
             break;
@@ -1036,7 +1045,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             // confusion and +2 att opp
             if(!enemy_active->hasVolatileCondition(CONFUSION) &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
-                !field->getTerrain()==MISTY_FIELD){
+                field->getTerrain()!=MISTY_FIELD){
                 total_utility += 35 * effect_prob_mult;
             }
             unsigned int attack_mod = enemy_active->getAttackModifier();
@@ -1146,9 +1155,9 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                     total_utility += 60;
             }else{
                 // +1 att def -1 spd user
-                unsigned int attack_mod = cpu_active->getAttackModifier();
-                unsigned int defense_mod = cpu_active->getDefenseModifier();
-                unsigned int speed_mod = cpu_active->getSpeedModifier();
+                int attack_mod = cpu_active->getAttackModifier();
+                int defense_mod = cpu_active->getDefenseModifier();
+                // int speed_mod = cpu_active->getSpeedModifier();
                 total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
                 total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
                 total_utility -= 5 * effect_prob_mult;
@@ -1286,7 +1295,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 166:{
             //-1 speed user
-            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            int speed_mod = cpu_active->getSpeedModifier();
             total_utility -= 5 * effect_prob_mult;
             break;
         }
@@ -1546,7 +1555,7 @@ unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
     return choices[random_choice];
 }
 
-BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_team, Battler* enemy_active,Field* field)const{
+BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_team, Battler* enemy_active,Field* field,Bag*bag)const{
     BattleAction forced_action = forcedAction(OPPONENT, active_monster,field);
     if(forced_action.getActionType() != ATTACK){return forced_action;}
     if(active_monster->hasVolatileCondition(ENCORE)){
@@ -1575,6 +1584,7 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
     }
     Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
+    Choice * item_choice = getBestItemChoice(active_monster,bag);
     if(switch_choice != nullptr && active_monster->hasVolatileCondition(PERISH_SONG))
         switch_choice->utility*=2.5;//increase utility of switching perish song condamned monster
     BattleAction struggle_action(
@@ -1650,7 +1660,7 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
     for(auto choice: choices){
         unsigned int attack_id = choice.first;
         unsigned int curr_pp = choice.second;
-        if(choice.second == 0){continue;}
+        if(curr_pp==0){continue;}
         if(attack_id==0){continue;}
         if(active_user->getDisabledAttack() == attack_id){continue;}
         int utility = computeAttackUtility(attack_id,active_user,active_target,field);
@@ -1675,7 +1685,7 @@ Choice* CPUAI::getBestSwitchChoice(Battler*active_user,MonsterTeam*user_team,Bat
     auto choices = user_team->getMonsters();
     unsigned int best_choice_id = 0;
     int best_utility = -100000;
-    for(int i=1; i<choices.size();i++){
+    for(unsigned int i=1; i<choices.size();i++){
         if(choices[i]->isFainted()){
             continue;
         }
@@ -1714,4 +1724,37 @@ unsigned int CPUAI::chooseSwitch(Battler*active_user,MonsterTeam*user_team,Battl
     unsigned int choice_id = choice->choice_id;
     delete choice;
     return choice_id;
+}
+
+int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
+    return 0;
+}
+
+Choice* CPUAI::getBestItemChoice(Battler*active_user,Bag*bag)const{
+    std::cout<<"z"<<std::endl;std::cout.flush();
+    std::cout<<bag<<std::endl;std::cout.flush();
+    if(bag->getPocket(MEDICINE) == nullptr)
+        return nullptr;
+    std::cout<<"a"<<std::endl;std::cout.flush();
+    auto items = bag->getItemsInPocket(MEDICINE);
+    std::cout<<"b"<<std::endl;std::cout.flush();
+    if(items.empty())
+        return nullptr;
+    ItemType best_item = NO_ITEM_TYPE;
+    int best_utility = -100000;
+    for(auto item: items){
+        ItemType item_type = item.first;
+        if(item_type == NO_ITEM_TYPE){continue;}
+        int utility = computeItemUtility(item_type,active_user);
+        if(utility > best_utility){
+            best_item = item_type;
+            best_utility = utility;
+        }
+    }
+    if(best_utility == -100000)
+        return nullptr;
+    return new Choice(
+        best_item,
+        best_utility
+    );
 }

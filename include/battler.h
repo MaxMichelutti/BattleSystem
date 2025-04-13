@@ -23,13 +23,13 @@ bool isVolatileConditionClearedByRapidSpin(VolatileStatusCondition status);
 
 class Modifiers{
     private:
-    unsigned int attack;
-    unsigned int defense;
-    unsigned int special_attack;
-    unsigned int special_defense;
-    unsigned int speed;
-    unsigned int accuracy;
-    unsigned int evasion;
+    int attack;
+    int defense;
+    int special_attack;
+    int special_defense;
+    int speed;
+    int accuracy;
+    int evasion;
 
     public:
     Modifiers();

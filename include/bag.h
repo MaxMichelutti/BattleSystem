@@ -16,7 +16,7 @@ class ItemData;
 
 class Pocket{
     std::string name;
-    std::vector<std::pair<ItemType,unsigned int>> items;
+    std::map<ItemType,unsigned int> items;
     public:
     Pocket(std::string name);
     ~Pocket();
@@ -24,7 +24,7 @@ class Pocket{
     void addItem(ItemType item,unsigned int amount);
     void removeItem(ItemType item,unsigned int amount);
     unsigned int getItemCount(ItemType item)const;
-    std::vector<std::pair<ItemType,unsigned int>> getItems()const;
+    std::map<ItemType, unsigned int> getItems()const;
     std::string getName()const;
     bool hasItem(ItemType item,unsigned int amount)const;
     bool hasItem(ItemType item)const;
@@ -45,9 +45,10 @@ class Bag{
     bool hasItem(ItemType item)const;
     unsigned int getItemCount(ItemType item)const;
     std::vector<ItemCategory> getPockets()const;
-    std::vector<std::pair<ItemType,unsigned int>> getItemsInPocket(ItemCategory category)const;
+    std::map<ItemType, unsigned int> getItemsInPocket(ItemCategory category)const;
     std::string getPocketName(ItemCategory category)const;
     bool isEmpty()const;
+    Pocket * getPocket(ItemCategory);
 };
 
 #endif

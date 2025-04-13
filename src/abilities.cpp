@@ -61,6 +61,7 @@ bool isAbilityIgnorable(Ability ability){
         case MARVEL_SCALE:
         case MULTISCALE:
             return true;
+        default:return false;
     }        
     return false;
 }
@@ -71,6 +72,7 @@ bool isAbilityTraceable(Ability ability){
         case IMPOSTOR:
         case NEUTRALIZING_GAS:
             return false;
+        default: return true;
     }
     return true;
 }

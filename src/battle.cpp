@@ -158,8 +158,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     rounds_used_this_turn = 0;
     turn_of_opponent_last_kill = -2;
     turn_of_player_last_kill = -2;
-    player_bag = user_bag;
-    opponent_bag = opponent_bag;
+    this->player_bag = user_bag;
+    this->opponent_bag = opponent_bag;
 }
 
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
@@ -180,8 +180,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     rounds_used_this_turn = 0;
     turn_of_opponent_last_kill = -2;
     turn_of_player_last_kill = -2;
-    player_bag = user_bag;
-    opponent_bag = opponent_bag;
+    this->player_bag = user_bag;
+    this->opponent_bag = opponent_bag;
 }
 
 Battle::~Battle() {
@@ -315,12 +315,12 @@ void Battle::performTurn(){
     std::cout<<"Choosing action player "<<std::endl;
     std::cout.flush();
     #endif
-    BattleAction player_action = event_handler->chooseAction(player_active,player_team,opponent_active,field);
+    BattleAction player_action = event_handler->chooseAction(player_active,player_team,opponent_active,field,player_bag);
     #ifdef DEBUG
     std::cout<<"Choosing action CPU "<<std::endl;
     std::cout.flush();
     #endif
-    BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field);
+    BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);
     // 2: focus monsters
     if(player_action.getAttackId() == FOCUS_PUNCH_ID){
         player_active->addVolatileCondition(FOCUSED,5);
@@ -437,8 +437,8 @@ void Battle::performTurn(){
 void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_actions){
     Battler* active_user = getActorBattler(action.getActor());
     Battler* other_active = getActorBattler(otherBattleActionActor(action.getActor()));
-    MonsterTeam* user_team = getActorTeam(action.getActor());
-    MonsterTeam* target_team = getActorTeam(otherBattleActionActor(action.getActor()));
+    // MonsterTeam* user_team = getActorTeam(action.getActor());
+    // MonsterTeam* target_team = getActorTeam(otherBattleActionActor(action.getActor()));
     // check if user is alive
     if(active_user->isFainted()){
         return;
@@ -483,8 +483,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(active_user->isFainted())
         return;
     Battler* active_target = getActorBattler(otherBattleActionActor(actor));
-    MonsterTeam* user_team = getActorTeam(actor);
-    MonsterTeam* target_team = getActorTeam(otherBattleActionActor(actor));
+    // MonsterTeam* user_team = getActorTeam(actor);
+    // MonsterTeam* target_team = getActorTeam(otherBattleActionActor(actor));
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
     std::string user_player_name;
@@ -966,7 +966,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             return 0;
         }
         //cycle in order to deal with multi hit moves
-        for(int i=0;i<number_of_hits;i++){
+        for(unsigned int i=0;i<number_of_hits;i++){
             actual_hits++;
             // TINTED LENS doubles effectiveness of not very effective moves
             if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
@@ -3041,7 +3041,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case 37:case 68:{
             double original_bp = base_power;
             if(active_user->getLastAttackUsed() == attack_id){//fury cutter
-                for(int i=1; i<active_user->getSameAttackCounter(); i++){
+                for(unsigned int i=1; i<active_user->getSameAttackCounter(); i++){
                     base_power *= 2;
                     if(base_power>=4*original_bp)
                         break;
@@ -3291,7 +3291,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case RIVALRY:{
             Gender gender_user = active_user->getGender();
             Gender gender_target = active_target->getGender();
-            if(gender_target == gender_user && gender_user!=NO_GENDER)//same gender
+            if(gender_target == gender_user && gender_user!=GENDERLESS)//same gender
                 base_power *= 1.25;
             else if(areMaleAndFemale(gender_user,gender_target))//opposite gender
                 base_power *= 0.75;
@@ -3683,7 +3683,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
     Battler* active_user=getActorBattler(actor);
     if(active_user->isFainted())
         return;
-    Battler * enemy_active = getActorBattler(otherBattleActionActor(actor));
+    // Battler * enemy_active = getActorBattler(otherBattleActionActor(actor));
     std::string mon_name = getActorBattlerName(actor);
     if(thereIsaCloudNine())
         return;
@@ -4537,7 +4537,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
 
 void Battle::applyScheduledFutureSights(){
     std::vector<unsigned int> to_remove;
-    for(int i = 0; i < scheduled_futuresights.size(); i++){
+    for(unsigned int i = 0; i < scheduled_futuresights.size(); i++){
         ScheduledFutureSight& it = scheduled_futuresights[i];
         it.turns_left--;
         if(it.turns_left == 0){

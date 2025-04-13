@@ -37,6 +37,9 @@ int main(int argc, char** argv) {
     opponent_team->addMonster(monster_o3);
     TextEventHandler* handler = new TextEventHandler();
     Bag * user_bag = new Bag();
+    user_bag->addItem(POTION,5);
+    user_bag->addItem(SUPER_POTION,3);
+    user_bag->addItem(POTION,1);
     Bag * opponent_bag = new Bag();
     Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);
     battle->startBattle();

@@ -168,9 +168,6 @@ void Field::clearFieldEffect(FieldEffect field_effect, BattleActionActor actor) 
         field_side_owner = "Opponent";
     }
     switch(field_effect){
-        case WRAP:
-            event_handler->displayMsg(field_side_owner+"' Pokèmon freed from Wrap!");
-            break;
         case SAFEGUARD:
             event_handler->displayMsg(field_side_owner+"'s side is no longer protected by safeguard!");
             break;
@@ -315,6 +312,7 @@ bool Field::clearFieldEffectsSuchThat(bool (*func)(FieldEffect),BattleActionActo
     for(auto it = field_effects_to_clear.begin(); it != field_effects_to_clear.end(); it++){
         clearFieldEffect(*it, actor);
     }
+    return true;
 }
 
 

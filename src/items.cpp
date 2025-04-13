@@ -15,15 +15,15 @@ std::string ItemCategoryToString(ItemCategory category){
     }
 }
 ItemCategory StringToItemCategory(std::string category){
-    if (category == "No Category") return NO_CATEGORY;
-    else if (category == "Key Item") return KEY_ITEM;
-    else if (category == "Berry") return BERRY;
-    else if (category == "Ball") return BALL;
-    else if (category == "Medicine") return MEDICINE;
-    else if (category == "Evolution Item") return EVOLUTION_ITEM;
+    if (category == "NO_CATEGORY") return NO_CATEGORY;
+    else if (category == "KEY") return KEY_ITEM;
+    else if (category == "BERRY") return BERRY;
+    else if (category == "BALL") return BALL;
+    else if (category == "MEDICINE") return MEDICINE;
+    else if (category == "EVOLUTION") return EVOLUTION_ITEM;
     else if (category == "TM") return TM;
-    else if (category == "Held Item") return HELD_ITEM;
-    else if (category == "General Item") return GENERAL_ITEM;
+    else if (category == "HELD") return HELD_ITEM;
+    else if (category == "GENERAL") return GENERAL_ITEM;
     else return NO_CATEGORY; // Default case
 }
 

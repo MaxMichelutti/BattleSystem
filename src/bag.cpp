@@ -12,36 +12,28 @@ bool Pocket::isEmpty() const {
 }
 void Pocket::addItem(ItemType item, unsigned int amount) {
     if (amount == 0) return;
-    for (auto& it : items) {
-        if (it.first == item) {
-            it.second += amount;
-            return;
-        }
+    if(items.find(item)==items.end()){
+        items.insert({item,amount});
+    }else{
+        items[item]+=amount;
     }
-    items.push_back(std::make_pair(item, amount));
 }
 void Pocket::removeItem(ItemType item, unsigned int amount) {
     if (amount == 0) return;
-    for (auto& it : items) {
-        if (it.first == item) {
-            if (it.second > amount) {
-                it.second -= amount;
-            } else {
-                it.second = 0;
-            }
-            return;
-        }
-    }
+    if(items.find(item)==items.end())
+        return;
+    unsigned int old_amount = items[item];
+    amount = min(amount,old_amount);
+    items[item]-=amount;
+    if(items[item]==0)
+        items.erase(item);
 }
 unsigned int Pocket::getItemCount(ItemType item) const {
-    for (const auto& it : items) {
-        if (it.first == item) {
-            return it.second;
-        }
-    }
-    return 0;
+    if(items.find(item)==items.end())
+        return 0;
+    return items.at(item);
 }
-std::vector<std::pair<ItemType, unsigned int>> Pocket::getItems() const {
+std::map<ItemType, unsigned int> Pocket::getItems() const {
     return items;
 }
 std::string Pocket::getName() const {
@@ -74,7 +66,9 @@ void Pocket::removeAllItems(ItemType item) {
 }
 
 // Bag --------------------------------------------------------------------------------------------------------------
-Bag::Bag(){}
+Bag::Bag(){
+    pockets = std::map<ItemCategory,Pocket*>();
+}
 Bag::~Bag(){
     for(auto& pocket : pockets){
         delete pocket.second;
@@ -157,11 +151,14 @@ std::vector<ItemCategory> Bag::getPockets()const{
     }
     return pocket_list;
 }
-std::vector<std::pair<ItemType,unsigned int>> Bag::getItemsInPocket(ItemCategory category)const{
-    std::vector<std::pair<ItemType,unsigned int>> items_in_pocket;
+std::map<ItemType, unsigned int> Bag::getItemsInPocket(ItemCategory category)const{
+    std::cout<<"GEt ITEMS IN POCKET 0"<<std::endl;std::cout.flush();
+    std::map<ItemType, unsigned int> items_in_pocket;
+    std::cout<<"GEt ITEMS IN POCKET"<<std::endl;std::cout.flush();
     if (pockets.find(category) != pockets.end()) {
         items_in_pocket = pockets.at(category)->getItems();
     }
+    std::cout<<"GEt ITEMS IN POCKET 2"<<std::endl;std::cout.flush();
     return items_in_pocket;
 }
 std::string Bag::getPocketName(ItemCategory category)const{
@@ -172,5 +169,14 @@ std::string Bag::getPocketName(ItemCategory category)const{
 }
 bool Bag::isEmpty()const{
     return pockets.empty();
+}
+
+Pocket* Bag::getPocket(ItemCategory cat){
+    if(pockets.find(cat) == pockets.end()){
+        std::cout<<"GP a 2"<<std::endl;std::cout.flush();
+        return nullptr;
+    }
+    std::cout<<"GP b"<<std::endl;std::cout.flush();
+    return pockets[cat];
 }
 

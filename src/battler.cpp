@@ -1233,6 +1233,7 @@ bool Battler::disableAttack(unsigned int attack_id, unsigned int turns){
         return false;
     disabled_attack_id = attack_id;
     disabled_turns_left = turns;
+    return true;
 }
 bool Battler::isAttackDisabled(unsigned int attack)const{
     if(disabled_attack_id == attack)

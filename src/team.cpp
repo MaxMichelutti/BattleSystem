@@ -9,7 +9,7 @@ MonsterTeam::MonsterTeam() {
 }
 
 MonsterTeam::~MonsterTeam() {
-    for (int i = 0; i < team_size; i++) {
+    for (unsigned int i = 0; i < team_size; i++) {
         delete monsters[i];
     }
 }
@@ -61,7 +61,7 @@ void MonsterTeam::swapActiveMonster(unsigned int index) {
 }
 
 Monster* MonsterTeam::getActiveMonster()const {
-    for(int i=0;i<team_size;i++){
+    for(unsigned int i=0;i<team_size;i++){
         if(!monsters[i]->isFainted()){
             return monsters[i];
         }
@@ -126,7 +126,7 @@ void MonsterTeam::swapRandomMonster() {
         }
     }
     if(!found){
-        for(int i=1;i<index;i++){
+        for(unsigned int i=1;i<index;i++){
             if(!monsters[i]->isFainted()){
                 index = i;
                 found=true;

@@ -1,7 +1,7 @@
 #ifndef __CONST_MON_H__
 #define __CONST_MON_H__
 
-// #define DEBUG
+ #define DEBUG
 
 #include <string>
 

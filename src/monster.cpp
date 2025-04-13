@@ -560,7 +560,7 @@ void Monster::usePP(unsigned int attack_id, unsigned int amount){
 bool Monster::hasPP(unsigned int attack_id)const{
     if(transformation != nullptr)
         return transformation->hasPP(attack_id);
-    if(attack_id = STRUGGLE_ID)
+    if(attack_id == STRUGGLE_ID)
         return true;
     if(!hasAttack(attack_id))
         return false;
@@ -571,6 +571,7 @@ bool Monster::hasPP(unsigned int attack_id)const{
             return true;
         }
     }
+    return false;
 }
 
 void Monster::recoverPP(unsigned int attack_id, unsigned int amount){
