@@ -1731,13 +1731,9 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
 }
 
 Choice* CPUAI::getBestItemChoice(Battler*active_user,Bag*bag)const{
-    std::cout<<"z"<<std::endl;std::cout.flush();
-    std::cout<<bag<<std::endl;std::cout.flush();
     if(bag->getPocket(MEDICINE) == nullptr)
         return nullptr;
-    std::cout<<"a"<<std::endl;std::cout.flush();
     auto items = bag->getItemsInPocket(MEDICINE);
-    std::cout<<"b"<<std::endl;std::cout.flush();
     if(items.empty())
         return nullptr;
     ItemType best_item = NO_ITEM_TYPE;
