@@ -85,6 +85,10 @@ Monster* MonsterTeam::getMonster(unsigned int index)const {
     return monsters[index];
 }
 
+unsigned int MonsterTeam::getSize()const {
+    return team_size;
+}
+
 bool MonsterTeam::isEmpty()const {
     return team_size == 0;
 }

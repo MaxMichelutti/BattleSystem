@@ -465,6 +465,19 @@ void Battle::performUseItem(BattleAction action){
         return;
     std::string user_mon_name = getActorBattlerName(action.getActor());
     ItemType item_to_use = action.getItemToUse();
+    ItemData* item_data = ItemData::getItemData(item_to_use);
+    std::string player_name;
+    Bag * bag_used;
+    if(action.getActor() == PLAYER){
+        player_name = "Player";
+        bag_used = player_bag;
+    }else{
+        player_name = "Opponent";
+        bag_used = opponent_bag;
+    }
+    event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+user_mon_name+"!");
+    bag_used->removeItem(item_to_use,1);
+    active_user->useItem(item_to_use);
 }
 
 void Battle::performRechargeTurn(BattleAction action){

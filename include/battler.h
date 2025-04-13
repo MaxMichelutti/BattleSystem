@@ -11,7 +11,9 @@
 #include "events.h"
 
 class Field;
+class AttackData;
 class EventHandler;
+class Monster;
 
 std::string cannotFallMsg(std::string nickname, std::string stat_name);
 std::string cannotRaiseMsg(std::string nickname, std::string stat_name); 
@@ -231,6 +233,8 @@ class Battler{
     void activateMoldBreaker();
     bool isMoldBreakerActive()const;
     void deactivateMoldBreaker();
+    bool useItem(ItemType item);
+    bool itemWouldHaveEffect(ItemType item)const;
 };
 
 #endif

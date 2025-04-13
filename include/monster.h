@@ -5,10 +5,14 @@
 #include "attack.h"
 #include "expcurve.h"
 #include "abilities.h"
+#include "enums.h"
+#include "common.h"
+#include "events.h"
 #include <vector>
 #include <string>
 #include <iostream>
 
+class EventHandler;
 
 class AttackData{
     public:
@@ -103,6 +107,8 @@ class Monster{
     void transformInto(Monster* other);
     unsigned int getHeight()const;
     unsigned int getWeight()const;
+    bool useItem(ItemType item, EventHandler*);
+    bool itemWouldHaveEffect(ItemType item)const;
 };
 
 #endif

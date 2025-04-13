@@ -1669,3 +1669,43 @@ bool Battler::isMoldBreakerActive()const{
 void Battler::deactivateMoldBreaker(){
     is_mold_breaker_active = false;
 }
+
+bool Battler::useItem(ItemType item_type){
+    if(item_type == NO_ITEM_TYPE)
+        return false;
+    if(isFainted())
+        return false;
+    // ItemData* item_data = ItemData::getItemData(item_type);
+    bool res = monster->useItem(item_type, handler);
+    switch (item_type){
+        case FULL_RESTORE:
+            if(hasVolatileCondition(CONFUSION)){
+                removeVolatileCondition(CONFUSION);
+                res = true;
+            }
+            break;
+        default:
+            break;
+    }   
+    if(!res)
+        handler->displayMsg("But it failed");
+    return res;
+}
+
+bool Battler::itemWouldHaveEffect(ItemType item_type)const{
+    if(item_type == NO_ITEM_TYPE)
+        return false;
+    if(isFainted())
+        return false;
+    // ItemData* item_data = ItemData::getItemData(item_type);
+    bool res = monster->itemWouldHaveEffect(item_type);
+    switch (item_type){
+        case FULL_RESTORE:
+            if(hasVolatileCondition(CONFUSION))
+                res = true;
+            break;
+        default:
+            break;
+    }   
+    return res;
+}

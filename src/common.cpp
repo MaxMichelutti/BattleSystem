@@ -380,7 +380,7 @@ float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground
         return 2.0;
     switch(attacker){
         case NORMAL:
-            if(defender == GHOST)
+            if(defender == GHOST && !can_hit_ghosts)
                 return 0.0;
             if((defender == ROCK)||(defender == STEEL))
                 return 0.5;
@@ -400,7 +400,7 @@ float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground
         case ELECTRIC:
             if((defender == WATER)||(defender == FLYING))
                 return 2;
-            if((defender == ELECTRIC)||(defender == GROUND)||(defender == DRAGON))
+            if((defender == ELECTRIC)||(defender == GRASS)||(defender == DRAGON))
                 return 0.5;
             if(defender == GROUND)
                 return 0;
@@ -425,7 +425,7 @@ float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground
             if((defender == FLYING)||(defender == POISON)||(defender == BUG)||(defender == PSYCHIC)||
                 (defender == FAIRY))
                 return 0.5;
-            if(defender == GHOST)
+            if(defender == GHOST & !can_hit_ghosts)
                 return 0;
             return 1;
         case POISON:
@@ -469,7 +469,7 @@ float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground
         case ROCK:
             if((defender == FIRE)||(defender == FLYING)||(defender == BUG)||(defender == ICE))
                 return 2;
-            if((defender == NORMAL)||(defender == ROCK)||(defender == STEEL))
+            if((defender == FIGHTING)||(defender == GROUND)||(defender == STEEL))
                 return 0.5;
             return 1;
         case GHOST:

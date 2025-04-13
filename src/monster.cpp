@@ -688,3 +688,138 @@ unsigned int Monster::getWeight()const{
         return transformation->getWeight();
     return Species::getSpecies(species_id)->getWeight();
 }
+
+bool Monster::useItem(ItemType item_type, EventHandler* handler){
+    if(item_type == NO_ITEM_TYPE)
+        return false;
+    bool result = false;
+    if(!isFainted()){
+        // HP restoring items
+        unsigned int amount = 0;
+        switch (item_type){
+            case POTION:
+                amount=20;
+                break;
+            case SUPER_POTION:
+                amount=60;
+                break;
+            case HYPER_POTION:
+                amount=120;
+                break;
+            case MAX_POTION:
+            case FULL_RESTORE:
+                amount=getMaxHP();
+                break;
+            default:
+                break;
+        }
+        unsigned int actual_heal_amount = removeDamage(amount);
+        if(actual_heal_amount>0){
+            result = true;
+            handler->displayMsg(getNickname()+" was healed of " + std::to_string(actual_heal_amount) + " HP!");
+        }
+        // status restoring items
+        switch(item_type){
+            case ANTIDOTE:
+                if(permanent_status == POISONED || permanent_status == BAD_POISON){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its poisoning!");
+                }
+                break;
+            case AWAKENING:
+                if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
+                    permanent_status == SLEEP_3 || permanent_status == SLEEP_4){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its poisoning!");
+                }
+                break;
+            case PARALYZE_HEAL:
+                if(permanent_status == PARALYSIS){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its paralysis!");
+                }
+                break;
+            case BURN_HEAL:
+                if(permanent_status == BURN){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its burn!");
+                }
+                break;
+            case ICE_HEAL:
+                if(permanent_status == FREEZE){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its freeze!");
+                }
+                break;
+            case FULL_RESTORE:
+            case FULL_HEAL:
+                if(permanent_status != NO_PERMANENT_CONDITION){
+                    permanent_status = NO_PERMANENT_CONDITION;
+                    result = true;
+                    handler->displayMsg(getNickname()+" was cured of its status condition!");
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return result;
+}
+
+bool Monster::itemWouldHaveEffect(ItemType item_type)const{
+    if(item_type == NO_ITEM_TYPE)
+        return false;
+    bool result = false;
+    if(!isFainted()){
+        //healing items
+        switch(item_type){
+            case POTION:
+            case SUPER_POTION:
+            case HYPER_POTION:
+            case MAX_POTION:
+            case FULL_RESTORE:
+                if(getCurrentHP() < getMaxHP())
+                    result = true;
+                break;
+            default:
+                break;
+        }
+        // status restoring items
+        switch(item_type){
+            case ANTIDOTE:
+                if(permanent_status == POISONED || permanent_status == BAD_POISON)
+                    result = true;
+                break;
+            case AWAKENING:
+                if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
+                    permanent_status == SLEEP_3 || permanent_status == SLEEP_4)
+                    result = true;
+                break;
+            case PARALYZE_HEAL:
+                if(permanent_status == PARALYSIS)
+                    result = true;
+                break;
+            case BURN_HEAL:
+                if(permanent_status == BURN)
+                    result = true;
+                break;
+            case ICE_HEAL:
+                if(permanent_status == FREEZE)
+                    result = true;
+                break;
+            case FULL_RESTORE:
+            case FULL_HEAL:
+                if(permanent_status != NO_PERMANENT_CONDITION)
+                    result = true;
+                break;
+            default:
+                break;
+        }
+    }
+    return result;   
+}

@@ -70,8 +70,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 choice = 0;
                 continue;
             }
-            ItemType item = chooseItem(bag);
-            if (item == NO_ITEM_TYPE){
+            auto item = chooseItem(bag, player_team);
+            if (item.first == NO_ITEM_TYPE){
                 choice = 0;
                 continue;
             }
@@ -81,8 +81,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 0,
                 0,
                 player_active->getModifiedSpeed(),
-                0,
-                item};
+                item.second,
+                item.first};
         }else{
             displayMsg("Invalid choice. Please try again.");
         }
@@ -183,32 +183,21 @@ unsigned int TextEventHandler::chooseSwitch(MonsterTeam *player_team)
         // get choice
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
-        if (choice < 1 || choice > available_monsters.size() + 1)
-        {
+        if (choice < 1 || choice > available_monsters.size() + 1){
             displayMsg("Invalid choice. Please try again.");
-        }
-        else if (choice == available_monsters.size() + 1)
-        {
+        }else if (choice == available_monsters.size() + 1){
             return 0;
-        }
-        else
-        {
-            if (choice == 1)
-            {
+        }else{
+            if (choice == 1){
                 displayMsg("You cannot switch to the active monster!");
                 choice = 0;
-            }
-            else
-            {
+            }else{
                 unsigned int result = choice - 1;
                 Monster *switch_monster = available_monsters[result];
-                if (switch_monster->isFainted())
-                {
+                if (switch_monster->isFainted()){
                     displayMsg("You cannot switch to a fainted monster!");
                     choice = 0;
-                }
-                else
-                {
+                }else{
                     return result;
                 }
             }
@@ -297,9 +286,9 @@ void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam 
     std::cout << std::endl;
 }
 
-ItemType TextEventHandler::chooseItem(Bag *bag){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterTeam* team){
     if (bag->isEmpty())
-        return NO_ITEM_TYPE;
+        return std::make_pair(NO_ITEM_TYPE,0);
     auto pockets = bag->getPockets();
     unsigned int pocket_choice = 0;
     std::map<unsigned int, ItemCategory> pocket_choices;
@@ -309,21 +298,21 @@ ItemType TextEventHandler::chooseItem(Bag *bag){
     while (true){
         displayMsg("Choose the pocket:");
         for (auto it : pocket_choices){
-            displayMsg(std::to_string(it.first) + ": " + ItemCategoryToString(it.second));
+            displayMsg(std::to_string(it.first) + ". " + ItemCategoryToString(it.second));
         }
-        displayMsg(std::to_string(count) + ": Back");
+        displayMsg(std::to_string(count) + ". Back");
         displayMsgNoEndl("Enter your choice:");
         pocket_choice = getNumberFromCin();
         if (pocket_choice == count){
-            return NO_ITEM_TYPE;
+            return std::make_pair(NO_ITEM_TYPE,0);
         }else if (pocket_choices.find(pocket_choice) == pocket_choices.end()){
             pocket_choice = 0;
             displayMsg("Invalid pocket!");
             continue;
         }else{
             ItemCategory category = pocket_choices[pocket_choice];
-            ItemType result = chooseItemFromPocket(bag->getPocket(category));
-            if(result == NO_ITEM_TYPE){//means "go back"
+            auto result = chooseItemFromPocket(bag->getPocket(category),team);
+            if(result.first == NO_ITEM_TYPE){//means "go back"
                 pocket_choice = 0;
                 continue;
             }
@@ -332,9 +321,9 @@ ItemType TextEventHandler::chooseItem(Bag *bag){
     }
 }
 
-ItemType TextEventHandler::chooseItemFromPocket(Pocket * pocket){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket * pocket,MonsterTeam* team){
     if(pocket->isEmpty())
-        return NO_ITEM_TYPE;
+        return std::make_pair(NO_ITEM_TYPE,0);
     auto items = pocket->getItems();
     unsigned int item_choice = 0;
     std::map<unsigned int, ItemType> item_choices;
@@ -346,22 +335,69 @@ ItemType TextEventHandler::chooseItemFromPocket(Pocket * pocket){
         for(auto it: item_choices){
             ItemData* item_data = ItemData::getItemData(it.second);
             if(item_data==nullptr)// return to avoid seg faults
-                return NO_ITEM_TYPE;
+                return std::make_pair(NO_ITEM_TYPE,0);
             unsigned int quantity = pocket->getItemCount(it.second);
-            displayMsg(std::to_string(it.first)+": "+item_data->getName()+"(x"+std::to_string(quantity)+")");
+            displayMsg(std::to_string(it.first)+". "+item_data->getName()+"(x"+std::to_string(quantity)+")");
         }
-        displayMsg(std::to_string(count) + ": Back");
+        displayMsg(std::to_string(count) + ". Back");
         displayMsgNoEndl("Enter your choice:");
         item_choice = getNumberFromCin();
         if(item_choice==count){
-            return NO_ITEM_TYPE;
+            return std::make_pair(NO_ITEM_TYPE,0);
         }else if(item_choices.find(item_choice)==item_choices.end()){
             item_choice = 0;
             displayMsg("Invalid item!");
             continue;
         }else{
             ItemType res = item_choices[item_choice];
-            return res;
+            unsigned int target = chooseItemTarget(res,team);
+            if(target == 10){//10 equals go back, 0 equals active monster
+                item_choice = 0;
+                continue;
+            }
+            return std::make_pair(res,target);
+        }
+    }
+}
+
+unsigned int TextEventHandler::chooseItemTarget(ItemType item_type,MonsterTeam* team){
+    // returns 10 if go back
+    if(team->isEmpty())
+        return 10;
+    if(item_type == NO_ITEM_TYPE)
+        return 10;
+    unsigned int team_size = team->getSize();
+    unsigned int choice = 0;
+    while(true){
+        displayMsg("Select the target:");
+        for(unsigned int i = 0; i < team_size; i++){
+            Monster* mon = team->getMonster(i);
+            // if(mon->isFainted()){
+            //     continue;
+            // }
+            std::string msg = std::to_string(i+1)+". "+mon->getNickname();
+            displayMsg(msg);
+        }
+        displayMsg(std::to_string(team_size+1)+". Back");
+        displayMsgNoEndl("Enter your choice:");
+        choice = getNumberFromCin();
+        if(choice == team_size+1){//choice is go back
+            return 10;
+        }else if(choice < 1 || choice > team_size+1){
+            choice = 0;
+            displayMsg("Invalid choice! Please choose again!");
+            continue;
+        }else{
+            unsigned int result = choice-1;
+            Monster* target = team->getMonster(result);
+            if(target->itemWouldHaveEffect(item_type)){
+                return result;
+            }else{
+                displayMsg("The item would have no effect on " + target->getNickname() + "!");
+                displayMsg("Please choose another target!");
+                choice = 0;
+                continue;
+            }
         }
     }
 }

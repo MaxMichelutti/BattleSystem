@@ -4,6 +4,8 @@
 #include "common.h"
 #include "monster.h"
 
+class Monster;
+
 class MonsterTeam{
     private:
     Monster* monsters[6];
@@ -25,6 +27,7 @@ class MonsterTeam{
     bool hasAliveBackup()const;
     void swapRandomMonster();
     void clearBattleEffectsAll();
+    unsigned int getSize()const;
 };
 
 #endif
