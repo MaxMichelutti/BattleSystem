@@ -16,7 +16,7 @@ MonsterTeam::~MonsterTeam() {
 
 MonsterTeam::MonsterTeam(const MonsterTeam& other) {
     team_size = other.team_size;
-    for (int i = 0; i < team_size; i++) {
+    for (unsigned int i = 0; i < team_size; i++) {
         monsters[i] = other.monsters[i];
     }
 }

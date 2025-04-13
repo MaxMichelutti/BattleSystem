@@ -1295,7 +1295,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 166:{
             //-1 speed user
-            int speed_mod = cpu_active->getSpeedModifier();
+            // int speed_mod = cpu_active->getSpeedModifier();
             total_utility -= 5 * effect_prob_mult;
             break;
         }

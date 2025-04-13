@@ -9,7 +9,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
         return forced_action;
     }
     unsigned int choice = 0;
-    while (choice != 1 && choice != 2){
+    while (true){
         displayMsg("Choose your action:");
         displayMsg("1. Attack");
         displayMsg("2. Switch");
@@ -89,8 +89,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
     }
 }
 
-unsigned int TextEventHandler::chooseAttack(Battler *player_active)
-{
+unsigned int TextEventHandler::chooseAttack(Battler *player_active){
     auto available_attacks = player_active->getAttacks();
     bool has_usable_attack = false;
     int counter = 1;
@@ -114,7 +113,7 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active)
     // print choices
     unsigned int choice = 0;
     // get choice
-    while (choice < 1 || choice > choices.size() + 1){
+    while (true){
         displayMsg("Available attacks: ");
         for (auto it = choices.begin(); it != choices.end(); it++){
             Attack *attack = Attack::getAttack(it->second.first);
@@ -162,12 +161,10 @@ unsigned int TextEventHandler::chooseSwitch(MonsterTeam *player_team)
     auto available_monsters = player_team->getMonsters();
     // get choice
     unsigned int choice = 0;
-    while (choice < 1 || choice > available_monsters.size() + 1)
-    {
+    while (true){
         // print choices
         displayMsg("Available monsters:");
-        for (unsigned int i = 0; i < available_monsters.size(); i++)
-        {
+        for (unsigned int i = 0; i < available_monsters.size(); i++){
             int currentHP = available_monsters[i]->getCurrentHP();
             int maxHP = available_monsters[i]->getMaxHP();
             PermanentStatusCondition status = available_monsters[i]->getPermanentStatus();
@@ -219,51 +216,39 @@ unsigned int TextEventHandler::chooseSwitch(MonsterTeam *player_team)
     }
 }
 
-unsigned int TextEventHandler::chooseSwitchForced(MonsterTeam *player_team)
-{
+unsigned int TextEventHandler::chooseSwitchForced(MonsterTeam *player_team){
     auto available_monsters = player_team->getMonsters();
     unsigned int choice = 0;
-    while (true)
-    {
+    while (true){
         choice = chooseSwitch(player_team);
-        if (choice == 0)
-        {
+        if (choice == 0){
             displayMsg("You cannot go back!");
-        }
-        else
-        {
+        }else{
             break;
         }
     }
     return choice;
 }
 
-void TextEventHandler::displayMsg(const std::string &msg)
-{
+void TextEventHandler::displayMsg(const std::string &msg){
     std::cout << msg << std::endl;
 }
 
-void TextEventHandler::displayMsgNoEndl(const std::string &msg)
-{
+void TextEventHandler::displayMsgNoEndl(const std::string &msg){
     std::cout << msg;
 }
 
-unsigned int TextEventHandler::getNumberFromCin()
-{
+unsigned int TextEventHandler::getNumberFromCin(){
     std::string input;
     std::cin >> input;
-    if (is_number(input))
-    {
+    if (is_number(input)){
         return stringToInteger(input);
-    }
-    else
-    {
+    }else{
         return 0;
     }
 }
 
-void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam *user_team, Battler *enemy_active, MonsterTeam *enemy_team)
-{
+void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam *user_team, Battler *enemy_active, MonsterTeam *enemy_team){
     std::string user_name = user_active->getNickname();
     std::string enemy_name = enemy_active->getNickname();
     std::cout << "Player:\t" << user_name << ": "
@@ -273,24 +258,18 @@ void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam 
     auto monsters = user_team->getMonsters();
     unsigned int alive_amount = 0;
     unsigned int fainted_amount = 0;
-    for (unsigned int i = 0; i < monsters.size(); i++)
-    {
+    for (unsigned int i = 0; i < monsters.size(); i++){
         Monster *mon = user_team->getMonster(i);
-        if (mon->isFainted())
-        {
+        if (mon->isFainted()){
             fainted_amount++;
-        }
-        else
-        {
+        }else{
             alive_amount++;
         }
     }
-    for (unsigned int a = 0; a < alive_amount; a++)
-    {
+    for (unsigned int a = 0; a < alive_amount; a++){
         std::cout << "O ";
     }
-    for (unsigned int b = 0; b < fainted_amount; b++)
-    {
+    for (unsigned int b = 0; b < fainted_amount; b++){
         std::cout << "X ";
     }
     std::cout << std::endl;
@@ -301,24 +280,18 @@ void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam 
     monsters = enemy_team->getMonsters();
     alive_amount = 0;
     fainted_amount = 0;
-    for (unsigned int i = 0; i < monsters.size(); i++)
-    {
+    for (unsigned int i = 0; i < monsters.size(); i++){
         Monster *mon = enemy_team->getMonster(i);
-        if (mon->isFainted())
-        {
+        if (mon->isFainted()){
             fainted_amount++;
-        }
-        else
-        {
+        }else{
             alive_amount++;
         }
     }
-    for (unsigned int a = 0; a < alive_amount; a++)
-    {
+    for (unsigned int a = 0; a < alive_amount; a++){
         std::cout << "O ";
     }
-    for (unsigned int b = 0; b < fainted_amount; b++)
-    {
+    for (unsigned int b = 0; b < fainted_amount; b++){
         std::cout << "X ";
     }
     std::cout << std::endl;
@@ -333,11 +306,9 @@ ItemType TextEventHandler::chooseItem(Bag *bag){
     unsigned int count = 1;
     for (auto pocket : pockets)
         pocket_choices.insert({count++, pocket});
-    while (pocket_choice == 0)
-    {
+    while (true){
         displayMsg("Choose the pocket:");
-        for (auto it : pocket_choices)
-        {
+        for (auto it : pocket_choices){
             displayMsg(std::to_string(it.first) + ": " + ItemCategoryToString(it.second));
         }
         displayMsg(std::to_string(count) + ": Back");
@@ -345,14 +316,11 @@ ItemType TextEventHandler::chooseItem(Bag *bag){
         pocket_choice = getNumberFromCin();
         if (pocket_choice == count){
             return NO_ITEM_TYPE;
-        }
-        else if (pocket_choices.find(pocket_choice) == pocket_choices.end())
-        {
+        }else if (pocket_choices.find(pocket_choice) == pocket_choices.end()){
             pocket_choice = 0;
             displayMsg("Invalid pocket!");
             continue;
-        }
-        else{
+        }else{
             ItemCategory category = pocket_choices[pocket_choice];
             ItemType result = chooseItemFromPocket(bag->getPocket(category));
             if(result == NO_ITEM_TYPE){//means "go back"
@@ -373,7 +341,7 @@ ItemType TextEventHandler::chooseItemFromPocket(Pocket * pocket){
     unsigned int count = 1;
     for (auto item : items)
         item_choices.insert({count++, item.first});
-    while(item_choice==0){
+    while(true){
         displayMsg("Select the item to use:");
         for(auto it: item_choices){
             ItemData* item_data = ItemData::getItemData(it.second);
