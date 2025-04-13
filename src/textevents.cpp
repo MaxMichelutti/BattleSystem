@@ -3,26 +3,21 @@
 TextEventHandler::TextEventHandler() {}
 TextEventHandler::~TextEventHandler() {}
 
-BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam *player_team, Battler *opponent_active, Field *field, Bag *bag)
-{
+BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam *player_team, Battler *opponent_active, Field *field, Bag *bag){
     BattleAction forced_action = forcedAction(PLAYER, player_active, field);
-    if (forced_action.getActionType() != ATTACK)
-    {
+    if (forced_action.getActionType() != ATTACK){
         return forced_action;
     }
     unsigned int choice = 0;
-    while (choice != 1 && choice != 2)
-    {
+    while (choice != 1 && choice != 2){
         displayMsg("Choose your action:");
         displayMsg("1. Attack");
         displayMsg("2. Switch");
         displayMsg("3. Item");
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
-        if (choice == 1)
-        {
-            if (player_active->hasVolatileCondition(ENCORE))
-            {
+        if (choice == 1){
+            if (player_active->hasVolatileCondition(ENCORE)){
                 // force use of encored move
                 unsigned int attack_id = player_active->getLastAttackUsed();
                 Attack *attack = Attack::getAttack(attack_id);
@@ -37,8 +32,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                     NO_ITEM_TYPE);
             }
             unsigned int attack_id = chooseAttack(player_active);
-            if (attack_id == 0)
-            {
+            if (attack_id == 0){
                 choice = 0;
                 continue;
             }
@@ -51,18 +45,14 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 NO_ITEM_TYPE);
-        }
-        else if (choice == 2)
-        {
-            if (!player_active->canSwitchOut(opponent_active))
-            {
+        }else if (choice == 2){
+            if (!player_active->canSwitchOut(opponent_active)){
                 displayMsg("You cannot switch! " + player_active->getNickname() + " is trapped!");
                 choice = 0;
                 continue;
             }
             unsigned int switch_id = chooseSwitch(player_team);
-            if (switch_id == 0)
-            {
+            if (switch_id == 0){
                 choice = 0;
                 continue;
             }
@@ -74,18 +64,14 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 switch_id,
                 NO_ITEM_TYPE);
-        }
-        else if (choice == 3)
-        {
-            if (bag->isEmpty())
-            {
+        }else if (choice == 3){
+            if (bag->isEmpty()){
                 displayMsg("You have no items available to use!");
                 choice = 0;
                 continue;
             }
             ItemType item = chooseItem(bag);
-            if (item == NO_ITEM_TYPE)
-            {
+            if (item == NO_ITEM_TYPE){
                 choice = 0;
                 continue;
             }
@@ -97,9 +83,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 item};
-        }
-        else
-        {
+        }else{
             displayMsg("Invalid choice. Please try again.");
         }
     }
@@ -151,8 +135,7 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active)
         }else if (player_active->isAttackDisabled(choices[choice].first)){//disable check
             displayMsg("This attack is currently disabled! Please choose another one.");
             choice = 0;
-        }else
-        {
+        }else{
             auto it = choices.find(choice);
             if (it != choices.end()){
                 unsigned int attack_id = it->second.first;
