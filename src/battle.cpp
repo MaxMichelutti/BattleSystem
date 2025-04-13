@@ -440,17 +440,21 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
     // MonsterTeam* user_team = getActorTeam(action.getActor());
     // MonsterTeam* target_team = getActorTeam(otherBattleActionActor(action.getActor()));
     // check if user is alive
-    if(active_user->isFainted()){
-        return;
-    }
+    
     // perform action
     BattleActionType atype = action.getActionType();
     if(isAttackingActionType(atype)){
+        if(active_user->isFainted()){
+            return;
+        }
         performAttack(action,all_actions);
         // deactivate mold breaker
         active_user->deactivateMoldBreaker();
         other_active->deactivateMoldBreaker();
     }else if(atype == SWITCH){
+        if(active_user->isFainted()){
+            return;
+        }
         performSwitch(action);
     }else if(atype==RECHARGE_TURN){
         performRechargeTurn(action);
@@ -460,10 +464,6 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
 }
 
 void Battle::performUseItem(BattleAction action){
-    Battler* active_user = getActorBattler(action.getActor());
-    if(active_user->isFainted())
-        return;
-    std::string user_mon_name = getActorBattlerName(action.getActor());
     ItemType item_to_use = action.getItemToUse();
     ItemData* item_data = ItemData::getItemData(item_to_use);
     std::string player_name;
@@ -475,9 +475,34 @@ void Battle::performUseItem(BattleAction action){
         player_name = "Opponent";
         bag_used = opponent_bag;
     }
-    event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+user_mon_name+"!");
-    bag_used->removeItem(item_to_use,1);
-    active_user->useItem(item_to_use);
+    unsigned int target = action.getSwitchId();
+    if(target==0){
+        //use on active
+        Battler* active_target = getActorBattler(action.getActor());
+        if(active_target->isFainted()){
+            return;
+        }
+        if(!active_target->itemWouldHaveEffect(item_to_use)){
+            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+", but it had no effect!");
+            return;
+        }else{
+            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+"!");
+            active_target->useItem(item_to_use);
+            bag_used->removeItem(item_to_use);
+        }
+    }else{
+        //use on bench
+        MonsterTeam* target_team = getActorTeam(action.getActor());
+        Monster* monster_target = target_team->getMonster(target);
+        if(!monster_target->itemWouldHaveEffect(item_to_use)){
+            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+", but it had no effect!");
+            return;
+        }else{
+            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+"!");
+            monster_target->useItem(item_to_use, event_handler);
+            bag_used->removeItem(item_to_use);
+        }
+    }
 }
 
 void Battle::performRechargeTurn(BattleAction action){
@@ -4138,6 +4163,17 @@ bool Battle::checkIfAttackFails(Attack* attack,
     Battler * active_target = getActorBattler(otherBattleActionActor(actor));
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
+    // check if attack is disabled
+    if(active_user->isAttackDisabled(attack_id)){
+        event_handler->displayMsg(user_mon_name+"'s "+attack->getName()+" is disabled!");
+        active_user->setLastAttackUsed(action.getAttackId());
+        last_attack_used_id = attack_id;
+        decrementVolatiles(active_user);
+        active_user->setLastAttackFailed();
+        active_user->removeVolatileCondition(LASER_FOCUS);
+        return true;
+    }
+
     // check if gravity blocks attack
     if(field->hasFullFieldEffect(GRAVITY) && attack->getType()==FLYING){
         event_handler->displayMsg(user_mon_name+" cannot use "+attack->getName()+" due to gravity!");

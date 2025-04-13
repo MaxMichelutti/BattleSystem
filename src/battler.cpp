@@ -1678,6 +1678,7 @@ bool Battler::useItem(ItemType item_type){
     // ItemData* item_data = ItemData::getItemData(item_type);
     bool res = monster->useItem(item_type, handler);
     switch (item_type){
+        case FULL_HEAL:
         case FULL_RESTORE:
             if(hasVolatileCondition(CONFUSION)){
                 removeVolatileCondition(CONFUSION);
@@ -1700,6 +1701,7 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
     // ItemData* item_data = ItemData::getItemData(item_type);
     bool res = monster->itemWouldHaveEffect(item_type);
     switch (item_type){
+        case FULL_HEAL:
         case FULL_RESTORE:
             if(hasVolatileCondition(CONFUSION))
                 res = true;

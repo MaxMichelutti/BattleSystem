@@ -70,7 +70,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 choice = 0;
                 continue;
             }
-            auto item = chooseItem(bag, player_team);
+            auto item = chooseItem(bag, player_team, player_active);
             if (item.first == NO_ITEM_TYPE){
                 choice = 0;
                 continue;
@@ -286,7 +286,7 @@ void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam 
     std::cout << std::endl;
 }
 
-std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterTeam* team){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterTeam* team,Battler* active_monster){
     if (bag->isEmpty())
         return std::make_pair(NO_ITEM_TYPE,0);
     auto pockets = bag->getPockets();
@@ -311,7 +311,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterT
             continue;
         }else{
             ItemCategory category = pocket_choices[pocket_choice];
-            auto result = chooseItemFromPocket(bag->getPocket(category),team);
+            auto result = chooseItemFromPocket(bag->getPocket(category),team, active_monster);
             if(result.first == NO_ITEM_TYPE){//means "go back"
                 pocket_choice = 0;
                 continue;
@@ -321,7 +321,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterT
     }
 }
 
-std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket * pocket,MonsterTeam* team){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket * pocket,MonsterTeam* team,Battler* active_monster){
     if(pocket->isEmpty())
         return std::make_pair(NO_ITEM_TYPE,0);
     auto items = pocket->getItems();
@@ -350,7 +350,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket *
             continue;
         }else{
             ItemType res = item_choices[item_choice];
-            unsigned int target = chooseItemTarget(res,team);
+            unsigned int target = chooseItemTarget(res,team,active_monster);
             if(target == 10){//10 equals go back, 0 equals active monster
                 item_choice = 0;
                 continue;
@@ -360,7 +360,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket *
     }
 }
 
-unsigned int TextEventHandler::chooseItemTarget(ItemType item_type,MonsterTeam* team){
+unsigned int TextEventHandler::chooseItemTarget(ItemType item_type,MonsterTeam* team,Battler* active_monster){
     // returns 10 if go back
     if(team->isEmpty())
         return 10;
@@ -389,14 +389,26 @@ unsigned int TextEventHandler::chooseItemTarget(ItemType item_type,MonsterTeam* 
             continue;
         }else{
             unsigned int result = choice-1;
-            Monster* target = team->getMonster(result);
-            if(target->itemWouldHaveEffect(item_type)){
-                return result;
-            }else{
-                displayMsg("The item would have no effect on " + target->getNickname() + "!");
-                displayMsg("Please choose another target!");
-                choice = 0;
-                continue;
+            if(result == 0){//use on active
+                Battler* target = active_monster;
+                if(target->itemWouldHaveEffect(item_type)){
+                    return result;
+                }else{
+                    displayMsg("The item would have no effect on " + target->getNickname() + "!");
+                    displayMsg("Please choose another target!");
+                    choice = 0;
+                    continue;
+                }
+            }else{//use on bench
+                Monster* target = team->getMonster(result);
+                if(target->itemWouldHaveEffect(item_type)){
+                    return result;
+                }else{
+                    displayMsg("The item would have no effect on " + target->getNickname() + "!");
+                    displayMsg("Please choose another target!");
+                    choice = 0;
+                    continue;
+                }
             }
         }
     }
