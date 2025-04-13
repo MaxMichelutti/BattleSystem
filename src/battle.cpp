@@ -4166,8 +4166,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     // check if attack is disabled
     if(active_user->isAttackDisabled(attack_id)){
         event_handler->displayMsg(user_mon_name+"'s "+attack->getName()+" is disabled!");
-        active_user->setLastAttackUsed(action.getAttackId());
-        last_attack_used_id = attack_id;
+        // active_user->setLastAttackUsed(action.getAttackId());
+        // last_attack_used_id = attack_id;
         decrementVolatiles(active_user);
         active_user->setLastAttackFailed();
         active_user->removeVolatileCondition(LASER_FOCUS);
