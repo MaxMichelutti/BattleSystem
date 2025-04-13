@@ -113,31 +113,26 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active)
     // collect choices
     std::map<unsigned int, std::pair<unsigned int, unsigned int>> choices;
     // check if at least one choice can be selected
-    for (auto it = available_attacks.begin(); it != available_attacks.end(); it++)
-    {
+    for (auto it = available_attacks.begin(); it != available_attacks.end(); it++){
         choices.insert({counter++, {it->first, it->second}});
         Attack *attack = Attack::getAttack(it->first);
         if (it->second > 0 &&
-            !player_active->isAttackDisabled(it->first) &&
-            (attack->getCategory() != STATUS || !player_active->hasVolatileCondition(TAUNTED)))
-        {
+            !player_active->isAttackDisabled(it->first) &&//disable check
+            (attack->getCategory() != STATUS || !player_active->hasVolatileCondition(TAUNTED))){//taunt check
             has_usable_attack = true;
         }
     }
     // force struggle if no choice can be selected
-    if (!has_usable_attack)
-    {
+    if (!has_usable_attack){
         displayMsg("You have no usable attacks! Your monster will use Struggle!");
         return STRUGGLE_ID;
     }
     // print choices
     unsigned int choice = 0;
     // get choice
-    while (choice < 1 || choice > choices.size() + 1)
-    {
+    while (choice < 1 || choice > choices.size() + 1){
         displayMsg("Available attacks: ");
-        for (auto it = choices.begin(); it != choices.end(); it++)
-        {
+        for (auto it = choices.begin(); it != choices.end(); it++){
             Attack *attack = Attack::getAttack(it->second.first);
             std::string msg = std::to_string(it->first) + ". " +
                               attack->getName() + "\t" +
@@ -148,35 +143,32 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active)
         displayMsg(std::to_string(choices.size() + 1) + ". Go Back");
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
-        if (choice < 1 || choice > choices.size() + 1)
-        {
+        if (choice < 1 || choice > choices.size() + 1){
             displayMsg("Invalid choice. Please try again.");
-        }
-        else if (choice == choices.size() + 1)
-        {
+            choice = 0;
+        }else if (choice == choices.size() + 1){
             return 0;
-        }
-        else if (player_active->isAttackDisabled(choices[choice].first))
-        {
+        }else if (player_active->isAttackDisabled(choices[choice].first)){//disable check
             displayMsg("This attack is currently disabled! Please choose another one.");
             choice = 0;
-        }
-        else
+        }else
         {
             auto it = choices.find(choice);
-            if (it != choices.end())
-            {
+            if (it != choices.end()){
                 unsigned int attack_id = it->second.first;
                 unsigned int current_pp = it->second.second;
-                if (current_pp > 0)
-                {
+                Attack *attack = Attack::getAttack(attack_id);
+                if(attack->getCategory() == STATUS && player_active->hasVolatileCondition(TAUNTED)){
+                    displayMsg("You cannot use a status move while taunted! Please choose another one.");
+                    choice = 0;
+                }else if (current_pp > 0){
                     return attack_id;
-                }
-                else
-                {
+                }else{
                     displayMsg("You have no PP left for this attack! Please choose another one.");
                     choice = 0;
                 }
+            }else{
+                choice = 0;
             }
         }
     }

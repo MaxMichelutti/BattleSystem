@@ -1663,6 +1663,9 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
         if(curr_pp==0){continue;}
         if(attack_id==0){continue;}
         if(active_user->getDisabledAttack() == attack_id){continue;}
+        Attack* attack = Attack::getAttack(attack_id);
+        if(attack->getCategory() == STATUS && active_user->hasVolatileCondition(TAUNTED))//cannot use status moves when taunted
+            continue;
         int utility = computeAttackUtility(attack_id,active_user,active_target,field);
         if(utility > best_utility){
             best_choice_id = attack_id;
