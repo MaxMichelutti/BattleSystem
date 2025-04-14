@@ -437,7 +437,7 @@ POWER:60
 CONTACT
 CATEGORY:PHYSICAL
 TYPE:BUG
-% EFFECT: STEAL AND EAT OPPONENT BERRY
+EFFECT:199
 # 50 HARDEN
 NAME:Harden
 DESCRIPTION:The user stiffens all the muscles in its body to raise its Defense stat.
@@ -830,7 +830,7 @@ PP:20
 CONTACT
 POWER:60
 CATEGORY:PHYSICAL
-% EFFECT: STEAL AND EAT OPPONENT BERRY
+EFFECT:199
 # 93 WRAP
 NAME:Wrap
 DESCRIPTION:A long body or vines are used to wrap and squeeze the target for four to five turns.
@@ -918,14 +918,15 @@ PP:10
 EFFECT:58
 # 103 BELCH
 NAME:Belch
-DESCRIPTION:The user lets out a damaging belch at the target. 
-% actual DESCRIPTION:The user lets out a damaging belch at the target. The user must eat a held Berry to use this move. 
+DESCRIPTION:The user lets out a damaging belch at the target. The user must eat a held Berry to use this move.
+EFFECT:200
 TYPE:POISON
 CATEGORY:SPECIAL
 POWER:120
 ACCURACY:90
 PP:10
-% EFFECT: FAILS IF NO BERRY HAS BEEN EATEN YET
+EFFECT:200
+EFFECTTARGET:SELF
 # 104 HAZE
 NAME:Haze
 DESCRIPTION:The user creates a haze that eliminates every stat change among all the Pokémon engaged in battle.
@@ -1450,11 +1451,12 @@ EFFECT:91
 # 162 INCINERATE
 NAME:incinerate
 DESCRIPTION:The user attacks opposing Pokémon with fire. If a Pokémon is holding a certain item, such as a Berry, the item becomes burned up and unusable.
-% EFFECT: delete berry from target
 TYPE:FIRE
 POWER:60
 PP:15
 CATEGORY:SPECIAL
+EFFECT:201
+EFFECTTARGET:SELF
 # 163 CONFUSE RAY
 NAME:Confuse Ray
 DESCRIPTION:The target is exposed to a sinister ray that causes confusion.
@@ -1523,7 +1525,8 @@ CATEGORY:PHYSICAL
 PP:25
 POWER:60
 CONTACT
-% EFFECT: steals item
+EFFECT:202
+EFFECTTARGET:SELF
 # 171 ROUND
 NAME:Round
 DESCRIPTION:The user attacks the target with a song. Others can join in the Round and make the attack do greater damage.
@@ -2138,7 +2141,8 @@ POWER:65
 TYPE:DARK
 CONTACT
 CATEGORY:PHYSICAL
-% EFFECT: removes target held item
+EFFECT:203
+EFFECTTARGET:SELF
 # 239 VITAL THROW
 NAME:Vital Throw
 DESCRIPTION:The user attacks last. In return, this throw move never misses.
@@ -3472,4 +3476,19 @@ TYPE:PSYCHIC
 PP:10
 POWER:100
 EFFECT:128
+EFFECTTARGET:SELF
+# 386 SWITCHEROO
+NAME:Switcheroo
+DESCRIPTION:The user trades held items with the target faster than the eye can follow.
+PP:10
+TYPE:DARK
+CATEGORY:STATUS
+EFFECT:198
+# 387 FLING
+NAME:Fling
+DESCRIPTION:The user flings its held item at the target to attack. This move's power and effects depend on the item.
+PP:10
+TYPE:DARK
+CATEGORY:PHYSICAL
+EFFECT:204
 EFFECTTARGET:SELF

@@ -22,6 +22,7 @@ class TextEventHandler : public EventHandler {
     unsigned int chooseSwitch(MonsterTeam*);
     unsigned int chooseSwitchForced(MonsterTeam*);
     unsigned int chooseItemTarget(ItemType,MonsterTeam*,Battler*);
+    unsigned int chooseTargetAttack(Battler*,MonsterTeam*,unsigned int target);
     std::pair<ItemType,unsigned int> chooseItem(Bag*,MonsterTeam*,Battler*);
     std::pair<ItemType,unsigned int> chooseItemFromPocket(Pocket*,MonsterTeam*,Battler*);
     void displayMsg(const std::string& msg);

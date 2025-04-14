@@ -195,3 +195,9 @@
 195: only usable while sleeping, 30% flinch opponent
 196: supereffective against water
 197: sky attack, flinch opponent, incresaed critical hit
+198: held items are switched between user and target
+199: steal opponent berry and eat it
+200: fails if the user does not have consumed at least one berry
+201: remove Berry from target
+202: steal target item
+203: removes target held item when computing power, if the target had item power is doubled

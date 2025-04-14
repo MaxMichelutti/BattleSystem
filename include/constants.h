@@ -23,6 +23,8 @@ const unsigned int MINIMIZE_ID = 261;
 const unsigned int DEFENSE_CURL_ID = 126;
 const unsigned int FOCUS_PUNCH_ID = 330;
 
+const unsigned int MAX_UNSIGNED = 4294967295;
+
 // stat modifiers
 const int MAX_MODIFIER = 6;
 const int MIN_MODIFIER = -6;

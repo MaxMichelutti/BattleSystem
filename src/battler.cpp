@@ -277,6 +277,8 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     stockpiles = 0;
     last_attack_used = 0;
     same_attack_counter = 0;
+    had_held_item = false;
+    consumed_held_item = NO_ITEM_TYPE;
     stat_modifiers = Modifiers(0,0,0,0,0,0,0);
     mimicked_attack = nullptr;
     disabled_attack_id = 0;
@@ -303,6 +305,8 @@ void Battler::setMonster(Monster* monster){
     turns_in_battle = 0;
     last_attack_failed = false;
     hits_taken = 0;
+    consumed_held_item = NO_ITEM_TYPE;
+    had_held_item = false;
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
@@ -327,14 +331,14 @@ Monster* Battler::getMonster()const {
 void Battler::addVolatileCondition(VolatileStatusCondition condition, int duration) {
     if(hasVolatileCondition(condition))
         return;
-    if(getAbility()==OWN_TEMPO && condition == CONFUSION){
+    if(hasAbility(OWN_TEMPO) && condition == CONFUSION){
         handler->displayMsg(monster->getNickname()+"'s Own Tempo prevents confusion!");
         return;
     }
-    if(getAbility()==INNER_FOCUS && condition == FLINCH){
+    if(hasAbility(INNER_FOCUS) && condition == FLINCH){
         return;
     }
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD &&
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD) &&
         condition==DROWSY){
         handler->displayMsg(monster->getNickname()+"'s Leaf Guard prevents drowsiness!");
         return;
@@ -425,6 +429,9 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
         default:
             break;
     }
+    //eat persim berry in case of confusion
+    if(hasVolatileCondition(CONFUSION) && hasHeldItem(PERSIM_BERRY))
+        tryEatBerry();
 }
 
 void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
@@ -554,20 +561,20 @@ bool Battler::changeAttackModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
-    if(getAbility() == HYPER_CUTTER && amount < 0){
+    if(hasAbility(HYPER_CUTTER) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Hyper Cutter prevents the Attack reduction!");
         return false;
     }
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -585,20 +592,20 @@ bool Battler::changeDefenseModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(name+"'s Clear Body prevents Stat reductions!");
         return false;
     }
-    if(getAbility() == BIG_PECKS && amount < 0){
+    if(hasAbility(BIG_PECKS) && amount < 0){
         handler->displayMsg(name+"'s Defense cannot be lowered!");
         return false;
     }
     bool res= stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -615,16 +622,16 @@ bool Battler::changeSpecialAttackModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -642,16 +649,16 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -668,16 +675,16 @@ bool Battler::changeSpeedModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -694,25 +701,25 @@ bool Battler::changeAccuracyModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
-    if(getAbility()==ILLUMINATE && amount<0){
+    if(hasAbility(ILLUMINATE) && amount<0){
         handler->displayMsg(monster->getNickname()+"'s Accuracy cannot be lowered!");
         return false;
     }
     std::string name = monster->getNickname();
-    if(getAbility() == KEEN_EYE && amount<0){
+    if(hasAbility(KEEN_EYE) && amount<0){
         handler->displayMsg(name+"'s Accuracy cannot be lowered!");
         return false;
     }
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -729,16 +736,16 @@ bool Battler::changeEvasionModifier(int amount) {
         handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(getAbility() == CLEAR_BODY && amount < 0){
+    if(hasAbility(CLEAR_BODY) && amount < 0){
         handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
-    if(res && amount < 0 && getAbility()==COMPETITIVE){
+    if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
     }
-    if(res && amount < 0 && getAbility()==DEFIANT){
+    if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
     return res;
@@ -790,9 +797,9 @@ unsigned int Battler::getModifiedAttack()const {
     }else if(modifier<0){
         base_modified = base_attack * 2 / (-modifier + 2);
     }
-    if(getAbility()==HUSTLE)
+    if(hasAbility(HUSTLE))
         base_modified*=1.5;
-    if(getAbility()==GUTS && hasPermanentStatus())
+    if(hasAbility(GUTS) && hasPermanentStatus())
         base_modified*=1.5;
     return base_modified;
 }
@@ -806,7 +813,7 @@ unsigned int Battler::getModifiedDefense()const {
     }else if(modifier<0){
         base_modified = base_defense * 2 / (-modifier + 2);
     }
-    if(getAbility()==MARVEL_SCALE && hasPermanentStatus()){
+    if(hasAbility(MARVEL_SCALE) && hasPermanentStatus()){
         base_modified = base_modified * 3 / 2;
     }
     return base_modified;
@@ -821,7 +828,7 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     }else if(modifier<0){
         base_modified = base_special_attack * 2 / (-modifier + 2);
     }
-    if(monster->getAbility() == SOLAR_POWER && field->getWeather() == SUN){// SOLAR POWER
+    if(hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
         base_modified = base_modified * 3 / 2;
     }
     return base_modified;
@@ -854,18 +861,21 @@ unsigned int Battler::getModifiedSpeed()const {
     if(field->hasFieldEffect(TAILWIND,actor)){//tailwind doubles speed of the team
         base_modified = base_modified * 2;
     }
-    if(getAbility()==QUICK_FEET && hasPermanentStatus()){
+    if(hasAbility(QUICK_FEET) && hasPermanentStatus()){
         base_modified =  base_modified * 1.5;
     }else if(monster->getPermanentStatus() == PARALYSIS){
         base_modified = base_modified * 0.5;
     }
-    if(monster->getAbility() == CHLOROPHYL && field->getWeather() == SUN){// CHLOROPHYL
+    if(hasAbility(UNBURDEN) && hasLostHeldItem()){
         base_modified = base_modified * 2;
     }
-    if(monster->getAbility() == SWIFT_SWIM && field->getWeather() == RAIN){// SWIFT SWIM
+    if(hasAbility(CHLOROPHYL) && field->getWeather() == SUN){// CHLOROPHYL
         base_modified = base_modified * 2;
     }
-    if(field->getWeather()==SANDSTORM && getAbility()==SAND_RUSH){//Sand rush doubles speed under sandstorm
+    if(hasAbility(SWIFT_SWIM) && field->getWeather() == RAIN){// SWIFT SWIM
+        base_modified = base_modified * 2;
+    }
+    if(field->getWeather()==SANDSTORM && hasAbility(SAND_RUSH)){//Sand rush doubles speed under sandstorm
         base_modified = base_modified * 2;
     }
     return base_modified;
@@ -880,7 +890,7 @@ unsigned int Battler::getModifiedAccuracy()const {
     }else if(modifier<0){
         modified_accuracy = accuracy * 3 / (-modifier + 3);
     }
-    if(getAbility() == COMPOUND_EYES)
+    if(hasAbility(COMPOUND_EYES))
         modified_accuracy *= 13 / 10;
     return modified_accuracy;
 }
@@ -938,18 +948,18 @@ void Battler::setAbility(Ability ability) {
     this->battler_ability = ability;
 }
 bool Battler::canSwitchOut(Battler* enemy)const {
-    if(getAbility() == RUN_AWAY)
+    if(hasAbility(RUN_AWAY))
         return true;
     if(hasVolatileCondition(INGRAINED))
         return false;
     if(hasType(GHOST))
         return true;
     if(enemy != nullptr &&
-        enemy->getAbility() == ARENA_TRAP && 
+        enemy->hasAbility(ARENA_TRAP) && 
         isTouchingGround())
         return false;
     if(enemy != nullptr &&
-        enemy->getAbility() == MAGNET_PULL && 
+        enemy->hasAbility(MAGNET_PULL) && 
         hasType(STEEL))
         return false;
     if(hasVolatileCondition(WRAP))
@@ -1049,7 +1059,7 @@ bool Battler::isTouchingGround()const{
         return true;
     if(hasVolatileCondition(MAGNET_RISE))
         return false;
-    if(getAbility()==LEVITATE)
+    if(hasAbility(LEVITATE))
         return false;
     if(hasType(FLYING))
         return false;
@@ -1070,11 +1080,11 @@ bool Battler::canFallAsleep()const{
         return false;
     if(field->getTerrain() == ELECTRIC_FIELD)
         return false;
-    if(getAbility() == INSOMNIA)
+    if(hasAbility(INSOMNIA))
         return false;
-    if(getAbility() == VITAL_SPIRIT)
+    if(hasAbility(VITAL_SPIRIT))
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
     if(hasPermanentStatus())
         return false;
@@ -1092,11 +1102,11 @@ bool Battler::canBeParalyzed()const{
         return false;
     if(field->getTerrain() == MISTY_FIELD)
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
     if(hasPermanentStatus())
         return false;
-    if(getAbility()==LIMBER)
+    if(hasAbility(LIMBER))
         return false;
     return true;
 }
@@ -1114,7 +1124,7 @@ bool Battler::canBeFrozen()const{
         return false;
     if(hasPermanentStatus())
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
     return true;
 }
@@ -1130,9 +1140,9 @@ bool Battler::canBeBurned()const{
         return false;
     if(field->getTerrain() == MISTY_FIELD)
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
-    if(getAbility()==WATER_VEIL)
+    if(hasAbility(WATER_VEIL))
         return false;
     return true;
 }
@@ -1151,9 +1161,9 @@ bool Battler::canBePoisoned()const{
         return false;
     if(hasType(POISON) || hasType(STEEL))
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
-    if(getAbility()==IMMUNITY)
+    if(hasAbility(IMMUNITY))
         return false;
     return true;
 }
@@ -1165,9 +1175,9 @@ bool Battler::canBeBadlyPoisoned()const{
         return false;
     if(hasType(POISON) || hasType(STEEL))
         return false;
-    if(field->getWeather()==SUN && getAbility()==LEAF_GUARD)
+    if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
         return false;
-    if(getAbility()==IMMUNITY)
+    if(hasAbility(IMMUNITY))
         return false;
     return true;
 }
@@ -1291,9 +1301,27 @@ void Battler::usePP(unsigned int attack_id, unsigned int amount){
         if(mimicked_attack->current_pp < amount)
             amount = mimicked_attack->current_pp;
         mimicked_attack->current_pp -= amount;
+        tryEatLeppaBerry(attack_id);
         return;
     }
     monster->usePP(attack_id,amount);
+    tryEatLeppaBerry(attack_id);
+}
+
+void Battler::tryEatLeppaBerry(unsigned int attack_id){
+    if(hasPP(attack_id))
+        return;
+    if(attack_id==0 || attack_id==STRUGGLE_ID)
+        return;
+    if(!hasHeldItem(LEPPA_BERRY))
+        return;
+    recoverPP(attack_id,10);
+    ItemData* item_data = ItemData::getItemData(LEPPA_BERRY);
+    Attack* attack_data = Attack::getAttack(attack_id);
+    handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
+    handler->displayMsg(getNickname()+"'s "+attack_data->getName()+" PP was restored!");
+    removeHeldItem();
+    consumed_held_item = LEPPA_BERRY;
 }
 
 bool Battler::hasPP(unsigned int attack_id)const{
@@ -1349,19 +1377,19 @@ void Battler::transformInto(Monster* other){
 
 unsigned int Battler::addDamage(unsigned int amount, AttackType category){
     unsigned int currentHP = monster->getCurrentHP();
-    if(isAtFullHP() && getAbility()==MULTISCALE){
-        handler->displayMsg(monster->getNickname()+"'s Multiscale reduces the damage!");
+    if(isAtFullHP() && hasAbility(MULTISCALE)){
+        handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
         amount = max(1,amount / 2);
     }
     if(currentHP != 1 && 
         currentHP < amount &&
-        getAbility() == STURDY){
-        handler->displayMsg(monster->getNickname()+" endures the hit!");
+        hasAbility(STURDY)){
+        handler->displayMsg(getNickname()+" endures the hit!");
         amount = currentHP - 1;
     }
     if(currentHP < amount &&
         hasVolatileCondition(ENDURE)){
-        handler->displayMsg(monster->getNickname()+" endures the hit!");
+        handler->displayMsg(getNickname()+" endures the hit!");
         amount = currentHP - 1;
     }
     unsigned int dmg = monster->addDamage(amount);
@@ -1376,18 +1404,84 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category){
         return dmg;
     }
     //weak armor activation
-    if(dmg>0 && getAbility()==WEAK_ARMOR && !isFainted() && category==PHYSICAL){
+    if(dmg>0 && hasAbility(WEAK_ARMOR) && !isFainted() && category==PHYSICAL){
         changeDefenseModifier(-1);
         changeSpeedModifier(2);
     }
+    // berry check
+    if(!hasVolatileCondition(UNNERVED))
+        tryEatBerry();
     return dmg;
 }
 
 unsigned int Battler::addDirectDamage(unsigned int amount){
     unsigned int dmg = monster->addDamage(amount);
     if(isFainted())
-        handler->displayMsg(monster->getNickname()+" fainted!");
+        handler->displayMsg(getNickname()+" fainted!");
+    // berry check
+    if(!hasVolatileCondition(UNNERVED))
+        tryEatBerry();
     return dmg;
+}
+
+void Battler::tryEatBerry(){
+    if(isFainted())
+        return;
+    ItemType held_item = getHeldItem();
+    ItemData* item_data = ItemData::getItemData(held_item);
+    if(item_data==nullptr)  
+        return;
+    if(item_data->getCategory()!=BERRY) 
+        return;
+    switch(held_item){
+        //berries activating at below 50% health
+        case ORAN_BERRY:
+        case SITRUS_BERRY:
+            if(getCurrentHP() >= getMaxHP()/2)
+                return;
+            break;
+        // berries activating below 25%
+        case CUSTAP_BERRY:
+        case MICLE_BERRY:
+        case LANSAT_BERRY:
+        case AGUAV_BERRY:
+        case WIKI_BERRY:
+        case IAPAPA_BERRY:
+        case MAGO_BERRY:
+        case FIGY_BERRY:
+        case LIECHI_BERRY:
+        case STARF_BERRY:
+        case SALAC_BERRY:
+        case PETAYA_BERRY:
+        case APICOT_BERRY:
+        case GANION_BERRY:
+            if(!(getCurrentHP() < getMaxHP()/4 || (hasAbility(GLUTTONY) && getCurrentHP() < getMaxHP()/2)))
+                return;
+            break;
+        //berries activating in case of status
+        case ASPEAR_BERRY:
+            if(!isFrozen())
+                return;
+        case CHERY_BERRY:
+            if(!isParalyzed())
+                return;
+        case CHESTO_BERRY:
+            if(!isAsleep())
+                return;
+        case PECHA_BERRY:
+            if(!isPoisoned())
+                return;
+        case RAWST_BERRY:
+            if(!isBurned())
+                return;
+        case PERSIM_BERRY:
+            if(!hasVolatileCondition(CONFUSION))
+                return;
+        // berries that cannot be consumed in battle
+        default:
+            return;
+    }
+    consumeHeldItem();
 }
 
 unsigned int Battler::getCurrentHP()const{
@@ -1454,32 +1548,40 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             if(!canBeBurned())
                 return false;
             monster->setPermanentStatus(BURN);
-            handler->displayMsg(monster->getNickname()+" was burned!");
+            handler->displayMsg(getNickname()+" was burned!");
+            if(hasHeldItem(RAWST_BERRY))
+                tryEatBerry();
             break;
         case PARALYSIS:
             if(!canBeParalyzed())
                 return false;
             monster->setPermanentStatus(PARALYSIS);
-            handler->displayMsg(monster->getNickname()+" was paralyzed!");
+            handler->displayMsg(getNickname()+" was paralyzed!");
+            if(hasHeldItem(CHERY_BERRY))
+                tryEatBerry();
             break;
         case FREEZE:
             if(!canBeFrozen())
                 return false;
             monster->setPermanentStatus(FREEZE);
-            handler->displayMsg(monster->getNickname()+" was frozen!");
+            handler->displayMsg(getNickname()+" was frozen!");
+            if(hasHeldItem(ASPEAR_BERRY))
+                tryEatBerry();
             break;
         case POISONED:
             if(!canBePoisoned())
                 return false;
             monster->setPermanentStatus(POISONED);
-            handler->displayMsg(monster->getNickname()+" was poisoned!");
+            handler->displayMsg(getNickname()+" was poisoned!");
+            if(hasHeldItem(PECHA_BERRY))
+                tryEatBerry();
             break;
         case BAD_POISON:
             if(!canBeBadlyPoisoned())
                 return false;
             monster->setPermanentStatus(BAD_POISON);
             bad_poison_counter = 1;
-            handler->displayMsg(monster->getNickname()+" was badly poisoned!");
+            handler->displayMsg(getNickname()+" was badly poisoned!");
             break;
         case SLEEP_1:
         case SLEEP_2:
@@ -1489,6 +1591,8 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
                 return false;
             monster->setPermanentStatus(status);
             handler->displayMsg(monster->getNickname()+" fell asleep!");
+            if(hasHeldItem(CHESTO_BERRY))
+                tryEatBerry();
             break;
         default:
             return false;
@@ -1598,7 +1702,7 @@ void Battler::setLastAttackHit(){
 void Battler::hitOnceMore(Type attack_type){
     hits_taken++;
     if((attack_type == BUG || attack_type == DARK || attack_type == GHOST) &&
-        getAbility() == RATTLED){
+        hasAbility(RATTLED)){
         handler->displayMsg(monster->getNickname()+"'s Rattled boosts its Speed!");
         changeSpeedModifier(1);
     }
@@ -1670,21 +1774,126 @@ void Battler::deactivateMoldBreaker(){
     is_mold_breaker_active = false;
 }
 
-bool Battler::useItem(ItemType item_type){
+bool Battler::hasHeldItem()const{
+    return monster->hasHeldItem();
+}
+ItemType Battler::getHeldItem()const{
+    return monster->getHeldItem();
+}
+bool Battler::hasHeldItem(ItemType item)const{
+    if(item == NO_ITEM_TYPE)
+        return false;
+    if(!hasHeldItem())
+        return false;
+    ItemType held_item = monster->getHeldItem();
+    if(held_item == item)
+        return true;
+    return false;
+}
+ItemType Battler::setHeldItem(ItemType item){
+    if(item != NO_ITEM_TYPE)
+        had_held_item = false;
+    return monster->setHeldItem(item);
+}
+ItemType Battler::removeHeldItem(){
+    ItemType res = monster->removeHeldItem();
+    if(res != NO_ITEM_TYPE){
+        had_held_item = true;
+    }
+    return res;
+}
+
+bool Battler::useItem(ItemType item_type,unsigned int data){
     if(item_type == NO_ITEM_TYPE)
         return false;
     if(isFainted())
         return false;
     // ItemData* item_data = ItemData::getItemData(item_type);
-    bool res = monster->useItem(item_type, handler);
+    bool res = monster->useItem(item_type, handler, data);
     switch (item_type){
         case FULL_HEAL:
         case FULL_RESTORE:
+        case PERSIM_BERRY:{
             if(hasVolatileCondition(CONFUSION)){
                 removeVolatileCondition(CONFUSION);
                 res = true;
             }
             break;
+        }
+        case AGUAV_BERRY:
+        case MAGO_BERRY:
+        case IAPAPA_BERRY:
+        case WIKI_BERRY:
+        case FIGY_BERRY:{
+            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type)){
+                addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
+                res = true;
+            }
+            break;
+        }
+        case APICOT_BERRY:{
+            changeSpecialDefenseModifier(1);
+            res = true;
+            break;
+        }
+        case GANION_BERRY:{
+                changeDefenseModifier(1);
+                res = true;
+                break;
+            }
+        case LIECHI_BERRY:{
+            changeAttackModifier(1);
+            res = true;
+            break;
+        }
+        case SALAC_BERRY:{
+            changeSpeedModifier(1);
+            res = true;
+            break;
+        }
+        case PETAYA_BERRY:{
+            changeSpecialAttackModifier(1);
+            res = true;
+            break;
+        }
+        case STARF_BERRY:{
+            // sharply boost random stat
+            int random_integer = RNG::getRandomInteger(0,4);
+            switch(random_integer){
+                case 0:
+                    changeAttackModifier(2);
+                    break;
+                case 1:
+                    changeSpecialAttackModifier(2);
+                    break;
+                case 2:
+                    changeDefenseModifier(2);
+                    break;
+                case 3:
+                    changeSpecialDefenseModifier(2);
+                    break;
+                case 4:
+                    changeSpeedModifier(2);
+                    break;
+                default:break;
+            }
+            break;
+        }
+        case CUSTAP_BERRY:{
+            addVolatileCondition(MOVING_FIRST,-1);
+            res = true;
+            break;
+        }
+        case MICLE_BERRY:{
+            addVolatileCondition(INCREASED_ACCURACY,-1);
+            res = true;
+            break;
+        }
+        case LANSAT_BERRY:{
+            addVolatileCondition(INCREASED_CRIT,-1);
+            res = true;
+            break;
+        }
         default:
             break;
     }   
@@ -1703,11 +1912,92 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
     switch (item_type){
         case FULL_HEAL:
         case FULL_RESTORE:
+        case PERSIM_BERRY:
             if(hasVolatileCondition(CONFUSION))
                 res = true;
+            break;
+        case AGUAV_BERRY:
+        case IAPAPA_BERRY:
+        case WIKI_BERRY:
+        case MAGO_BERRY:
+        case FIGY_BERRY:
+            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type))
+                res = true;
+            break;
+        case APICOT_BERRY:
+        case GANION_BERRY:
+        case LIECHI_BERRY:
+        case STARF_BERRY:
+        case SALAC_BERRY:
+        case PETAYA_BERRY:
+            res = true;
             break;
         default:
             break;
     }   
     return res;
+}
+
+bool Battler::hasConsumedBerry()const{
+    ItemData * item_data = ItemData::getItemData(consumed_held_item);
+    if(item_data == nullptr)
+        return false;
+    if(item_data->getCategory() == BERRY)
+        return true;
+    return false;
+}
+
+bool Battler::canStealItem()const{
+    ItemType item = getHeldItem();
+    if(!canBeStolen(item))
+        return false;
+    if(hasAbility(STICKY_HOLD))
+        return false;
+    return true;
+}
+
+bool Battler::consumeHeldItem(){
+    if(!hasHeldItem())
+        return false;
+    ItemType item = monster->getHeldItem();
+    if(canItemBeConsumed(item)){
+        ItemData* item_data = ItemData::getItemData(item);
+        if(item_data->getCategory()==BERRY)
+            handler->displayMsg(monster->getNickname()+" ate its "+item_data->getName()+"!");
+        else
+            handler->displayMsg(monster->getNickname()+" consumed its "+item_data->getName()+"!");
+        consumed_held_item = item;
+        setHeldItem(NO_ITEM_TYPE);
+        useItem(item,0);
+        had_held_item = true;
+        return true;
+    }
+    return false;
+}
+
+void Battler::consumeItem(ItemType item){
+    if(item == NO_ITEM_TYPE)
+        return;
+    if(!canItemBeConsumed(item))
+        return;
+    useItem(item,0);
+    consumed_held_item = item;
+    had_held_item = true;
+}
+
+bool Battler::restoreBerry(){
+    if(consumed_held_item == NO_ITEM_TYPE)
+        return false;
+    ItemData* item_data = ItemData::getItemData(consumed_held_item);
+    if(item_data == nullptr)
+        return false;
+    if(item_data->getCategory() != BERRY)
+        return false;
+    setHeldItem(consumed_held_item);
+    consumed_held_item = NO_ITEM_TYPE;
+    return true;
+}
+
+bool Battler::hasLostHeldItem()const{
+    return had_held_item;
 }

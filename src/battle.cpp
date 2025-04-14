@@ -74,6 +74,10 @@ bool BattleAction::operator==(const BattleAction& other) const {
     return (speed == other.speed) && (priority == other.priority);
 }
 
+void BattleAction::setSpeed(unsigned int speed){
+    this->speed = speed;
+}
+
 ItemType BattleAction::getItemToUse()const {
     return item_to_use;
 }
@@ -160,6 +164,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     turn_of_player_last_kill = -2;
     this->player_bag = user_bag;
     this->opponent_bag = opponent_bag;
+    item_on_the_ground_player = NO_ITEM_TYPE;
+    item_on_the_ground_opponent = NO_ITEM_TYPE;
 }
 
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
@@ -182,6 +188,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     turn_of_player_last_kill = -2;
     this->player_bag = user_bag;
     this->opponent_bag = opponent_bag;
+    item_on_the_ground_player = NO_ITEM_TYPE;
+    item_on_the_ground_opponent = NO_ITEM_TYPE;
 }
 
 Battle::~Battle() {
@@ -267,6 +275,37 @@ void Battle::incrementTurn(){
     // remove focus
     player_active->removeVolatileCondition(FOCUSED);
     opponent_active->removeVolatileCondition(FOCUSED);
+    // collect items on the ground
+    if(player_active->hasAbility(PICKUP) && item_on_the_ground_player != NO_ITEM_TYPE && 
+        !player_active->isFainted()){
+        if(player_active->getHeldItem() == NO_ITEM_TYPE){
+            player_active->setHeldItem(item_on_the_ground_player);
+            item_on_the_ground_player = NO_ITEM_TYPE;
+        }
+    }
+    item_on_the_ground_player = NO_ITEM_TYPE;
+    if(opponent_active->hasAbility(PICKUP) && item_on_the_ground_opponent != NO_ITEM_TYPE && 
+        !opponent_active->isFainted()){
+        if(opponent_active->getHeldItem() == NO_ITEM_TYPE){
+            opponent_active->setHeldItem(item_on_the_ground_opponent);
+            item_on_the_ground_opponent = NO_ITEM_TYPE;
+        }
+    }
+    item_on_the_ground_opponent = NO_ITEM_TYPE;
+    // apply harvest
+    if(player_active->hasAbility(HARVEST) && RNG::coinFlip() && 
+        !player_active->isFainted()){
+        if(player_active->restoreBerry()){
+            event_handler->displayMsg(player_active->getNickname() + " harvested a berry!");
+        }
+    }
+    if(opponent_active->hasAbility(HARVEST) && RNG::coinFlip() && 
+        !opponent_active->isFainted()){
+        if(opponent_active->restoreBerry()){
+            event_handler->displayMsg(opponent_active->getNickname() + " harvested a berry!");
+        }
+    }
+    //check uproars
     checkUproars();
 }
 
@@ -320,13 +359,24 @@ void Battle::performTurn(){
     std::cout<<"Choosing action CPU "<<std::endl;
     std::cout.flush();
     #endif
-    BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);
+    BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);    
     // 2: focus monsters
     if(player_action.getAttackId() == FOCUS_PUNCH_ID){
         player_active->addVolatileCondition(FOCUSED,5);
     }
     if(opponent_action.getAttackId() == FOCUS_PUNCH_ID){
         opponent_active->addVolatileCondition(FOCUSED,5);
+    }
+    // 2.5 apply action speed mods
+    player_active->tryEatBerry();
+    opponent_active->tryEatBerry();
+    if(player_active->hasVolatileCondition(MOVING_FIRST)){
+        player_active->removeVolatileCondition(MOVING_FIRST);
+        player_action.setSpeed(MAX_UNSIGNED);
+    }
+    if(opponent_active->hasVolatileCondition(MOVING_FIRST)){
+        opponent_active->removeVolatileCondition(MOVING_FIRST);
+        opponent_action.setSpeed(MAX_UNSIGNED);
     }
     // 3: sort actions by priority
     #ifdef DEBUG
@@ -487,7 +537,7 @@ void Battle::performUseItem(BattleAction action){
             return;
         }else{
             event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+"!");
-            active_target->useItem(item_to_use);
+            active_target->useItem(item_to_use,action.getAttackId());
             bag_used->removeItem(item_to_use);
         }
     }else{
@@ -499,7 +549,7 @@ void Battle::performUseItem(BattleAction action){
             return;
         }else{
             event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+"!");
-            monster_target->useItem(item_to_use, event_handler);
+            monster_target->useItem(item_to_use, event_handler, action.getAttackId());
             bag_used->removeItem(item_to_use);
         }
     }
@@ -928,6 +978,11 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
             !thereIsaCloudNine()){
             modified_accuracy = modified_accuracy * 4.0/5;
         }
+        // INCERASED ACCURACY effect
+        if(active_user->hasVolatileCondition(INCREASED_ACCURACY)){
+            modified_accuracy *= 1.2;
+            active_user->removeVolatileCondition(INCREASED_ACCURACY);
+        }
         // TANGLED FEET effect
         if(active_target->hasAbility(TANGLED_FEET) && active_target->hasVolatileCondition(CONFUSION)){
             modified_accuracy *= 0.5;
@@ -1012,19 +1067,31 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }
             //check for critical hit;
             bool is_critical_hit = false;
-            if(active_user->hasVolatileCondition(LASER_FOCUS)){// laser focus guarantees crit
-                is_critical_hit = true;
+            int crit_level = 0;
+            if(active_user->hasVolatileCondition(LASER_FOCUS)){//laser focus makes crits more likely
+                crit_level+=3;
                 active_user->removeVolatileCondition(LASER_FOCUS);
-            }else if((attack->getEffectId() == 17 || attack->getEffectId()==197) && !active_user->hasAbility(SHEER_FORCE)){ 
-                // Moves with increased crit chance
-                if(active_user->hasVolatileCondition(FOCUS_ENERGY))//focus energy + increse crit chance = guaranteed crit
-                    is_critical_hit = true;
-                else if(RNG::oneEight())
-                    is_critical_hit = true;
-            }else if(active_user->hasVolatileCondition(FOCUS_ENERGY)){// focus energy crit ratio
-                is_critical_hit = RNG::coinFlip();
-            }else if(0==RNG::getRandomInteger(0,23))//normal crit ratio
+            }
+            if((attack->getEffectId() == 17 || attack->getEffectId()==197) 
+                && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
+                crit_level+=1;
+            }
+            if(active_user->hasVolatileCondition(FOCUS_ENERGY)){//focus energy
+                crit_level+=2;
+            }
+            if(active_user->hasVolatileCondition(INCREASED_CRIT)){//crit incresed by berry
+                crit_level += 1;
+                active_user->removeVolatileCondition(INCREASED_CRIT);
+            }
+            if(crit_level == 0 && RNG::getRandomInteger(0,23)==0){
                 is_critical_hit = true;
+            }else if(crit_level == 1 && RNG::oneEight()){
+                is_critical_hit = true;
+            }else if(crit_level == 2 && RNG::coinFlip()){
+                is_critical_hit = true;
+            }else if(crit_level>=3){
+                is_critical_hit = true;
+            }
             if(attack->getEffectId()==189)//always crits unless abilities deny it
                 is_critical_hit = true;
             // check for crit immunity
@@ -1032,7 +1099,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 active_target->hasAbility(BATTLE_ARMOR)){//battle armor blocks crits
                 is_critical_hit = false;
             }
-            if(is_critical_hit && attack->getCategory() != STATUS){
+            if(is_critical_hit){
                 event_handler->displayMsg("It's a critical hit!");
             }
             // apply damage
@@ -2734,6 +2801,87 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }else{
                     active_target->addVolatileCondition(BLOCKED, 5);
                 }
+                break;
+            }
+            case 198:{
+                //switch item with target
+                ItemType user_item = active_user->getHeldItem();
+                ItemType target_item = active_target->getHeldItem();
+                if((user_item == NO_ITEM_TYPE && target_item == NO_ITEM_TYPE)||
+                    !active_target->canStealItem() || !active_user->canStealItem()){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
+                active_user->setHeldItem(target_item);
+                active_target->setHeldItem(user_item);
+                event_handler->displayMsg(user_mon_name+" switched items with "+opponent_mon_name+"!");
+                break;
+            }
+            case 199:{
+                //steal target item if it is a berry and use it
+                ItemType target_item = active_target->getHeldItem();
+                ItemData * target_item_data = ItemData::getItemData(target_item);
+                if(target_item_data == nullptr || 
+                    target_item_data->getCategory()!=BERRY || 
+                    !active_target->canStealItem()){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
+                active_target->removeHeldItem();
+                active_user->consumeItem(target_item);
+                event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+" and ate it!");
+                break;
+            }
+            case 201:{
+                //delete opponent item if it is a berry
+                ItemType target_item = active_target->getHeldItem();
+                ItemData * target_item_data = ItemData::getItemData(target_item);
+                if(target_item_data == nullptr || 
+                    target_item_data->getCategory()!=BERRY){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
+                // ItemData * target_item_data = ItemData::getItemData(target_item);
+                active_target->removeHeldItem();
+                event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was destroyed!");
+                break;
+            }
+            case 202:{
+                // steal opponent item
+                ItemType target_item = active_target->getHeldItem();
+                ItemType user_item = active_user->getHeldItem();
+                if(user_item != NO_ITEM_TYPE || 
+                    target_item == NO_ITEM_TYPE || 
+                    !active_target->canStealItem()){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
+                ItemData * target_item_data = ItemData::getItemData(target_item);
+                active_target->removeHeldItem();
+                active_user->setHeldItem(target_item);
+                event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+"!");
+                break;
+            }
+            case 204:{
+                //fling
+                ItemType user_item = active_user->removeHeldItem();
+                if(actor==PLAYER)
+                    item_on_the_ground_player = user_item;
+                else
+                    item_on_the_ground_opponent = user_item;
+                break;
             }
             default:break;
         }
@@ -3073,6 +3221,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     unsigned int attack_id = attack->getId();
     // get base power
     double base_power = attack->getPower();
+    std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
 
     //effect modidifiers
     switch(effect){
@@ -3291,6 +3440,27 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
                 base_power = 40;
             else
                 base_power = 20;
+            break;
+        }
+        // remove target item if any and double power if target had an item
+        case 203:{
+            ItemType target_item = active_target->getHeldItem();
+            if(target_item != NO_ITEM_TYPE && canBeStolen(target_item)){
+                ItemData * target_item_data = ItemData::getItemData(target_item);
+                active_target->removeHeldItem();
+                if(actor==PLAYER)
+                    item_on_the_ground_opponent = target_item;
+                else
+                    item_on_the_ground_player = target_item;
+                event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was knocked off!");
+                base_power *= 2;
+            }
+            break;
+        }
+        case 204:{
+            // fling
+            ItemType target_item = active_user->getHeldItem();
+            base_power = flingPower(target_item);
             break;
         }
         default: break;
@@ -3684,6 +3854,18 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
     if(active_user->hasVolatileCondition(FLINCH)){
         active_user->removeVolatileCondition(FLINCH);
     }
+    // remove Moving first
+    if(active_user->hasVolatileCondition(MOVING_FIRST)){
+        active_user->removeVolatileCondition(MOVING_FIRST);
+    }
+    // remove incresed crit
+    if(active_user->hasVolatileCondition(INCREASED_CRIT)){
+        active_user->removeVolatileCondition(INCREASED_CRIT);
+    }
+    // remove incresed accuracy
+    if(active_user->hasVolatileCondition(INCREASED_ACCURACY)){
+        active_user->removeVolatileCondition(INCREASED_ACCURACY);
+    }
     // remove protect
     if(active_user->hasVolatileCondition(PROTECT)){
         active_user->removeVolatileCondition(PROTECT);
@@ -3987,8 +4169,30 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             }
             break;
         }
-        
+        case FRISK:{
+            if(!target_active->isFainted()){
+                ItemType item_type = target_active->getHeldItem();
+                if(item_type == NO_ITEM_TYPE)
+                    break;
+                ItemData * item = ItemData::getItemData(item_type);
+                event_handler->displayMsg(user_name+"'s Frisk reveals "+other_name+"'s "+item->getName()+"!"); 
+            }
+            break;
+        }
+        case UNNERVE:{
+            if(!target_active->isFainted()){
+                event_handler->displayMsg(other_name+" is nervous and won't eat berries!");
+                target_active->addVolatileCondition(UNNERVED,-1);
+            }
+            break;
+        }
         default:break;
+    }
+    // unnerve
+    if(opponent_active->hasAbility(UNNERVE) && 
+        !user_active->isFainted()){
+        user_active->addVolatileCondition(UNNERVED,-1);
+        event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
     }
 }
 
@@ -4306,6 +4510,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
                 active_user->setLastAttackUsed(action.getAttackId());
                 attack_failed = true;
             }
+            break;
+        }
+        case 200:{
+            //fails if user has not eaten a berry before
+            if(!active_user->hasConsumedBerry()){
+                active_user->setLastAttackFailed();
+                attack_failed = true;
+            }
+            break;
+        }
+        case 204:{
+            //fling fails if the user has no held item
+            if(!active_user->canStealItem() || active_user->getHeldItem()==NO_ITEM_TYPE){
+                active_user->setLastAttackFailed();
+                attack_failed = true;
+            }
         }
     }
     if(attack_failed){
@@ -4543,6 +4763,7 @@ void Battle::removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor 
     opponent_active_monster->removeVolatileCondition(WRAP);
     opponent_active_monster->removeVolatileCondition(BIND);
     opponent_active_monster->removeVolatileCondition(IMPRISON);
+    opponent_active_monster->removeVolatileCondition(UNNERVED);
 }
 
 void Battle::forceSwitch(BattleActionActor actor_switching_out){

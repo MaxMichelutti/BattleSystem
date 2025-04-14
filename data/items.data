@@ -53,3 +53,141 @@ NAME:Full Heal
 DESCRIPTION:A spray-type medicine that is broadly effective. It can be used to cure any status condition a Pokémon may have.
 PRICE:400
 CATEGORY:MEDICINE
+# 12 ORAN BERRY
+NAME:Oran Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore 10 HP to itself.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 10 0 10 10 20
+# 13 AGUAV BERRY
+NAME:Aguav Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore some HP should it find itself in a pinch. But it will become confused if it hates the Berry's taste.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 15 0 25
+# 14 APICOT BERRY
+NAME:Apicot Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its Sp. Def stat will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 30 0 0 30 40
+# 15 CUSTAP BERRY
+NAME:Custap Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to act faster should it find itself in a pinch—but only for the next move it uses.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 40 10 0 60
+# 16 FIGY BERRY
+NAME:Figy Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore some HP should it find itself in a pinch. But it will become confused if it hates the Berry's taste.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:15 0 0 0 0 25
+# 17 GANION BERRY (GANLON BERRY)
+NAME:Ganlon Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its Defense stat will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 30 10 30 0 40
+# 18 IAPAPA BERRY
+NAME:Iapapa Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore some HP should it find itself in a pinch. But it will become confused if it hates the Berry's taste.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 0 15 25
+# 19 LANSAT BERRY
+NAME:Lansat Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its critical-hit ratio will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:30 10 30 10 30 50
+# 20 LIECHI BERRY
+NAME:Liechi Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its Attack stat will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:30 10 30 0 0 40
+# 21 MAGO BERRY
+NAME:Mago Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore some HP should it find itself in a pinch. But it will become confused if it hates the Berry's taste.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 15 0 0 25
+# 22 MICLE BERRY
+NAME:Micle Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its accuracy will be boosted should it find itself in a pinch—but only for the next move it uses.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 40 10 0 0 60
+# 23 PETAYA BERRY
+NAME:Petaya Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its Sp. Atk stat will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:30 0 0 30 10 40
+# 24 SALAC BERRY
+NAME:Salac Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, its Speed stat will be boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 30 10 30 40
+# 25 SITRUS BERRY
+NAME:Sitrus Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore a small amount of HP to itself.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 10 10 10 20
+# 26 STARF BERRY
+NAME:Starf Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, one of its stats will be sharply boosted should it find itself in a pinch.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:30 10 30 10 30 50
+# 27 WIKI BERRY
+NAME:Wiki Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore some HP should it find itself in a pinch. But it will become confused if it hates the Berry's taste.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 0 0 0 25
+# 28 ASPEAR BERRY
+NAME:Aspear Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to thaw itself after being frozen.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 0 10 25
+# 29 CHERY BERRY
+NAME:Chery Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to free itself from paralysis.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 0 0 0 25
+# 30 CHESTO BERRY
+NAME:Chesto Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to wake itself from sleep.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 0 0 0 25
+# 31 PECHA BERRY
+NAME:Pecha Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to lift the effects of being poisoned from itself.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 10 0 0 25
+# 32 RAWST BERRY
+NAME:Rawst Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to cure itself of a burn. 
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 10 0 25
+# 33 PERSIM BERRY
+NAME:Persim Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to cure itself of confusion.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 10 10 0 10 20
+# 34 LEPPA BERRY
+NAME:Leppa Berry
+DESCRIPTION: 	If a Pokémon holds one of these Berries, it will be able to restore 10 PP to a move.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 10 10 10 20

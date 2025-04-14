@@ -75,16 +75,70 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 choice = 0;
                 continue;
             }
+            unsigned int target_attack = 0;
+            if(item.first == LEPPA_BERRY){
+                target_attack = chooseTargetAttack(player_active,player_team,item.second);
+                if(target_attack==0){
+                    choice=0;
+                    continue;
+                }
+            }
             return BattleAction{
                 PLAYER,
                 USE_ITEM,
-                0,
+                target_attack,
                 0,
                 player_active->getModifiedSpeed(),
                 item.second,
                 item.first};
         }else{
             displayMsg("Invalid choice. Please try again.");
+        }
+    }
+}
+
+unsigned int TextEventHandler::chooseTargetAttack(Battler*active,MonsterTeam*team,unsigned int target){
+    std::map<unsigned int,unsigned int> attacks;
+    if(target==0)
+        attacks = active->getAttacks();
+    else
+        attacks = team->getMonster(target)->getAttacks();
+    std::map<unsigned int,unsigned int> choices;
+    unsigned int choice = 0;
+    unsigned int count=1;
+    for(auto attack:attacks){
+        if(attack.first == 0 || attack.first == STRUGGLE_ID)
+            continue;
+        choices.insert({count,attack.first});
+        count++;
+    }
+    while(true){
+        displayMsg("Choose the Attack on which to use the item: ");
+        for (auto it = choices.begin(); it != choices.end(); it++){
+            Attack *attack = Attack::getAttack(it->second);
+            std::string msg = std::to_string(it->first) + ". " +
+                              attack->getName() + "\t" +
+                              std::to_string(attacks[it->second]) + "/";
+            std::string max_pp_string;
+            if(target==0){
+                max_pp_string = std::to_string(active->getMaxPPForAttack(it->second));
+            }else{
+                max_pp_string = std::to_string(team->getMonster(target)->getMaxPPForAttack(it->second));
+            }              
+            msg += max_pp_string;
+            displayMsg(msg);
+        }
+        displayMsg(std::to_string(count) + ". Cancel");
+        displayMsgNoEndl("Enter your choice: ");
+        choice = getNumberFromCin();
+        if(choice == count){
+            return 0;
+        }else if(choice == 0 || choice > count){
+            displayMsg("Invalid choice. Please try again.");
+            choice = 0;
+            continue;
+        }else{
+            return choices[choice];
         }
     }
 }

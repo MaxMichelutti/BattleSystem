@@ -42,6 +42,7 @@ class Monster{
     PermanentStatusCondition permanent_status;
     bool has_hidden_ability;
     Monster* transformation;
+    ItemType held_item;
 
     void updateStats();
     void packAttacks();
@@ -107,8 +108,14 @@ class Monster{
     void transformInto(Monster* other);
     unsigned int getHeight()const;
     unsigned int getWeight()const;
-    bool useItem(ItemType item, EventHandler*);
+    bool useItem(ItemType item, EventHandler*, unsigned int data);
     bool itemWouldHaveEffect(ItemType item)const;
+    bool hasHeldItem()const;
+    ItemType getHeldItem()const;
+    ItemType setHeldItem(ItemType item);
+    ItemType removeHeldItem();
+    bool dislikesBerry(ItemType item)const;
+    bool likesBerry(ItemType item)const;
 };
 
 #endif

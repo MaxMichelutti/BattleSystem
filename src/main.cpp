@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
     user_bag->addItem(POTION,5);
     user_bag->addItem(SUPER_POTION,3);
     user_bag->addItem(POTION,1);
+    user_bag->addItem(LEPPA_BERRY,5);
     Bag * opponent_bag = new Bag();
     opponent_bag->addItem(HYPER_POTION,1);
     Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);

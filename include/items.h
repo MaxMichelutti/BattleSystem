@@ -11,6 +11,9 @@
 
 std::string ItemCategoryToString(ItemCategory category);
 ItemCategory StringToItemCategory(std::string category);
+bool canBeStolen(ItemType item_type);
+unsigned int flingPower(ItemType item_type);
+bool canItemBeConsumed(ItemType item_type);
 
 class ItemData;
 static std::unordered_map<ItemType,ItemData*>  itemTypeMap;
@@ -20,6 +23,7 @@ class ItemData{
     ItemCategory category;
     std::string name;
     std::string description;
+    unsigned int flavour[6];
     int price;
     static void loadItem(ItemType key,const std::unordered_map<std::string,std::string> &input_data);
     public:
@@ -29,9 +33,11 @@ class ItemData{
     ItemCategory getCategory()const;
     std::string getName() const;
     std::string getDescription() const;
+    void setFlavours(std::string);
     int getPrice() const;
     static void loadItems();
     static ItemData* getItemData(ItemType key);
+    unsigned int getFlavour(unsigned int flavbour_type)const;
 };
 
 #endif

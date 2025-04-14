@@ -113,7 +113,11 @@ enum VolatileStatusCondition{
     FOCUSED,
     INGRAINED,
     BLOCKED,
-    FLASH_FIRED
+    FLASH_FIRED,
+    UNNERVED,
+    MOVING_FIRST,
+    INCREASED_CRIT,
+    INCREASED_ACCURACY
 };
 
 enum Gender{
@@ -228,7 +232,7 @@ enum Ability{
     GUTS,
     HUSTLE,
     INTIMIDATE,
-    UNNERVE,
+    UNNERVE,//only works with items
     STATIC,
     LIGHTNING_ROD,
     SAND_VEIL,
@@ -243,7 +247,7 @@ enum Ability{
     FLASH_FIRE,
     DROUGHT,
     COMPETITIVE,
-    FRISK,//only works with items
+    FRISK,
     INFILTRATOR,
     INNER_FOCUS,
     STENCH,//no battle effect
@@ -255,7 +259,7 @@ enum Ability{
     IMPOSTOR,
     LIMBER,
     SAND_FORCE,
-    PICKUP,// does nothing in battle
+    PICKUP,
     TECHNICIAN,
     CLOUD_NINE,
     VITAL_SPIRIT,
@@ -281,7 +285,7 @@ enum Ability{
     THICK_FAT,
     HYDRATION,
     ICE_BODY,
-    STICKY_HOLD,//only works with items
+    STICKY_HOLD,
     POISON_TOUCH,
     SHELL_ARMOR,
     SKILL_LINK,
@@ -295,10 +299,10 @@ enum Ability{
     AFTERMATH,
     PLUS,
     MINUS,
-    HARVEST, //only works with items
+    HARVEST,
     BATTLE_ARMOR,
     RECKLESS,
-    UNBURDEN,//only works with items
+    UNBURDEN,
     IRON_FIST,
     NEUTRALIZING_GAS,
     NATURAL_CURE,
@@ -307,7 +311,7 @@ enum Ability{
     LEAF_GUARD,
     SCRAPPY,
     WATER_VEIL,
-    ILLUMINATE,//no battle effect
+    ILLUMINATE,
     FILTER,
     MOLD_BREAKER,
     MOXIE,
@@ -349,7 +353,30 @@ enum ItemType{
     PARALYZE_HEAL,
     BURN_HEAL,
     ICE_HEAL,
-    FULL_HEAL
+    FULL_HEAL,
+    ORAN_BERRY,
+    AGUAV_BERRY,
+    APICOT_BERRY,
+    CUSTAP_BERRY,
+    FIGY_BERRY,
+    GANION_BERRY,
+    IAPAPA_BERRY,
+    LANSAT_BERRY,
+    LIECHI_BERRY,
+    MAGO_BERRY,
+    MICLE_BERRY,
+    PETAYA_BERRY,
+    SALAC_BERRY,
+    SITRUS_BERRY,
+    STARF_BERRY,
+    WIKI_BERRY,
+    ASPEAR_BERRY,
+    CHERY_BERRY,
+    CHESTO_BERRY,
+    PECHA_BERRY,
+    RAWST_BERRY,
+    PERSIM_BERRY,
+    LEPPA_BERRY
 };
 
 #endif

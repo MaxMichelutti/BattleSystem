@@ -42,7 +42,7 @@ class BattleAction{
     unsigned int switch_id;
     unsigned int attack_id;
     int priority;
-    int speed;
+    unsigned int speed;
     unsigned int order;
     ItemType item_to_use;
     public:
@@ -62,6 +62,7 @@ class BattleAction{
     unsigned int getAttackId()const;
     int getPriority()const;
     ItemType getItemToUse()const;
+    void setSpeed(unsigned int speed);
 
     bool operator<=(const BattleAction& other) const;
     bool operator>=(const BattleAction& other) const;
@@ -91,6 +92,8 @@ class Battle{
     unsigned int turn_of_player_last_kill;
     unsigned int turn_of_opponent_last_kill;
     unsigned int rounds_used_this_turn;
+    ItemType item_on_the_ground_player;
+    ItemType item_on_the_ground_opponent;
     std::set<Monster*> uproaring_monsters;//never dereference this pointers!!!
     std::vector<ScheduledFutureSight> scheduled_futuresights;
     void checkUproars();

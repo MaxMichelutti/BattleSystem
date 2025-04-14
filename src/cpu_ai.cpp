@@ -1786,6 +1786,8 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
         case FULL_RESTORE:
             heal_percent = 100;
             break;
+        default:
+            break;
     }
     double healable_HP_percent =  100.0 - (cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP());
     double actual_heal = min(heal_percent,healable_HP_percent);

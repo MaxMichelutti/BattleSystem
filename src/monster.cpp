@@ -689,7 +689,7 @@ unsigned int Monster::getWeight()const{
     return Species::getSpecies(species_id)->getWeight();
 }
 
-bool Monster::useItem(ItemType item_type, EventHandler* handler){
+bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int data){
     if(item_type == NO_ITEM_TYPE)
         return false;
     bool result = false;
@@ -697,6 +697,19 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
         // HP restoring items
         unsigned int amount = 0;
         switch (item_type){
+            case ORAN_BERRY:
+                amount=10;
+                break;
+            case SITRUS_BERRY:
+                amount=max(1,getMaxHP()/4);
+                break;
+            case AGUAV_BERRY:
+            case FIGY_BERRY:
+            case WIKI_BERRY:
+            case IAPAPA_BERRY:
+            case MAGO_BERRY:
+                amount=max(1,getMaxHP()/3);
+                break;
             case POTION:
                 amount=20;
                 break;
@@ -721,6 +734,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
         // status restoring items
         switch(item_type){
             case ANTIDOTE:
+            case PECHA_BERRY:
                 if(permanent_status == POISONED || permanent_status == BAD_POISON){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
@@ -728,14 +742,16 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
                 }
                 break;
             case AWAKENING:
+            case CHESTO_BERRY:
                 if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
                     permanent_status == SLEEP_3 || permanent_status == SLEEP_4){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
-                    handler->displayMsg(getNickname()+" was cured of its poisoning!");
+                    handler->displayMsg(getNickname()+" woke up!");
                 }
                 break;
             case PARALYZE_HEAL:
+            case CHERY_BERRY:
                 if(permanent_status == PARALYSIS){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
@@ -743,6 +759,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
                 }
                 break;
             case BURN_HEAL:
+            case RAWST_BERRY:
                 if(permanent_status == BURN){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
@@ -750,6 +767,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
                 }
                 break;
             case ICE_HEAL:
+            case ASPEAR_BERRY:
                 if(permanent_status == FREEZE){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
@@ -767,6 +785,14 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler){
             default:
                 break;
         }
+        // PP Restoring items
+        switch(item_type){
+            case LEPPA_BERRY:
+                recoverPP(data,10);
+                result=true;
+                break;
+            default:break;
+        }
     }
     return result;
 }
@@ -783,6 +809,13 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
             case HYPER_POTION:
             case MAX_POTION:
             case FULL_RESTORE:
+            case ORAN_BERRY:
+            case SITRUS_BERRY:
+            case IAPAPA_BERRY:
+            case MAGO_BERRY:
+            case AGUAV_BERRY:
+            case WIKI_BERRY:
+            case FIGY_BERRY:
                 if(getCurrentHP() < getMaxHP())
                     result = true;
                 break;
@@ -792,23 +825,28 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
         // status restoring items
         switch(item_type){
             case ANTIDOTE:
+            case PECHA_BERRY:
                 if(permanent_status == POISONED || permanent_status == BAD_POISON)
                     result = true;
                 break;
             case AWAKENING:
+            case CHESTO_BERRY:
                 if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
                     permanent_status == SLEEP_3 || permanent_status == SLEEP_4)
                     result = true;
                 break;
             case PARALYZE_HEAL:
+            case CHERY_BERRY:
                 if(permanent_status == PARALYSIS)
                     result = true;
                 break;
             case BURN_HEAL:
+            case RAWST_BERRY:
                 if(permanent_status == BURN)
                     result = true;
                 break;
             case ICE_HEAL:
+            case ASPEAR_BERRY:
                 if(permanent_status == FREEZE)
                     result = true;
                 break;
@@ -820,6 +858,136 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
             default:
                 break;
         }
+        // PP restoring items
+        switch(item_type){
+            case LEPPA_BERRY:
+                result = true;
+                break;
+            default:break;
+        }
     }
     return result;   
+}
+
+bool Monster::hasHeldItem()const{
+    return held_item != NO_ITEM_TYPE;
+}
+ItemType Monster::getHeldItem()const{
+    return held_item;
+}
+ItemType Monster::setHeldItem(ItemType item){
+    ItemType old_held_item = getHeldItem();
+    held_item = item;
+    return old_held_item;
+}
+ItemType Monster::removeHeldItem(){
+    ItemType old_held_item = getHeldItem();
+    held_item = NO_ITEM_TYPE;
+    return old_held_item;
+}
+
+bool Monster::dislikesBerry(ItemType item)const{
+    if(item == NO_ITEM_TYPE)
+        return false;
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data == nullptr)
+        return false;
+    if(item_data->getCategory() != BERRY)
+        return false;
+    switch(getNature()){
+        case HARDY:
+        case BOLD:
+        case TIMID:
+        case MODEST:
+        case CALM:
+            if(item_data->getFlavour(0)>0)
+                return true;
+            break;
+        case LONELY:
+        case DOCILE:
+        case HASTY:
+        case GENTLE:
+        case MILD:
+            if(item_data->getFlavour(1)>0)
+                return true;
+            break;
+        case BRAVE:
+        case RELAXED:
+        case SERIOUS:
+        case QUIET:
+        case SASSY:
+            if(item_data->getFlavour(2)>0)
+                return true;
+            break;
+        case ADAMANT:
+        case IMPISH:
+        case JOLLY:
+        case BASHFUL:
+        case CAREFUL:
+            if(item_data->getFlavour(3)>0)
+                return true;
+            break;
+        case NAUGHTY:
+        case LAX:
+        case NAIVE:
+        case RASH:
+        case QUIRKY:
+            if(item_data->getFlavour(4)>0)
+                return true;
+            break;
+    }
+    return false;
+}
+
+bool Monster::likesBerry(ItemType item)const{
+    if(item == NO_ITEM_TYPE)
+        return false;
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data == nullptr)
+        return false;
+    if(item_data->getCategory() != BERRY)
+        return false;
+    switch(getNature()){
+        case HARDY:
+        case LONELY:
+        case BRAVE:
+        case ADAMANT:
+        case NAUGHTY:
+            if(item_data->getFlavour(0)>0)
+                return true;
+            break;
+        case BOLD:
+        case DOCILE:
+        case RELAXED:
+        case IMPISH:
+        case LAX:
+            if(item_data->getFlavour(1)>0)
+                return true;
+            break;
+        case TIMID:
+        case HASTY:
+        case SERIOUS:
+        case JOLLY:
+        case NAIVE:
+            if(item_data->getFlavour(2)>0)
+                return true;
+            break;
+        case MODEST:
+        case MILD:
+        case QUIET:
+        case BASHFUL:
+        case RASH:
+            if(item_data->getFlavour(3)>0)
+                return true;
+            break;
+        case CALM:
+        case GENTLE:
+        case QUIRKY:
+        case SASSY:
+        case CAREFUL:
+            if(item_data->getFlavour(4)>0)
+                return true;
+            break;
+    }
+    return false;
 }

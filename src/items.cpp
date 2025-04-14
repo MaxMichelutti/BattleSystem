@@ -65,6 +65,26 @@ void ItemData::loadItem(ItemType key,const std::unordered_map<std::string,std::s
     std::string description = input_data.at("description");
     int price = std::stoi(input_data.at("price"));
     itemTypeMap[key] = new ItemData(key, category, name, description, price);
+    if(input_data.find("flavour") != input_data.end())
+        itemTypeMap[key]->setFlavours(input_data.at("flavour"));
+    else{//set all flavours to 0
+        for(int i=0;i<6;i++)
+            itemTypeMap[key]->flavour[i] = 0;
+    }
+}
+
+void ItemData::setFlavours(std::string flavour_string){
+    std::istringstream iss(flavour_string);
+    std::string flavour_value;
+    int i = 0;
+    while (iss>>flavour_value) {
+        if(i >= 6) break; // Prevent overflow
+        flavour[i++] = std::stoi(flavour_value);
+    }
+    if(i!=6){
+        std::cerr << "Error: Item " << type << " has invalid number of flavours!" << std::endl;
+        return;
+    }
 }
 
 void ItemData::loadItems() {
@@ -93,6 +113,8 @@ void ItemData::loadItems() {
             input_data["price"] = line.substr(6);
         }else if(line.rfind("CATEGORY:",0)==0){        
             input_data["category"] = line.substr(9);
+        }else if(line.rfind("FLAVOUR:",0)==0){        
+            input_data["flavour"] = line.substr(8);
         }else{
             std::cerr << "Error: Unknown line in item file: " << line << std::endl;
             continue;
@@ -110,4 +132,49 @@ ItemData* ItemData::getItemData(ItemType key){
     if (iter == itemTypeMap.end())
         return nullptr;
     return iter->second;
+}
+
+bool canBeStolen(ItemType item_type){
+    switch (item_type){
+        default:
+            return true;
+    }
+}
+
+unsigned int flingPower(ItemType item_type){
+    switch(item_type){
+        case POTION:
+        case SUPER_POTION:
+        case HYPER_POTION:
+        case MAX_POTION:
+        case FULL_RESTORE:
+        case ANTIDOTE:
+        case AWAKENING:
+        case PARALYZE_HEAL:
+        case BURN_HEAL:
+        case ICE_HEAL:
+        case FULL_HEAL:
+            return 30;
+        default:
+            return 10;
+    }
+}
+
+bool canItemBeConsumed(ItemType item_type){
+    if(item_type == NO_ITEM_TYPE)
+        return false;
+    ItemData* item_data = ItemData::getItemData(item_type);
+    if(item_data->getCategory() == BERRY){
+        return true;
+    }
+    switch(item_type){
+        default:
+            return false;
+    }
+}
+
+unsigned int ItemData::getFlavour(unsigned int flavour_type)const{
+    if(flavour_type > 5)
+        return 0;
+    return flavour[flavour_type];
 }
