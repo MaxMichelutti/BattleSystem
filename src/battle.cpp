@@ -3045,6 +3045,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
+            case 217:{
+                //drop money 5 times user level
+                unsigned int money_dropped = active_user->getLevel() * 5;
+                addMoney(money_dropped);
+                event_handler->displayMsg(user_mon_name+" dropped "+std::to_string(money_dropped)+"$!");
+                break;
+            }
             default:break;
         }
     }
@@ -5135,4 +5142,11 @@ void Battle::applyScheduledFutureSights(){
 bool Battle::thereIsNeutralizingGas(){
     return (player_active->hasAbility(NEUTRALIZING_GAS) && !player_active->isFainted()) || 
         (opponent_active->hasAbility(NEUTRALIZING_GAS) && !opponent_active->isFainted());
+}
+
+unsigned int Battle::getMoney()const{
+    return money;
+}
+void Battle::addMoney(unsigned int money){
+    this->money += money;
 }

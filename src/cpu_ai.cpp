@@ -50,11 +50,13 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         sleep_mult=1.5;//incentivize hitting asleep opponents
     double screen_mult = 1;
     // decentivize hitting screens, unless brick break is used
-    if(field->hasFieldEffect(REFLECT,OPPONENT) && attack->getCategory() == PHYSICAL){
-        screen_mult = (effect==172)?1.1:0.5;
+    if((field->hasFieldEffect(REFLECT,OPPONENT) ||
+        field->hasFieldEffect(AURORA_VEIL,OPPONENT)) && attack->getCategory() == PHYSICAL){
+        screen_mult = (effect==172 || effect==215)?1.1:0.5;
     }
-    if(field->hasFieldEffect(LIGHT_SCREEN,OPPONENT) && attack->getCategory() == SPECIAL){
-        screen_mult = (effect==172)?1.1:0.5;
+    if((field->hasFieldEffect(LIGHT_SCREEN,OPPONENT) ||
+        field->hasFieldEffect(AURORA_VEIL,OPPONENT)) && attack->getCategory() == SPECIAL){
+        screen_mult = (effect==172 || effect==215)?1.1:0.5;
     }
     unsigned int power = attack->getPower();
     switch(effect){//change power of particular attacks
@@ -1631,6 +1633,14 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 30;
             else
                 total_utility -= 10;
+            break;
+        }
+        case 216:{
+            //trick room
+            if(field->hasFullFieldEffect(TRICK_ROOM))
+                total_utility -= 10;
+            else
+                total_utility += 60;
             break;
         }
         default: break;

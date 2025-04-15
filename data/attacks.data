@@ -1800,7 +1800,8 @@ CATEGORY:PHYSICAL
 CONTACT
 PP:20
 POWER:40
-% EFFECT: drop money five times the user level
+EFFECT:217
+EFFECTTARGET:SELF
 # 201 SOAK
 NAME:Soak
 DESCRIPTION:The user shoots a torrent of water that changes the target's type to Water.

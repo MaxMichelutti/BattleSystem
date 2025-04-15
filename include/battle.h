@@ -100,6 +100,7 @@ class Battle{
     ItemType item_on_the_ground_opponent;
     std::set<Monster*> uproaring_monsters;//never dereference this pointers!!!
     std::vector<ScheduledFutureSight> scheduled_futuresights;
+    unsigned int money;
     void checkUproars();
     void incrementTurn();
     void performTurn();
@@ -136,6 +137,7 @@ class Battle{
     void removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor actor_switching_out);
     void forceSwitch(BattleActionActor actor);
     void applyScheduledFutureSights();
+    void addMoney(unsigned int money);
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
@@ -146,7 +148,7 @@ class Battle{
     bool isOver()const;
     bool playerWon()const;
     bool opponentWon()const;
-    
+    unsigned int getMoney()const;
 };
 
 #endif

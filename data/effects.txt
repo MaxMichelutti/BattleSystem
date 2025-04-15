@@ -214,3 +214,4 @@
 214: restore consumed item
 215: removes barriers and changes type depending on user
 216: trick room
+217: drop money 5 times user level
