@@ -405,7 +405,8 @@ enum ItemType{
     KELPSY_BERRY,
     POMEG_BERRY,
     QUALOT_BERRY,
-    TAMATO_BERRY
+    TAMATO_BERRY,
+    LUM_BERRY
 };
 
 #endif

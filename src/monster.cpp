@@ -777,6 +777,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                 break;
             case FULL_RESTORE:
             case FULL_HEAL:
+            case LUM_BERRY:
                 if(permanent_status != NO_PERMANENT_CONDITION){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
@@ -969,6 +970,7 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
                 break;
             case FULL_RESTORE:
             case FULL_HEAL:
+            case LUM_BERRY:
                 if(permanent_status != NO_PERMANENT_CONDITION)
                     result = true;
                 break;

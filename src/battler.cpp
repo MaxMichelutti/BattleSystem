@@ -1563,12 +1563,18 @@ void Battler::tryEatStatusBerry(){
             if(!hasVolatileCondition(CONFUSION))
                 return;
             consumeHeldItem();
+            break;
+        }
+        case LUM_BERRY:{
+            if(!hasPermanentStatus() && !hasVolatileCondition(CONFUSION))
+                return;
+            consumeHeldItem();
+            break;
         }
         // berries that cannot be consumed in battle
         default:
             return;
     }
-    consumeHeldItem();
 }
 
 void Battler::tryEatLowHPBerry(){
@@ -1945,6 +1951,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
     bool res = monster->useItem(item_type, handler, data);
     switch (item_type){
         case FULL_HEAL:
+        case LUM_BERRY:
         case FULL_RESTORE:
         case PERSIM_BERRY:{
             if(hasVolatileCondition(CONFUSION)){
@@ -2046,6 +2053,7 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
     bool res = monster->itemWouldHaveEffect(item_type);
     switch (item_type){
         case FULL_HEAL:
+        case LUM_BERRY:
         case FULL_RESTORE:
         case PERSIM_BERRY:
             if(hasVolatileCondition(CONFUSION))

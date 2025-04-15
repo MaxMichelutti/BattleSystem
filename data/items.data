@@ -365,3 +365,9 @@ DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it 
 PRICE:20
 CATEGORY:BERRY
 FLAVOUR:20 10 0 0 0 30
+# 64 LUM BERRY
+NAME:Lum Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to cure itself of any status condition it may have.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 10 10 10 10 20
