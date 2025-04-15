@@ -116,6 +116,7 @@ class Monster{
     ItemType removeHeldItem();
     bool dislikesBerry(ItemType item)const;
     bool likesBerry(ItemType item)const;
+    // bool hasMaxedEVs()const;
 };
 
 #endif

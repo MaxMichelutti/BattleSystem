@@ -204,7 +204,7 @@ class Battler{
     bool hasMimickedAttack()const;
     unsigned int getMaxPPForAttack(unsigned int attack_id)const;
     void transformInto(Monster* other);
-    unsigned int addDamage(unsigned int amount, AttackType category);
+    unsigned int addDamage(unsigned int amount, AttackType category, float effectiveness, Battler* attacker);
     unsigned int addDirectDamage(unsigned int amount);
     unsigned int getCurrentHP()const;
     unsigned int getMaxHP()const;
@@ -248,8 +248,12 @@ class Battler{
     void consumeItem(ItemType item);
     bool restoreBerry();
     bool hasLostHeldItem()const;
-    void tryEatBerry();
+    void tryEatStartOfTurnBerry();
+    void tryEatLowHPBerry();
+    void tryEatStatusBerry();
     void tryEatLeppaBerry(unsigned int attack_id);
+    void tryEatAfterGettingHitBerry(AttackType category, float effectiveness, Battler* attacker);
+    bool tryEatSuperEffectiveBerry(Type attack_type, bool is_supereffective);
 };
 
 #endif

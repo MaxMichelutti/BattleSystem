@@ -1773,6 +1773,12 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
     //healing items
     double heal_percent = 0;
     switch(item_id){
+        case ORAN_BERRY:
+            heal_percent = min(100,1000 / cpu_active->getMaxHP());
+            break;
+        case SITRUS_BERRY:
+            heal_percent = 25;
+            break;
         case POTION:
             heal_percent = min(100,2000 / cpu_active->getMaxHP());
             break;
@@ -1795,22 +1801,27 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
     // status healing items
     switch(item_id){
         case ANTIDOTE:
+        case PECHA_BERRY:
             if(cpu_active->isPoisoned())
                 total_utility += 100;
             break;
         case AWAKENING:
+        case CHESTO_BERRY:
             if(cpu_active->isAsleep())
                 total_utility += 100;
             break;
         case PARALYZE_HEAL:
+        case CHERY_BERRY:
             if(cpu_active->isParalyzed())
                 total_utility += 100;
             break;
         case ICE_HEAL:
+        case ASPEAR_BERRY:
             if(cpu_active->isFrozen())
                 total_utility += 100;
             break;
         case BURN_HEAL:
+        case RAWST_BERRY:
             if(cpu_active->isBurned())
                 total_utility += 100;
             break;
@@ -1821,6 +1832,8 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
             break;
         default: break;
     }
+    if(total_utility==0)
+        total_utility = -50;
     return total_utility;
 }
 

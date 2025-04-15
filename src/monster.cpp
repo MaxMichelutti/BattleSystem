@@ -701,6 +701,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                 amount=10;
                 break;
             case SITRUS_BERRY:
+            case ENIGMA_BERRY:
                 amount=max(1,getMaxHP()/4);
                 break;
             case AGUAV_BERRY:
@@ -788,9 +789,124 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
         // PP Restoring items
         switch(item_type){
             case LEPPA_BERRY:
-                recoverPP(data,10);
+                if(data!=0)
+                    recoverPP(data,10);
+                else{
+                    // if no attack is specified, recover PP for the first attack available
+                    for(int i=0;i<4;i++){
+                        if(attack_ids[i].attack_id != 0){
+                            unsigned int attack_id = attack_ids[i].attack_id;
+                            unsigned int current_pp = attack_ids[i].current_pp;
+                            unsigned int max_pp = getMaxPPForAttack(attack_id);
+                            if(max_pp > current_pp){
+                                recoverPP(attack_id,10);
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                }
                 result=true;
                 break;
+            default:break;
+        }
+        // friendship berries
+        switch(item_type){
+            case GREPA_BERRY:{
+                if(effort.getSpdef() > 0){
+                    effort.changeSpdef(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                }
+                break;
+            }
+            case HONDEW_BERRY:{
+                if(effort.getSpatk() > 0){
+                    effort.changeSpatk(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                }
+                break;
+            }
+            case KELPSY_BERRY:{
+                if(effort.getAtk() > 0){
+                    effort.changeAtk(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                }
+                break;
+            }
+            case QUALOT_BERRY:{
+                if(effort.getDef() > 0){
+                    effort.changeDef(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                }
+                break;
+            }
+            case TAMATO_BERRY:{
+                if(effort.getSpd() > 0){
+                    effort.changeSpd(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                }
+                break;
+            }
+            case POMEG_BERRY:{
+                if(effort.getHp() > 0){
+                    unsigned int old_hp = getCurrentHP();
+                    effort.changeHp(-10);
+                    if(friendship < 100)
+                        changeFriendship(10);
+                    else if(friendship<200)
+                        changeFriendship(5);
+                    else
+                        changeFriendship(2);
+                    updateStats();
+                    result = true;
+                    //avoid pomeg berry glitch
+                    if(isFainted())
+                        damage = getMaxHP();
+                    else{
+                        if(old_hp >= getMaxHP()){
+                            damage = 0;
+                        }else{
+                            damage = getMaxHP() - old_hp;
+                        }
+                    }
+                }
+                break;
+            }
             default:break;
         }
     }
@@ -811,6 +927,7 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
             case FULL_RESTORE:
             case ORAN_BERRY:
             case SITRUS_BERRY:
+            case ENIGMA_BERRY:
             case IAPAPA_BERRY:
             case MAGO_BERRY:
             case AGUAV_BERRY:
@@ -861,10 +978,55 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
         // PP restoring items
         switch(item_type){
             case LEPPA_BERRY:
-                result = true;
+                for(int i=0; i<4;i++){
+                    if(attack_ids[i].attack_id != 0){
+                        unsigned int attack_id = attack_ids[i].attack_id;
+                        unsigned int current_pp = attack_ids[i].current_pp;
+                        unsigned int max_pp = getMaxPPForAttack(attack_id);
+                        if(max_pp > current_pp){
+                            result = true;
+                            break;
+                        }
+                    }
+                }
                 break;
             default:break;
         }
+        //friendship berries
+        switch(item_type){
+            case GREPA_BERRY:{
+                if(effort.getSpdef() > 0)
+                    result = true;
+                break;
+            }
+            case HONDEW_BERRY:{
+                if(effort.getSpatk() > 0)
+                    result = true;
+                break;
+            }
+            case KELPSY_BERRY:{
+                if(effort.getAtk() > 0)
+                    result = true;
+                break;
+            }
+            case POMEG_BERRY:{
+                if(effort.getHp() > 0)
+                    result = true;
+                break;
+            }
+            case QUALOT_BERRY:{
+                if(effort.getDef() > 0)
+                    result = true;
+                break;
+            }
+            case TAMATO_BERRY:{
+                if(effort.getSpd() > 0)
+                    result = true;
+                break;
+            }
+            default:break;
+        }
+
     }
     return result;   
 }

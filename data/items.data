@@ -187,7 +187,181 @@ CATEGORY:BERRY
 FLAVOUR:10 10 10 0 10 20
 # 34 LEPPA BERRY
 NAME:Leppa Berry
-DESCRIPTION: 	If a Pokémon holds one of these Berries, it will be able to restore 10 PP to a move.
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to restore 10 PP to a move.
 PRICE:20
 CATEGORY:BERRY
 FLAVOUR:10 0 10 10 10 20
+# 35 ENIGMA BERRY
+NAME:Enigma Berry
+DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to regain some HP if it is hit with a supereffective move.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:40 10 0 0 0 60
+# 36 JABOCA BERRY
+NAME:Jaboca Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a physical move, the attacker will also take damage.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 40 10 60
+# 37 ROWAP BERRY
+NAME:Rowap Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a special move, the attacker will also take damage. 
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 0 0 40 60
+# 38 KEE BERRY
+NAME:Kee Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a physical move, the holder’s Defense stat will be boosted.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:30 30 10 10 10 0
+# 39 MARANGA BERRY
+NAME:Maranga Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a special move, the holder’s Sp. Def stat will be boosted.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 10 30 30 10 0
+# 40 BABIRI BERRY
+NAME:Babiri Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Steel-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:25 10 0 0 0 35
+# 41 CHARTI BERRY
+NAME:Charti Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Rock-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 20 0 0 0 35
+# 42 CHILAN BERRY
+NAME:Chilan Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a Normal-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 25 10 0 0 35
+# 43 CHOPLE BERRY
+NAME:Chople Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Fighting-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:15 0 0 10 0 30
+# 44 COBA BERRY
+NAME:Coba Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Flying-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 0 15 0 30
+# 45 COLBUR BERRY
+NAME:Colbur Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Flying-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 0 10 20 35
+# 46 HABAN BERRY
+NAME:Haban Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Dragon-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 10 20 0 35
+# 47 KASIB BERRY
+NAME:Kasib Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Ghost-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 20 0 0 35
+# 48 KEBIA BERRY
+NAME:Kebia Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Poison-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 15 0 0 10 30
+# 49 OCCA BERRY
+NAME:Occa Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Fire-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:15 0 10 0 0 30
+# 50 PASSHO BERRY
+NAME:Passho Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Water-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 15 0 10 0 30
+# 51 PAYAPA BERRY
+NAME:Payapa Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Psychic-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 10 0 15 30
+# 52 RINDO BERRY
+NAME:Rindo Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Grass-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 0 15 0 30
+# 53 ROSELI BERRY
+NAME:Roseli Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Fairy-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 25 10 0 35
+# 54 SHUCA BERRY
+NAME:Shuca Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Ground-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 15 0 0 30
+# 55 TANGA BERRY
+NAME:Tanga Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Bug-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:20 0 0 0 10 35
+# 56 WACAN BERRY
+NAME:Wacan Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Electric-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 0 15 0 10 30
+# 57 YACHE BERRY
+NAME:Yache Berry
+DESCRIPTION:If a Pokémon holding this Berry is hit with a supereffective Ice-type move, the power of that move will be weakened.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 0 0 15 30
+# 58 GREPA BERRY
+NAME:Grepa Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its Sp. Def stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 10 0 10 20
+# 59 HONDEW BERRY
+NAME:Hondew Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its Sp. Atk stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 10 0 10 0 20
+# 60 KELPSY BERRY
+NAME:Kelpsy Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its Attack stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:0 10 0 10 10 20
+# 61 POMEG BERRY
+NAME:Pomeg Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its HP stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 10 10 0 20
+# 62 QUALOT BERRY
+NAME:Qualot Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its Defense stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:10 0 10 0 10 20
+# 63 TAMATO BERRY
+NAME:Tamato Berry
+DESCRIPTION:If a Pokémon is fed this Berry, it will grow more friendly, but it will lose base points for its Speed stat.
+PRICE:20
+CATEGORY:BERRY
+FLAVOUR:20 10 0 0 0 30

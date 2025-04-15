@@ -431,7 +431,7 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
     }
     //eat persim berry in case of confusion
     if(hasVolatileCondition(CONFUSION) && hasHeldItem(PERSIM_BERRY))
-        tryEatBerry();
+        tryEatStatusBerry();
 }
 
 void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
@@ -1309,9 +1309,11 @@ void Battler::usePP(unsigned int attack_id, unsigned int amount){
 }
 
 void Battler::tryEatLeppaBerry(unsigned int attack_id){
-    if(hasPP(attack_id))
-        return;
     if(attack_id==0 || attack_id==STRUGGLE_ID)
+        return;
+    if(hasVolatileCondition(UNNERVED))
+        return;
+    if(hasPP(attack_id))
         return;
     if(!hasHeldItem(LEPPA_BERRY))
         return;
@@ -1375,7 +1377,8 @@ void Battler::transformInto(Monster* other){
     this->attacks_used.clear();
 }
 
-unsigned int Battler::addDamage(unsigned int amount, AttackType category){
+unsigned int Battler::addDamage(unsigned int amount, AttackType category, float effectiveness, Battler* attacker){
+    // BE CAREFUL: Attacker may be nullptr!!!
     unsigned int currentHP = monster->getCurrentHP();
     if(isAtFullHP() && hasAbility(MULTISCALE)){
         handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
@@ -1409,22 +1412,12 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category){
         changeSpeedModifier(2);
     }
     // berry check
-    if(!hasVolatileCondition(UNNERVED))
-        tryEatBerry();
+    tryEatLowHPBerry();
+    tryEatAfterGettingHitBerry(category,effectiveness,attacker);
     return dmg;
 }
 
-unsigned int Battler::addDirectDamage(unsigned int amount){
-    unsigned int dmg = monster->addDamage(amount);
-    if(isFainted())
-        handler->displayMsg(getNickname()+" fainted!");
-    // berry check
-    if(!hasVolatileCondition(UNNERVED))
-        tryEatBerry();
-    return dmg;
-}
-
-void Battler::tryEatBerry(){
+void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness,Battler*attacker){
     if(isFainted())
         return;
     ItemType held_item = getHeldItem();
@@ -1433,17 +1426,175 @@ void Battler::tryEatBerry(){
         return;
     if(item_data->getCategory()!=BERRY) 
         return;
+    if(hasVolatileCondition(UNNERVED))
+        return;
+    switch(held_item){
+        case ENIGMA_BERRY:{
+            if(effectiveness > 1.1)
+                return;
+            consumeHeldItem();
+            break;
+        }
+        case ROWAP_BERRY:{
+            if(category != SPECIAL)
+                return;
+            if(attacker == nullptr)
+                return;
+            if(attacker->isFainted())
+                return;
+            handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
+            removeHeldItem();
+            consumed_held_item = ROWAP_BERRY;
+            unsigned int dmg = attacker->getMaxHP()/8;
+            unsigned int actual_dmg = attacker->addDirectDamage(dmg);
+            break;
+        }
+        case JABOCA_BERRY:{
+            if(category != PHYSICAL)
+                return;
+            if(attacker == nullptr)
+                return;
+            if(attacker->isFainted())
+                return;
+            handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
+            removeHeldItem();
+            consumed_held_item = JABOCA_BERRY;
+            unsigned int dmg = attacker->getMaxHP()/8;
+            unsigned int actual_dmg = attacker->addDirectDamage(dmg);
+            break;
+        }
+        case KEE_BERRY:{
+            if(category!=PHYSICAL)
+                return;
+            consumeHeldItem();
+            break;
+        }
+        case MARANGA_BERRY:{
+            if(category!=SPECIAL)
+                return;
+            consumeHeldItem();
+            break;
+        }
+        default:
+            return;
+    }
+}
+
+unsigned int Battler::addDirectDamage(unsigned int amount){
+    unsigned int dmg = monster->addDamage(amount);
+    if(isFainted())
+        handler->displayMsg(getNickname()+" fainted!");
+    // berry check
+    tryEatLowHPBerry();
+    return dmg;
+}
+
+void Battler::tryEatStartOfTurnBerry(){
+    if(isFainted())
+        return;
+    ItemType held_item = getHeldItem();
+    ItemData* item_data = ItemData::getItemData(held_item);
+    if(item_data==nullptr)  
+        return;
+    if(item_data->getCategory()!=BERRY) 
+        return;
+    if(hasVolatileCondition(UNNERVED))
+        return;
+    switch(held_item){
+        case MICLE_BERRY:
+        case APICOT_BERRY:
+        case CUSTAP_BERRY:
+        case LANSAT_BERRY:{
+            if(!(getCurrentHP() < getMaxHP()/4 || (hasAbility(GLUTTONY) && getCurrentHP() < getMaxHP()/2)))
+                return;
+            consumeHeldItem();
+            break;
+        }
+        default:
+            return;
+    }
+    
+}
+
+void Battler::tryEatStatusBerry(){
+    if(isFainted())
+        return;
+    ItemType held_item = getHeldItem();
+    ItemData* item_data = ItemData::getItemData(held_item);
+    if(item_data==nullptr)  
+        return;
+    if(item_data->getCategory()!=BERRY) 
+        return;
+    if(hasVolatileCondition(UNNERVED))
+        return;
+    switch(held_item){
+        //berries activating in case of status
+        case ASPEAR_BERRY:{
+            if(!isFrozen())
+                return;
+            consumeHeldItem();
+            break;      
+        }
+        case CHERY_BERRY:{
+            if(!isParalyzed())
+                return;
+            consumeHeldItem();
+            break;      
+        }
+        case CHESTO_BERRY:{
+            if(!isAsleep())
+                return;
+            consumeHeldItem();
+            break;      
+        }
+        case PECHA_BERRY:{
+            if(!isPoisoned())
+                return;
+            consumeHeldItem();
+            break;      
+        }
+        case RAWST_BERRY:{
+            if(!isBurned())
+                return;
+            consumeHeldItem();
+            break;      
+        }
+        case PERSIM_BERRY:{
+            if(!hasVolatileCondition(CONFUSION))
+                return;
+            consumeHeldItem();
+        }
+        // berries that cannot be consumed in battle
+        default:
+            return;
+    }
+    consumeHeldItem();
+}
+
+void Battler::tryEatLowHPBerry(){
+    if(isFainted())
+        return;
+    ItemType held_item = getHeldItem();
+    ItemData* item_data = ItemData::getItemData(held_item);
+    if(item_data==nullptr)  
+        return;
+    if(item_data->getCategory()!=BERRY) 
+        return;
+    if(hasVolatileCondition(UNNERVED))
+        return;
     switch(held_item){
         //berries activating at below 50% health
         case ORAN_BERRY:
-        case SITRUS_BERRY:
+        case SITRUS_BERRY:{
             if(getCurrentHP() >= getMaxHP()/2)
                 return;
+            consumeHeldItem();
             break;
+        }
         // berries activating below 25%
-        case CUSTAP_BERRY:
-        case MICLE_BERRY:
-        case LANSAT_BERRY:
+        // case CUSTAP_BERRY:
+        // case MICLE_BERRY:
+        // case LANSAT_BERRY:
         case AGUAV_BERRY:
         case WIKI_BERRY:
         case IAPAPA_BERRY:
@@ -1453,35 +1604,17 @@ void Battler::tryEatBerry(){
         case STARF_BERRY:
         case SALAC_BERRY:
         case PETAYA_BERRY:
-        case APICOT_BERRY:
-        case GANION_BERRY:
+        // case APICOT_BERRY:
+        case GANION_BERRY:{
             if(!(getCurrentHP() < getMaxHP()/4 || (hasAbility(GLUTTONY) && getCurrentHP() < getMaxHP()/2)))
                 return;
+            consumeHeldItem();
             break;
-        //berries activating in case of status
-        case ASPEAR_BERRY:
-            if(!isFrozen())
-                return;
-        case CHERY_BERRY:
-            if(!isParalyzed())
-                return;
-        case CHESTO_BERRY:
-            if(!isAsleep())
-                return;
-        case PECHA_BERRY:
-            if(!isPoisoned())
-                return;
-        case RAWST_BERRY:
-            if(!isBurned())
-                return;
-        case PERSIM_BERRY:
-            if(!hasVolatileCondition(CONFUSION))
-                return;
-        // berries that cannot be consumed in battle
+        }
         default:
             return;
     }
-    consumeHeldItem();
+   
 }
 
 unsigned int Battler::getCurrentHP()const{
@@ -1550,7 +1683,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             monster->setPermanentStatus(BURN);
             handler->displayMsg(getNickname()+" was burned!");
             if(hasHeldItem(RAWST_BERRY))
-                tryEatBerry();
+                tryEatStatusBerry();
             break;
         case PARALYSIS:
             if(!canBeParalyzed())
@@ -1558,7 +1691,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             monster->setPermanentStatus(PARALYSIS);
             handler->displayMsg(getNickname()+" was paralyzed!");
             if(hasHeldItem(CHERY_BERRY))
-                tryEatBerry();
+                tryEatStatusBerry();
             break;
         case FREEZE:
             if(!canBeFrozen())
@@ -1566,7 +1699,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             monster->setPermanentStatus(FREEZE);
             handler->displayMsg(getNickname()+" was frozen!");
             if(hasHeldItem(ASPEAR_BERRY))
-                tryEatBerry();
+                tryEatStatusBerry();
             break;
         case POISONED:
             if(!canBePoisoned())
@@ -1574,7 +1707,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             monster->setPermanentStatus(POISONED);
             handler->displayMsg(getNickname()+" was poisoned!");
             if(hasHeldItem(PECHA_BERRY))
-                tryEatBerry();
+                tryEatStatusBerry();
             break;
         case BAD_POISON:
             if(!canBeBadlyPoisoned())
@@ -1592,7 +1725,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             monster->setPermanentStatus(status);
             handler->displayMsg(monster->getNickname()+" fell asleep!");
             if(hasHeldItem(CHESTO_BERRY))
-                tryEatBerry();
+                tryEatStatusBerry();
             break;
         default:
             return false;
@@ -1825,18 +1958,20 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         case IAPAPA_BERRY:
         case WIKI_BERRY:
         case FIGY_BERRY:{
-            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type)){
+            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type) && !monster->likesBerry(item_type)){
                 addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
                 res = true;
             }
             break;
         }
-        case APICOT_BERRY:{
+        case APICOT_BERRY:
+        case MARANGA_BERRY:{
             changeSpecialDefenseModifier(1);
             res = true;
             break;
         }
-        case GANION_BERRY:{
+        case GANION_BERRY:
+        case KEE_BERRY:{
                 changeDefenseModifier(1);
                 res = true;
                 break;
@@ -1921,7 +2056,7 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
         case WIKI_BERRY:
         case MAGO_BERRY:
         case FIGY_BERRY:
-            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type))
+            if(!hasVolatileCondition(CONFUSION) && monster->dislikesBerry(item_type) && !monster->likesBerry(item_type))
                 res = true;
             break;
         case APICOT_BERRY:
@@ -2000,4 +2135,120 @@ bool Battler::restoreBerry(){
 
 bool Battler::hasLostHeldItem()const{
     return had_held_item;
+}
+
+bool Battler::tryEatSuperEffectiveBerry(Type attack_type, bool is_supereffective){
+    if(isFainted())
+        return false;
+    if(!is_supereffective && !hasHeldItem(CHILAN_BERRY))
+        return false;
+    ItemType held_item = getHeldItem();
+    ItemData* item_data = ItemData::getItemData(held_item);
+    if(item_data==nullptr)  
+        return false;
+    if(item_data->getCategory()!=BERRY)
+        return false;
+    if(hasVolatileCondition(UNNERVED))
+        return false;
+    bool consume = false;
+    switch(held_item){
+        case BABIRI_BERRY:{
+            if(attack_type == STEEL)
+                consume = true;
+            break;
+        }
+        case CHARTI_BERRY:{
+            if(attack_type == ROCK)
+                consume = true;
+            break;
+        }
+        case CHILAN_BERRY:{
+            if(attack_type == NORMAL)
+                consume = true;
+            break;
+        }
+        case CHOPLE_BERRY:{
+            if(attack_type == FIGHTING)
+                consume = true;
+            break;
+        }
+        case COBA_BERRY:{
+            if(attack_type == FLYING)
+                consume = true;
+            break;
+        }
+        case COLBUR_BERRY:{
+            if(attack_type == DARK)
+                consume = true;
+            break;
+        }
+        case HABAN_BERRY:{
+            if(attack_type == DRAGON)
+                consume = true;
+            break;
+        }
+        case KASIB_BERRY:{
+            if(attack_type == GHOST)
+                consume = true;
+            break;
+        }
+        case KEBIA_BERRY:{
+            if(attack_type == POISON)
+                consume = true;
+            break;
+        }
+        case OCCA_BERRY:{
+            if(attack_type == FIRE)
+                consume = true;
+            break;
+        }
+        case PASSHO_BERRY:{
+            if(attack_type == WATER)
+                consume = true;
+            break;
+        }
+        case PAYAPA_BERRY:{
+            if(attack_type == PSYCHIC)
+                consume = true;
+            break;
+        }
+        case RINDO_BERRY:{
+            if(attack_type == GRASS)
+                consume = true;
+            break;
+        }
+        case ROSELI_BERRY:{
+            if(attack_type == FAIRY)
+                consume = true;
+            break;
+        }
+        case SHUCA_BERRY:{
+            if(attack_type == GROUND)
+                consume = true;
+            break;
+        }
+        case TANGA_BERRY:{
+            if(attack_type == BUG)
+                consume = true;
+            break;
+        }
+        case WACAN_BERRY:{
+            if(attack_type == ELECTRIC)
+                consume = true;
+            break;
+        }
+        case YACHE_BERRY:{
+            if(attack_type == ICE)
+                consume = true;
+            break;
+        }
+        default:return false;
+    }
+    if(consume){
+        removeHeldItem();
+        consumed_held_item = held_item;
+        handler->displayMsg(getNickname()+" ate its "+item_data->getName()+" to reduce the incoming damage!");
+        return true;
+    }
+    return false;
 }

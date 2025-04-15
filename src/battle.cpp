@@ -368,8 +368,8 @@ void Battle::performTurn(){
         opponent_active->addVolatileCondition(FOCUSED,5);
     }
     // 2.5 apply action speed mods
-    player_active->tryEatBerry();
-    opponent_active->tryEatBerry();
+    player_active->tryEatStartOfTurnBerry();
+    opponent_active->tryEatStartOfTurnBerry();
     if(player_active->hasVolatileCondition(MOVING_FIRST)){
         player_active->removeVolatileCondition(MOVING_FIRST);
         player_action.setSpeed(MAX_UNSIGNED);
@@ -1111,13 +1111,12 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 event_handler->displayMsg("It's a one hit KO!");//notice that this may only OHKO the substitute!
                 damage = active_target->getMaxHP();
             }
-            actual_damage = active_target->addDamage(damage,attack->getCategory());
+            actual_damage = active_target->addDamage(damage,attack->getCategory(), effectiveness, active_user);
             active_target->hitOnceMore(attack->getType());
             
             total_actual_damage += actual_damage;
             if(number_of_hits>1)
                 event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage)+" damage!");
-
             
             // contact effects
             applyContactEffects(attack,actor);
@@ -3197,12 +3196,18 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         damage *= 3.0 / 4.0;
     }
 
-    if(attack->getEffectId() == 112){
+    // target eats berries to reduce incoming damage
+    if(effect!=112 && effect!=117 && // do not eat berries for fixed dmg attacks
+        enemy_monster->tryEatSuperEffectiveBerry(attack->getType(),effectiveness>1.1)){//lazy eval will prevent this call if attack is fixed dmg
+        damage /= 2;
+    }
+
+    if(effect == 112){
         // damage equal to level
         unsigned int level = user_monster->getLevel();
         damage = level;
     }
-    if(attack->getEffectId() == 117){
+    if(effect == 117){
         // damage equal to currentHP user
         unsigned int current_hp = user_monster->getCurrentHP();
         damage = current_hp;
@@ -4848,8 +4853,10 @@ void Battle::applyScheduledFutureSights(){
             if(it.stab){
                 stab_multiplier = 1.5;
             }
+            if(target_active->tryEatSuperEffectiveBerry(attack->getType(),effectiveness>1.1))
+                base_dmg /= 2;
             unsigned int final_damage = max(base_dmg * effectiveness * crit_multiplier * stab_multiplier,1);
-            unsigned int actual_damage = target_active->addDamage(final_damage, attack->getCategory());
+            unsigned int actual_damage = target_active->addDamage(final_damage, attack->getCategory(), effectiveness, nullptr);
             event_handler->displayMsg(target_name+" took "+std::to_string(actual_damage)+" damage!");
         }
 
