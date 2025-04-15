@@ -1826,6 +1826,7 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
                 total_utility += 100;
             break;
         case FULL_HEAL:
+        case LUM_BERRY:
         case FULL_RESTORE:
             if(cpu_active->hasPermanentStatus() || cpu_active->hasVolatileCondition(CONFUSION))
                 total_utility += 99;//1 minus of status specific in order to incentivize status specific item use
