@@ -43,6 +43,8 @@ class Monster{
     bool has_hidden_ability;
     Monster* transformation;
     ItemType held_item;
+    ItemType consumed_item;
+    unsigned int form_id;
 
     void updateStats();
     void packAttacks();
@@ -117,6 +119,9 @@ class Monster{
     bool dislikesBerry(ItemType item)const;
     bool likesBerry(ItemType item)const;
     // bool hasMaxedEVs()const;
+    unsigned int getFormId()const;
+    void setConsumedItem(ItemType item);
+    ItemType getConsumedItem()const;
 };
 
 #endif

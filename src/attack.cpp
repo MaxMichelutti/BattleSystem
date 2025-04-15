@@ -127,6 +127,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_sound_based = (data.find("sound") != data.end());
     is_punching = (data.find("punching") != data.end());
     is_powder = (data.find("powder") != data.end());
+    is_pulse = (data.find("pulse") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -139,6 +140,36 @@ unsigned int Attack::getId()const {
 
 Type Attack::getType()const {
     return type;
+}
+
+Type Attack::getType(Battler* user)const{
+    Type attack_type = getType();
+    if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
+        attack_type = ELECTRIC;
+    if(user->hasAbility(AERILATE) && attack_type==NORMAL)
+        attack_type = FLYING;
+    if(getEffectId()==215){
+        //raging bull changes type depending on the user's form
+        switch(user->getMonster()->getFormId()){
+            case 46:{
+                attack_type=FIGHTING;
+                break;
+            }
+            case 47:{
+                attack_type=WATER;
+                break;
+            }
+            case 48:{
+                attack_type=FIRE;
+                break;
+            }
+            default:{
+                attack_type=NORMAL;
+                break;
+            }
+        }
+    }
+    return attack_type;
 }
 
 unsigned int Attack::getPower()const {
@@ -187,6 +218,10 @@ AttackTarget Attack::getEffectTarget()const {
 
 bool Attack::makesContact()const {
     return is_contact;
+}
+
+bool Attack::isPulse()const {
+    return is_pulse;
 }
 
 bool Attack::isSoundBased()const {
@@ -255,6 +290,8 @@ void Attack::loadAttacks(){
             parsed_data["no_metronome"] = "true";
         }else if(line.rfind("POWDER",0)==0){
             parsed_data["powder"] = "true";
+        }else if(line.rfind("PULSE",0)==0){
+            parsed_data["pulse"] = "true";
         }else{
             std::cout<<"Error: Unknown line in attack file: " << line << std::endl;
         }

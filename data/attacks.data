@@ -348,6 +348,7 @@ CATEGORY:SPECIAL
 TYPE:WATER
 EFFECT:25
 EFFECTCHANCE:20
+PULSE
 # 40 PROTECT
 NAME:Protect
 DESCRIPTION:Enables the user to evade all attacks. Its chance of failing rises if it is used in succession.
@@ -2407,6 +2408,7 @@ PP:10
 EFFECT:145
 TYPE:PSYCHIC
 CATEGORY:STATUS
+PULSE
 # 269 ATTRACT
 NAME:Attract
 DESCRIPTION:If it is the opposite gender of the user, the target becomes infatuated and less likely to attack
@@ -2687,6 +2689,7 @@ POWER:80
 CATEGORY:SPECIAL
 EFFECT:21
 EFFECTCHANCE:20
+PULSE
 # 301 SHADOW BALL
 NAME:Shadow Ball
 DESCRIPTION:The user attacks by hurling a shadowy blob at the target. This may also lower the target's Sp. Def stat.
@@ -3134,6 +3137,7 @@ TYPE:DRAGON
 PP:10
 POWER:85
 CATEGORY:SPECIAL
+PULSE
 # 347 DRAGON DANCE
 NAME:Dragon Dance
 DESCRIPTION:The user vigorously performs a mystic, powerful dance that raises its Attack and Speed stats.
@@ -3312,7 +3316,7 @@ CATEGORY:PHYSICAL
 CONTACT
 PP:10
 POWER:90
-EFFECT:172
+EFFECT:215
 EFFECTTARGET:SELF
 # 368 MIST
 NAME:Mist
@@ -3468,6 +3472,7 @@ CATEGORY:SPECIAL
 PP:20
 POWER:80
 ACCURACY:200
+PULSE
 # 385 PSYSTRIKE
 NAME:Psystrike
 DESCRIPTION:The user materializes an odd psychic wave to attack the target. This move deals physical damage.
@@ -3492,3 +3497,198 @@ TYPE:DARK
 CATEGORY:PHYSICAL
 EFFECT:204
 EFFECTTARGET:SELF
+# 388 PURSUIT
+NAME:Pursuit
+DESCRIPTION:The power of this attack move is doubled if it's used on a target that's switching out of battle.
+CATEGORY:PHYSICAL
+TYPE:DARK
+PP:20
+POWER:40
+EFFECT:205
+EFFECTTARGET:SELF
+CONTACT
+# 389 HYPER FANG
+NAME:Hyper Fang
+DESCRIPTION:The user bites hard on the target with its sharp front fangs. This may also make the target flinch.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:15
+ACCURACY:90
+POWER:80
+CONTACT
+EFFECT:21
+EFFECTCHANCE:10
+# 390 METAL BURST
+NAME:Metal Burst
+DESCRIPTION:The user retaliates with much greater force against the opponent that last inflicted damage on it.
+PP:10
+TYPE:STEEL
+CATEGORY:PHYSICAL
+EFFECT:206
+EFFECTTARGET:SELF
+# 391 HONE CLAWS
+NAME:Hone Claws
+DESCRIPTION:The user sharpens its claws to boost its Attack stat and accuracy.
+TYPE:DARK
+CATEGORY:STATUS
+TARGET:SELF
+PP:15
+EFFECT:207
+# 392 AURORA VEIL
+NAME:Aurora Veil
+DESCRIPTION:This move reduces damage from physical and special moves for five turns. This can be used only when it is snowing.
+TYPE:ICE
+CATEGORY:STATUS
+PP:20
+EFFECT:208
+TARGET:SELF
+# 393 RAGING FURY
+NAME:Raging Fury
+DESCRIPTION:The user rampages around spewing flames for two to three turns. The user then becomes confused.
+TYPE:FIRE
+PP:10
+POWER:120
+CATEGORY:PHYSICAL
+EFFECT:209
+EFFECTTARGET:SELF
+# 394 FAIRY WIND
+NAME:Fairy Wind
+DESCRIPTION:The user attacks by stirring up a fairy wind to strike the target.
+TYPE:FAIRY
+CATEGORY:SPECIAL
+PP:30
+POWER:40
+# 395 SHELL SIDE ARM
+NAME:Shell Side Arm
+DESCRIPTION:This move is either physical or special—whichever will inflict more damage. This may also poison the target.
+TYPE:POISON
+PP:10
+POWER:90
+CATEGORY:SPECIAL
+EFFECT:210
+EFFECTCHANCE:20
+# 396 ROCK SMASH
+NAME:Rock Smash
+DESCRIPTION:The user attacks with a punch. This may also lower the target's Defense stat.
+TYPE:FIGHTING
+PP:15
+CATEGORY:PHYSICAL
+POWER:40
+EFFECT:22
+CONTACT
+EFFECTCHANCE:50
+# 397 BRUTAL SWING
+NAME:Brutal Swing
+DESCRIPTION:The user swings its body around violently to inflict damage on everything in its vicinity.
+TYPE:DARK
+CATEGORY:PHYSICAL
+CONTACT
+PP:20
+POWER:60
+# 398 DEFOG
+NAME:Defog
+DESCRIPTION:A strong wind blows away the target's barriers such as Reflect or Light Screen. This also lowers the target's evasiveness.
+PP:15
+TYPE:FLYING
+CATEGORY:STATUS
+EFFECT:211
+TARGET:SELF
+# 399 ENERGY BALL
+NAME:Energy Ball
+DESCRIPTION:The user draws power from nature and fires it at the target. This may also lower the target's Sp. Def stat.
+TYPE:GRASS
+PP:10
+POWER:90
+CATEGORY:SPECIAL
+EFFECT:31
+EFFECTCHANCE:10
+# 400 CHLOROBLAST
+NAME:Chloroblast
+DESCRIPTION:The user launches its amassed chlorophyll to inflict damage on the target. This also damages the user.
+TYPE:GRASS
+PP:5
+POWER:150
+ACCURACY:95
+CATEGORY:SPECIAL
+EFFECT:212
+EFFECTTARGET:SELF
+# 401 DRAGON HAMMER
+NAME:Dragon Hammer
+DESCRIPTION:The user wields its body like a hammer to attack the target and inflict damage.
+PP:15
+TYPE:DRAGON
+CATEGORY:PHYSICAL
+POWER:90
+CONTACT
+# 402 SHADOW BONE
+NAME:Shadow Bone
+DESCRIPTION:The user attacks by beating the target with a bone that contains a spirit. This may also lower the target's Defense stat.
+PP:10
+POWER:85
+CATEGORY:PHYSICAL
+TYPE:GHOST
+EFFECT:22
+EFFECTCHANCE:20
+# 403 STRANGE STEAM
+NAME:Strange Steam
+DESCRIPTION:The user attacks the target by emitting steam. This may also confuse the target.
+POWER:90
+ACCURACY:95
+PP:10
+TYPE:FAIRY
+CATEGORY:SPECIAL
+EFFECT:25
+EFFECTCHANCE:20
+# 404 MISTY TERRAIN
+% not found
+NAME:Misty Terrain
+DESCRIPTION:This protects Pokémon on the ground from status conditions and halves damage from Dragon-type moves for five turns.
+PP:10
+TYPE:FAIRY
+CATEGORY:STATUS
+EFFECT:213
+TARGET:SELF
+# 405 RECYCLE
+NAME:Recycle
+DESCRIPTION:The user recycles a held item that has been used in battle so it can be used again.
+PP:10
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:214
+TARGET:SELF
+# 406 FREEZING GLARE
+NAME:Freezing Glare
+DESCRIPTION:The user shoots its psychic power from its eyes to attack. This may also leave the target frozen.
+PP:10
+POWER:90
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+EFFECT:61
+EFFECTCHANCE:10
+# 407 TRICK ROOM
+NAME:Trick Room
+DESCRIPTION:The user creates a bizarre area in which slower Pokémon get to move first for five turns. 
+PP:5
+PRIORITY:-7
+TYPE:PSYCHIC
+CATEGORY:STATUS
+EFFECT:216
+TARGET:SELF
+# 408 THUNDEROUS KICK
+NAME:Thunderous Kick
+DESCRIPTION:The user overwhelms the target with lightning-like movement before delivering a kick. This also lowers the target's Defense stat.
+TYPE:FIGHTING
+PP:10
+POWER:90
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:22
+# 409 FIERY WRATH
+NAME:Fiery Wrath
+DESCRIPTION:The user transforms its wrath into a fire-like aura to attack. This may also make opposing Pokémon flinch. 
+TYPE:DARK
+PP:10
+POWER:90
+CATEGORY:SPECIAL
+EFFECT:21
+EFFECTCHANCE:20

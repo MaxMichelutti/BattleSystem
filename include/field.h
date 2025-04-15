@@ -37,8 +37,10 @@ class Field{
     void setWeather(Weather weather);
     void setWeather(Weather weather,unsigned int);
     void setTerrain(Terrain terrain);
+    void setTerrain(Terrain terrain,unsigned int);
     void clearWeather();
     void clearTerrain();
+    void clearFieldSide(BattleActionActor actor);
     bool setFullFieldEffect(FieldEffect field_effect, unsigned int turns);
     void clearFullFieldEffect(FieldEffect field_effect);
     bool hasFullFieldEffect(FieldEffect field_effect)const;

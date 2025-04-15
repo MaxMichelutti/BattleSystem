@@ -29,6 +29,8 @@ Monster::Monster(unsigned int species_id, unsigned int level) {
 
 void Monster::init(unsigned int species_id, unsigned int level) {
     transformation=nullptr;
+    form_id = 0;
+    held_item = NO_ITEM_TYPE;
     this->species_id = species_id;
     has_hidden_ability = false;
     Species* spec = Species::getSpecies(species_id);
@@ -39,7 +41,7 @@ void Monster::init(unsigned int species_id, unsigned int level) {
     // init stats
     this->level = level;
     nature = randomNature();
-    experience = getExpForLevel(level, spec->getExpCurve());
+    experience = getExpForLevel(level, spec->getExpCurve(getFormId()));
     init_stats();    
 
     // set name
@@ -57,10 +59,10 @@ void Monster::init(unsigned int species_id, unsigned int level) {
     // set ability
     // choose a random ability
     std::vector<Ability> abilities;
-    if(spec->getAbility1() != NO_ABILITY)
-        abilities.push_back(spec->getAbility1());
-    if(spec->getAbility2() != NO_ABILITY)
-        abilities.push_back(spec->getAbility2());
+    if(spec->getAbility1(getFormId()) != NO_ABILITY)
+        abilities.push_back(spec->getAbility1(getFormId()));
+    if(spec->getAbility2(getFormId()) != NO_ABILITY)
+        abilities.push_back(spec->getAbility2(getFormId()));
     unsigned int random_index = RNG::getRandomInteger(0,abilities.size()-1);
     ability = abilities[random_index];
 }
@@ -187,13 +189,13 @@ Gender Monster::getGender()const{
 Type Monster::getType1()const {
     if(transformation != nullptr)
         return transformation->getType1();
-    return Species::getSpecies(species_id)->getType1();
+    return Species::getSpecies(species_id)->getType1(getFormId());
 }
 
 Type Monster::getType2()const {
     if(transformation != nullptr)
         return transformation->getType2();
-    return Species::getSpecies(species_id)->getType2();
+    return Species::getSpecies(species_id)->getType2(getFormId());
 }
 
 unsigned long Monster::getExperience()const {
@@ -273,7 +275,7 @@ void Monster::changeEffortHp(int amount) {
 }
 
 void Monster::updateStats() {
-    Stats base = Species::getSpecies(species_id)->getBaseStats();
+    Stats base = Species::getSpecies(species_id)->getBaseStats(getFormId());
     unsigned int old_hp = stats.getHp();
     Stats effort = getEffort();
     Stats individual = getIndividual();
@@ -369,7 +371,7 @@ bool Monster::forgetAttack(unsigned int attack_id) {
 
 void Monster::gainExperience(unsigned long exp) {
     experience += exp;
-    unsigned int level_after_exp_gain = getLevelFromExp(experience, Species::getSpecies(species_id)->getExpCurve());
+    unsigned int level_after_exp_gain = getLevelFromExp(experience, Species::getSpecies(species_id)->getExpCurve(getFormId()));
     while(level < level_after_exp_gain){
         levelUp();
     }
@@ -385,11 +387,15 @@ Monster* Monster::generateRandomMonster(unsigned int species_id) {
     return generateRandomMonster(species_id, 1);
 }
 
+unsigned int Monster::getFormId()const{
+    return form_id;
+}
+
 Monster* Monster::generateRandomMonster(unsigned int species_id, unsigned int level) {
     Monster* monster = new Monster(species_id, level);
     // choose up to 4 moves from learnset
     Species* species = Species::getSpecies(species_id);
-    std::set<unsigned int> learnset = species->getLearnsetUntil(monster->getLevel());
+    std::set<unsigned int> learnset = species->getLearnsetUntil(0,monster->getLevel());
     for(int i=0;i<4;i++){
         std::vector<unsigned int> learnset_vector(learnset.begin(), learnset.end());
         if(learnset_vector.size() == 0)
@@ -410,9 +416,9 @@ void Monster::printSummary()const{
     std::cout << "Ability: " << abilityToString(ability) << std::endl;
     std::cout << "Friendship: " << friendship << std::endl;
     std::cout << "Permanent Status: " << permanentStatusConditionToString(permanent_status) << std::endl;
-    std::cout << "Type(s):" << typeToString(Species::getSpecies(species_id)->getType1());
-    if(Species::getSpecies(species_id)->getType2() != NO_TYPE)
-        std::cout << " " << typeToString(Species::getSpecies(species_id)->getType2());
+    std::cout << "Type(s):" << typeToString(Species::getSpecies(species_id)->getType1(getFormId()));
+    if(Species::getSpecies(species_id)->getType2(getFormId()) != NO_TYPE)
+        std::cout << " " << typeToString(Species::getSpecies(species_id)->getType2(getFormId()));
     std::cout << std::endl << "Stats: " << std::endl;
     std::cout << "HP: " << stats.getHp()
     << " ATK: " << stats.getAtk()
@@ -463,7 +469,7 @@ void Monster::printSummary()const{
 
 bool Monster::canEvolve()const{
     Species* spec = Species::getSpecies(species_id);
-    for(const Evolution &evo: spec->getEvolutions()){
+    for(const Evolution &evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
             case LEVEL:
                 if(level >= evo.getMethodCondition())
@@ -478,7 +484,7 @@ void Monster::evolve(){
     if(!canEvolve())
         return;
     Species* spec = Species::getSpecies(species_id);
-    for(const Evolution& evo: spec->getEvolutions()){
+    for(const Evolution& evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
             case LEVEL:
                 if(level >= evo.getMethodCondition()){
@@ -498,16 +504,25 @@ void Monster::completeEvolution(unsigned int target_species_id){
     if(nickname == old_spec->getName()){
         nickname = new_spec->getName();
     }
+    unsigned int new_form_id;
+    unsigned int old_form_id = getFormId();
+    if(old_form_id==0)
+        new_form_id = 0;
+    else{
+        AlternateForm* form = AlternateForm::getAlternateForm(getFormId());
+        FormKind kind = form->getFormKind();
+        new_form_id = new_spec->getFormIdOfKind(kind);
+    }
     //update stats
     updateStats();
     // update ability
     if(has_hidden_ability)
-        ability = new_spec->getHiddenAbility();
+        ability = new_spec->getHiddenAbility(new_form_id);
     else{
-        Ability old1 = old_spec->getAbility1();
-        Ability new1 = new_spec->getAbility1();
-        Ability old2 = old_spec->getAbility2();
-        Ability new2 = new_spec->getAbility2();
+        Ability old1 = old_spec->getAbility1(old_form_id);
+        Ability new1 = new_spec->getAbility1(new_form_id);
+        Ability old2 = old_spec->getAbility2(old_form_id);
+        Ability new2 = new_spec->getAbility2(new_form_id);
         if(ability==old1)
             ability=new1;
         else if(ability==old2)
@@ -647,6 +662,8 @@ void Monster::clearBattleData(){
         delete transformation;
         transformation = nullptr;
     }
+    if(consumed_item!=NO_ITEM_TYPE)
+        consumed_item = NO_ITEM_TYPE;
 }
 
 void Monster::transformInto(Monster* other){
@@ -660,6 +677,8 @@ void Monster::transformInto(Monster* other){
     transformation->attack_ids[1].current_pp = 5;
     transformation->attack_ids[2].current_pp = 5;
     transformation->attack_ids[3].current_pp = 5;
+    // steal form
+    transformation->form_id = other->getFormId();
     // keep gender
     transformation->gender = getGender();
     // steal ability
@@ -680,13 +699,13 @@ void Monster::transformInto(Monster* other){
 unsigned int Monster::getHeight()const{
     if(transformation != nullptr)
         return transformation->getHeight();
-    return Species::getSpecies(species_id)->getHeight();
+    return Species::getSpecies(species_id)->getHeight(getFormId());
 }
 
 unsigned int Monster::getWeight()const{
     if(transformation != nullptr)
         return transformation->getWeight();
-    return Species::getSpecies(species_id)->getWeight();
+    return Species::getSpecies(species_id)->getWeight(getFormId());
 }
 
 bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int data){
@@ -1154,4 +1173,11 @@ bool Monster::likesBerry(ItemType item)const{
             break;
     }
     return false;
+}
+
+void Monster::setConsumedItem(ItemType item){
+    consumed_item = item;
+}
+ItemType Monster::getConsumedItem()const{
+    return consumed_item;
 }

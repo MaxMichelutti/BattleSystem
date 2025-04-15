@@ -9,6 +9,7 @@ enum Weather{
     HAIL,
     SNOWSTORM
 };
+
 enum Terrain{
     NO_TERRAIN,
     GRASSY_FIELD,
@@ -16,6 +17,17 @@ enum Terrain{
     ELECTRIC_FIELD,
     PSYCHIC_FIELD
 };
+
+enum FormKind{
+    NO_FORM_KIND,
+    ALTERNATE_FORM,
+    MEGA_EVOLUTION,
+    ALOLAN_FORM,
+    GALARIAN_FORM,
+    PALDEAN_FORM,
+    HISUIAN_FORM
+};
+
 enum FieldEffect{
     NO_FIELD_EFFECT,
     // FIRE_SPIN,
@@ -32,7 +44,9 @@ enum FieldEffect{
     SPIKES,
     SPIKES_2,
     SPIKES_3,
-    MIST
+    MIST,
+    AURORA_VEIL,
+    TRICK_ROOM
     // AURORA_VEIL,
     // MAGIC_COAT,
     // TRICK_ROOM,
@@ -45,6 +59,7 @@ enum BattleActionType{
     ATTACK,
     SWITCH,
     PETAL_DANCE,
+    RAGING_FURY,
     OUTRAGE,
     THRASH,
     SOLAR_BEAM,
@@ -81,6 +96,7 @@ enum VolatileStatusCondition{
     RECHARGING,
     GROUNDED,
     PETAL_DANCING,
+    RAGING_FURING,
     OUTRAGING,
     THRASHING,
     PROTECT,
@@ -117,7 +133,9 @@ enum VolatileStatusCondition{
     UNNERVED,
     MOVING_FIRST,
     INCREASED_CRIT,
-    INCREASED_ACCURACY
+    INCREASED_ACCURACY,
+    SWITCHING_OUT,
+    JUST_EATEN_BERRY
 };
 
 enum Gender{
@@ -206,7 +224,9 @@ enum ExpCurve{
 enum EvolutionMethod{
     LEVEL,
     USE_EVO_ITEM,
-    TRADE
+    TRADE,
+    LEVEL_NIGHT,
+    FRIENDSHIP
 };
 
 enum Ability{
@@ -326,7 +346,25 @@ enum Ability{
     IMMUNITY,
     SNOW_CLOAK,
     MULTISCALE,
-    MARVEL_SCALE
+    MARVEL_SCALE,
+    TOUGH_CLAWS,
+    MEGA_LAUNCHER,
+    SURGE_SURFER,
+    SLUSH_RUSH,
+    SNOW_WARNING,
+    TANGLING_HAIR,
+    FUR_COAT,
+    GALVANIZE,
+    PASTEL_VEIL,
+    QUICK_DRAW,
+    POWER_OF_ALCHEMY,
+    SHADOW_TAG,
+    MISTY_SURGE,
+    PARENTAL_BOND,
+    SCREEN_CLEANER,
+    AERILATE,
+    CUD_CHEW,
+    BERSERK
 };
 
 enum ItemCategory{

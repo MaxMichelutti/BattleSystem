@@ -22,6 +22,7 @@ const unsigned int FUTURE_SIGHT_ID = 235;
 const unsigned int MINIMIZE_ID = 261;
 const unsigned int DEFENSE_CURL_ID = 126;
 const unsigned int FOCUS_PUNCH_ID = 330;
+const unsigned int PURSUIT_ID = 388;
 
 const unsigned int MAX_UNSIGNED = 4294967295;
 
@@ -32,6 +33,7 @@ const int MIN_MODIFIER = -6;
 // FILES
 const std::string ATTACK_FILE = "data/attacks.data";
 const std::string SPECIES_FILE = "data/species.data";
+const std::string FORMS_FILE = "data/forms.data";
 const std::string ABILITIES_FILE = "data/abilities.data";
 const std::string ITEMS_FILE = "data/items.data";
 

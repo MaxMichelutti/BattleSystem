@@ -230,3 +230,39 @@ MARVEL_SCALE
 The Pokémon's marvelous scales boost its Defense stat if it has a status condition.
 NATURAL_CURE
 The Pokémon's status conditions are cured when it switches out.
+TOUGH_CLAWS
+Powers up moves that make direct contact. 
+MEGA_LAUNCHER
+Powers up pulse moves.
+SURGE_SURFER
+Doubles the Pokémon's Speed stat on Electric Terrain.
+SLUSH_RUSH
+Boosts the Pokémon's Speed stat in snow and hailstorms.
+SNOW_WARNING
+The Pokémon makes it snow when it enters a battle.
+TANGLING_HAIR
+Contact with the Pokémon lowers the attacker's Speed stat.
+FUR_COAT
+Halves the damage from physical moves.
+GALVANIZE
+Normal-type moves become Electric-type moves. The power of those moves is boosted a little.
+PASTEL_VEIL
+Prevents the Pokémon and its allies from being poisoned.
+QUICK_DRAW
+Enables the Pokémon to move first occasionally.
+POWER_OF_ALCHEMY
+The Pokémon copies the Ability of a defeated ally.
+SHADOW_TAG
+The Pokémon steps on the opposing Pokémon's shadows to prevent them from fleeing or switching out.
+MISTY_SURGE
+Turns the ground into Misty Terrain when the Pokémon enters a battle.
+PARENTAL_BOND
+The parent and child attack one after the other.
+SCREEN_CLEANER
+When the Pokémon enters a battle, the effects of Light Screen, Reflect, and Aurora Veil are nullified for both opposing and ally Pokémon.
+AERILATE
+Normal-type moves become Flying-type moves. The power of those moves is boosted a little.
+CUD_CHEW
+When the Pokémon eats a Berry, it will regurgitate that Berry at the end of the next turn and eat it one more time.
+BERSERK
+Boosts the Pokémon's Sp. Atk stat when it takes a hit that causes its HP to drop to half or less.

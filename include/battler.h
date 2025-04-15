@@ -87,11 +87,13 @@ class Battler{
     unsigned int physical_dmg_taken_this_turn;
     unsigned int special_dmg_taken_thi_turn;
     bool is_mold_breaker_active;
-    ItemType consumed_held_item;
+    // ItemType consumed_held_item;
     bool had_held_item;
     std::set<Monster*> lock_ons;// never dereference the pointers contained in this set!!!
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
+    unsigned int getModifiedDefenseInternal()const;
+    unsigned int getModifiedSpecialDefenseInternal()const;
     public:
     Battler();
     Battler(Monster* monster,Field*field,BattleActionActor actor, EventHandler*);
@@ -240,13 +242,16 @@ class Battler{
     bool itemWouldHaveEffect(ItemType item)const;
     bool hasHeldItem()const;
     ItemType getHeldItem()const;
+    ItemType getConsumedItem()const;
     bool hasHeldItem(ItemType item)const;
     ItemType setHeldItem(ItemType item);
     ItemType removeHeldItem();
     bool hasConsumedBerry()const;
+    bool hasConsumedItem()const;
     bool canStealItem()const;
     void consumeItem(ItemType item);
     bool restoreBerry();
+    bool restoreItem();
     bool hasLostHeldItem()const;
     void tryEatStartOfTurnBerry();
     void tryEatLowHPBerry();

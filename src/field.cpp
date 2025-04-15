@@ -128,8 +128,29 @@ void Field::setWeather(Weather new_weather, unsigned int length) {
 }
 
 void Field::setTerrain(Terrain terrain) {
-    this->terrain = terrain;
-    turns_to_clear_terrain = 5;
+    setTerrain(terrain,5);
+}
+
+void Field::setTerrain(Terrain terrain, unsigned int length) {
+    if(terrain != this->terrain){
+        this->terrain = terrain;
+        turns_to_clear_terrain = length;
+        switch(terrain){
+            case ELECTRIC_FIELD:
+                event_handler->displayMsg("The terrain is full of electricity!");
+                break;
+            case GRASSY_FIELD:
+                event_handler->displayMsg("The Grass grows lush on the terrain!");
+                break;
+            case MISTY_FIELD:
+                event_handler->displayMsg("A Misty clound covers the terrain!");
+                break;
+            case PSYCHIC_FIELD:
+                event_handler->displayMsg("A Psychic field covers the terrain!");
+                break;
+            default:break;
+        }
+    }
 }
 
 void Field::setFieldEffectPlayer(FieldEffect field_effect,unsigned int turns) {
@@ -346,4 +367,23 @@ void Field::clearFullFieldEffect(FieldEffect field_effect){
 }
 bool Field::hasFullFieldEffect(FieldEffect field_effect)const{
     return full_field_effects.find(field_effect) != full_field_effects.end();
+}
+
+void Field::clearFieldSide(BattleActionActor actor){
+    // be careful not clearing tailwind from the side
+    bool had_tailwind = hasFieldEffect(TAILWIND, actor);
+    unsigned int tailwind_turns;
+    if(actor == PLAYER){
+        if(had_tailwind)
+            tailwind_turns = field_effect_player[TAILWIND];
+        field_effect_player.clear();
+        if(had_tailwind)
+            field_effect_player[TAILWIND] = tailwind_turns;
+    }else{
+        if(had_tailwind)
+            tailwind_turns = field_effect_opponent[TAILWIND];
+        field_effect_opponent.clear();
+        if(had_tailwind)
+            field_effect_opponent[TAILWIND] = tailwind_turns;
+    }
 }

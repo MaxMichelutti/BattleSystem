@@ -20,7 +20,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 # Rule to compile .cpp files into .o files
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -std=c++17
 # Rule to run the executable
 run: $(TARGET)
 	./$(TARGET)

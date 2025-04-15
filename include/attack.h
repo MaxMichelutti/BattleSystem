@@ -9,7 +9,9 @@
 #include <map>
 #include <unordered_map>
 #include "enums.h"
+#include "battler.h"
 
+class Battler;
 class Attack;
 
 // always contains a nullptr at index 0
@@ -41,12 +43,14 @@ class Attack{
     bool is_sound_based;
     bool is_punching;
     bool is_powder;
+    bool is_pulse;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
     ~Attack();
     unsigned int getId()const;
     Type getType()const;
+    Type getType(Battler* user)const;
     unsigned int getPower()const;
     unsigned int getAccuracy()const;
     AttackType getCategory()const;
@@ -63,6 +67,7 @@ class Attack{
     bool isSoundBased()const;
     bool isPunching()const;
     bool isPowder()const;
+    bool isPulse()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;

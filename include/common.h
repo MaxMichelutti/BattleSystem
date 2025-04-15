@@ -13,8 +13,6 @@ std::string permanentStatusConditionToString(PermanentStatusCondition status);
 PermanentStatusCondition stringToPermanentStatusCondition(std::string status);
 PermanentStatusCondition decrementSleep(PermanentStatusCondition status);
 
-
-
 Gender stringToGender(std::string);
 std::string genderToString(Gender);
 bool areMaleAndFemale(Gender,Gender);
@@ -29,7 +27,8 @@ Nature stringToNature(std::string nature);
 std::string natureToString(Nature nature);
 Nature randomNature();
 
-
+std::string formKindToString(FormKind form_kind);
+FormKind stringToFormKind(std::string form_kind);
 
 Type stringToType(std::string type);
 std::string typeToString(Type type);

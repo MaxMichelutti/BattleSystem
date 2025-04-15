@@ -1342,7 +1342,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 30;
             break;
         }
-        case 175:{
+        case 175:case 206:{
             total_utility = 30;
             break;
         }
@@ -1527,6 +1527,110 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             //supereffective against water
             if(enemy_active->hasType(WATER))
                 total_utility *= 3.33;
+            break;
+        }
+        case 198:case 202:{
+            // try to steal held item
+            if(!cpu_active->hasHeldItem() && enemy_active->hasHeldItem())
+                total_utility += 40;
+            else
+                total_utility -= 40;
+            break;
+        }
+        case 200:{
+            //fails if user hasnt consumed berries
+            if(!cpu_active->hasConsumedBerry())
+                total_utility -= 100; //attack is going to fail
+            break;
+        }
+        case 203:{
+            //if target has item power is increased
+            if(enemy_active->hasHeldItem())
+                total_utility *= 1.5;
+            break;
+        }
+        case 204:{
+            //if user has no item attack fails
+            if(!cpu_active->hasHeldItem())
+                total_utility -= 100; //attack is going to fail
+            else
+                total_utility += 50;
+            break;
+        }
+        case 207:{
+            //+1 att acc user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int accuracy_mod = cpu_active->getAccuracyModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 3 * (actual_stat_zero - accuracy_mod) * effect_prob_mult;
+            break;
+        }
+        case 208:{
+            //aurora veil
+            if(field->hasFieldEffect(AURORA_VEIL,OPPONENT) || 
+                (field->getWeather()!=SNOWSTORM && field->getWeather()!=HAIL))
+                total_utility -= 30;
+            else
+                total_utility += 90;
+            break;
+        }
+        case 211:{
+            //defog
+            // -1 evasion
+            unsigned int evasion_mod = enemy_active->getEvasionModifier();
+            total_utility += 3 * effect_prob_mult * (actual_stat_zero + evasion_mod);
+            // clear terrain
+            if(field->getTerrain() != NO_TERRAIN)
+                total_utility += 30;
+            // clear field effects
+            //positive impacts
+            if(field->hasFieldEffect(LIGHT_SCREEN,OPPONENT))
+                total_utility += 20;
+            if(field->hasFieldEffect(REFLECT,OPPONENT))
+                total_utility += 20;
+            if(field->hasFieldEffect(SAFEGUARD,OPPONENT))
+                total_utility += 20;
+            if(field->hasFieldEffect(MIST,OPPONENT))
+                total_utility += 20;
+            if(field->hasFieldEffect(AURORA_VEIL,OPPONENT))
+                total_utility += 20;
+            //negative impacts
+            if(field->hasFieldEffect(STEALTH_ROCKS,OPPONENT))
+                total_utility -= 20;
+            if(field->hasFieldEffect(SPIKES_3,OPPONENT))
+                total_utility -= 20;
+            if(field->hasFieldEffect(SPIKES_2,OPPONENT))
+                total_utility -= 10;
+            if(field->hasFieldEffect(SPIKES,OPPONENT))
+                total_utility -= 5;
+            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,OPPONENT))
+                total_utility -= 20;
+            if(field->hasFieldEffect(TOXIC_SPIKES,OPPONENT))
+                total_utility -= 10;
+            break;
+        }
+        case 212:{
+            //-1 opponent speed
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            // recoil 50% user health
+            total_utility *= 0.6;
+            break;
+        }
+        case 213:{
+            //misty terrain
+            if(field->getTerrain() == MISTY_FIELD)
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 214:{
+            //restore item
+            if(cpu_active->hasConsumedItem())
+                total_utility += 30;
+            else
+                total_utility -= 10;
             break;
         }
         default: break;

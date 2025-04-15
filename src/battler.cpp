@@ -278,7 +278,6 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     last_attack_used = 0;
     same_attack_counter = 0;
     had_held_item = false;
-    consumed_held_item = NO_ITEM_TYPE;
     stat_modifiers = Modifiers(0,0,0,0,0,0,0);
     mimicked_attack = nullptr;
     disabled_attack_id = 0;
@@ -305,7 +304,6 @@ void Battler::setMonster(Monster* monster){
     turns_in_battle = 0;
     last_attack_failed = false;
     hits_taken = 0;
-    consumed_held_item = NO_ITEM_TYPE;
     had_held_item = false;
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
@@ -317,6 +315,7 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(QUICK_GUARD);
     removeVolatileCondition(SMACKED_DOWN);
     removeVolatileCondition(UPROARING);
+    removeVolatileCondition(JUST_EATEN_BERRY);
 }
 
 Battler::~Battler() {
@@ -804,7 +803,19 @@ unsigned int Battler::getModifiedAttack()const {
     return base_modified;
 }
 
-unsigned int Battler::getModifiedDefense()const {
+unsigned int Battler::getModifiedDefense()const{
+    if(field->hasFullFieldEffect(WONDER_ROOM))
+        return getModifiedSpecialDefenseInternal();
+    return getModifiedDefenseInternal();
+}
+
+unsigned int Battler::getModifiedSpecialDefense()const{
+    if(field->hasFullFieldEffect(WONDER_ROOM))
+        return getModifiedDefenseInternal();
+    return getModifiedSpecialDefenseInternal();
+}
+
+unsigned int Battler::getModifiedDefenseInternal()const {
     unsigned int base_defense = monster->getStats().getDef();
     unsigned int base_modified = base_defense;
     int modifier = getDefenseModifier();
@@ -834,7 +845,7 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     return base_modified;
 }
 
-unsigned int Battler::getModifiedSpecialDefense()const {
+unsigned int Battler::getModifiedSpecialDefenseInternal()const {
     unsigned int base_special_defense = monster->getStats().getSpdef();
     unsigned int base_modified = base_special_defense;
     int modifier = getSpecialDefenseModifier();
@@ -873,6 +884,13 @@ unsigned int Battler::getModifiedSpeed()const {
         base_modified = base_modified * 2;
     }
     if(hasAbility(SWIFT_SWIM) && field->getWeather() == RAIN){// SWIFT SWIM
+        base_modified = base_modified * 2;
+    }
+    if(hasAbility(SLUSH_RUSH) && 
+        (field->getWeather() == SNOWSTORM || field->getWeather()==HAIL)){// SLUSH RUSH
+        base_modified = base_modified * 2;
+    }
+    if(hasAbility(SURGE_SURFER) && field->getTerrain()==ELECTRIC_FIELD){// SURGE SURFER
         base_modified = base_modified * 2;
     }
     if(field->getWeather()==SANDSTORM && hasAbility(SAND_RUSH)){//Sand rush doubles speed under sandstorm
@@ -961,6 +979,10 @@ bool Battler::canSwitchOut(Battler* enemy)const {
     if(enemy != nullptr &&
         enemy->hasAbility(MAGNET_PULL) && 
         hasType(STEEL))
+        return false;
+    if(enemy != nullptr &&
+        enemy->hasAbility(SHADOW_TAG) &&
+        !hasAbility(SHADOW_TAG))//having shadow tag makes you immune from other shadow tag holders
         return false;
     if(hasVolatileCondition(WRAP))
         return false;
@@ -1165,6 +1187,8 @@ bool Battler::canBePoisoned()const{
         return false;
     if(hasAbility(IMMUNITY))
         return false;
+    if(hasAbility(PASTEL_VEIL))
+        return false;
     return true;
 }
 
@@ -1321,9 +1345,10 @@ void Battler::tryEatLeppaBerry(unsigned int attack_id){
     ItemData* item_data = ItemData::getItemData(LEPPA_BERRY);
     Attack* attack_data = Attack::getAttack(attack_id);
     handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
+    addVolatileCondition(JUST_EATEN_BERRY,2);
     handler->displayMsg(getNickname()+"'s "+attack_data->getName()+" PP was restored!");
     removeHeldItem();
-    consumed_held_item = LEPPA_BERRY;
+    monster->setConsumedItem(LEPPA_BERRY);
 }
 
 bool Battler::hasPP(unsigned int attack_id)const{
@@ -1411,9 +1436,12 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category, float 
         changeDefenseModifier(-1);
         changeSpeedModifier(2);
     }
+    // berserk activation
+    if((currentHP>=getMaxHP()/2) && (getCurrentHP()<getMaxHP()/2) && hasAbility(BERSERK)){
+        changeSpecialAttackModifier(1);
+    }
     // berry check
     tryEatLowHPBerry();
-    tryEatAfterGettingHitBerry(category,effectiveness,attacker);
     return dmg;
 }
 
@@ -1444,9 +1472,11 @@ void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness
                 return;
             handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
             removeHeldItem();
-            consumed_held_item = ROWAP_BERRY;
-            unsigned int dmg = attacker->getMaxHP()/8;
+            monster->setConsumedItem(ROWAP_BERRY);
+            addVolatileCondition(JUST_EATEN_BERRY,2);
+            unsigned int dmg = max(1,attacker->getMaxHP()/8);
             unsigned int actual_dmg = attacker->addDirectDamage(dmg);
+            handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
             break;
         }
         case JABOCA_BERRY:{
@@ -1458,9 +1488,11 @@ void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness
                 return;
             handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
             removeHeldItem();
-            consumed_held_item = JABOCA_BERRY;
+            monster->setConsumedItem(JABOCA_BERRY);
+            addVolatileCondition(JUST_EATEN_BERRY,2);
             unsigned int dmg = attacker->getMaxHP()/8;
             unsigned int actual_dmg = attacker->addDirectDamage(dmg);
+            handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
             break;
         }
         case KEE_BERRY:{
@@ -1919,6 +1951,9 @@ bool Battler::hasHeldItem()const{
 ItemType Battler::getHeldItem()const{
     return monster->getHeldItem();
 }
+ItemType Battler::getConsumedItem()const{
+    return monster->getConsumedItem();
+}
 bool Battler::hasHeldItem(ItemType item)const{
     if(item == NO_ITEM_TYPE)
         return false;
@@ -2082,12 +2117,17 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
 }
 
 bool Battler::hasConsumedBerry()const{
-    ItemData * item_data = ItemData::getItemData(consumed_held_item);
+    ItemData * item_data = ItemData::getItemData(monster->getConsumedItem());
     if(item_data == nullptr)
         return false;
     if(item_data->getCategory() == BERRY)
         return true;
     return false;
+}
+
+bool Battler::hasConsumedItem()const{
+    ItemData * item_data = ItemData::getItemData(monster->getConsumedItem());
+    return item_data != nullptr;
 }
 
 bool Battler::canStealItem()const{
@@ -2105,12 +2145,13 @@ bool Battler::consumeHeldItem(){
     ItemType item = monster->getHeldItem();
     if(canItemBeConsumed(item)){
         ItemData* item_data = ItemData::getItemData(item);
-        if(item_data->getCategory()==BERRY)
+        if(item_data->getCategory()==BERRY){
             handler->displayMsg(monster->getNickname()+" ate its "+item_data->getName()+"!");
-        else
+            addVolatileCondition(JUST_EATEN_BERRY,2);
+        }else
             handler->displayMsg(monster->getNickname()+" consumed its "+item_data->getName()+"!");
-        consumed_held_item = item;
-        setHeldItem(NO_ITEM_TYPE);
+        monster->setConsumedItem(item);
+        removeHeldItem();
         useItem(item,0);
         had_held_item = true;
         return true;
@@ -2124,20 +2165,31 @@ void Battler::consumeItem(ItemType item){
     if(!canItemBeConsumed(item))
         return;
     useItem(item,0);
-    consumed_held_item = item;
+    monster->setConsumedItem(item);
     had_held_item = true;
 }
 
 bool Battler::restoreBerry(){
-    if(consumed_held_item == NO_ITEM_TYPE)
+    if(monster->getConsumedItem() == NO_ITEM_TYPE)
         return false;
-    ItemData* item_data = ItemData::getItemData(consumed_held_item);
+    ItemData* item_data = ItemData::getItemData(monster->getConsumedItem());
     if(item_data == nullptr)
         return false;
     if(item_data->getCategory() != BERRY)
         return false;
-    setHeldItem(consumed_held_item);
-    consumed_held_item = NO_ITEM_TYPE;
+    setHeldItem(monster->getConsumedItem());
+    monster->setConsumedItem(NO_ITEM_TYPE);
+    return true;
+}
+
+bool Battler::restoreItem(){
+    if(monster->getConsumedItem() == NO_ITEM_TYPE)
+        return false;
+    ItemData* item_data = ItemData::getItemData(monster->getConsumedItem());
+    if(item_data == nullptr)
+        return false;
+    setHeldItem(monster->getConsumedItem());
+    monster->setConsumedItem(NO_ITEM_TYPE);
     return true;
 }
 
@@ -2254,7 +2306,7 @@ bool Battler::tryEatSuperEffectiveBerry(Type attack_type, bool is_supereffective
     }
     if(consume){
         removeHeldItem();
-        consumed_held_item = held_item;
+        monster->setConsumedItem(held_item);
         handler->displayMsg(getNickname()+" ate its "+item_data->getName()+" to reduce the incoming damage!");
         return true;
     }

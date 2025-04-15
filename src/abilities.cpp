@@ -71,6 +71,8 @@ bool isAbilityTraceable(Ability ability){
         case TRACE:
         case IMPOSTOR:
         case NEUTRALIZING_GAS:
+        case POWER_OF_ALCHEMY:
+        case PARENTAL_BOND:
             return false;
         default: return true;
     }

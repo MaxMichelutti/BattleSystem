@@ -11,6 +11,7 @@
 #include "util.h"
 #include "items.h"
 #include "bag.h"
+#include "monster.h"
 
 class CPUAI;
 class EventHandler;
@@ -20,6 +21,7 @@ class Attack;
 class Field;
 class ItemData;
 class Bag;
+class Monster;
 
 struct ScheduledFutureSight{
     unsigned int turns_left;
@@ -63,6 +65,7 @@ class BattleAction{
     int getPriority()const;
     ItemType getItemToUse()const;
     void setSpeed(unsigned int speed);
+    void setPriority(int priority);
 
     bool operator<=(const BattleAction& other) const;
     bool operator>=(const BattleAction& other) const;
@@ -72,6 +75,7 @@ class BattleAction{
 
     void setOrder(unsigned int order);
     unsigned int getOrder()const;
+    unsigned int getSpeed()const;
 
     // void applySpeedModifiers(Battler* active_user, Field* field);
 };
@@ -111,7 +115,7 @@ class Battle{
     void applySwitchInAbilitiesEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor);
-    void applyContactEffects(Attack* attack,BattleActionActor actor);
+    void applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
     bool thereIsNeutralizingGas();
     std::string getActorBattlerName(BattleActionActor actor);
@@ -126,7 +130,7 @@ class Battle{
     void performSwitch(BattleAction action);
     void performUseItem(BattleAction action);
     void performRechargeTurn(BattleAction action);
-    unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target);
+    unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target,float effectiveness,AttackType category);
     void performEntryHazardCheck(BattleActionActor actor);
     bool thereIsaCloudNine();
     void removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor actor_switching_out);

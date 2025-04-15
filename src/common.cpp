@@ -425,7 +425,7 @@ float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground
             if((defender == FLYING)||(defender == POISON)||(defender == BUG)||(defender == PSYCHIC)||
                 (defender == FAIRY))
                 return 0.5;
-            if(defender == GHOST & !can_hit_ghosts)
+            if(defender == GHOST && !can_hit_ghosts)
                 return 0;
             return 1;
         case POISON:
@@ -881,3 +881,43 @@ IVs IVs::generateRandomIVs() {
     return ivs;
 }
 
+// FormKind ------------------------------------------------------------------------------------------------------------
+
+std::string formKindToString(FormKind fk){
+    switch(fk){
+        case NO_FORM_KIND:
+            return "NO_FORM";
+        case ALTERNATE_FORM:
+            return "ALTERNATE_FORM";
+        case MEGA_EVOLUTION:
+            return "MEGA_EVOLUTION";
+        case ALOLAN_FORM:
+            return "ALOLAN_FORM";
+        case GALARIAN_FORM:
+            return "GALARIAN_FORM";
+        case PALDEAN_FORM:
+            return "PALDEAN_FORM";
+        case HISUIAN_FORM:
+            return "HISUIAN_FORM";
+        default:
+            return "NO_FORM";
+    }
+}
+
+FormKind stringToFormKind(std::string formkind){
+    if(formkind == "NO_FORM")
+        return NO_FORM_KIND;
+    if(formkind == "ALTERNATE_FORM")
+        return ALTERNATE_FORM;
+    if(formkind == "MEGA_EVOLUTION")
+        return MEGA_EVOLUTION;
+    if(formkind == "ALOLAN_FORM")
+        return ALOLAN_FORM;
+    if(formkind == "GALARIAN_FORM")
+        return GALARIAN_FORM;
+    if(formkind == "PALDEAN_FORM")
+        return PALDEAN_FORM;
+    if(formkind == "HISUIAN_FORM")
+        return HISUIAN_FORM;
+    return NO_FORM_KIND;
+}

@@ -15,6 +15,7 @@ bool isAttackingActionType(BattleActionType action_type){
     switch(action_type){
         case ATTACK:
         case PETAL_DANCE:
+        case RAGING_FURY:
         case OUTRAGE:
         case THRASH:
         case SOLAR_BEAM:
@@ -74,8 +75,16 @@ bool BattleAction::operator==(const BattleAction& other) const {
     return (speed == other.speed) && (priority == other.priority);
 }
 
+unsigned int BattleAction::getSpeed()const{
+    return speed;
+}
+
 void BattleAction::setSpeed(unsigned int speed){
     this->speed = speed;
+}
+
+void BattleAction::setPriority(int priority){
+    this->priority = priority;
 }
 
 ItemType BattleAction::getItemToUse()const {
@@ -179,8 +188,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     field = new Field(handler);
     player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,handler);
     opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,handler);
-    field->setWeather(weather);
-    field->setTerrain(terrain);
+    field->setWeather(weather,-1);
+    field->setTerrain(terrain,-1);
     turn = 0;
     last_attack_used_id = 0;
     rounds_used_this_turn = 0;
@@ -305,6 +314,21 @@ void Battle::incrementTurn(){
             event_handler->displayMsg(opponent_active->getNickname() + " harvested a berry!");
         }
     }
+    //apply cud chew
+    if(player_active->hasVolatileCondition(JUST_EATEN_BERRY)){
+        player_active->decrementVolatileCondition(JUST_EATEN_BERRY);
+        if(!player_active->hasVolatileCondition(JUST_EATEN_BERRY)&&
+            player_active->hasAbility(CUD_CHEW)){
+            player_active->useItem(player_active->getConsumedItem(),0);
+        }
+    }
+    if(opponent_active->hasVolatileCondition(JUST_EATEN_BERRY)){
+        opponent_active->decrementVolatileCondition(JUST_EATEN_BERRY);
+        if(!opponent_active->hasVolatileCondition(JUST_EATEN_BERRY)&&
+            opponent_active->hasAbility(CUD_CHEW)){
+            opponent_active->useItem(opponent_active->getConsumedItem(),0);
+        }
+    }
     //check uproars
     checkUproars();
 }
@@ -367,6 +391,22 @@ void Battle::performTurn(){
     if(opponent_action.getAttackId() == FOCUS_PUNCH_ID){
         opponent_active->addVolatileCondition(FOCUSED,5);
     }
+    // 2.1 check pursuit modifications
+    if(player_action.getActionType()==SWITCH){
+        player_active->addVolatileCondition(SWITCHING_OUT,5);
+        if(opponent_action.getAttackId()==PURSUIT_ID)
+            opponent_action.setPriority(11);
+    }
+    if(opponent_action.getActionType()==SWITCH){
+        opponent_active->addVolatileCondition(SWITCHING_OUT,5);
+        if(player_action.getAttackId()==PURSUIT_ID)
+            player_action.setPriority(11);
+    }
+    // 2.2 apply trick room
+    if(field->hasFullFieldEffect(TRICK_ROOM)){
+        player_action.setSpeed(MAX_UNSIGNED - player_action.getSpeed());
+        opponent_action.setSpeed(MAX_UNSIGNED - opponent_action.getSpeed());
+    }
     // 2.5 apply action speed mods
     player_active->tryEatStartOfTurnBerry();
     opponent_active->tryEatStartOfTurnBerry();
@@ -374,8 +414,15 @@ void Battle::performTurn(){
         player_active->removeVolatileCondition(MOVING_FIRST);
         player_action.setSpeed(MAX_UNSIGNED);
     }
+    if(player_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
+        //quick draw gives 30% chance to the user to act first in its priority
+        player_action.setSpeed(MAX_UNSIGNED);
+    }
     if(opponent_active->hasVolatileCondition(MOVING_FIRST)){
         opponent_active->removeVolatileCondition(MOVING_FIRST);
+        opponent_action.setSpeed(MAX_UNSIGNED);
+    }
+    if(opponent_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
         opponent_action.setSpeed(MAX_UNSIGNED);
     }
     // 3: sort actions by priority
@@ -614,7 +661,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         active_user->resetConsecutiveProtect();
     }
     //reset charged if move is electric type
-    if(attack->getType() == ELECTRIC && active_user->hasVolatileCondition(CHARGED)){
+    Type attack_type = attack->getType(active_user);
+    if(attack_type == ELECTRIC && active_user->hasVolatileCondition(CHARGED)){
         active_user->removeVolatileCondition(CHARGED);
         active_user->addVolatileCondition(CHARGED_2,-1);
     }
@@ -1019,15 +1067,21 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             number_of_hits = 5;
     }else if(attack->getEffectId()==75){//double hitting moves
         number_of_hits = 2;
+    }else if(active_user->hasAbility(PARENTAL_BOND)){
+        // parental bond always guarantees 2 shots
+        number_of_hits = 2;
     }
     // perform damage calc and apply damage
     unsigned int actual_damage = 0;
     unsigned int total_actual_damage = 0;
     unsigned int actual_hits = 0;
-    if(attack->getCategory() != STATUS){
+    // get category
+    AttackType category = attack->getCategory();
+    if(category != STATUS){
         bool can_hit_ghosts = active_user->hasAbility(SCRAPPY);
+        Type attack_type = attack->getType(active_user);
         float effectiveness = getTypeEffectiveness(
-            attack->getType(), 
+            attack_type, 
             active_target->getTypes(),
             active_target->isTouchingGround(),
             can_hit_ghosts,
@@ -1058,9 +1112,25 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }
             return 0;
         }
+        // compute effective category for attack
+        if(attack->getEffectId()==210){//shell side arm chooses which category to be
+            unsigned int physical_dmg = baseDamage(active_user->getLevel(), attack->getPower(), active_user->getModifiedAttack(), active_target->getModifiedDefense());
+            unsigned int special_dmg = baseDamage(active_user->getLevel(), attack->getPower(), active_user->getModifiedSpecialAttack(), active_target->getModifiedSpecialDefense());
+            if(physical_dmg > special_dmg){
+                category = PHYSICAL;
+            }else if(special_dmg > physical_dmg || RNG::coinFlip()){
+                category = SPECIAL;
+            }else{
+                category = PHYSICAL;
+            }
+        }
         //cycle in order to deal with multi hit moves
         for(unsigned int i=0;i<number_of_hits;i++){
             actual_hits++;
+            if(i==1 && active_user->hasAbility(PARENTAL_BOND)){
+                // display second attack msg for parental bond
+                event_handler->displayMsg(user_mon_name+" attacks again!");
+            }
             // TINTED LENS doubles effectiveness of not very effective moves
             if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
                 effectiveness *= 2;
@@ -1103,7 +1173,11 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 event_handler->displayMsg("It's a critical hit!");
             }
             // apply damage
-            unsigned int damage = max(computeDamage(attack->getId(), actor, is_critical_hit, target_attack_first),1);
+            unsigned int damage = max(computeDamage(attack->getId(), actor, is_critical_hit, target_attack_first,effectiveness,category),1);
+            if(i==1 && active_user->hasAbility(PARENTAL_BOND)){
+                // parental bond second shot is weakened in power
+                damage = max(1, damage / 4);
+            }
             if(attack->getEffectId() == 150 && damage >= active_target->getCurrentHP()){// user cannot be killed by this move
                 damage = active_target->getCurrentHP()-1;
             }
@@ -1111,15 +1185,20 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 event_handler->displayMsg("It's a one hit KO!");//notice that this may only OHKO the substitute!
                 damage = active_target->getMaxHP();
             }
-            actual_damage = active_target->addDamage(damage,attack->getCategory(), effectiveness, active_user);
-            active_target->hitOnceMore(attack->getType());
+            actual_damage = active_target->addDamage(damage,category, effectiveness, active_user);
+            active_target->hitOnceMore(attack_type);
             
             total_actual_damage += actual_damage;
             if(number_of_hits>1)
                 event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage)+" damage!");
             
+            bool makes_contact = false;
+            if(attack->makesContact() || 
+                (attack->getEffectId() == 210 && category==PHYSICAL))//shell side arm becomes physical sometimes
+                makes_contact=true;
+
             // contact effects
-            applyContactEffects(attack,actor);
+            applyContactEffects(attack,actor,makes_contact);
             if(active_target->isFainted()){
                 if(actor == PLAYER)
                     turn_of_player_last_kill = turn;
@@ -1127,8 +1206,9 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                     turn_of_opponent_last_kill = turn;
                 break;
             }
+            
             // justified increase attack by 1 when hit by a dark move
-            if(attack->getType() == DARK && active_user->hasAbility(JUSTIFIED)){
+            if(attack_type && active_user->hasAbility(JUSTIFIED)){
                 event_handler->displayMsg(user_mon_name+"'s Justified triggers!");
                 active_user->changeAttackModifierForced(1);
             }
@@ -1138,6 +1218,8 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 event_handler->displayMsg(opponent_mon_name+"'s Anger Point triggers!");
                 active_target->changeAttackModifierForced(12);
             }
+
+            active_target->tryEatAfterGettingHitBerry(category,effectiveness,active_user);
         }
         // check super effectiveness
         // std::cout<<"Effectiveness: "<<effectiveness<<std::endl;
@@ -1154,7 +1236,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage)+" damage!");
         //active_user->setLastAttackUsed(attack->getId());
         last_attack_used_id = attack->getId();
-        if(active_target->isFrozen() && attack->getType()==FIRE)
+        if(active_target->isFrozen() && attack_type==FIRE)
             active_target->clearPermanentStatus();
         // check if target is dead
         if(active_target->isFainted()){
@@ -1251,6 +1333,15 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
             case 100:case 117:{//user faints
                 unsigned int max_hp = active_user->getMaxHP();
                 active_user->addDirectDamage(max_hp);
+                return;
+            }
+            case 212:{
+                // 1/2 user HP recoil
+                unsigned int recoil_damage = max(active_user->getMaxHP() / 2,1);
+                unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
+                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                if(active_user->isFainted())
+                    return;
                 break;
             }
             default: break;
@@ -1270,6 +1361,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
     unsigned int effect_chance = attack->getEffectChance();
     if(active_user->isFainted() || active_target->isFainted())
         return;
+    Type attack_type = attack->getType(active_user);
     bool effect_is_applied=true;
     if (effect_chance!=ALWAYS_HITS){
         if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up ,ikelihood of applying effects
@@ -1303,6 +1395,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
         attack->getEffectTarget() == TARGET_OPPONENT){
         effect_is_applied = false;
     }
+
     if(effect_is_applied){
         switch(effect){
             case 1: { // lower attack by 1 opponent
@@ -1329,7 +1422,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 4:{//poison opponent
+            case 4:case 210:{//poison opponent
                 if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being poisoned!");
@@ -1377,7 +1470,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 5:{//sleep opponent
-                if(attack->getType()==GRASS && active_target->hasType(GRASS)){
+                if(attack_type==GRASS && active_target->hasType(GRASS)){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1460,7 +1553,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     break;
                 }
-                if(active_target->hasType(FIRE) && attack->getType() == FIRE){
+                if(active_target->hasType(FIRE) && attack_type == FIRE){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     if(attack->getCategory() == STATUS)
                         active_user->setLastAttackFailed();
@@ -1486,7 +1579,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 16:case 67:{ // paralyze opponent - paralysis
-                if(active_target->hasType(GRASS) && attack->getType() == GRASS && attack->getCategory() == STATUS){
+                if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
                     break;
@@ -1885,6 +1978,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
+            case 208:{//aurora veil
+                if(field->hasFieldEffect(AURORA_VEIL,actor)){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }else{
+                    field->setFieldEffect(AURORA_VEIL, 5, actor);
+                    event_handler->displayMsg(user_mon_name+" set up an aurora screen that reduces damage coming from attacks!");
+                }
+                break;
+            }
             case 69:{//-1 speed opponent
                 active_target->changeSpeedModifier(-1);
                 break;
@@ -2071,10 +2174,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 99:{//set up grassy terrain
-                if(field->getTerrain() == GRASSY_FIELD)
+                if(field->getTerrain() == GRASSY_FIELD){
                     event_handler->displayMsg("But it failed!");
-                else
-                    field->setTerrain(GRASSY_FIELD);
+                    active_user->setLastAttackFailed();
+                }else
+                    field->setTerrain(GRASSY_FIELD,5);
                 break;
             }
             case 102:{//transform
@@ -2260,7 +2364,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 127:{
                 // copy target ability
-                if(active_user->getAbility() == active_target->getAbility() || active_target->hasAbility(NO_ABILITY)){
+                if(active_user->getAbility() == active_target->getAbility() ||
+                    active_target->hasAbility(NO_ABILITY) ||
+                    active_user->hasAbility(NO_ABILITY) ||
+                    !isAbilityTraceable(active_target->getAbility())){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else{
@@ -2389,7 +2496,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                 }else{
                     unsigned int maxHP = active_target->getMaxHP();
-                    unsigned int heal_amount = max((maxHP+1) / 2,1);
+                    unsigned int heal_amount;
+                    if(active_user->hasAbility(MEGA_LAUNCHER) && attack->isPulse())
+                        //mega launcher also powers up heal pulse
+                        heal_amount = max((maxHP*3+3) / 4,1);
+                    else
+                        heal_amount = max((maxHP+1) / 2,1);
                     unsigned int actual_heal_amount = active_target->removeDamage(heal_amount);
                     if(actual_heal_amount>0)
                         event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(actual_heal_amount)+" HP!");
@@ -2422,10 +2534,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 148:{
                 //electric terrain
-                if(field->getTerrain() == ELECTRIC_FIELD)
+                if(field->getTerrain() == ELECTRIC_FIELD){
                     event_handler->displayMsg("But it failed!");
-                else
-                    field->setTerrain(ELECTRIC_FIELD);
+                    active_user->setLastAttackFailed();
+                }else
+                    field->setTerrain(ELECTRIC_FIELD,5);
                 break;
             }
             case 149:{
@@ -2775,7 +2888,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                     break;
                 }
-                Type attack_type = opponent_last_attack->getType();
+                // Type attack_type = opponent_last_attack->getType();
                 if(attack_type==NO_TYPE){
                     attack_type = NORMAL;
                 }
@@ -2882,6 +2995,56 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     item_on_the_ground_opponent = user_item;
                 break;
             }
+            case 207:{
+                //+1 att acc user
+                active_user->changeAttackModifier(+1);
+                active_user->changeAccuracyModifier(+1);
+                break;
+            }
+            case 211:{
+                //defog
+                active_target->changeEvasionModifier(-1);
+                field->clearFieldSide(otherBattleActionActor(actor));
+                field->clearTerrain();
+                event_handler->displayMsg(user_mon_name+" cleared "+opponent_mon_name+"'s side of the field!");
+                break;
+            }
+            case 212:{
+                //-1 speed opponent
+                active_target->changeSpeedModifier(-1);
+                break;
+            }
+            case 213:{
+                //set up misty terrain
+                if(field->getTerrain() == MISTY_FIELD){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }else{
+                    field->setTerrain(MISTY_FIELD,5);
+                }
+                break;
+            }
+            case 214:{
+                //restore consumed item
+                if(active_user->restoreItem()){
+                    event_handler->displayMsg(user_mon_name+" restored its item!");
+                }else{
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            case 216:{
+                //trick room
+                if(field->hasFullFieldEffect(TRICK_ROOM)){
+                    field->clearFullFieldEffect(TRICK_ROOM);
+                    event_handler->displayMsg("The trick room wore off!");
+                }else{
+                    field->setFullFieldEffect(TRICK_ROOM, 5);
+                    event_handler->displayMsg(user_mon_name+" set up trick room!");
+                }
+                break;
+            }
             default:break;
         }
     }
@@ -2891,6 +3054,14 @@ void Battle::decrementVolatiles(Battler* active_user){
     if(active_user->hasVolatileCondition(PETAL_DANCING)){
         active_user->decrementVolatileCondition(PETAL_DANCING);
         if(!active_user->hasVolatileCondition(PETAL_DANCING) && 
+            !active_user->hasVolatileCondition(CONFUSION) &&
+            field->getTerrain() != MISTY_FIELD){
+            active_user->addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
+        }
+    }
+    if(active_user->hasVolatileCondition(RAGING_FURING)){
+        active_user->decrementVolatileCondition(RAGING_FURING);
+        if(!active_user->hasVolatileCondition(RAGING_FURING) && 
             !active_user->hasVolatileCondition(CONFUSION) &&
             field->getTerrain() != MISTY_FIELD){
             active_user->addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
@@ -2931,6 +3102,7 @@ void Battle::decrementVolatiles(Battler* active_user){
 
 void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(PETAL_DANCING);
+    active_user->removeVolatileCondition(RAGING_FURING);
     active_user->removeVolatileCondition(UPROARING);
     uproaring_monsters.erase(active_user->getMonster());
     active_user->removeVolatileCondition(THRASHING);
@@ -3002,9 +3174,9 @@ void Battle::performSwitch(BattleAction action){
     checkUproars();
 }
 
-unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool attack_after_target){
+unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool attack_after_target, float effectiveness, AttackType category){
     Attack* attack = Attack::getAttack(attack_id);
-    if(attack->getCategory() == STATUS){
+    if(category == STATUS){
         return 0;
     }
     unsigned int effect = attack->getEffectId();
@@ -3019,14 +3191,9 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     }
     double attack_stat;
     double defense_stat;
+    Type attack_type = attack->getType(user_monster);
+    
     //check immunity
-    bool can_hit_ghosts = (user_monster->hasAbility(SCRAPPY));
-    float effectiveness = getTypeEffectiveness(attack->getType(), 
-        enemy_monster->getTypes(),
-        enemy_monster->isTouchingGround(),
-        can_hit_ghosts,
-        attack->getEffectId() == 196
-    );
     if(effectiveness == 0)
         return 0;//immunities
     // check for sheer cold immunity
@@ -3035,13 +3202,13 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     }
     // check for soundproof immunity
     if(attack->isSoundBased() && 
-        attack->getCategory() != STATUS &&
+        category != STATUS &&
         enemy_monster->hasAbility(SOUNDPROOF)){
         return 0;
     }
     // check for overcoat immunity
     if(attack->isPowder() && 
-        attack->getCategory() != STATUS &&
+        category != STATUS &&
         enemy_monster->hasAbility(OVERCOAT)){
         return 0;
     }
@@ -3065,6 +3232,12 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         // reflect double physical damage taken
         unsigned int dmg_taken = user_monster->getPhysicalDamageTakenThisTurn();
         return max(1,dmg_taken*2);
+    }
+    if(effect==206){
+        //reflect 1.5 times damage taken
+        unsigned int dmg_taken = user_monster->getPhysicalDamageTakenThisTurn() + 
+            user_monster->getSpecialDamageTakenThisTurn();
+        return max(1,dmg_taken*1.5);
     }
 
     float burn_multiplier = 1;
@@ -3095,22 +3268,15 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         physical_defense_stat *= 1.5;
     }
         
-    if(attack->getCategory() == PHYSICAL){
+    if(category == PHYSICAL){
         attack_stat = physical_attack_stat;
-        if(field->hasFullFieldEffect(WONDER_ROOM))
-            defense_stat = special_defense_stat;
-        else
-            defense_stat = physical_defense_stat;   
+        defense_stat = physical_defense_stat;   
         if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
             burn_multiplier *= 0.5;
         }
     }else{
         attack_stat = special_attack_stat;
-        if((field->hasFullFieldEffect(WONDER_ROOM) && (effect != 128)) ||
-            (!field->hasFullFieldEffect(WONDER_ROOM) && (effect == 128)))
-            defense_stat = physical_defense_stat;
-        else
-            defense_stat = special_defense_stat; 
+        defense_stat = special_defense_stat; 
         if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
             burn_multiplier *= 0.5;
         }
@@ -3119,7 +3285,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         //self destructing moves halve enemy defense stat
         defense_stat *= 0.5;
     }
-    if((attack->getType()==FIRE || attack->getType()==ICE) &&
+    if((attack_type==FIRE || attack_type==ICE) &&
         enemy_monster->hasAbility(THICK_FAT)){
         //THICK FAT reduces damage from fire and ice moves by 50%
         attack_stat *= 0.5;
@@ -3129,7 +3295,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     // compute modifiers
     unsigned int level = user_monster->getLevel();
     float stab_multiplier = 1;
-    if(user_monster->hasType(attack->getType())){
+    if(user_monster->hasType(attack_type)){
         if(user_monster->hasAbility(ADAPTABILITY))//adaptability boosts STAB
             stab_multiplier = 2;
         else
@@ -3137,14 +3303,14 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     }
     float weather_multiplier = 1;
     if(field->getWeather() == RAIN && !thereIsaCloudNine()){
-        if(attack->getType() == WATER)
+        if(attack_type == WATER)
             weather_multiplier = 1.5;
-        else if(attack->getType() == FIRE)
+        else if(attack_type == FIRE)
             weather_multiplier = 0.5;
     }else if(field->getWeather() == SUN && !thereIsaCloudNine()){
-        if(attack->getType() == FIRE)
+        if(attack_type == FIRE)
             weather_multiplier = 1.5;
-        else if(attack->getType() == WATER)
+        else if(attack_type == WATER)
             weather_multiplier = 0.5;
     }
     float crit_multiplier = 1;
@@ -3161,20 +3327,26 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     double damage = base_damage * stab_multiplier * effectiveness * weather_multiplier * crit_multiplier * random_factor * burn_multiplier;
     
     // remove barriers 
-    if(effect==172){
+    if(effect==172 || effect==215){
         field->clearFieldEffect(REFLECT,otherBattleActionActor(user));
         field->clearFieldEffect(LIGHT_SCREEN,otherBattleActionActor(user));
+        field->clearFieldEffect(AURORA_VEIL,otherBattleActionActor(user));
     }
     //apply field effects
     if(field->hasFieldEffect(LIGHT_SCREEN, otherBattleActionActor(user)) && 
-        attack->getCategory()==SPECIAL &&
+        category==SPECIAL &&
         !user_monster->hasAbility(INFILTRATOR)){
-        damage -= damage * 2732.0 / 4096;
+        damage *= 2732.0 / 4096;
     }
     if(field->hasFieldEffect(REFLECT, otherBattleActionActor(user)) && 
-        attack->getCategory()==PHYSICAL  &&
+        category==PHYSICAL  &&
         !user_monster->hasAbility(INFILTRATOR)){
-        damage -= damage * 2732.0 / 4096;
+        damage *= 2732.0 / 4096;
+    }
+    if(field->hasFieldEffect(AURORA_VEIL, otherBattleActionActor(user)) && 
+        (category!=STATUS) &&
+        !user_monster->hasAbility(INFILTRATOR)){
+        damage *= 2732.0 / 4096;
     }
     // apply solar beam modifiers
     if((effect == 9)&&
@@ -3187,18 +3359,23 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     if(field->getTerrain() == GRASSY_FIELD && (effect == 69 || effect == 73)){
         damage *= 0.5;
     }
-    // dry skin opponents take 25% more damage
-    if(enemy_monster->hasAbility(DRY_SKIN) && attack->getType() == FIRE){
+    // dry skin opponents take 25% more damage from fire attacks
+    if(enemy_monster->hasAbility(DRY_SKIN) && attack_type == FIRE){
         damage *= 1.25;
     }
     // filter reduces damage from supereffective attacks
     if(effectiveness>1.1 && enemy_monster->hasAbility(FILTER)){
         damage *= 3.0 / 4.0;
     }
+    // fur coat halves physical damage
+    if(category == PHYSICAL && 
+        enemy_monster->hasAbility(FUR_COAT)){
+        damage *= 0.5;
+    }
 
     // target eats berries to reduce incoming damage
     if(effect!=112 && effect!=117 && // do not eat berries for fixed dmg attacks
-        enemy_monster->tryEatSuperEffectiveBerry(attack->getType(),effectiveness>1.1)){//lazy eval will prevent this call if attack is fixed dmg
+        enemy_monster->tryEatSuperEffectiveBerry(attack_type,effectiveness>1.1)){//lazy eval will prevent this call if attack is fixed dmg
         damage /= 2;
     }
 
@@ -3227,6 +3404,8 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     // get base power
     double base_power = attack->getPower();
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
+
+    Type attack_type = attack->getType(active_user);
 
     //effect modidifiers
     switch(effect){
@@ -3474,28 +3653,28 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     // ability modifiers
     switch(active_user->getAbility()){
         case OVERGROW:{
-            if(attack->getType() == GRASS && 
+            if(attack_type == GRASS && 
                 active_user->getCurrentHP() <= active_user->getMaxHP() / 3){
                 base_power *= 3.0 / 2;
             }
             break;
         }
         case BLAZE:{
-            if(attack->getType() == FIRE && 
+            if(attack_type == FIRE && 
                 active_user->getCurrentHP() <= active_user->getMaxHP() / 3){
                 base_power *= 3.0 / 2;
             }
             break;
         }
         case TORRENT:{
-            if(attack->getType() == WATER && 
+            if(attack_type == WATER && 
                 active_user->getCurrentHP() <= active_user->getMaxHP() / 3){
                 base_power *= 3.0 / 2;
             }
             break;
         }
         case SWARM:{
-            if(attack->getType() == BUG && 
+            if(attack_type == BUG && 
                 active_user->getCurrentHP() <= active_user->getMaxHP() / 3){
                 base_power *= 3.0 / 2;
             }
@@ -3517,7 +3696,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case FLASH_FIRE:{
-            if(attack->getType() == FIRE && active_user->hasVolatileCondition(FLASH_FIRED)){
+            if(attack_type == FIRE && active_user->hasVolatileCondition(FLASH_FIRED)){
                 base_power *= 3.0 / 2;
             }
             break;
@@ -3525,9 +3704,9 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case SAND_FORCE:{
             if(field->getWeather() == SANDSTORM &&
                 !thereIsaCloudNine() && (
-                attack->getType()==STEEL ||
-                attack->getType()==GROUND ||
-                attack->getType()==ROCK))
+                attack_type==STEEL ||
+                attack_type==GROUND ||
+                attack_type==ROCK))
                 base_power*=1.3;
             break;
         }
@@ -3557,31 +3736,51 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
                 base_power*=1.2;
             break;
         }
+        case TOUGH_CLAWS:{
+            //boost power of contact moves
+            if(attack->makesContact())
+                base_power*=5325/4096;
+            break;
+        }
+        case MEGA_LAUNCHER:{
+            //boost power of pulse moves
+            if(attack->isPulse())
+                base_power*=5325/4096;
+            break;
+        }
+        case GALVANIZE:
+        case AERILATE:{
+            //boost power of moves that changed type
+            if(attack->getType() == NORMAL){
+                base_power *= 1.2;
+            }
+            break;
+        }
         default: break;
     }
 
     //terrain modifiers
     switch(field->getTerrain()){
         case GRASSY_FIELD:{
-            if(attack->getType() == GRASS && active_user->isTouchingGround()){
+            if(attack_type == GRASS && active_user->isTouchingGround()){
                 base_power *= 3.0 / 2;
             }
             break;
         }
         case MISTY_FIELD:{
-            if(attack->getType() == DRAGON){
+            if(attack_type == DRAGON){
                 base_power *= 0.5;
             }
             break;
         }
         case ELECTRIC_FIELD:{
-            if(attack->getType() == ELECTRIC && active_user->isTouchingGround()){
+            if(attack_type == ELECTRIC && active_user->isTouchingGround()){
                 base_power *= 3.0 / 2;
             }
             break;
         }
         case PSYCHIC_FIELD:{
-            if(attack->getType() == PSYCHIC && active_user->isTouchingGround()){
+            if(attack_type == PSYCHIC && active_user->isTouchingGround()){
                 base_power *= 3.0 / 2;
             }
             break;
@@ -3591,7 +3790,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
 
     //volatile conditions modifiers
     if(active_user->hasVolatileCondition(CHARGED_2)){
-        if(attack->getType() == ELECTRIC){
+        if(attack_type == ELECTRIC){
             base_power *= 2;
         }
     }
@@ -4101,14 +4300,17 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             }
             break;
         }
-        // case UNNERVE:{
-        //     event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
-        //     break;
-        // }
         case DROUGHT:{
             if(field->getWeather() != SUN && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drought made the sun shine harshly!");
                 field->setWeather(SUN,5);
+            }
+            break;
+        }
+        case SNOW_WARNING:{
+            if(field->getWeather() != SNOWSTORM && !thereIsaCloudNine()){
+                event_handler->displayMsg(user_name+"'s Snow Warning started a Snow storm!");
+                field->setWeather(SNOWSTORM,5);
             }
             break;
         }
@@ -4191,6 +4393,40 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             }
             break;
         }
+        case POWER_OF_ALCHEMY:{
+            //copy a traceable ability from a dead teammate
+            MonsterTeam * user_team = getActorTeam(actor);
+            auto monsters = user_team->getMonsters();
+            Ability final_choice = NO_ABILITY;
+            for(Monster* mon: monsters){
+                if(!mon->isFainted())
+                    continue;
+                Ability mon_ability = mon->getAbility();
+                if(isAbilityTraceable(mon_ability)){
+                    final_choice = mon_ability;
+                    break;
+                }
+            }
+            user_active->setAbility(final_choice);
+            break;
+        }
+        case MISTY_SURGE:{
+            if(field->getTerrain()!=MISTY_FIELD){
+                event_handler->displayMsg(user_name+"'s Misty Surge activates!");
+                field->setTerrain(MISTY_FIELD,5);
+            }
+            break;
+        }
+        case SCREEN_CLEANER:{
+            // screen cleaner removes all screens active when holder switches in
+            field->clearFieldEffect(REFLECT,PLAYER);
+            field->clearFieldEffect(LIGHT_SCREEN,PLAYER);
+            field->clearFieldEffect(MIST,PLAYER);
+            field->clearFieldEffect(REFLECT,OPPONENT);
+            field->clearFieldEffect(LIGHT_SCREEN,OPPONENT);
+            field->clearFieldEffect(MIST,OPPONENT);
+            break;
+        }
         default:break;
     }
     // unnerve
@@ -4242,12 +4478,12 @@ MonsterTeam* Battle::getActorTeam(BattleActionActor actor){
     }
 }
 
-void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
+void Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool makes_contact){
     Battler * active_user = getActorBattler(actor);
     Battler * active_target = getActorBattler(otherBattleActionActor(actor));
     std::string user_mon_name = active_user->getNickname();
     std::string opponent_mon_name = active_target->getNickname();
-    if(!attack->makesContact()){
+    if(!makes_contact){
         return;
     }
     
@@ -4262,6 +4498,11 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor){
             event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
             active_user->setPermanentStatus(POISONED);
         }
+    }
+
+    // TANGLING HAIR decreses attacker speed
+    if(active_target->hasAbility(TANGLING_HAIR)){
+        active_user->changeSpeedModifier(-1);
     }
 
     // STATIC ability effect
@@ -4372,6 +4613,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     Battler * active_target = getActorBattler(otherBattleActionActor(actor));
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
+
+    Type attack_type = attack->getType(active_user);
     // check if attack is disabled
     if(active_user->isAttackDisabled(attack_id)){
         event_handler->displayMsg(user_mon_name+"'s "+attack->getName()+" is disabled!");
@@ -4384,7 +4627,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
 
     // check if gravity blocks attack
-    if(field->hasFullFieldEffect(GRAVITY) && attack->getType()==FLYING){
+    if(field->hasFullFieldEffect(GRAVITY) && attack_type==FLYING){
         event_handler->displayMsg(user_mon_name+" cannot use "+attack->getName()+" due to gravity!");
         // active_user->setLastAttackUsed(action.getAttackId());
         // last_attack_used_id = attack_id;
@@ -4445,6 +4688,14 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         case 175:{// check if attack fails due to not having taken any Physical damage
             if(active_user->getPhysicalDamageTakenThisTurn() == 0){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 206:{
+            // check if attack fails due to not having taken any damage
+            if((active_user->getPhysicalDamageTakenThisTurn() + 
+                active_user->getSpecialDamageTakenThisTurn()) == 0){
                 attack_failed = true;
             }
             break;
@@ -4531,7 +4782,17 @@ bool Battle::checkIfAttackFails(Attack* attack,
                 active_user->setLastAttackFailed();
                 attack_failed = true;
             }
+            break;
         }
+        case 208:{
+            //fails if there is no hail or snow
+            if(field->getWeather() != HAIL && field->getWeather() != SNOWSTORM){
+                active_user->setLastAttackFailed();
+                attack_failed = true;
+            }
+            break;
+        }
+        default:break;
     }
     if(attack_failed){
         event_handler->displayMsg("But it failed!");
@@ -4599,6 +4860,9 @@ bool Battle::checkIfAttackFails(Attack* attack,
     // moves that lock user in using them for a while
     if(attack->getEffectId() == 10 && !active_user->hasVolatileCondition(PETAL_DANCING)){
         active_user->addVolatileCondition(PETAL_DANCING, RNG::getRandomInteger(2,3));
+    }
+    if(attack->getEffectId() == 209 && !active_user->hasVolatileCondition(RAGING_FURING)){
+        active_user->addVolatileCondition(RAGING_FURING, RNG::getRandomInteger(2,3));
     }
     if(attack->getEffectId() == 151 && !active_user->hasVolatileCondition(UPROARING)){
         active_user->addVolatileCondition(UPROARING, 3);
@@ -4680,6 +4944,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->setLastAttackFailed();
         return true;
     }
+
     // damp prevents explosion and self-destruct
     if(active_target->hasAbility(DAMP) && 
         attack->getEffectId() == 100 &&
@@ -4693,7 +4958,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     bool attack_absorbed = false;
     // lightning rod -> drew in electric type attack and increase SPATT
     if(active_target->hasAbility(LIGHTNING_ROD) && 
-        attack->getType()==ELECTRIC &&
+        attack_type==ELECTRIC &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
@@ -4702,7 +4967,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     // flash fire -> drew in fire type attack and get flash fired volatile
     if(active_target->hasAbility(FLASH_FIRE) && 
-        attack->getType()==FIRE &&
+        attack_type==FIRE &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
@@ -4714,7 +4979,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     unsigned int actual_heal_amount = 0;
     if((active_target->hasAbility(DRY_SKIN) ||
         active_target->hasAbility(WATER_ABSORB)) && 
-        attack->getType()==WATER &&
+        attack_type==WATER &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" absorbed the water attack!");
@@ -4724,7 +4989,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     // volt absorb prevents electric type moves from hitting and restores 25% of max HP
     if(active_target->hasAbility(VOLT_ABSORB) && 
-        attack->getType()==ELECTRIC &&
+        attack_type==ELECTRIC &&
         attack->getCategory()!=STATUS && 
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" absorbed the electric attack!");

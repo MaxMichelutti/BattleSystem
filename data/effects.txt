@@ -201,3 +201,16 @@
 201: remove Berry from target
 202: steal target item
 203: removes target held item when computing power, if the target had item power is doubled
+204: fling
+205: pursuit -> if opponent switches attack has hits before switch
+206: metal burst, reflect damage taken from any attack (both physical and special) this turn times 1.5
+207: +1 ATT and accuracy user
+208: aurora veil, fails if not used under snow or hail
+209: raging fury (fire type petal dance)
+210: poison opponent + choose wether to be physical or special
+211: defog
+212: -1 speed opponent, 50% user health recoil
+213: set up misty terrain
+214: restore consumed item
+215: removes barriers and changes type depending on user
+216: trick room

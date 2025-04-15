@@ -31,6 +31,15 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE);
+    if(active->hasVolatileCondition(RAGING_FURING))
+        return BattleAction(
+            actor,
+            RAGING_FURY,
+            393, 
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE);
     if(active->hasVolatileCondition(THRASHING))
         return BattleAction(
             actor,

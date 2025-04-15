@@ -11,6 +11,7 @@
 
 Ability stringToAbility(std::string);
 static std::unordered_map<std::string,Ability> strToAbility = {
+    {"NO_ABILITY",NO_ABILITY},
     {"OVERGROW",OVERGROW},
     {"CHLOROPHYL",CHLOROPHYL},
     {"CHLOROPHYLL",CHLOROPHYL},
@@ -128,7 +129,25 @@ static std::unordered_map<std::string,Ability> strToAbility = {
     {"IMMUNITY",IMMUNITY},
     {"SNOW_CLOAK",SNOW_CLOAK},
     {"MULTISCALE",MULTISCALE},
-    {"MARVEL_SCALE",MARVEL_SCALE}
+    {"MARVEL_SCALE",MARVEL_SCALE},
+    {"TOUGH_CLAWS",TOUGH_CLAWS},
+    {"MEGA_LAUNCHER",MEGA_LAUNCHER},
+    {"SURGE_SURFER",SURGE_SURFER},
+    {"SLUSH_RUSH",SLUSH_RUSH},
+    {"SNOW_WARNING",SNOW_WARNING},
+    {"TANGLING_HAIR",TANGLING_HAIR},
+    {"FUR_COAT",FUR_COAT},
+    {"GALVANIZE",GALVANIZE},
+    {"PASTEL_VEIL",PASTEL_VEIL},
+    {"QUICK_DRAW",QUICK_DRAW},
+    {"POWER_OF_ALCHEMY",POWER_OF_ALCHEMY},
+    {"SHADOW_TAG",SHADOW_TAG},
+    {"MISTY_SURGE",MISTY_SURGE},
+    {"PARENTAL_BOND",PARENTAL_BOND},
+    {"SCREEN_CLEANER",SCREEN_CLEANER},
+    {"AERILATE",AERILATE},
+    {"CUD_CHEW",CUD_CHEW},
+    {"BERSERK",BERSERK}
 };
 
 std::string abilityToString(Ability);
