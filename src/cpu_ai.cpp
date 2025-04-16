@@ -1709,6 +1709,7 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         active_monster->getModifiedSpeed(), 
         0,
         NO_ITEM_TYPE);
+    bool mega_evolution_choice = active_monster->canMegaEvolve() && !monster_team->hasMega();
     if(attack_choice == nullptr && switch_choice == nullptr){
         if(item_choice!=nullptr)
             delete item_choice;
@@ -1743,7 +1744,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 attack->getPriorityLevel(), 
                 active_monster->getModifiedSpeed(), 
                 0,
-                NO_ITEM_TYPE);
+                NO_ITEM_TYPE,
+                mega_evolution_choice);
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;
@@ -1771,7 +1773,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 attack->getPriorityLevel(), 
                 active_monster->getModifiedSpeed(), 
                 0,
-                NO_ITEM_TYPE);
+                NO_ITEM_TYPE,
+                mega_evolution_choice);
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;

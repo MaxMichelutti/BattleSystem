@@ -259,6 +259,9 @@ class Battler{
     void tryEatLeppaBerry(unsigned int attack_id);
     void tryEatAfterGettingHitBerry(AttackType category, float effectiveness, Battler* attacker);
     bool tryEatSuperEffectiveBerry(Type attack_type, bool is_supereffective);
+    bool ismegaEvolved()const;
+    bool megaEvolve();
+    bool canMegaEvolve()const;
 };
 
 #endif

@@ -148,3 +148,13 @@ void MonsterTeam::clearBattleEffectsAll() {
         monsters[i]->clearBattleData();
     }
 }
+
+bool MonsterTeam::hasMega()const{
+    for (unsigned int i = 0; i < team_size; i++) {
+        if(monsters[i] == nullptr)
+            continue;
+        if(monsters[i]->isMegaEvolved())
+            return true;
+    }
+    return false;
+}

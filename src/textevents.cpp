@@ -37,6 +37,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 continue;
             }
             Attack *attack = Attack::getAttack(attack_id);
+            bool mega_evolve = chooseWetherToMegaEvolve(player_active, player_team);
             return BattleAction(
                 PLAYER,
                 ATTACK,
@@ -44,7 +45,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 attack->getPriorityLevel(),
                 player_active->getModifiedSpeed(),
                 0,
-                NO_ITEM_TYPE);
+                NO_ITEM_TYPE,
+                mega_evolve);
         }else if (choice == 2){
             if (!player_active->canSwitchOut(opponent_active)){
                 displayMsg("You cannot switch! " + player_active->getNickname() + " is trapped!");
@@ -464,6 +466,26 @@ unsigned int TextEventHandler::chooseItemTarget(ItemType item_type,MonsterTeam* 
                     continue;
                 }
             }
+        }
+    }
+}
+
+bool TextEventHandler::chooseWetherToMegaEvolve(Battler* active,MonsterTeam*team){
+    if(!active->canMegaEvolve() || team->hasMega()){
+        return false;
+    }
+    std::string msg = "Do you want to mega evolve " + active->getNickname() + "? (y/n)";
+    while(true){
+        displayMsgNoEndl(msg);
+        std::string input;
+        std::cin >> input;
+        if (input == "y" || input == "Y"){
+            return true;
+        }else if (input == "n" || input == "N"){
+            return false;
+        }else{
+            displayMsg("Invalid choice. Please enter 'y' or 'n'.");
+            continue;
         }
     }
 }

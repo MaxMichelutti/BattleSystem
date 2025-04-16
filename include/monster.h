@@ -39,6 +39,8 @@ class Monster{
     Nature nature;
     Gender gender;
     Ability ability;
+    bool is_mega;
+    Ability mega_ability;
     PermanentStatusCondition permanent_status;
     bool has_hidden_ability;
     Monster* transformation;
@@ -122,6 +124,10 @@ class Monster{
     unsigned int getFormId()const;
     void setConsumedItem(ItemType item);
     ItemType getConsumedItem()const;
+    bool megaEvolve();
+    bool isMegaEvolved()const;
+    bool canMegaEvolve()const;
+    void cancelMega();
 };
 
 #endif

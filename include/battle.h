@@ -47,6 +47,7 @@ class BattleAction{
     unsigned int speed;
     unsigned int order;
     ItemType item_to_use;
+    bool mega_evolution;
     public:
     BattleAction();
     BattleAction(BattleActionActor actor,
@@ -55,7 +56,8 @@ class BattleAction{
         int priority, 
         unsigned int speed, 
         unsigned int switch_id,
-        ItemType item_to_use);
+        ItemType item_to_use,
+        bool mega_evolution = false);
     ~BattleAction();
 
     BattleActionActor getActor()const;
@@ -66,6 +68,7 @@ class BattleAction{
     ItemType getItemToUse()const;
     void setSpeed(unsigned int speed);
     void setPriority(int priority);
+    bool isMega()const;
 
     bool operator<=(const BattleAction& other) const;
     bool operator>=(const BattleAction& other) const;

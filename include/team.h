@@ -28,6 +28,7 @@ class MonsterTeam{
     void swapRandomMonster();
     void clearBattleEffectsAll();
     unsigned int getSize()const;
+    bool hasMega()const;
 };
 
 #endif

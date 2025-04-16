@@ -31,6 +31,8 @@ void Monster::init(unsigned int species_id, unsigned int level) {
     transformation=nullptr;
     form_id = 0;
     held_item = NO_ITEM_TYPE;
+    mega_ability = NO_ABILITY;
+    is_mega = false;
     this->species_id = species_id;
     has_hidden_ability = false;
     Species* spec = Species::getSpecies(species_id);
@@ -145,6 +147,8 @@ IVs Monster::getIndividual()const {
 Ability Monster::getAbility()const {
     if (transformation != nullptr)
         return transformation->getAbility();
+    if (mega_ability != NO_ABILITY)
+        return mega_ability;
     return ability;
 }
 
@@ -664,6 +668,9 @@ void Monster::clearBattleData(){
     }
     if(consumed_item!=NO_ITEM_TYPE)
         consumed_item = NO_ITEM_TYPE;
+    if(isMegaEvolved()){
+        cancelMega();
+    }
 }
 
 void Monster::transformInto(Monster* other){
@@ -1180,4 +1187,43 @@ void Monster::setConsumedItem(ItemType item){
 }
 ItemType Monster::getConsumedItem()const{
     return consumed_item;
+}
+
+bool Monster::canMegaEvolve()const{
+    if(isFainted())
+        return false;
+    if(transformation != nullptr)
+        return false;
+    if(is_mega)
+        return false;
+    Species* spec = Species::getSpecies(species_id);
+    return spec->canMegaEvolve(getFormId(),getHeldItem());
+}
+
+bool Monster::megaEvolve(){
+    if(!canMegaEvolve())
+        return false;
+    Species* spec = Species::getSpecies(species_id);
+    // if(!spec->canMegaEvolve(getFormId(),getHeldItem()))
+    //     return false;
+    unsigned int new_form_id = spec->getMegaForm(getFormId(),getHeldItem());
+    if(new_form_id == getFormId() || new_form_id == 0)
+        return false;
+    form_id = new_form_id;
+    updateStats();
+    mega_ability = spec->getAbility1(new_form_id); 
+    is_mega = true;
+    return true;
+}
+bool Monster::isMegaEvolved()const{
+    return is_mega;
+}
+void Monster::cancelMega(){
+    if(!isMegaEvolved())
+        return;
+    Species* spec = Species::getSpecies(species_id);
+    form_id = spec->getNonMegaForm(getFormId());
+    updateStats();
+    is_mega = false;
+    mega_ability = NO_ABILITY;
 }

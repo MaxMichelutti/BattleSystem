@@ -56,7 +56,8 @@ BattleAction::BattleAction() {
 }
 
 BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsigned int attack_id, 
-    int priority, unsigned int speed, unsigned int switch_id, ItemType item_to_use) {
+    int priority, unsigned int speed, unsigned int switch_id, ItemType item_to_use,
+    bool mega_evolution = false) {
     this->item_to_use = item_to_use;
     this->action_type = type;
     this->actor = actor;
@@ -64,6 +65,7 @@ BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsign
     this->priority = priority;
     this->speed = speed;
     this->switch_id = switch_id;
+    this->mega_evolution = mega_evolution;
     if(action_type == SWITCH)
         this->priority = 10;
     else if(action_type == USE_ITEM)
@@ -81,6 +83,10 @@ unsigned int BattleAction::getSpeed()const{
 
 void BattleAction::setSpeed(unsigned int speed){
     this->speed = speed;
+}
+
+bool BattleAction::isMega()const{
+    return mega_evolution;
 }
 
 void BattleAction::setPriority(int priority){
@@ -384,6 +390,16 @@ void Battle::performTurn(){
     std::cout.flush();
     #endif
     BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);    
+    // apply mega evolutions
+    if(player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega()){
+        player_active->megaEvolve();
+        player_action.setSpeed(player_active->getModifiedSpeed());
+    }
+    if(opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega()){
+        opponent_active->megaEvolve();
+        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
+    }
+    
     // 2: focus monsters
     if(player_action.getAttackId() == FOCUS_PUNCH_ID){
         player_active->addVolatileCondition(FOCUSED,5);

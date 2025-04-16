@@ -11,6 +11,7 @@ std::string ItemCategoryToString(ItemCategory category){
         case TM: return "TM";
         case HELD_ITEM: return "Held Item";
         case GENERAL_ITEM: return "General Item";
+        case MEGA_STONE: return "Mega Stone";
         default: return "Unknown Category";
     }
 }
@@ -24,6 +25,7 @@ ItemCategory StringToItemCategory(std::string category){
     else if (category == "TM") return TM;
     else if (category == "HELD") return HELD_ITEM;
     else if (category == "GENERAL") return GENERAL_ITEM;
+    else if (category == "MEGA_STONE") return MEGA_STONE;
     else return NO_CATEGORY; // Default case
 }
 

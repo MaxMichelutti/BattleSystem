@@ -853,3 +853,122 @@ void AlternateForm::parseEvolutions(std::string data){
         evolutions->push_back(Evolution(species,evo_method,evo_condition));
     }
 }
+
+
+bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
+    switch(id){
+        case 3:{//venusaur
+            return curr_form==0 && mega_item==VENUSAURITE;
+        }
+        case 6:{//charizard
+            return curr_form==0 && (mega_item==CHARIZARDITE_X || mega_item==CHARIZARDITE_Y);
+        }
+        case 9:{//blastoise
+            return curr_form==0 && mega_item==BLASTOISINITE;
+        }
+        case 15:{//beedrill
+            return curr_form==0 && mega_item==BEEDRILLITE;
+        }
+        case 18:{//pidgeot
+            return curr_form==0 && mega_item==PIDGEOTITE;
+        }
+        case 65:{//alakazam
+            return curr_form==0 && mega_item==ALAKAZITE;
+        }
+        case 80:{//slowbro
+            return curr_form==0 && mega_item==SLOWBRONITE;
+        }
+        case 94:{//gengar
+            return curr_form==0 && mega_item==GENGARITE;
+        }
+        case 115:{//kangaskhan
+            return curr_form==0 && mega_item==KANGASKHANTITE;
+        }
+        case 127:{//pinsir
+            return curr_form==0 && mega_item==PINSIRITE;
+        }
+        case 130:{//gyarados
+            return curr_form==0 && mega_item==GYARADOSITE;
+        }
+        case 142:{//aerodactyl
+            return curr_form==0 && mega_item==AERODACTYLITE;
+        }
+        case 150:{//mewtwo
+            return curr_form==0 && (mega_item==MEWTWONITE_X || mega_item==MEWTWONITE_Y);
+        }
+        default:return false;
+    }
+}
+
+unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)const{
+    if(!canMegaEvolve(curr_form,mega_item)){
+        return 0;//not actual mega
+    }
+    switch(id){
+        case 3:{//venusaur
+            if(curr_form==0 && mega_item==VENUSAURITE)
+                return 3;
+        }
+        case 6:{//charizard
+            if(curr_form==0 && mega_item==CHARIZARDITE_X)
+                return 1;
+            if(curr_form==0 && mega_item==CHARIZARDITE_Y)
+                return 2;
+        }
+        case 9:{//blastoise
+            if(curr_form==0 && mega_item==BLASTOISINITE)
+                return 4;
+        }
+        case 15:{//beedrill
+            if(curr_form==0 && mega_item==BEEDRILLITE)
+                return 5;
+        }
+        case 18:{//pidgeot
+            if(curr_form==0 && mega_item==PIDGEOTITE)
+                return 6;
+        }
+        case 65:{//alakazam
+            if(curr_form==0 && mega_item==ALAKAZITE)
+                return 22;
+        }
+        case 80:{//slowbro
+            if(curr_form==0 && mega_item==SLOWBRONITE)
+                return 30;
+        }
+        case 94:{//gengar
+            if(curr_form==0 && mega_item==GENGARITE)
+                return 34;
+        }
+        case 115:{//kangaskhan
+            if(curr_form==0 && mega_item==KANGASKHANTITE)
+                return 43;
+        }
+        case 127:{//pinsir
+            if(curr_form==0 && mega_item==PINSIRITE)
+                return 45;
+        }
+        case 130:{//gyarados
+            if(curr_form==0 && mega_item==GYARADOSITE)
+                return 49;
+        }
+        case 142:{//aerodactyl
+            if(curr_form==0 && mega_item==AERODACTYLITE)
+                return 50;
+        }
+        case 150:{//mewtwo
+            if(curr_form==0 && mega_item==MEWTWONITE_X)
+                return 54;
+            if(curr_form==0 && mega_item==MEWTWONITE_Y)
+                return 55;
+        }
+        default:return 0;
+    }
+    return 0;
+}
+
+unsigned int Species::getNonMegaForm(unsigned int curr_form)const{
+    // if any alternate form receives a mega evo, 
+    // here we return the standard non mega eveolved 
+    // form which may be non-0 
+    return 0;
+}

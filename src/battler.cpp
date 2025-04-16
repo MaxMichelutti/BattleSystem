@@ -331,7 +331,7 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
     if(hasVolatileCondition(condition))
         return;
     if(hasAbility(OWN_TEMPO) && condition == CONFUSION){
-        handler->displayMsg(monster->getNickname()+"'s Own Tempo prevents confusion!");
+        handler->displayMsg(getNickname()+"'s Own Tempo prevents confusion!");
         return;
     }
     if(hasAbility(INNER_FOCUS) && condition == FLINCH){
@@ -339,7 +339,7 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
     }
     if(field->getWeather()==SUN && hasAbility(LEAF_GUARD) &&
         condition==DROWSY){
-        handler->displayMsg(monster->getNickname()+"'s Leaf Guard prevents drowsiness!");
+        handler->displayMsg(getNickname()+"'s Leaf Guard prevents drowsiness!");
         return;
     }
     volatile_conditions.insert({condition,duration});
@@ -440,35 +440,35 @@ void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
     switch(condition){
         case GROUNDED:
             if(monster->hasType(FLYING)){
-                handler->displayMsg(monster->getNickname()+" tries to take flight!");
+                handler->displayMsg(getNickname()+" tries to take flight!");
             }
             break;
         case INFATUATION:
-            handler->displayMsg(monster->getNickname()+" is no longer infatuated!");
+            handler->displayMsg(getNickname()+" is no longer infatuated!");
             break;
         case FIRESPIN:
-            handler->displayMsg(monster->getNickname()+" is no longer trapped in a vortex of fire!");
+            handler->displayMsg(getNickname()+" is no longer trapped in a vortex of fire!");
             break;
         case WHIRLPOOL:
-            handler->displayMsg(monster->getNickname()+" is no longer trapped in a whirlpool of water!");
+            handler->displayMsg(getNickname()+" is no longer trapped in a whirlpool of water!");
             break;
         case SANDTOMB:
-            handler->displayMsg(monster->getNickname()+" is no longer trapped in a vortex of sand!");
+            handler->displayMsg(getNickname()+" is no longer trapped in a vortex of sand!");
             break;
         case WRAP:
-            handler->displayMsg(monster->getNickname()+" is no longer trapped in a wrap!");
+            handler->displayMsg(getNickname()+" is no longer trapped in a wrap!");
             break;
         case BIND:
-            handler->displayMsg(monster->getNickname()+" is no longer binded!");
+            handler->displayMsg(getNickname()+" is no longer binded!");
             break;
         case LEECH_SEED:
-            handler->displayMsg(monster->getNickname()+" is no longer seeded!");
+            handler->displayMsg(getNickname()+" is no longer seeded!");
             break;
         case TAUNTED:
-            handler->displayMsg(monster->getNickname()+" is no longer taunted!");
+            handler->displayMsg(getNickname()+" is no longer taunted!");
             break;
         case CONFUSION:
-            handler->displayMsg(monster->getNickname()+" snapped out of confusion!");
+            handler->displayMsg(getNickname()+" snapped out of confusion!");
             break;
         default:
             break;
@@ -541,7 +541,7 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
     }else{
         name = "opponent's ";
     }
-    name += monster->getNickname();
+    name += getNickname();
     if(!res){
         if(amount > 0)
             handler->displayMsg(cannotRaiseMsg(name,stat_name));
@@ -557,15 +557,15 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
 
 bool Battler::changeAttackModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     if(hasAbility(HYPER_CUTTER) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Hyper Cutter prevents the Attack reduction!");
+        handler->displayMsg(getNickname()+"'s Hyper Cutter prevents the Attack reduction!");
         return false;
     }
     bool res = stat_modifiers.changeAtk(amount);
@@ -586,9 +586,9 @@ bool Battler::changeAttackModifierForced(int amount) {
 }
 
 bool Battler::changeDefenseModifier(int amount) {
-    std::string name = monster->getNickname();
+    std::string name = getNickname();
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
@@ -618,11 +618,11 @@ bool Battler::changeDefenseModifierForced(int amount) {
 
 bool Battler::changeSpecialAttackModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res= stat_modifiers.changeSpatk(amount);
@@ -645,11 +645,11 @@ bool Battler::changeSpecialAttackModifierForced(int amount) {
 
 bool Battler::changeSpecialDefenseModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res= stat_modifiers.changeSpdef(amount);
@@ -671,11 +671,11 @@ bool Battler::changeSpecialDefenseModifierForced(int amount) {
 
 bool Battler::changeSpeedModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res = stat_modifiers.changeSpd(amount);
@@ -697,18 +697,18 @@ bool Battler::changeSpeedModifierForced(int amount) {
 
 bool Battler::changeAccuracyModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     if(hasAbility(ILLUMINATE) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s Accuracy cannot be lowered!");
+        handler->displayMsg(getNickname()+"'s Accuracy cannot be lowered!");
         return false;
     }
-    std::string name = monster->getNickname();
+    std::string name = getNickname();
     if(hasAbility(KEEN_EYE) && amount<0){
         handler->displayMsg(name+"'s Accuracy cannot be lowered!");
         return false;
@@ -732,11 +732,11 @@ bool Battler::changeAccuracyModifierForced(int amount) {
 
 bool Battler::changeEvasionModifier(int amount) {
     if(field->hasFieldEffect(MIST,actor) && amount<0){
-        handler->displayMsg(monster->getNickname()+"'s stat changes are prevented by Mist!");
+        handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
     if(hasAbility(CLEAR_BODY) && amount < 0){
-        handler->displayMsg(monster->getNickname()+"'s Clear Body prevents Stat reductions!");
+        handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
     bool res = stat_modifiers.changeEvasion(amount);
@@ -1283,7 +1283,7 @@ void Battler::decrementDisabledTurns(){
         if(disabled_turns_left == 0){
             std::string attack_name = Attack::getAttack(disabled_attack_id)->getName();
             disabled_attack_id = 0;
-            handler->displayMsg(monster->getNickname()+" can now use "+attack_name+" again!");
+            handler->displayMsg(getNickname()+" can now use "+attack_name+" again!");
         }
     }
 }
@@ -1428,7 +1428,7 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category, float 
     else if(category==SPECIAL)
         setSpecialDamageTakenThisTurn(dmg);
     if(isFainted()){
-        handler->displayMsg(monster->getNickname()+" fainted!");
+        handler->displayMsg(getNickname()+" fainted!");
         return dmg;
     }
     //weak armor activation
@@ -1761,7 +1761,7 @@ bool Battler::setPermanentStatus(PermanentStatusCondition status){
             if(!canFallAsleep())
                 return false;
             monster->setPermanentStatus(status);
-            handler->displayMsg(monster->getNickname()+" fell asleep!");
+            handler->displayMsg(getNickname()+" fell asleep!");
             if(hasHeldItem(CHESTO_BERRY))
                 tryEatStatusBerry();
             break;
@@ -1779,24 +1779,24 @@ bool Battler::setPermanentStatusForced(PermanentStatusCondition status){
     switch(status){
         case BURN:
             monster->setPermanentStatus(BURN);
-            handler->displayMsg(monster->getNickname()+" was burned!");
+            handler->displayMsg(getNickname()+" was burned!");
             break;
         case PARALYSIS:
             monster->setPermanentStatus(PARALYSIS);
-            handler->displayMsg(monster->getNickname()+" was paralyzed!");
+            handler->displayMsg(getNickname()+" was paralyzed!");
             break;
         case FREEZE:
             monster->setPermanentStatus(FREEZE);
-            handler->displayMsg(monster->getNickname()+" was frozen!");
+            handler->displayMsg(getNickname()+" was frozen!");
             break;
         case POISONED:
             monster->setPermanentStatus(POISONED);
-            handler->displayMsg(monster->getNickname()+" was poisoned!");
+            handler->displayMsg(getNickname()+" was poisoned!");
             break;
         case BAD_POISON:
             monster->setPermanentStatus(BAD_POISON);
             bad_poison_counter = 1;
-            handler->displayMsg(monster->getNickname()+" was badly poisoned!");
+            handler->displayMsg(getNickname()+" was badly poisoned!");
             break;
         case SLEEP_1:
         case SLEEP_2:
@@ -1807,7 +1807,7 @@ bool Battler::setPermanentStatusForced(PermanentStatusCondition status){
                 old_status != SLEEP_2 &&
                 old_status != SLEEP_3 &&
                 old_status != SLEEP_4)//display msg only if it was not asleep before
-                handler->displayMsg(monster->getNickname()+" fell asleep!");
+                handler->displayMsg(getNickname()+" fell asleep!");
             break;
         default:
             return false;
@@ -1827,23 +1827,23 @@ bool Battler::clearPermanentStatus(){
     PermanentStatusCondition old_status = monster->getPermanentStatus();
     switch(old_status){
         case BURN:
-            handler->displayMsg(monster->getNickname()+" was cured of its burn!");
+            handler->displayMsg(getNickname()+" was cured of its burn!");
             break;
         case PARALYSIS:
-            handler->displayMsg(monster->getNickname()+" was cured of its paralysis!");
+            handler->displayMsg(getNickname()+" was cured of its paralysis!");
             break;
         case FREEZE:
-            handler->displayMsg(monster->getNickname()+" thawed out!");
+            handler->displayMsg(getNickname()+" thawed out!");
             break;
         case POISONED:
         case BAD_POISON:
-            handler->displayMsg(monster->getNickname()+" was cured from the poisoning!");
+            handler->displayMsg(getNickname()+" was cured from the poisoning!");
             break;
         case SLEEP_1:
         case SLEEP_2:
         case SLEEP_3:
         case SLEEP_4:
-            handler->displayMsg(monster->getNickname()+" woke up!");
+            handler->displayMsg(getNickname()+" woke up!");
             break;
         default:
             return false;
@@ -1874,7 +1874,7 @@ void Battler::hitOnceMore(Type attack_type){
     hits_taken++;
     if((attack_type == BUG || attack_type == DARK || attack_type == GHOST) &&
         hasAbility(RATTLED)){
-        handler->displayMsg(monster->getNickname()+"'s Rattled boosts its Speed!");
+        handler->displayMsg(getNickname()+"'s Rattled boosts its Speed!");
         changeSpeedModifier(1);
     }
 }
@@ -1917,7 +1917,7 @@ void Battler::addLockOn(Monster* monster){
     if(hasLockOn(monster))
         return;
     lock_ons.insert(monster);
-    handler->displayMsg(monster->getNickname()+" is locked on!");
+    handler->displayMsg(getNickname()+" is locked on!");
 }
 void Battler::removeLockOn(Monster* monster){
     auto it = lock_ons.find(monster);
@@ -2146,10 +2146,10 @@ bool Battler::consumeHeldItem(){
     if(canItemBeConsumed(item)){
         ItemData* item_data = ItemData::getItemData(item);
         if(item_data->getCategory()==BERRY){
-            handler->displayMsg(monster->getNickname()+" ate its "+item_data->getName()+"!");
+            handler->displayMsg(getNickname()+" ate its "+item_data->getName()+"!");
             addVolatileCondition(JUST_EATEN_BERRY,2);
         }else
-            handler->displayMsg(monster->getNickname()+" consumed its "+item_data->getName()+"!");
+            handler->displayMsg(getNickname()+" consumed its "+item_data->getName()+"!");
         monster->setConsumedItem(item);
         removeHeldItem();
         useItem(item,0);
@@ -2311,4 +2311,23 @@ bool Battler::tryEatSuperEffectiveBerry(Type attack_type, bool is_supereffective
         return true;
     }
     return false;
+}
+
+bool Battler::ismegaEvolved()const{
+    return monster->isMegaEvolved();
+}
+
+bool Battler::megaEvolve(){
+    if(monster->megaEvolve()){
+        handler->displayMsg(getNickname()+" mega evolved!");
+        setAbility(monster->getAbility());
+        return true;
+    }
+    return false;
+}
+
+bool Battler::canMegaEvolve()const{
+    if(isFainted())
+        return false;
+    return monster->canMegaEvolve();
 }

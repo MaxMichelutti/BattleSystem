@@ -371,3 +371,78 @@ DESCRIPTION:If a Pokémon holds one of these Berries, it will be able to cure it
 PRICE:20
 CATEGORY:BERRY
 FLAVOUR:10 10 10 10 10 20
+# 65 VENUSAURITE
+NAME:Venusaurite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Venusaur hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 66 CHARIZARDITE X
+NAME:Charizardite X
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Charizard hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 67 CHARIZARDITE Y
+NAME:Charizardite Y
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Charizard hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 68 BLASTOISINITE
+NAME:Blastoisinite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Blastoise hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 69 BEEDRILLITE
+NAME:Beedrillite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Beedrill hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 70 PIDGEOTITE 
+NAME:Pidgeotite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Pidgeot hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 71 ALAKAZITE
+NAME:Alakazite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Alakazam hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 72 SLOWBRONITE 
+NAME:Slowbro
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Kantonian Slowbro hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 73 GENGARITE
+NAME:Gengarite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Gengar hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 74 KANGASKHANITE
+NAME:Kangaskhanite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Kangaskhan hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 75 PINSIRITE
+NAME:Pinsirite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Pinsir hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 76 GYARADOSITE 
+NAME:Gyaradosite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Gyarados hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 77 AERODACTYLITE
+NAME:Aerodactylite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Aerodactyl hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 78 MEWTWONITE X
+NAME:Mewtwonite X
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Mewtwo hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 79 MEWTWONITE Y
+NAME:Mewtwonite Y
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Mewtwo hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
