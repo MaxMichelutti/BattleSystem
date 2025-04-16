@@ -12,6 +12,7 @@ std::string ItemCategoryToString(ItemCategory category){
         case HELD_ITEM: return "Held Item";
         case GENERAL_ITEM: return "General Item";
         case MEGA_STONE: return "Mega Stone";
+        case FOSSIL: return "Fossil";
         default: return "Unknown Category";
     }
 }
@@ -26,6 +27,7 @@ ItemCategory StringToItemCategory(std::string category){
     else if (category == "HELD") return HELD_ITEM;
     else if (category == "GENERAL") return GENERAL_ITEM;
     else if (category == "MEGA_STONE") return MEGA_STONE;
+    else if (category == "FOSSIL") return FOSSIL;
     else return NO_CATEGORY; // Default case
 }
 
@@ -159,6 +161,8 @@ unsigned int flingPower(ItemType item_type){
         return 10;
     if(category == MEGA_STONE)
         return 80;
+    if(category==FOSSIL)
+        return 100;
     switch(item_type){
         case POTION:
         case SUPER_POTION:

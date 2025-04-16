@@ -377,7 +377,8 @@ enum ItemCategory{
     TM,
     HELD_ITEM,
     GENERAL_ITEM,
-    MEGA_STONE
+    MEGA_STONE,
+    FOSSIL
 };
 
 enum ItemType{
