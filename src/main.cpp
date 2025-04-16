@@ -12,7 +12,8 @@ int main(int argc, char** argv) {
     Species::loadSpecies();
     AbilityItem::initAbilities();
     ItemData::loadItems();
-    Monster* monster_p1 = Monster::generateRandomMonster(150,50);
+    Monster* monster_p1 = Monster::generateRandomMonster(115,50);
+    monster_p1->setHeldItem(KANGASKHANTITE);
     // for(int i=0;i<100;i++){
     //     monster_p1->forgetAttack(i);
     // }
@@ -24,7 +25,8 @@ int main(int argc, char** argv) {
     // monster_p2->printSummary();
     Monster* monster_p3 = Monster::generateRandomMonster(151,50);
     // monster_p3->printSummary();
-    Monster* monster_o1 = Monster::generateRandomMonster(40,50);
+    Monster* monster_o1 = Monster::generateRandomMonster(127,50);
+    monster_o1->setHeldItem(PINSIRITE);
     Monster* monster_o2 = Monster::generateRandomMonster(51,50);
     Monster* monster_o3 = Monster::generateRandomMonster(62,50);
     MonsterTeam* player_team = new MonsterTeam();

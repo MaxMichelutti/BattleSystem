@@ -1069,6 +1069,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
     // check if move is multi hit
     unsigned int number_of_hits = 1;
+    bool parental_bond_has_effect = false;
     if(attack->getEffectId() == 36){//moves hitting from 2 to 5 times
         int random_number = RNG::getRandomInteger(1,8);
         if(random_number==8)
@@ -1086,6 +1087,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     }else if(active_user->hasAbility(PARENTAL_BOND)){
         // parental bond always guarantees 2 shots
         number_of_hits = 2;
+        parental_bond_has_effect = true;
     }
     // perform damage calc and apply damage
     unsigned int actual_damage = 0;
@@ -1143,7 +1145,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         //cycle in order to deal with multi hit moves
         for(unsigned int i=0;i<number_of_hits;i++){
             actual_hits++;
-            if(i==1 && active_user->hasAbility(PARENTAL_BOND)){
+            if(i==1 && parental_bond_has_effect){
                 // display second attack msg for parental bond
                 event_handler->displayMsg(user_mon_name+" attacks again!");
             }
@@ -1190,7 +1192,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }
             // apply damage
             unsigned int damage = max(computeDamage(attack->getId(), actor, is_critical_hit, target_attack_first,effectiveness,category),1);
-            if(i==1 && active_user->hasAbility(PARENTAL_BOND)){
+            if(i==1 && parental_bond_has_effect){
                 // parental bond second shot is weakened in power
                 damage = max(1, damage / 4);
             }

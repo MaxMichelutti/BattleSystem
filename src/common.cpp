@@ -533,6 +533,7 @@ Stats::Stats(std::string stats_string){
     // HP, ATK, DEF, SPATK, SPDEF, SPEED
     std::stringstream ss(stats_string);
     unsigned int token;
+    // std::cout<<"Stats string: " << stats_string << std::endl;
     if(!(ss >> token))
         statsParsingError();
     setHp(token);

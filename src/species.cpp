@@ -496,6 +496,7 @@ void Species::loadSpecies(){
         static_species.insert({current_species_id,species});
     }
     file.close();
+    AlternateForm::loadAlternateForms();
 }
 
 void Species::printSummary()const{
@@ -591,11 +592,11 @@ AlternateForm::AlternateForm(){
     form_kind = NO_FORM_KIND;
 }
 AlternateForm::AlternateForm(std::map<std::string,std::string> data){
-    if(data.find("species_id") == data.end()){
+    if(data.find("species") == data.end()){
         std::cerr << "Error: Alternate form has no species id!" << std::endl;
         exit(DATA_ERROR);
     }else
-        species_id = stringToInteger(data["species_id"]);
+        species_id = stringToInteger(data["species"]);
     if(data.find("form_kind") == data.end()){
         std::cerr << "Error: Alternate form has no form kind!" << std::endl;
         exit(DATA_ERROR);
@@ -625,7 +626,7 @@ AlternateForm::AlternateForm(std::map<std::string,std::string> data){
         exp_yield = stringToInteger(data["exp_yield"]);
     if(data.find("ev_yield") != data.end())
         ev_yield = Stats(data["ev_yield"]);
-    if(data.find("base_stats") == data.end())
+    if(data.find("base_stats") != data.end())
         basestats = Stats(data["base_stats"]);
     if(data.find("attacks") != data.end())
         parseLearnset(data["attacks"]);
@@ -641,7 +642,7 @@ AlternateForm::AlternateForm(std::map<std::string,std::string> data){
     }
     Species* species = Species::getSpecies(species_id);
     if(species == nullptr){
-        std::cerr << "Error: Alternate form " << species_id << " does not exist!" << std::endl;
+        std::cerr << "Error: Species for Alternate form " << species_id << " does not exist!" << std::endl;
         exit(DATA_ERROR);
     }
 }
@@ -747,20 +748,20 @@ void AlternateForm::loadAlternateForms(){
     unsigned int current_form_id = 1;
     std::map<std::string,std::string> parsed_data;
     while(std::getline(file,line)){
-        if(line[0] == '%')
+        if(line.empty() || line[0] == '%')
             continue;
         if(line[0] == '#'){
             if(parsed_data.size() > 0){
                 AlternateForm* form = new AlternateForm(parsed_data);
                 static_alternate_forms.insert({current_form_id,form});
-                current_form_id++;
                 parsed_data.clear();
-                Species* species = Species::getSpecies(current_form_id);
+                Species* species = Species::getSpecies(form->getSpeciesId());
                 if(species == nullptr){
-                    std::cerr << "Error: Alternate form " << current_form_id << " does not exist!" << std::endl;
+                    std::cerr << "Error: Species for Form " << current_form_id << " does not exist!" << std::endl;
                     exit(DATA_ERROR);
                 }
                 species->addAlternateFormId(current_form_id);
+                current_form_id++;
             }
         }else if(line.rfind("SPECIES:",0)==0){
             parsed_data["species"] = line.substr(8);
@@ -805,9 +806,9 @@ void AlternateForm::loadAlternateForms(){
     if(parsed_data.size() > 0){
         AlternateForm* form = new AlternateForm(parsed_data);
         static_alternate_forms.insert({current_form_id,form});
-        Species* species = Species::getSpecies(current_form_id);
+        Species* species = Species::getSpecies(form->getSpeciesId());
         if(species == nullptr){
-            std::cerr << "Error: Alternate form " << current_form_id << " does not exist!" << std::endl;
+            std::cerr << "Error: Species for Alternate form " << current_form_id << " does not exist!" << std::endl;
             exit(DATA_ERROR);
         }
         species->addAlternateFormId(current_form_id);
