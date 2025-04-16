@@ -1672,6 +1672,8 @@ unsigned int Battler::getLevel()const{
 }
 
 std::string Battler::getNickname()const{
+    if(monster->isMegaEvolved())
+        return "M-"+monster->getNickname();
     return monster->getNickname();
 }
 
@@ -2318,8 +2320,9 @@ bool Battler::ismegaEvolved()const{
 }
 
 bool Battler::megaEvolve(){
+    std::string old_nick = getNickname();
     if(monster->megaEvolve()){
-        handler->displayMsg(getNickname()+" mega evolved!");
+        handler->displayMsg(old_nick+" mega evolved!");
         setAbility(monster->getAbility());
         return true;
     }

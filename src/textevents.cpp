@@ -29,7 +29,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                     attack->getPriorityLevel(),
                     player_active->getModifiedSpeed(),
                     0,
-                    NO_ITEM_TYPE);
+                    NO_ITEM_TYPE,
+                    false);
             }
             unsigned int attack_id = chooseAttack(player_active);
             if (attack_id == 0){
@@ -65,7 +66,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 0,
                 player_active->getModifiedSpeed(),
                 switch_id,
-                NO_ITEM_TYPE);
+                NO_ITEM_TYPE,
+                false);
         }else if (choice == 3){
             if (bag->isEmpty()){
                 displayMsg("You have no items available to use!");
@@ -85,14 +87,15 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                     continue;
                 }
             }
-            return BattleAction{
+            return BattleAction(
                 PLAYER,
                 USE_ITEM,
                 target_attack,
                 0,
                 player_active->getModifiedSpeed(),
                 item.second,
-                item.first};
+                item.first,
+                false);
         }else{
             displayMsg("Invalid choice. Please try again.");
         }

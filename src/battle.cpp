@@ -57,7 +57,7 @@ BattleAction::BattleAction() {
 
 BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsigned int attack_id, 
     int priority, unsigned int speed, unsigned int switch_id, ItemType item_to_use,
-    bool mega_evolution = false) {
+    bool mega_evolution) {
     this->item_to_use = item_to_use;
     this->action_type = type;
     this->actor = actor;

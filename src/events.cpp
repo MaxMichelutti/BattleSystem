@@ -12,7 +12,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(CHARGING_SKYATTACK))
         return BattleAction(
             actor,
@@ -21,7 +22,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(PETAL_DANCING))
         return BattleAction(
             actor,
@@ -30,7 +32,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(RAGING_FURING))
         return BattleAction(
             actor,
@@ -39,7 +42,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(THRASHING))
         return BattleAction(
             actor,
@@ -48,7 +52,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(OUTRAGING))
         return BattleAction(
             actor,
@@ -57,7 +62,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(FLYING_HIGH)){
         return BattleAction(
             actor,
@@ -66,7 +72,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
     if(active->hasVolatileCondition(ROLLINGOUT)){
         return BattleAction(
@@ -76,7 +83,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
     if(active->hasVolatileCondition(UNDERGROUND)){
         return BattleAction(
@@ -86,7 +94,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
     if(active->hasVolatileCondition(UNDERWATER)){
         return BattleAction(
@@ -96,7 +105,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
     if(active->hasVolatileCondition(UPROARING)){
         return BattleAction(
@@ -106,7 +116,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
     if(active->hasVolatileCondition(RECHARGING)){
         return BattleAction(
@@ -116,8 +127,10 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0, 
             active->getModifiedSpeed(), 
             0,
-            NO_ITEM_TYPE);
+            NO_ITEM_TYPE,
+            false);
     }
+    //default BattleAction is ATTACK action
     return BattleAction();
 }
 

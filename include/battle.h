@@ -57,7 +57,7 @@ class BattleAction{
         unsigned int speed, 
         unsigned int switch_id,
         ItemType item_to_use,
-        bool mega_evolution = false);
+        bool mega_evolution);
     ~BattleAction();
 
     BattleActionActor getActor()const;
