@@ -137,6 +137,11 @@ ItemData* ItemData::getItemData(ItemType key){
 }
 
 bool canBeStolen(ItemType item_type){
+    ItemData* item_data = ItemData::getItemData(item_type);
+    if(item_data == nullptr)
+        return false;
+    if(item_data->getCategory() == MEGA_STONE)
+        return false;
     switch (item_type){
         default:
             return true;
@@ -144,6 +149,16 @@ bool canBeStolen(ItemType item_type){
 }
 
 unsigned int flingPower(ItemType item_type){
+    if(!canBeStolen(item_type))
+        return 0;
+    ItemData* item_data = ItemData::getItemData(item_type);
+    if(item_data == nullptr)
+        return 0;
+    ItemCategory category = item_data->getCategory();
+    if(category == BERRY)
+        return 10;
+    if(category == MEGA_STONE)
+        return 80;
     switch(item_type){
         case POTION:
         case SUPER_POTION:
@@ -156,7 +171,53 @@ unsigned int flingPower(ItemType item_type){
         case BURN_HEAL:
         case ICE_HEAL:
         case FULL_HEAL:
+        case AUSPICIOUS_ARMOR:
+        case BLACK_AUGURITE:
+        case GALARICA_CUFF:
+        case GALARICA_WREATH:
+        case LINKING_CORD:
+        case MALICIOUS_ARMOR:
+        case METAL_ALLOY:
+        case PEAT_BLOCK:
+        case SCROLL_OF_DARKNESS:
+        case SCROLL_OF_WATERS:
+        case SWEET_APPLE:
+        case SYRUPY_APPLE:
+        case TART_APPLE:
+        case DEEP_SEA_SCALE:
+        case DRAGON_SCALE:
+        case KINGS_ROCK:
+        case METAL_COAT:
+        case PRSIM_SCALE:
+        case RAZOR_FANG:
+        case UPGRADE:
+        case FIRE_STONE:
+        case WATER_STONE:
+        case THUNDER_STONE:
+        case LEAF_STONE:
+        case MOON_STONE:
+        case SUN_STONE:
+        case ICE_STONE:
             return 30;
+        case DUBIOUS_DISC:
+            return 50;
+        case CHIPPED_POT:
+        case CRACKED_POT:
+        case MASTERPIECE_TEACUP:
+        case UNREMARKABLE_TEACUP:
+        case ELECTIRIZER:
+        case MAGMARIZER:
+        case OVAL_STONE:
+        case PROTECTOR:
+        case RAZOR_CLAW:
+        case SACHET:
+        case WHIPPED_DREAM:
+        case SHINY_STONE:
+        case DUSK_STONE:
+        case DAWN_STONE:
+            return 80;
+        case DEEP_SEA_TOOTH:
+            return 90;
         default:
             return 10;
     }

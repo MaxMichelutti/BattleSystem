@@ -1160,6 +1160,9 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 crit_level+=3;
                 active_user->removeVolatileCondition(LASER_FOCUS);
             }
+            if(active_user->hasHeldItem(RAZOR_CLAW)){//razor claw makes crits more likely for the user
+                crit_level+=1;
+            }
             if((attack->getEffectId() == 17 || attack->getEffectId()==197) 
                 && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
                 crit_level+=1;
@@ -1254,8 +1257,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage)+" damage!");
         //active_user->setLastAttackUsed(attack->getId());
         last_attack_used_id = attack->getId();
-        if(active_target->isFrozen() && attack_type==FIRE)
-            active_target->clearPermanentStatus();
+        
         // check if target is dead
         if(active_target->isFainted()){
             if(attack->getEffectId()==44){// if the damage of the attack kills the target, the user gains +2 ATT
@@ -1279,6 +1281,17 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 active_user->changeAttackModifier(1);
             }
             return total_actual_damage;
+        }else{
+            if(active_target->isFrozen() && attack_type==FIRE)
+                active_target->clearPermanentStatus();
+            ItemType held_item = active_target->getHeldItem();
+            unsigned int effect_id = attack->getEffectId();
+            if((held_item==KINGS_ROCK || held_item==RAZOR_FANG) &&//kings rock effect
+                actual_damage>0 &&
+                effect_id!=21 && effect_id!=45 && effect_id!=105 && effect_id!=141 && effect_id!=195 && effect_id!=197 &&// attacks that cause flinch
+                RNG::getRandomInteger(1,10)==1){//10% chance
+                active_target->addVolatileCondition(FLINCH,-1);
+            }
         }
     }else{
         //active_user->setLastAttackUsed(attack->getId());
@@ -3011,6 +3024,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     item_on_the_ground_player = user_item;
                 else
                     item_on_the_ground_opponent = user_item;
+                switch(user_item){
+                    case KINGS_ROCK:
+                    case RAZOR_FANG:{
+                        //flinch
+                        active_target->addVolatileCondition(FLINCH, 1);
+                        break;
+                    }
+                    default:break;
+                }
                 break;
             }
             case 207:{
@@ -3818,6 +3840,18 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         if(attack_type == ELECTRIC){
             base_power *= 2;
         }
+    }
+
+    // item modifiers
+    ItemType item = active_user->getHeldItem();
+    switch(item){
+        case METAL_COAT:{
+            if(attack_type == STEEL){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        default:break;
     }
 
     return base_power;

@@ -28,15 +28,17 @@ std::string evolutionMethodToString(EvolutionMethod);
 class Evolution{
     private:
     unsigned int target_species_id;
+    unsigned int target_form_id;
     EvolutionMethod evo_method;
     unsigned int method_condition;
     public:
     Evolution();
-    Evolution(unsigned int, EvolutionMethod, unsigned int);
+    Evolution(unsigned int, unsigned int, EvolutionMethod, unsigned int);
     ~Evolution();
     unsigned int getTargetSpeciesId()const;
     EvolutionMethod getEvolutionMethod()const;
     unsigned int getMethodCondition()const;
+    unsigned int getTargetFormId()const;
 };
 
 class AlternateForm{

@@ -446,3 +446,265 @@ NAME:Mewtwonite Y
 CATEGORY:MEGA_STONE
 DESCRIPTION:One of a variety of mysterious Mega Stones. Have Mewtwo hold it, and this stone will enable it to Mega Evolve during battle.
 PRICE:100000
+# 80 AUSPICIOUS ARMOR
+NAME:Auspicious Armor
+DESCRIPTION:A peculiar set of armor that can make a certain species of Pokémon evolve. Auspicious wishes live within it.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 80 AUSPICIOUS ARMOR
+NAME:Auspicious Armor
+DESCRIPTION:A peculiar set of armor that can make a certain species of Pokémon evolve. Auspicious wishes live within it.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 81 BLACK AUGURITE
+NAME:Black Augurite
+DESCRIPTION:A glassy black stone that produces a sharp cutting edge when split. It’s loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 82 CHIPPED POT
+NAME:Chipped Pot
+DESCRIPTION:A peculiar teapot that can make a certain species of Pokémon evolve. It may be chipped, but tea poured from it is delicious.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 83 CRACKED POT
+NAME:Cracked Pot
+DESCRIPTION:A peculiar teapot that can make a certain species of Pokémon evolve. It may be cracked, but tea poured from it is delicious.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 84 GALARICA CUFF
+NAME:Galarica Cuff
+DESCRIPTION:A cuff made from woven-together Galarica Twigs. Giving it to a Galarian Slowpoke makes the Pokémon very happy.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 85 GALARICA WREATH
+NAME:Galarica Wreath
+DESCRIPTION:A wreath made from woven-together Galarica Twigs. Placing it on the head of a Galarian Slowpoke makes the Pokémon very happy.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 86 LINKING CORD
+NAME:Linking Cord
+DESCRIPTION:A string exuding a mysterious energy that makes you feel a strange sense of connection. It’s loved by certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 87 MALICIOUS ARMOR
+NAME:Malicious Armor
+DESCRIPTION:A peculiar set of armor that can make a certain species of Pokémon evolve. Malicious will lurks within it.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 88 MASTERPIECE TEACUP
+NAME:Masterpiece Teacup
+DESCRIPTION:A peculiar teacup that can make a certain species of Pokémon evolve. It may be chipped, but tea drunk from it is delicious.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 89 METAL ALLOY
+NAME:Metal Alloy
+DESCRIPTION:A peculiar metal that can make certain species of Pokémon evolve. It is composed of many layers.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 90 PEAT BLOCK
+NAME:Peat Block
+DESCRIPTION:A block of muddy material that can be used as fuel for burning when it is dried. It’s loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 91 SCROLL OF DARKNESS
+NAME:Scroll of Darkness
+DESCRIPTION:A peculiar scroll that can make a certain species of Pokémon evolve. Written upon it are the true secrets of the path of darkness.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 92 SCROLL OF WATERS
+NAME:Scroll of Waters
+DESCRIPTION:A peculiar scroll that can make a certain species of Pokémon evolve. Written upon it are the true secrets of the path of water.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 93 SWEET APPLE
+NAME:Sweet Apple
+DESCRIPTION:A peculiar apple that can make a certain species of Pokémon evolve. It's exceptionally sweet.
+CATEGORY:EVOLUTION
+PRICE:2200
+# 94 SYRUPY APPLE
+NAME:Syrupy Apple
+DESCRIPTION:A peculiar apple that can make a certain species of Pokémon evolve. It's exceptionally syrupy.
+CATEGORY:EVOLUTION
+PRICE:500
+# 95 TART APPLE
+NAME:Tart Apple
+DESCRIPTION:A peculiar apple that can make a certain species of Pokémon evolve. It's exceptionally tart.
+CATEGORY:EVOLUTION
+PRICE:2200
+# 96 UNREMARKABLE TEACUP
+NAME:Unremarkable Teacup
+DESCRIPTION:A peculiar teacup that can make a certain species of Pokémon evolve. It may be cracked, but tea drunk from it is delicious.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 97 DEEP SEA SCALE
+NAME:Deep Sea Scale
+% boosts Clamperl
+DESCRIPTION:An item to be held by Clamperl. This scale shines with a faint pink and boosts Clamperl's Sp. Def stat.
+CATEGORY:EVOLUTION
+PRICE:2000
+# 98 DEEP SEA TOOTH
+NAME:Deep Se Tooth
+% boosts Clamperl
+DESCRIPTION:An item to be held by Clamperl. This fang gleams a sharp silver and boosts Clamperl's Sp. Atk stat.
+CATEGORY:EVOLUTION
+PRICE:2000
+# 99 DRAGON SCALE
+NAME:Dragon Scale
+DESCRIPTION:A very tough and inflexible scale. Dragon-type Pokémon may be holding this item when caught.
+CATEGORY:EVOLUTION
+PRICE:2000
+# 100 DUBIOUS DISK
+NAME:Dragon Scale
+DESCRIPTION:A transparent device overflowing with dubious data. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:60000
+# 101 ELECTRIZER
+NAME:Electrizer
+DESCRIPTION:A box packed with a tremendous amount of electric energy. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 102 KINGS ROCk
+NAME:King's Rock
+DESCRIPTION:An item to be held by a Pokémon. It may cause the target to flinch whenever the holder successfully inflicts damage on them with an attack.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 103 MAGMARIZER
+NAME:Magmarizer
+DESCRIPTION:A box packed with a tremendous amount of magma energy. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 104 METAL COAT
+NAME:Metal Coat
+DESCRIPTION:An item to be held by a Pokémon. It's a special metallic coating that boosts the power of the holder's Steel-type moves.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 105 OVAL STONE
+NAME:Oval Stone
+DESCRIPTION:A peculiar stone that can make a certain species of Pokémon evolve. It is round and smooth.
+CATEGORY:EVOLUTION
+PRICE:6000
+# 106 PRISM SCALE
+NAME:Prism Scale
+DESCRIPTION:A mysterious scale that causes a certain Pokémon to evolve. It shines in rainbow colors.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 107 PROTECTOR
+NAME:Protector
+DESCRIPTION:A protective item of some sort. It is extremely stiff and heavy. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 108 RAZOR CLAW
+NAME:Razor Claw
+DESCRIPTION:An item to be held by a Pokémon. This sharply hooked claw boosts the critical-hit ratio of the holder's moves.
+CATEGORY:EVOLUTION
+PRICE:15000
+# 109 RAZOR FANG
+NAME:Razor Fang
+DESCRIPTION:An item to be held by a Pokémon. This sharply hooked fang may cause the target to flinch whenever the holder successfully inflicts damage on them with an attack.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 110 REAPER CLOTH
+NAME:Reaper Cloth
+DESCRIPTION:A cloth imbued with horrifyingly strong spiritual energy. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:10000
+# 111 SACHET
+NAME:Sachet
+DESCRIPTION:A sachet filled with fragrant perfumes that are just slightly overwhelming. Yet it's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 112 UPGRADE
+NAME:Upgrade
+DESCRIPTION:A transparent device somehow filled with all sorts of data. It was produced by Silph Co.
+CATEGORY:EVOLUTION
+PRICE:8000
+# 113 WHIPPED DREAM
+NAME:Whipped Dream
+DESCRIPTION:A soft and sweet treat made of fluffy, puffy, whipped, and whirled cream. It's loved by a certain Pokémon.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 114 STRAWBERRY SWEET
+NAME:Strawberry Sweet
+DESCRIPTION:A strawberry-shaped sweet. When a Milcery holds this, it spins around happily.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 115 LOVE SWEET
+NAME:Love Sweet
+DESCRIPTION:A heart-shaped sweet. When a Milcery holds this, it spins around happily.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 116 BERRY SWEET
+NAME:Berry Sweet
+DESCRIPTION:A berru-shaped sweet. When a Milcery holds this, it spins around happily. 
+CATEGORY:EVOLUTION
+PRICE:3000
+# 117 CLOVER SWEET
+NAME:Clover Sweet
+DESCRIPTION:A clover-shaped sweet. When a Milcery holds this, it spins around happily. 
+CATEGORY:EVOLUTION
+PRICE:3000
+# 118 FLOWER SWEET
+NAME:Flower Sweet
+DESCRIPTION:A flower-shaped sweet. When a Milcery holds this, it spins around happily. 
+CATEGORY:EVOLUTION
+PRICE:3000
+# 119 STAR SWEET
+NAME:Star Sweet
+DESCRIPTION:A star-shaped sweet. When a Milcery holds this, it spins around happily. 
+CATEGORY:EVOLUTION
+PRICE:3000
+# 120 RIBBON SWEET
+NAME:Ribbon Sweet
+DESCRIPTION:A ribbon-shaped sweet. When a Milcery holds this, it spins around happily. 
+CATEGORY:EVOLUTION
+PRICE:3000
+# 121 FIRE STONE
+NAME:Fire Stone
+DESCRIPTION: 	A peculiar stone that can make certain species of Pokémon evolve. It has a fiery orange heart.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 122 WATER STONE
+NAME:Water Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It is the clear blue of a deep pool.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 123 THUNDER STONE
+NAME:Thunder Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It has a distinct thunderbolt pattern.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 124 LEAF STONE
+NAME:Leaf Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It has an unmistakable leaf pattern.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 125 MOON STONE
+NAME:Moon Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It is dark like the night sky.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 126 SUN STONE
+NAME:Sun Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It burns as red as the evening sun.
+CATEGORY:EVOLUTION
+PRICE:3000
+# 127 SHINY STONE
+NAME:Shiny Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It shines with a dazzling light.
+CATEGORY:EVOLUTION
+PRICE:60000
+# 128 DUSK STONE
+NAME:Dusk Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It holds dark shadows within it.
+CATEGORY:EVOLUTION
+PRICE:60000
+# 129 DAWN STONE
+NAME:Dawn Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It sparkles like a glittering eye.
+CATEGORY:EVOLUTION
+PRICE:60000
+# 130 ICE STONE
+NAME:Ice Stone
+DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It has a snowflake pattern in it.
+CATEGORY:EVOLUTION
+PRICE:5000

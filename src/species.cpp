@@ -40,10 +40,11 @@ Evolution::Evolution(){
 
 }
 
-Evolution::Evolution(unsigned int species, EvolutionMethod evo_method, unsigned int evo_condition){
+Evolution::Evolution(unsigned int species, unsigned int form, EvolutionMethod evo_method, unsigned int evo_condition){
     target_species_id = species;
     this->evo_method = evo_method;
     this->method_condition = evo_condition;
+    target_form_id = form;
 }
 
 Evolution::~Evolution(){
@@ -59,6 +60,10 @@ unsigned int Evolution::getTargetSpeciesId()const{
 
 EvolutionMethod Evolution::getEvolutionMethod()const{
     return evo_method;
+}
+
+unsigned int Evolution::getTargetFormId()const{
+    return target_form_id;
 }
 
 // Species --------------------------------------------------------------------------------------
@@ -172,7 +177,12 @@ void Species::parseEvolutions(std::string data){
     EvolutionMethod evo_method;
     std::string token;
     unsigned int evo_condition;
+    unsigned int form_id;
     while(ss >> species){
+        if(!(ss >> form_id)){
+            std::cerr << "Malformed Evolution for Species "<<this->id<<std::endl;
+            exit(DATA_ERROR);
+        }
         if(!(ss >> token)){
             std::cerr << "Malformed Evolution for Species "<<this->id<<std::endl;
             exit(DATA_ERROR);
@@ -182,7 +192,7 @@ void Species::parseEvolutions(std::string data){
             std::cerr << "Malformed Evolution for Species "<<this->id<<std::endl;
             exit(DATA_ERROR);
         }
-        evolutions.push_back(Evolution(species,evo_method,evo_condition));
+        evolutions.push_back(Evolution(species,form_id,evo_method,evo_condition));
     }
 }
 
@@ -838,7 +848,12 @@ void AlternateForm::parseEvolutions(std::string data){
     EvolutionMethod evo_method;
     std::string token;
     unsigned int evo_condition;
+    unsigned int form_id;
     while(ss >> species){
+        if(!(ss >> form_id)){
+            std::cerr << "Malformed Evolution for Form "<<std::endl;
+            exit(DATA_ERROR);
+        }
         if(!(ss >> token)){
             std::cerr << "Malformed Evolution for Form "<<std::endl;
             exit(DATA_ERROR);
@@ -851,7 +866,7 @@ void AlternateForm::parseEvolutions(std::string data){
         if(!evolutions.has_value()){
             evolutions = std::vector<Evolution>();
         }
-        evolutions->push_back(Evolution(species,evo_method,evo_condition));
+        evolutions->push_back(Evolution(species,form_id,evo_method,evo_condition));
     }
 }
 
