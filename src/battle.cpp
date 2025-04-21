@@ -2339,9 +2339,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 123:{
                 // target is forced to switch
-                if(!target_team->hasAliveBackup() && attack->getCategory() == STATUS){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                if(!target_team->hasAliveBackup()){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
                     break;
                 }
                 //force opponent to switch
