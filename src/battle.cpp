@@ -21,6 +21,7 @@ bool isAttackingActionType(BattleActionType action_type){
         case SOLAR_BEAM:
         case FLY:
         case ROLLOUT:
+        case BOUNCE:
         case DIG:
         case DIVE:
         case UPROAR:
@@ -932,10 +933,16 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
     if(active_user->hasLockOn(active_target->getMonster())){
         return false;
     }
+    unsigned int effect_id = attack->getEffectId();
     // fly (target is flying high and cannot be hit)
     if(active_target->hasVolatileCondition(FLYING_HIGH) && target == TARGET_OPPONENT){
-        if(attack->getEffectId()!=45)//twister also hits monsters that are flying
+        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67))//thunder also hits monsters that are flying
             return true;   
+    }
+    // bounce (target is flying high and cannot be hit)
+    if(active_target->hasVolatileCondition(BOUNCING) && target == TARGET_OPPONENT){
+        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67))//gust also hits monsters that are bouncing
+            return true; 
     }
     // dig (target is underground and cannot be hit)
     if(active_target->hasVolatileCondition(UNDERGROUND) && target == TARGET_OPPONENT){
@@ -1323,8 +1330,10 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
         return;
     if(actual_damage>0){
         switch(effect){
-            case 6:{//recoil 1/4 damage dealt
+            case 6:case 229:{//recoil 1/4 damage dealt
                 unsigned int recoil_damage = max(actual_damage / 4,1);
+                if(effect==229)//recoil 1/2 damage dealt
+                    recoil_damage = max(actual_damage / 2,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
                 event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
                 if(active_user->isFainted()){
@@ -1620,7 +1629,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 active_target->changeAccuracyModifier(-1);
                 break;
             }
-            case 16:case 67:{ // paralyze opponent - paralysis
+            case 16:case 67:case 226:{ // paralyze opponent - paralysis
                 if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
@@ -3143,6 +3152,17 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 event_handler->displayMsg(user_mon_name+" tried to transfer its status to "+opponent_mon_name+"!");
                 break;
             }
+            case 225:{
+                //+3 def user
+                active_user->changeDefenseModifier(+3);
+                break;
+            }
+            case 228:{
+                //-1 att spaat opponent
+                active_target->changeAttackModifier(-1);
+                active_target->changeSpecialAttackModifier(-1);
+                break;
+            }
             default:break;
         }
     }
@@ -3207,6 +3227,7 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(OUTRAGING);
     active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
     active_user->removeVolatileCondition(FLYING_HIGH);
+    active_user->removeVolatileCondition(BOUNCING);
     active_user->removeVolatileCondition(UNDERGROUND);
     active_user->removeVolatileCondition(ROLLINGOUT);
     active_user->removeVolatileCondition(FLINCH);
@@ -3557,8 +3578,9 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         //check for twister -> doubles power when opponent is flying high
-        case 45:{
-            if(active_target->hasVolatileCondition(FLYING_HIGH)){
+        case 45:case 227:{
+            if(active_target->hasVolatileCondition(FLYING_HIGH) ||
+                active_target->hasVolatileCondition(BOUNCING)){
                 base_power *= 2.0;
             }   
             break;
@@ -4987,6 +5009,16 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_user->hasVolatileCondition(FLYING_HIGH)){
         active_user->removeVolatileCondition(FLYING_HIGH);
     }
+    //charge bounce
+    if(attack->getEffectId() == 226 && !active_user->hasVolatileCondition(BOUNCING)// Fly
+        && !field->hasFullFieldEffect(GRAVITY)){// gravity will cause the attack to fail since fly is flying type
+        active_user->addVolatileCondition(BOUNCING, 5);
+        active_user->removeVolatileCondition(LASER_FOCUS);
+        return true;
+    }
+    if(active_user->hasVolatileCondition(BOUNCING)){
+        active_user->removeVolatileCondition(BOUNCING);
+    }
     //charge dig
     if(attack->getEffectId() == 48 && !active_user->hasVolatileCondition(UNDERGROUND)){// Dig
         active_user->addVolatileCondition(UNDERGROUND, 5);
@@ -5111,6 +5143,15 @@ bool Battle::checkIfAttackFails(Attack* attack,
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         active_target->changeSpecialAttackModifier(1);
+        attack_absorbed = true;
+    }
+    // sap sipper -> drew in grass type attack and increase ATT
+    if(active_target->hasAbility(SAP_SIPPER) && 
+        attack_type==GRASS &&
+        attack->getCategory()!=STATUS && 
+        attack->getTarget()==TARGET_OPPONENT){
+        event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
+        active_target->changeAttackModifier(1);
         attack_absorbed = true;
     }
     // flash fire -> drew in fire type attack and get flash fired volatile

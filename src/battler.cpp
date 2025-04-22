@@ -807,6 +807,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(GUTS) && hasPermanentStatus())
         base_modified*=1.5;
+    if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
+        base_modified*=2;
     return base_modified;
 }
 

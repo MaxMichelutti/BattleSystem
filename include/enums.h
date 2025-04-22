@@ -69,7 +69,8 @@ enum BattleActionType{
     UPROAR,
     RECHARGE_TURN,
     SKY_ATTACK,
-    USE_ITEM
+    USE_ITEM,
+    BOUNCE
 };
 enum PermanentStatusCondition{
     NO_PERMANENT_CONDITION,
@@ -135,7 +136,8 @@ enum VolatileStatusCondition{
     INCREASED_ACCURACY,
     SWITCHING_OUT,
     JUST_EATEN_BERRY,
-    INFESTED
+    INFESTED,
+    BOUNCING
 };
 
 enum Gender{
@@ -366,7 +368,9 @@ enum Ability{
     CUD_CHEW,
     BERSERK,
     SUPER_LUCK,
-    MAGIC_BOUNCE
+    MAGIC_BOUNCE,
+    HUGE_POWER,
+    SAP_SIPPER
 };
 
 enum ItemCategory{
@@ -514,7 +518,8 @@ enum ItemType{
     SHINY_STONE,
     DUSK_STONE,
     DAWN_STONE,
-    ICE_STONE
+    ICE_STONE,
+    AMPHAROSITE
 };
 
 #endif

@@ -222,3 +222,8 @@
 222: poison opponent -1 SPD opponent
 223: wish
 224: give opponent your status
+225: +3 DEF user
+226: bounce
+227: hits flying targets and does double damage
+228: -1 ATT SPATT opponent
+229: recoil 1/2 damage dealt

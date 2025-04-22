@@ -75,6 +75,17 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             NO_ITEM_TYPE,
             false);
     }
+    if(active->hasVolatileCondition(BOUNCING)){
+        return BattleAction(
+            actor,
+            BOUNCE,
+            422,
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false);
+    }
     if(active->hasVolatileCondition(ROLLINGOUT)){
         return BattleAction(
             actor,

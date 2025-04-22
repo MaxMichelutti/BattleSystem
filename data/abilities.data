@@ -270,3 +270,7 @@ SUPER_LUCK
 The Pokémon is so lucky that the critical-hit ratios of its moves are boosted.
 MAGIC_BOUNCE
 The Pokémon reflects status moves instead of getting hit by them.
+HUGE_POWER
+Doubles the Pokémon's Attack stat.
+SAP_SIPPER
+The Pokémon takes no damage when hit by Grass-type moves. Instead, its Attack stat is boosted.

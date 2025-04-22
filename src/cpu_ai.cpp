@@ -290,9 +290,13 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility *= 0.8;
             break;
         }
-        case 6:{
+        case 6:case 229:{
             //recoil 1/4 dmg
             total_utility *= 0.9;
+            if(effect==229){
+                // recoil 1/2 dmg
+                total_utility *= 0.8;
+            }
             break;
         }
         case 7:{
@@ -1676,6 +1680,87 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 field->getTerrain()!=MISTY_FIELD){
                 total_utility += 60 * effect_prob_mult;
             }
+            break;
+        }
+        case 222:{
+            //poison opponent
+            if(enemy_active->canBePoisoned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                field->getTerrain()!=MISTY_FIELD){
+                total_utility += 60 * effect_prob_mult;
+            }
+            // -1 speed opp
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            break;
+        }
+        case 223:{
+            //wish
+            unsigned int curr_hp_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(curr_hp_percent >= 50)
+                total_utility -= 10;
+            else if(curr_hp_percent >= 25)
+                total_utility += 30;
+            else if(curr_hp_percent >= 10)
+                total_utility += 50;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 224:{
+            //give status to opponent
+            if(cpu_active->hasPermanentStatus())
+                total_utility += 20;
+            if(enemy_active->hasPermanentStatus())
+                total_utility -= 10;
+            else{
+                switch(cpu_active->getPermanentStatus()){
+                    case BURN:
+                        if(enemy_active->canBeBurned() &&
+                            (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                            field->getTerrain()!=MISTY_FIELD){
+                            total_utility += 60 * effect_prob_mult;
+                        }
+                        break;
+                    case PARALYSIS:
+                        if(enemy_active->canBeParalyzed() &&
+                            (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                            field->getTerrain()!=MISTY_FIELD){
+                            total_utility += 60 * effect_prob_mult;
+                        }
+                        break;  
+                    case POISON:
+                        if(enemy_active->canBePoisoned() &&
+                            (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                            field->getTerrain()!=MISTY_FIELD){
+                            total_utility += 60 * effect_prob_mult;
+                        }
+                        break;
+                    case BAD_POISON:
+                        if(enemy_active->canBeBadlyPoisoned() &&
+                            (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                            field->getTerrain()!=MISTY_FIELD){
+                            total_utility += 60 * effect_prob_mult;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            break;
+        }
+        case 225:{
+            // +3 DEF USER
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            total_utility += 15 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            break;
+        }
+        case 228:{
+            // -1 att spatt opponent
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
             break;
         }
         default: break;

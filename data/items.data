@@ -703,3 +703,8 @@ NAME:Ice Stone
 DESCRIPTION:A peculiar stone that can make certain species of Pokémon evolve. It has a snowflake pattern in it.
 CATEGORY:EVOLUTION
 PRICE:5000
+# 131 AMPHAROSITE 
+NAME:Ampharosite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Ampharos hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000

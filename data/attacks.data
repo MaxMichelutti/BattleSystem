@@ -464,6 +464,8 @@ PP:35
 CATEGORY:SPECIAL
 TYPE:FLYING
 POWER:40
+EFFECT:227
+EFFECTTARGET:SELF
 # 52 SUPERSONIC
 NAME:Supersonic
 DESCRIPTION:The user generates odd sound waves from its body that confuse the target.
@@ -3831,3 +3833,59 @@ EFFECT:224
 TYPE:PSYCHIC
 PP:10
 CATEGORY:STATUS
+# 420 COTTON SPORE
+NAME:Cotton Spore
+DESCRIPTION:The user releases cotton-like spores that cling to opposing Pokémon. This harshly lowers their Speed stats.
+REFLECTABLE
+TYPE:GRASS
+PP:40
+CATEGORY:STATUS
+EFFECT:18
+# 421 COTTON GUARD
+NAME:Cotton Guard
+DESCRIPTION:The user protects itself by wrapping its body in soft cotton, drastically boosting its Defense stat.
+TYPE:GRASS
+CATEGORY:STATUS
+PP:10
+TARGET:SELF
+EFFECT:225
+# 422 BOUNCE
+NAME:Bounce
+DESCRIPTION:The user bounces up high on the first turn, then drops onto the target on the next turn. This may also leave the target with paralysis.
+TYPE:FLYING
+PP:5
+ACCURACY:85
+CONTACT
+CATEGORY:PHYSICAL
+POWER:85
+EFFECT:226
+EFFECTCHANCE:30
+# 423 ROCK TOMB
+NAME:Rock Tomb
+DESCRIPTION:
+TYPE:ROCK
+CATEGORY:PHYSICAL
+ACCURACY:95
+PP:15
+POWER:60
+EFFECT:122
+# 424 TEARFUL LOOK
+NAME:Tearful Look
+DESCRIPTION:The user gets teary-eyed to make the target lose its combative spirit. This lowers the target's Attack and Sp. Atk stats.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:20
+ACCURACY:200
+REFLECTABLE
+EFFECT:228
+# 425 HEAD SMASH
+NAME:Head Smash
+DESCRIPTION:The user attacks the target with a hazardous full-power headbutt. This also damages the user terribly.
+TYPE:ROCK
+PP:5
+ACCURACY:80
+POWER:150
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:229
+EFFECTTARGET:SELF

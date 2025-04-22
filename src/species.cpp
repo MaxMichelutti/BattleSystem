@@ -912,6 +912,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 150:{//mewtwo
             return curr_form==0 && (mega_item==MEWTWONITE_X || mega_item==MEWTWONITE_Y);
         }
+        case 181:{//ampharos
+            return curr_form==0 && mega_item==AMPHAROSITE;
+        }
         default:return false;
     }
 }
@@ -976,6 +979,10 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
                 return 54;
             if(curr_form==0 && mega_item==MEWTWONITE_Y)
                 return 55;
+        }
+        case 181:{//ampharos
+            if(curr_form==0 && mega_item==AMPHAROSITE)
+                return 131;
         }
         default:return 0;
     }
