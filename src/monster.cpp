@@ -20,16 +20,21 @@ AttackData::AttackData(unsigned int attack_id, unsigned int current_pp){
 // MONSTER -------------------------------------------------------------------------------------------------------------    
 
 Monster::Monster(unsigned int species_id) {
-    init(species_id, 1);
+    init(species_id, 1,0);
 }
 
 Monster::Monster(unsigned int species_id, unsigned int level) {
-    init(species_id, level);
+    init(species_id, level,0);
 }
 
-void Monster::init(unsigned int species_id, unsigned int level) {
+Monster::Monster(unsigned int species_id, unsigned int level, unsigned int form_id) {
+    init(species_id, level, form_id);
+}
+
+
+void Monster::init(unsigned int species_id, unsigned int level,unsigned int form_id) {
     transformation=nullptr;
-    form_id = 0;
+    this->form_id = form_id;
     held_item = NO_ITEM_TYPE;
     mega_ability = NO_ABILITY;
     is_mega = false;
@@ -391,12 +396,16 @@ Monster* Monster::generateRandomMonster(unsigned int species_id) {
     return generateRandomMonster(species_id, 1);
 }
 
+Monster* Monster::generateRandomMonster(unsigned int species_id,unsigned int level) {
+    return generateRandomMonster(species_id, level, 0);
+}
+
 unsigned int Monster::getFormId()const{
     return form_id;
 }
 
-Monster* Monster::generateRandomMonster(unsigned int species_id, unsigned int level) {
-    Monster* monster = new Monster(species_id, level);
+Monster* Monster::generateRandomMonster(unsigned int species_id, unsigned int level,unsigned int form_id) {
+    Monster* monster = new Monster(species_id, level,form_id);
     // choose up to 4 moves from learnset
     Species* species = Species::getSpecies(species_id);
     std::set<unsigned int> learnset = species->getLearnsetUntil(0,monster->getLevel());

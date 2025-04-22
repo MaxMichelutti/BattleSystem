@@ -51,13 +51,14 @@ class Monster{
     void updateStats();
     void packAttacks();
     void levelUp();
-    void init(unsigned int species_id, unsigned int level);
+    void init(unsigned int species_id, unsigned int level,unsigned int form_id);
     void init_stats();
     void init_gender(GenderRule);
     void completeEvolution(unsigned int target_species_id);
     public:
     Monster(unsigned int species_id);
     Monster(unsigned int species_id, unsigned int level);
+    Monster(unsigned int species_id, unsigned int level,unsigned int form_id);
     ~Monster();
     unsigned int getSpeciesId()const;
     Stats getStats()const;
@@ -93,6 +94,7 @@ class Monster{
     void gainExperience(unsigned long exp);
     static Monster* generateRandomMonster(unsigned int species_id);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level);
+    static Monster* generateRandomMonster(unsigned int species_id, unsigned int level,unsigned int form_id);
     void printSummary()const;
     bool canEvolve()const;
     void evolve();
