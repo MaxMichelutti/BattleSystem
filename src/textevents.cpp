@@ -98,6 +98,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 false);
         }else{
             displayMsg("Invalid choice. Please try again.");
+            choice = 0;
+            continue;
         }
     }
 }
@@ -133,11 +135,28 @@ unsigned int TextEventHandler::chooseTargetAttack(Battler*active,MonsterTeam*tea
             msg += max_pp_string;
             displayMsg(msg);
         }
+        displayMsg(std::to_string(count++) + ". Info");
         displayMsg(std::to_string(count) + ". Cancel");
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
         if(choice == count){
             return 0;
+        }else if(choice == count-1){
+            for(auto it = choices.begin(); it != choices.end(); it++){
+                Attack *attack = Attack::getAttack(it->second);
+                // std::string msg = std::to_string(it->first) + ". " +
+                //                   attack->getName() + "\t" +
+                //                   std::to_string(attacks[it->second]) + "/" +
+                //                   std::to_string(active->getMaxPPForAttack(it->second));
+                // displayMsg(msg);
+                // displayMsg("Power: " + ((attack->getPower()==0)?"-":std::to_string(attack->getPower())));
+                // displayMsg("Accuracy: " + ((attack->getAccuracy()==ALWAYS_HITS)?"-":std::to_string(attack->getAccuracy())));
+                // displayMsg("Category: " + attackTypeToString(attack->getCategory()));
+                // displayMsg(attack->getDescription());
+                attack->printSummary(attacks[it->second]);
+            }
+            choice = 0;
+            continue;
         }else if(choice == 0 || choice > count){
             displayMsg("Invalid choice. Please try again.");
             choice = 0;
@@ -182,17 +201,27 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
                               std::to_string(player_active->getMaxPPForAttack(it->second.first));
             displayMsg(msg);
         }
-        displayMsg(std::to_string(choices.size() + 1) + ". Go Back");
+        displayMsg(std::to_string(choices.size() + 1) + ". Info");
+        displayMsg(std::to_string(choices.size() + 2) + ". Go Back");
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
-        if (choice < 1 || choice > choices.size() + 1){
+        if (choice < 1 || choice > choices.size() + 2){
             displayMsg("Invalid choice. Please try again.");
             choice = 0;
-        }else if (choice == choices.size() + 1){
+        }else if (choice == choices.size() + 2){
             return 0;
+        }else if(choice == choices.size()+1){
+            for(auto it = choices.begin(); it != choices.end(); it++){
+                Attack *attack = Attack::getAttack(it->second.first);
+                attack->printSummary(it->second.second);
+                // displayMsg(attack->getDescription());
+            }
+            choice = 0;
+            continue;
         }else if (player_active->isAttackDisabled(choices[choice].first)){//disable check
             displayMsg("This attack is currently disabled! Please choose another one.");
             choice = 0;
+            continue;
         }else{
             auto it = choices.find(choice);
             if (it != choices.end()){
@@ -238,14 +267,21 @@ unsigned int TextEventHandler::chooseSwitch(MonsterTeam *player_team)
                               permanentStatusConditionToString(status);
             displayMsg(msg);
         }
-        displayMsg(std::to_string(available_monsters.size() + 1) + ". Back");
+        displayMsg(std::to_string(available_monsters.size() + 1) + ". Info");
+        displayMsg(std::to_string(available_monsters.size() + 2) + ". Back");
         // get choice
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
-        if (choice < 1 || choice > available_monsters.size() + 1){
+        if (choice < 1 || choice > available_monsters.size() + 2){
             displayMsg("Invalid choice. Please try again.");
-        }else if (choice == available_monsters.size() + 1){
+        }else if (choice == available_monsters.size() + 2){
             return 0;
+        }else if(choice == available_monsters.size()+1){
+            for(unsigned int i=0;i<player_team->getSize();i++){
+                player_team->getMonster(i)->printSummary();
+            }
+            choice = 0;
+            continue;
         }else{
             if (choice == 1){
                 displayMsg("You cannot switch to the active monster!");

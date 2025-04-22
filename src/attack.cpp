@@ -343,8 +343,36 @@ void Attack::printSummary()const{
         std::cout<<"CONTACT   ";
     if(cannot_be_metronomed)
         std::cout<<"NO-METRONOME   ";
+    if(is_pulse)
+        std::cout<<"PULSE   ";
+    if(is_punching)
+        std::cout<<"PUNCHING   ";
+    if(is_powder)
+        std::cout<<"POWDER   ";
+    if(is_sound_based)
+        std::cout<<"SOUND_BASED   ";
+    if(is_reflectable)
+        std::cout<<"REFLECTABLE   ";
     std::cout<<std::endl;
     std::cout.flush();
+}
+
+void Attack::printSummary(unsigned int curr_pp){
+    std::cout << getName() << " -> " << getDescription() << std::endl;
+    std::cout << "Type: " << typeToString(getType());
+    unsigned int power = getPower();
+    if(power != 0)
+        std::cout << " Power: " << power;
+    else
+        std::cout << " Power: -";
+    unsigned int accuracy = getAccuracy();
+    if(accuracy != ALWAYS_HITS)
+        std::cout << " Accuracy: " << accuracy;
+    else
+        std::cout << " Accuracy: -";
+    std::cout << " PP: " <<curr_pp<<"/"<< getMaxPP()
+    // << " Priority: " << getPriorityLevel() 
+    << " Category: "<< attackTypeToString(getCategory())<<std::endl;
 }
 
 void Attack::printAllSummaries(){

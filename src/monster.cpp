@@ -463,25 +463,11 @@ void Monster::printSummary()const{
     for(int i=0;i<4;i++){
         unsigned int attack_id = attack_ids[i].attack_id;
         unsigned int current_pp = attack_ids[i].current_pp;
+        // unsigned int max_pp = attack_ids[i]
         if(attack_id == 0)
             continue;
         Attack* attack = Attack::getAttack(attack_id);
-        std::cout << attack->getName() << " -> " << attack->getDescription() << std::endl;
-        std::cout << "Type: " << typeToString(attack->getType());
-        unsigned int power = attack->getPower();
-        if(power != 0)
-            std::cout << " Power: " << power;
-        else
-            std::cout << " Power: -";
-        unsigned int accuracy = attack->getAccuracy();
-        if(accuracy != ALWAYS_HITS)
-            std::cout << " Accuracy: " << accuracy;
-        else
-            std::cout << " Accuracy: -";
-        std::cout << " PP: " <<current_pp<<"/"<< attack->getMaxPP()
-        << " Priority: " << attack->getPriorityLevel() 
-        << " Category: "<< attackTypeToString(attack->getCategory())<<std::endl;
-
+        attack->printSummary(current_pp);
     }
 }
 

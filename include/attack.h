@@ -73,6 +73,7 @@ class Attack{
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;
+    void printSummary(unsigned int current_pp);
     static void printAllSummaries();
 };
 
