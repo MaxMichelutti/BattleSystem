@@ -21,14 +21,14 @@ int main(int argc, char** argv) {
     // monster_p1->learnAttack(226);
     // monster_p1->learnAttack(161);
     // monster_p1->printSummary();
-    Monster* monster_p2 = Monster::generateRandomMonster(20,50);
+    Monster* monster_p2 = Monster::generateRandomMonster(101,50,36);
     // monster_p2->printSummary();
-    Monster* monster_p3 = Monster::generateRandomMonster(151,50);
+    Monster* monster_p3 = Monster::generateRandomMonster(157,50);
     // monster_p3->printSummary();
     Monster* monster_o1 = Monster::generateRandomMonster(127,50);
     monster_o1->setHeldItem(PINSIRITE);
-    Monster* monster_o2 = Monster::generateRandomMonster(51,50);
-    Monster* monster_o3 = Monster::generateRandomMonster(62,50);
+    Monster* monster_o2 = Monster::generateRandomMonster(166,50);
+    Monster* monster_o3 = Monster::generateRandomMonster(175,50);
     MonsterTeam* player_team = new MonsterTeam();
     player_team->addMonster(monster_p1);
     player_team->addMonster(monster_p2);
