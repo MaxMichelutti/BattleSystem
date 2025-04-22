@@ -266,3 +266,7 @@ CUD_CHEW
 When the Pokémon eats a Berry, it will regurgitate that Berry at the end of the next turn and eat it one more time.
 BERSERK
 Boosts the Pokémon's Sp. Atk stat when it takes a hit that causes its HP to drop to half or less.
+SUPER_LUCK
+The Pokémon is so lucky that the critical-hit ratios of its moves are boosted.
+MAGIC_BOUNCE
+The Pokémon reflects status moves instead of getting hit by them.

@@ -25,6 +25,7 @@ EFFECT:1
 CATEGORY:STATUS
 TYPE:NORMAL
 SOUND
+REFLECTABLE
 # 4 VINE WHIP
 NAME:Vine Whip
 DESCRIPTION:The target is struck with slender, whiplike vines to inflict damage.
@@ -52,6 +53,7 @@ ACCURACY:90
 EFFECT:3
 CATEGORY:STATUS
 TYPE:GRASS
+REFLECTABLE
 # 7 RAZOR LEAF
 NAME:Razor Leaf
 DESCRIPTION:Sharp-edged leaves are launched to slash at opposing Pokémon. This move has a heightened chance of landing a critical hit. 
@@ -68,6 +70,7 @@ ACCURACY:75
 EFFECT:4
 CATEGORY:STATUS
 TYPE:POISON
+REFLECTABLE
 POWDER
 # 9 SLEEP POWDER
 NAME:Sleep Powder
@@ -78,6 +81,7 @@ EFFECT:5
 CATEGORY:STATUS
 TYPE:GRASS
 POWDER
+REFLECTABLE
 # 10 SEED BOMB
 NAME:Seed Bomb
 DESCRIPTION:The user attacks by slamming a barrage of hard-shelled seeds down on the target from above.
@@ -102,6 +106,7 @@ DESCRIPTION:A sweet scent that harshly lowers opposing Pokémon's evasiveness.
 PP:20
 CATEGORY:STATUS
 EFFECT:7
+REFLECTABLE
 TYPE:NORMAL
 # 13 SYNTHESIS
 NAME:Synthesis
@@ -174,6 +179,7 @@ DESCRIPTION:A seed that causes worry is planted on the target. It prevents sleep
 CATEGORY:STATUS
 TYPE:GRASS
 EFFECT:13
+REFLECTABLE
 PP:10
 # 21 EMBER
 NAME:Ember
@@ -190,6 +196,7 @@ DESCRIPTION:The user releases an obscuring cloud of smoke or ink. This lowers th
 CATEGORY:STATUS
 PP:20
 EFFECT:15
+REFLECTABLE
 TYPE:NORMAL
 # 23 DRAGON BREATH
 NAME:Dragon Breath
@@ -238,6 +245,7 @@ PP:10
 EFFECT:18
 CATEGORY:STATUS
 TYPE:NORMAL
+REFLECTABLE
 # 28 FIRE SPIN
 NAME:Fire Spin
 DESCRIPTION:The target becomes trapped within a fierce vortex of fire that rages for four to five turns.
@@ -300,6 +308,7 @@ EFFECTCHANCE:30
 NAME:Tail Whip
 DESCRIPTION:The user wags its tail cutely, making opposing Pokémon less wary and lowering their Defense stat.
 PP:25
+REFLECTABLE
 CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:22
@@ -429,6 +438,7 @@ ACCURACY:95
 CATEGORY:STATUS
 TYPE:BUG
 EFFECT:18
+REFLECTABLE
 TYPE:BUG
 # 49 BUG BITE 
 NAME:Bug Bite
@@ -461,6 +471,7 @@ TYPE:NORMAL
 CATEGORY:STATUS
 ACCURACY:55
 PP:20
+REFLECTABLE
 EFFECT:25
 SOUND
 # 53 CONFUSION
@@ -477,6 +488,7 @@ NAME:Stun Spore
 DESCRIPTION:The user scatters a cloud of numbing powder that paralyzes the target.
 CATEGORY:STATUS
 PP:30
+REFLECTABLE
 EFFECT:16
 ACCURACY:75
 TYPE:GRASS
@@ -494,6 +506,7 @@ EFFECTCHANCE:10
 NAME:Whirlwind
 DESCRIPTION:The target is blown away, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
 PP:20
+REFLECTABLE
 ACCURACY:200
 TYPE:NORMAL
 CATEGORY:STATUS
@@ -611,6 +624,7 @@ EFFECT:41
 EFFECTTARGET:SELF
 TARGET:SELF
 PP:20
+REFLECTABLE
 CATEGORY:STATUS
 TYPE:POISON
 # 69 PIN MISSILE
@@ -668,6 +682,7 @@ CATEGORY:STATUS
 PP:15
 EFFECT:15
 TYPE:GROUND
+REFLECTABLE
 # 75 QUICK ATTACK
 NAME:Quick Attack
 DESCRIPTION:The user lunges at the target at a speed that makes it almost invisible. This move always goes first.
@@ -694,6 +709,7 @@ CATEGORY:STATUS
 TARGET:SELF
 EFFECT:46
 PP:15
+REFLECTABLE
 # 78 WING ATTACK
 NAME:Wing Attack
 DESCRIPTION:The target is struck with large, imposing wings spread wide to inflict damage.
@@ -803,6 +819,7 @@ DESCRIPTION:The user gives opposing Pokémon an intimidating leer that lowers th
 CATEGORY:STATUS
 EFFECT:22
 TYPE:NORMAL
+REFLECTABLE
 PP:30
 # 90 DRILL PECK
 NAME:Drill Peck
@@ -850,6 +867,7 @@ TYPE:NORMAL
 CATEGORY:STATUS
 EFFECT:16
 PP:30
+REFLECTABLE
 # 95 SCREECH
 NAME:Screech
 DESCRIPTION:An earsplitting screech harshly lowers the target's Defense stat.
@@ -858,6 +876,7 @@ TYPE:NORMAL
 CATEGORY:STATUS
 PP:40
 ACCURACY:85
+REFLECTABLE
 SOUND
 # 96 ACID
 NAME:Acid
@@ -917,6 +936,7 @@ TYPE:POISON
 CATEGORY:STATUS
 PP:10
 EFFECT:58
+REFLECTABLE
 # 103 BELCH
 NAME:Belch
 DESCRIPTION:The user lets out a damaging belch at the target. The user must eat a held Berry to use this move.
@@ -987,10 +1007,12 @@ CATEGORY:STATUS
 PP:20
 ACCURACY:200
 EFFECT:1
+REFLECTABLE
 # 110 SWEET KISS
 NAME:Sweet Kiss
 DESCRIPTION:The user kisses the target with a sweet, angelic cuteness that causes confusion.
 ACCURACY:75
+REFLECTABLE
 PP:10
 CATEGORY:STATUS
 EFFECT:25
@@ -1019,6 +1041,7 @@ CATEGORY:STATUS
 PP:20
 TYPE:FAIRY
 EFFECT:46
+REFLECTABLE
 # 114 THUNDER SHOCK
 NAME:Thunder Shock
 DESCRIPTION:A jolt of electricity crashes down on the target to inflict damage. This may also leave the target with paralysis.
@@ -1035,6 +1058,7 @@ CATEGORY:STATUS
 TYPE:ELECTRIC
 EFFECT:16
 ACCURACY:90
+REFLECTABLE
 PP:20
 # 116 DOUBLE TEAM
 NAME:Double Team
@@ -1250,6 +1274,7 @@ DESCRIPTION:A move that leaves the target badly poisoned. Its poison damage wors
 EFFECT:76
 TYPE:POISON
 PP:10
+REFLECTABLE
 ACCURACY:90
 CATEGORY:STATUS
 # 139 FLATTER
@@ -1259,6 +1284,7 @@ TYPE:DARK
 CATEGORY:STATUS
 PP:15
 EFFECT:77
+REFLECTABLE
 # 140 EARTH POWER
 NAME:Earth Power
 DESCRIPTION:The user makes the ground under the target erupt with power. This may also lower the target's Sp. Def stat. 
@@ -1311,6 +1337,7 @@ CATEGORY:STATUS
 TYPE:NORMAL
 PP:15
 ACCURACY:55
+REFLECTABLE
 EFFECT:5
 SOUND
 # 146 DISARMING VOICE
@@ -1365,6 +1392,7 @@ EFFECTTARGET:SELF
 TYPE:NORMAL
 PP:5
 CATEGORY:STATUS
+REFLECTABLE
 # 152 LIFE DEW
 NAME:Life Dew
 DESCRIPTION:The user scatters mysterious water around and restores the HP of itself and its ally Pokémon in the battle.
@@ -1442,11 +1470,13 @@ EFFECT:90
 PP:20
 CATEGORY:STATUS
 TYPE:NORMAL
+REFLECTABLE
 # 161 SPITE
 NAME:Spite
 DESCRIPTION:The user unleashes its grudge on the move last used by the target by cutting 4 PP from it.
 TYPE:GHOST
 PP:10
+REFLECTABLE
 CATEGORY:STATUS
 EFFECT:91
 # 162 INCINERATE
@@ -1465,6 +1495,7 @@ PP:10
 TYPE:GHOST
 EFFECT:25
 CATEGORY:STATUS
+REFLECTABLE
 # 164 WILL O WISP
 NAME:Will-O-Wisp
 DESCRIPTION:The user shoots a sinister flame at the target to inflict a burn.
@@ -1472,6 +1503,7 @@ PP:15
 ACCURACY:85
 TYPE:FIRE
 EFFECT:14
+REFLECTABLE
 CATEGORY:STATUS
 # 165 EXTRASENSORY
 NAME:Extrasensory
@@ -1579,6 +1611,7 @@ NAME:Mean Look
 DESCRIPTION:The user pins the target with a dark, arresting look. The target becomes unable to flee.
 ACCURACY:200
 PP:5
+REFLECTABLE
 TYPE:NORMAL
 CATEGORY:STATUS
 EFFECT:96
@@ -1676,6 +1709,7 @@ CATEGORY:STATUS
 PP:15
 EFFECT:5
 POWDER
+REFLECTABLE
 # 187 AROMATHERAPY
 NAME:Aromatherapy
 DESCRIPTION:The user releases a soothing scent that heals all status conditions affecting the user's party.
@@ -1784,6 +1818,7 @@ DESCRIPTION:The foe is taunted into a rage that allows it to use only attack mov
 TYPE:DARK
 CATEGORY:STATUS
 PP:20
+REFLECTABLE
 EFFECT:106
 # 199 POWER GEM
 NAME:Power Gem
@@ -1808,6 +1843,7 @@ DESCRIPTION:The user shoots a torrent of water that changes the target's type to
 PP:20
 TYPE:WATER
 EFFECT:107
+REFLECTABLE
 CATEGORY:STATUS
 # 202 PSYCH UP
 NAME:Psych Up
@@ -1868,6 +1904,7 @@ EFFECT:113
 PP:15
 ACCURACY:85
 TYPE:NORMAL
+REFLECTABLE
 CATEGORY:STATUS
 # 209 CROSS CHOP
 NAME:Cross Chop
@@ -1997,6 +2034,7 @@ EFFECT:32
 ACCURACY:200
 TARGET:SELF
 SOUND
+REFLECTABLE
 # 222 BELLY DRUM
 NAME:Belly Drum
 DESCRIPTION:The user maximizes its Attack stat in exchange for HP equal to half its max HP.
@@ -2013,6 +2051,7 @@ PP:20
 EFFECT:5
 ACCURACY:60
 TYPE:PSYCHIC
+REFLECTABLE
 # 224 BUBBLE BEAM
 NAME:Bubble Beam
 DESCRIPTION:A spray of bubbles is forcefully ejected at the target. This may also lower its Speed stat.
@@ -2059,6 +2098,7 @@ TYPE:PSYCHIC
 CATEGORY:STATUS
 PP:15
 EFFECT:15
+REFLECTABLE
 ACCURACY:80
 # 229 REFLECT
 NAME:Reflect
@@ -2302,6 +2342,7 @@ TYPE:ROCK
 CATEGORY:STATUS
 EFFECT:139
 TARGET:SELF
+REFLECTABLE
 PP:20
 # 257 ROCK BLAST
 NAME:Rock Blast
@@ -2374,6 +2415,7 @@ NAME:Yawn
 DESCRIPTION:The user lets loose a huge yawn that lulls the target into falling asleep on the next turn.
 EFFECT:143
 PP:10
+REFLECTABLE
 CATEGORY:STATUS
 TYPE:NORMAL
 # 265 CURSE
@@ -2410,6 +2452,7 @@ EFFECT:145
 TYPE:PSYCHIC
 CATEGORY:STATUS
 PULSE
+REFLECTABLE
 # 269 ATTRACT
 NAME:Attract
 DESCRIPTION:If it is the opposite gender of the user, the target becomes infatuated and less likely to attack
@@ -2417,6 +2460,7 @@ EFFECT:146
 PP:15
 TYPE:NORMAL
 CATEGORY:STATUS
+REFLECTABLE
 # 270 METAL SOUND
 NAME:Metal Sound
 DESCRIPTION:A horrible sound like scraping metal harshly lowers the target's Sp. Def stat.
@@ -2425,6 +2469,7 @@ PP:40
 ACCURACY:85
 CATEGORY:STATUS
 EFFECT:54
+REFLECTABLE
 SOUND
 # 271 LOCK ON
 NAME:Lock-On
@@ -2605,6 +2650,7 @@ PP:40
 CATEGORY:STATUS
 ACCURACY:90
 TYPE:POISON
+REFLECTABLE
 EFFECT:4
 # 292 ICICLE CRASH
 NAME:Icicle Crash
@@ -2642,6 +2688,7 @@ DESCRIPTION:The user lays a trap of spikes at the opposing team's feet. The trap
 EFFECT:159
 TARGET:SELF
 PP:20
+REFLECTABLE
 CATEGORY:STATUS
 TYPE:GROUND
 # 296 ICICLE SPEAR
@@ -2848,6 +2895,7 @@ CATEGORY:STATUS
 PP:15
 TYPE:ELECTRIC
 EFFECT:133
+REFLECTABLE
 # 317 MAGNETIC FLUX
 NAME:Magnetic Flux
 DESCRIPTION:The user manipulates magnetic fields, which boosts the Defense and Sp. Def stats of ally Pokémon with the Plus Ability or the Minus Ability.
@@ -3131,6 +3179,7 @@ PP:20
 CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:181
+REFLECTABLE
 # 346 DRAGON PULSE
 NAME:Dragon Pulse
 DESCRIPTION:The target is attacked with a shock wave generated by the user's gaping mouth.
@@ -3218,6 +3267,7 @@ PP:20
 TYPE:DARK
 CATEGORY:STATUS
 EFFECT:54
+REFLECTABLE
 # 357 LOVELY KISS
 NAME:Lovely Kiss
 DESCRIPTION:With a scary face, the user tries to kiss the target. If it succeeds, the target falls asleep
@@ -3225,6 +3275,7 @@ TYPE:NORMAL
 CATEGORY:STATUS
 EFFECT:5
 PP:10
+REFLECTABLE
 ACCURACY:75
 # 358 SHOCK WAVE
 NAME:Shock Wave
@@ -3336,6 +3387,7 @@ PP:30
 PRIORITY:1
 ACCURACY:200
 EFFECT:1
+REFLECTABLE
 # 370 MUDDY WATER
 NAME:Muddy Water
 DESCRIPTION:The user attacks by shooting muddy water at opposing Pokémon. This may also lower their accuracy.
@@ -3388,6 +3440,7 @@ PP:5
 CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:193
+REFLECTABLE
 # 376 SLEEP TALK
 NAME:Sleep Talk
 DESCRIPTION:The user randomly uses one of the moves it knows. This move can only be used while the user is asleep.
@@ -3594,6 +3647,7 @@ TYPE:FLYING
 CATEGORY:STATUS
 EFFECT:211
 TARGET:SELF
+REFLECTABLE
 # 399 ENERGY BALL
 NAME:Energy Ball
 DESCRIPTION:The user draws power from nature and fires it at the target. This may also lower the target's Sp. Def stat.
@@ -3693,3 +3747,87 @@ POWER:90
 CATEGORY:SPECIAL
 EFFECT:21
 EFFECTCHANCE:20
+# 410 MAGICAL LEAF
+NAME:Magical Leaf
+DESCRIPTION:The user scatters curious leaves that chase the target. This attack never misses.
+TYPE:GRASS
+CATEGORY:SPECIAL
+PP:20
+ACCURACY:200
+POWER:60
+# 411 ERUPTION
+NAME:Eruption
+DESCRIPTION:The user attacks opposing Pokémon with explosive fury. The lower the user's HP, the lower the move's power.
+TYPE:FIRE
+POWER:150
+PP:5
+CATEGORY:SPECIAL
+EFFECT:218
+EFFECTTARGET:SELF
+# 412 INFERNAL PARADE
+NAME:Infernal Parade
+DESCRIPTION:The user attacks with myriad fireballs. This may also leave the target with a burn. This move's power is doubled if the target has a status condition.
+TYPE:GHOST
+PP:15
+POWER:60
+CATEGORY:SPECIAL
+EFFECT:219
+EFFECTCHANCE:30
+# 413 STRUGGLE BUG
+NAME:Struggle Bug
+DESCRIPTION:The user attacks by struggling against opposing Pokémon. This also lowers their Sp. Atk stats.
+TYPE:BUG
+CATEGORY:SEPCIAL
+POWER:50
+PP:20
+EFFECT:88
+# 414 INFESTATION
+NAME:Infestation
+DESCRIPTION:The target is infested and attacked for four to five turns. The target can't flee during this time.
+TYPE:BUG
+PP:20
+POWER:20
+CATEGORY:SEPCIAL
+EFFECT:220
+EFFECTTARGET:SELF
+CONTACT
+# 415 SHADOW SNEAK
+NAME:Shadow Sneak
+DESCRIPTION:The user extends its shadow and attacks the target from behind. This move always goes first.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+PP:30
+POWER:40
+CONTACT
+PRIORITY:1
+# 416 STICKY WEB 
+NAME:Sticky Web
+DESCRIPTION:The user weaves a sticky net around the opposing team, which lowers their Speed stats upon switching into battle.
+PP:20
+TYPE:BUG
+CATEGORY:STATUS
+REFLECTABLE
+TARGET:SELF
+EFFECT:221
+# 417 TOXIC THREAD
+NAME:Toxic Thread
+DESCRIPTION:The user shoots poisonous threads to poison the target and lower the target's Speed stat.
+TYPE:POISON
+CATEGORY:STATUS
+PP:20
+EFFECT:222
+# 418 WISH
+NAME:Wish
+DESCRIPTION:One turn after this move is used, the user's or its replacement's HP is restored by up to half the user's max HP.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:10
+EFFECT:223
+TARGET:SELF
+# 419 PSYCHO SHIFT
+NAME:Psycho Shift
+DESCRIPTION:Using its psychic power of suggestion, the user transfers its status conditions to the target.
+EFFECT:224
+TYPE:PSYCHIC
+PP:10
+CATEGORY:STATUS

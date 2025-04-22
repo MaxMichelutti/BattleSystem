@@ -46,10 +46,9 @@ enum FieldEffect{
     SPIKES_3,
     MIST,
     AURORA_VEIL,
-    TRICK_ROOM
-    // AURORA_VEIL,
-    // MAGIC_COAT,
-    // TRICK_ROOM,
+    TRICK_ROOM,
+    STICKY_WEB,
+    WISH
 };
 enum BattleActionActor{
     PLAYER,
@@ -135,7 +134,8 @@ enum VolatileStatusCondition{
     INCREASED_CRIT,
     INCREASED_ACCURACY,
     SWITCHING_OUT,
-    JUST_EATEN_BERRY
+    JUST_EATEN_BERRY,
+    INFESTED
 };
 
 enum Gender{
@@ -364,7 +364,9 @@ enum Ability{
     SCREEN_CLEANER,
     AERILATE,
     CUD_CHEW,
-    BERSERK
+    BERSERK,
+    SUPER_LUCK,
+    MAGIC_BOUNCE
 };
 
 enum ItemCategory{

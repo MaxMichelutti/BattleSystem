@@ -35,6 +35,7 @@ bool isVolatileConditionClearedByRapidSpin(VolatileStatusCondition status) {
         case WRAP:
         case BIND:
         case FIRESPIN:
+        case INFESTED:
         case SANDTOMB:
         case WHIRLPOOL:
             return true;
@@ -370,6 +371,9 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
         case FIRESPIN:
             handler->displayMsg(getNickname()+" is trapped in a vortex of fire!");
             break;
+        case INFESTED:
+            handler->displayMsg(getNickname()+" is infested!");
+            break;
         case WHIRLPOOL:
             handler->displayMsg(getNickname()+" is trapped in a whirlpool of water!");
             break;
@@ -448,6 +452,9 @@ void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
             break;
         case FIRESPIN:
             handler->displayMsg(getNickname()+" is no longer trapped in a vortex of fire!");
+            break;
+        case INFESTED:
+            handler->displayMsg(getNickname()+" is no longer infested!");
             break;
         case WHIRLPOOL:
             handler->displayMsg(getNickname()+" is no longer trapped in a whirlpool of water!");
@@ -989,6 +996,8 @@ bool Battler::canSwitchOut(Battler* enemy)const {
     if(hasVolatileCondition(BIND))
         return false;
     if(hasVolatileCondition(FIRESPIN))
+        return false;
+    if(hasVolatileCondition(INFESTED))
         return false;
     if(hasVolatileCondition(WHIRLPOOL))
         return false;

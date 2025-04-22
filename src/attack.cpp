@@ -128,6 +128,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_punching = (data.find("punching") != data.end());
     is_powder = (data.find("powder") != data.end());
     is_pulse = (data.find("pulse") != data.end());
+    is_reflectable = (data.find("reflectable") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -224,6 +225,10 @@ bool Attack::isPulse()const {
     return is_pulse;
 }
 
+bool Attack::isReflectable()const {
+    return is_reflectable;
+}
+
 bool Attack::isSoundBased()const {
     return is_sound_based;
 }
@@ -292,6 +297,8 @@ void Attack::loadAttacks(){
             parsed_data["powder"] = "true";
         }else if(line.rfind("PULSE",0)==0){
             parsed_data["pulse"] = "true";
+        }else if(line.rfind("REFLECTABLE",0)==0){
+            parsed_data["reflectable"] = "true";
         }else{
             std::cout<<"Error: Unknown line in attack file: " << line << std::endl;
         }

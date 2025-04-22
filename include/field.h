@@ -56,6 +56,7 @@ class Field{
     void nextTurnFieldEffect();
     bool clearFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor);
     bool hasFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor)const;
+    void decrementFieldEffect(FieldEffect field_effect, BattleActionActor actor);
 };
 
 #endif

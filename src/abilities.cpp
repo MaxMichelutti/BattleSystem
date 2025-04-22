@@ -60,6 +60,7 @@ bool isAbilityIgnorable(Ability ability){
         case IMMUNITY:
         case MARVEL_SCALE:
         case MULTISCALE:
+        case MAGIC_BOUNCE:
             return true;
         default:return false;
     }        

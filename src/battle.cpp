@@ -1167,6 +1167,9 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
                 crit_level+=1;
             }
+            if(active_user->hasAbility(SUPER_LUCK)){
+                crit_level+=1;
+            }
             if(active_user->hasVolatileCondition(FOCUS_ENERGY)){//focus energy
                 crit_level+=2;
             }
@@ -1383,11 +1386,17 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
 void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
     // apply move effects
     Battler* active_user = getActorBattler(actor);
-    Battler* active_target = getActorBattler(otherBattleActionActor(actor));
+    BattleActionActor other_actor = otherBattleActionActor(actor);
+    Battler* active_target = getActorBattler(other_actor);
+    std::string opponent_mon_name = getActorBattlerName(other_actor);
+    if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
+        event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
+        active_target = getActorBattler(actor);
+        opponent_mon_name = getActorBattlerName(actor);
+    }
     std::string user_mon_name = getActorBattlerName(actor);
-    std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
     MonsterTeam* user_team = getActorTeam(actor);
-    MonsterTeam* target_team = getActorTeam(otherBattleActionActor(actor));
+    MonsterTeam* target_team = getActorTeam(other_actor);
     unsigned int effect = attack->getEffectId();
     unsigned int effect_chance = attack->getEffectChance();
     if(active_user->isFainted() || active_target->isFainted())
@@ -1453,17 +1462,19 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 4:case 210:{//poison opponent
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+            case 4:case 210:case 222:{//poison opponent
+                if(effect==222)
+                    active_target->changeSpeedModifier(-1);
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being poisoned!");
-                    if(attack->getCategory() == STATUS)
+                    if(attack->getCategory() == STATUS && effect!=222)
                         active_user->setLastAttackFailed();
                     break;
                 }
                 bool result = active_target->setPermanentStatus(POISONED);
                 if(!result){
-                    if(attack->getCategory() == STATUS){
+                    if(attack->getCategory() == STATUS && effect!=222){
                         event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                         active_user->setLastAttackFailed();
                     }
@@ -1477,7 +1488,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 76:{//bad poison opponent
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being badly poisoned!");
                     if(attack->getCategory() == STATUS)
@@ -1507,7 +1518,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     break;
                 }
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from falling asleep!");
                     if(attack->getCategory() == STATUS)
@@ -1576,8 +1587,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 14:case 20:{//burn opponent
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+            case 14:case 20:case 219:{//burn opponent
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
                     if(attack->getCategory() == STATUS)
@@ -1615,7 +1626,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                     break;
                 }
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from the paralysis!");
                     if(attack->getCategory() == STATUS)
@@ -1643,21 +1654,27 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 19:{ // Fire Spin
                 if(!active_target->hasVolatileCondition(FIRESPIN)){
-                    active_target->addVolatileCondition(FIRESPIN, 5);
+                    active_target->addVolatileCondition(FIRESPIN, RNG::coinFlip()?4:5);
                 // }else{
                 //     event_handler->displayMsg(opponent_mon_name+" is already trapped in a Fire Spin!");
                 }
                 break;
             }
+            case 220:{ // infestation
+                if(!active_target->hasVolatileCondition(INFESTED)){
+                    active_target->addVolatileCondition(INFESTED, RNG::coinFlip()?4:5);
+                }
+                break;
+            }
             case 158:{ // Whirlpool
                 if(!active_target->hasVolatileCondition(WHIRLPOOL)){
-                    active_target->addVolatileCondition(WHIRLPOOL, 5);
+                    active_target->addVolatileCondition(WHIRLPOOL, RNG::coinFlip()?4:5);
                 }
                 break;
             }
             case 74:{ // Sand Tomb
                 if(!active_target->hasVolatileCondition(SANDTOMB)){
-                    active_target->addVolatileCondition(SANDTOMB, 5);
+                    active_target->addVolatileCondition(SANDTOMB, RNG::coinFlip()?4:5);
                 }
                 break;
             }
@@ -1689,7 +1706,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         event_handler->displayMsg(opponent_mon_name+" is already confused!");
                         active_user->setLastAttackFailed();
                     }
-                }else if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                }else if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                         !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being confused!");
                     if(attack->getCategory() == STATUS)
@@ -1773,13 +1790,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     }
                     delete active_target;
                     target_team->swapRandomMonster();
-                    active_target = new Battler(target_team->getActiveMonster(),field,otherBattleActionActor(actor),event_handler);
+                    active_target = new Battler(target_team->getActiveMonster(),field,other_actor,event_handler);
                     if(actor == PLAYER){
                         opponent_active = active_target;
                     }else{
                         player_active = active_target;
                     }
-                    opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
+                    opponent_mon_name = getActorBattlerName(other_actor);
                     event_handler->displayMsg(opponent_mon_name+" was forced in!");
                     if(thereIsNeutralizingGas()){
                         player_active->neutralizeAbility();
@@ -1788,10 +1805,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         player_active->cancelAbilityNeutralization();
                         opponent_active->cancelAbilityNeutralization();
                     }
-                    removeVolatilesFromOpponentOfMonsterLeavingField(otherBattleActionActor(actor));
-                    applyImpostorSwitchIn(otherBattleActionActor(actor));
-                    applySwitchInAbilitiesEffects(otherBattleActionActor(actor));
-                    performEntryHazardCheck(otherBattleActionActor(actor));
+                    removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
+                    applyImpostorSwitchIn(other_actor);
+                    applySwitchInAbilitiesEffects(other_actor);
+                    performEntryHazardCheck(other_actor);
                     checkUproars();
                     if(active_target->isFainted())
                         return;
@@ -1838,34 +1855,34 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 41:{//Toxic spikes
-                if(field->hasFieldEffect(BAD_TOXIC_SPIKES,otherBattleActionActor(actor))){
+                if(field->hasFieldEffect(BAD_TOXIC_SPIKES,other_actor)){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
-                }else if(field->hasFieldEffect(TOXIC_SPIKES,otherBattleActionActor(actor))){
-                    field->setFieldEffect(BAD_TOXIC_SPIKES, -1, otherBattleActionActor(actor));
-                    field->clearFieldEffect(TOXIC_SPIKES,otherBattleActionActor(actor));
+                }else if(field->hasFieldEffect(TOXIC_SPIKES,other_actor)){
+                    field->setFieldEffect(BAD_TOXIC_SPIKES, -1, other_actor);
+                    field->clearFieldEffect(TOXIC_SPIKES,other_actor);
                     event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
                 }else{
-                    field->setFieldEffect(TOXIC_SPIKES, -1, otherBattleActionActor(actor));
+                    field->setFieldEffect(TOXIC_SPIKES, -1, other_actor);
                     event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
                 }
                 break;
             }
             case 159:{
                 //spikes
-                if(field->hasFieldEffect(SPIKES_3,otherBattleActionActor(actor))){
+                if(field->hasFieldEffect(SPIKES_3,other_actor)){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
-                }else if(field->hasFieldEffect(SPIKES_2,otherBattleActionActor(actor))){
-                    field->setFieldEffect(SPIKES_3, -1, otherBattleActionActor(actor));
-                    field->clearFieldEffect(SPIKES_2,otherBattleActionActor(actor));
+                }else if(field->hasFieldEffect(SPIKES_2,other_actor)){
+                    field->setFieldEffect(SPIKES_3, -1, other_actor);
+                    field->clearFieldEffect(SPIKES_2,other_actor);
                     event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
-                }else if(field->hasFieldEffect(SPIKES,otherBattleActionActor(actor))){
-                    field->setFieldEffect(SPIKES_2, -1, otherBattleActionActor(actor));
-                    field->clearFieldEffect(SPIKES,otherBattleActionActor(actor));
+                }else if(field->hasFieldEffect(SPIKES,other_actor)){
+                    field->setFieldEffect(SPIKES_2, -1, other_actor);
+                    field->clearFieldEffect(SPIKES,other_actor);
                     event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
                 }else{
-                    field->setFieldEffect(SPIKES, -1, otherBattleActionActor(actor));
+                    field->setFieldEffect(SPIKES, -1, other_actor);
                     event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
                 }
                 break;
@@ -1977,7 +1994,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 61:{//freeze opponent
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being frozen!");
                     if(attack->getCategory() == STATUS)
@@ -2224,7 +2241,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 104:{//tri attack
                 if(!active_target->hasPermanentStatus()){
-                    if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                    if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                         !active_user->hasAbility(INFILTRATOR)){
                         break;
                     }
@@ -2347,8 +2364,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     break;
                 }
                 //force opponent to switch
-                forceSwitch(otherBattleActionActor(actor));
-                active_target = getActorBattler(otherBattleActionActor(actor));
+                forceSwitch(other_actor);
+                active_target = getActorBattler(other_actor);
                 checkUproars();
                 if(active_target->isFainted())
                     return;
@@ -2425,7 +2442,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         3,
                         attack_stat,
                         active_user->getLevel(),
-                        otherBattleActionActor(actor),
+                        other_actor,
                         active_user->hasType(future_sight->getType())
                     ));
                 event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
@@ -2475,12 +2492,22 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 139:{
                 //stealth rocks
-                if(field->hasFieldEffect(STEALTH_ROCKS,otherBattleActionActor(actor))){
+                if(field->hasFieldEffect(STEALTH_ROCKS,other_actor)){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else{
-                    field->setFieldEffect(STEALTH_ROCKS, -1, otherBattleActionActor(actor));
+                    field->setFieldEffect(STEALTH_ROCKS, -1, other_actor);
                     event_handler->displayMsg("Pointed rocks float in the air at "+opponent_mon_name+"'s side!");
+                }
+            }
+            case 221:{
+                //sticky web
+                if(field->hasFieldEffect(STICKY_WEB,other_actor)){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }else{
+                    field->setFieldEffect(STICKY_WEB, -1, other_actor);
+                    event_handler->displayMsg("A sticky web slows down all Pokemon entering "+opponent_mon_name+"'s side!");
                 }
             }
             case 142:{
@@ -2490,7 +2517,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 143:{
                 //opponent drowsy
-                if(field->hasFieldEffect(SAFEGUARD,otherBattleActionActor(actor)) &&
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
@@ -3046,7 +3073,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             case 211:{
                 //defog
                 active_target->changeEvasionModifier(-1);
-                field->clearFieldSide(otherBattleActionActor(actor));
+                field->clearFieldSide(other_actor);
                 field->clearTerrain();
                 event_handler->displayMsg(user_mon_name+" cleared "+opponent_mon_name+"'s side of the field!");
                 break;
@@ -3092,6 +3119,28 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 unsigned int money_dropped = active_user->getLevel() * 5;
                 addMoney(money_dropped);
                 event_handler->displayMsg(user_mon_name+" dropped "+std::to_string(money_dropped)+"$!");
+                break;
+            }
+            case 223:{
+                //wish
+                event_handler->displayMsg(user_mon_name+" made a wish!");
+                field->setFieldEffect(WISH,2,actor);
+                break;
+            }
+            case 224:{
+                //swap status with opponent
+                if(!active_user->hasPermanentStatus()){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break;
+                }
+                //permanent status
+                PermanentStatusCondition old_status = active_user->getPermanentStatus();
+                active_user->clearPermanentStatus();
+                if(!field->hasFieldEffect(SAFEGUARD,other_actor) ||
+                    active_user->hasAbility(INFILTRATOR))
+                    active_target->setPermanentStatus(old_status);
+                event_handler->displayMsg(user_mon_name+" tried to transfer its status to "+opponent_mon_name+"!");
                 break;
             }
             default:break;
@@ -3615,7 +3664,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
-        case 134:{
+        case 134:case 219:{
             // power doubles if target has Permanent status
             if(active_target->hasPermanentStatus()){
                 base_power *= 2;
@@ -3694,6 +3743,11 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             // fling
             ItemType target_item = active_user->getHeldItem();
             base_power = flingPower(target_item);
+            break;
+        }
+        case 218:{
+            //power decreases with lower HP user
+            base_power *= active_user->getCurrentHP() / (double)active_user->getMaxHP();
             break;
         }
         default: break;
@@ -4074,6 +4128,17 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             active_user->decrementVolatileCondition(FIRESPIN);
         }
         if(active_user->isFainted()){return;}
+        //infested
+        if(active_user->hasVolatileCondition(INFESTED)){
+            event_handler->displayMsg(mon_name+" is infested!");
+            unsigned int fire_spin_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
+            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" infestation damage!");
+            if(active_user->isFainted())
+                return;
+            active_user->decrementVolatileCondition(INFESTED);
+        }
+        if(active_user->isFainted()){return;}
         //whirlpool
         if(active_user->hasVolatileCondition(WHIRLPOOL)){
             event_handler->displayMsg(mon_name+" is trapped in a Whirlpool!");
@@ -4267,8 +4332,23 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
 
 void Battle::applyFieldEffectsPostDamage(BattleActionActor actor){
     Battler* active_user=getActorBattler(actor);
-    if(active_user->isFainted())
-        return;
+    std::string mon_name = getActorBattlerName(actor);
+    
+    // wish
+    if(field->hasFieldEffect(WISH,actor)){
+        field->decrementFieldEffect(WISH,actor);
+        if(!field->hasFieldEffect(WISH,actor)){
+            event_handler->displayMsg("The wish comes true!");
+            if(active_user->isFainted()){
+                event_handler->displayMsg("But nothing happens!");
+            }else{
+                unsigned int wish_heal = max((active_user->getMaxHP()+1) / 2,1);
+                unsigned int actual_wish_heal = active_user->removeDamage(wish_heal);
+                if(actual_wish_heal>0)
+                    event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_wish_heal)+" HP thanks to Wish!");
+            }
+        }
+    }
     // std::string mon_name = getActorBattlerName(actor);
     // apply field effects
     // std::set<FieldEffect> field_effects = field->getFieldEffects(actor);
@@ -4330,6 +4410,13 @@ void Battle::performEntryHazardCheck(BattleActionActor actor){
             std::string battler_name = getActorBattlerName(actor);
             event_handler->displayMsg(battler_name+" took "+std::to_string(actual_stealth_rock_damage)+" damage from the Stealth Rocks!");
         }
+    }
+    if(active_battler->isFainted())
+        return;
+    // sticky web
+    if(field->hasFieldEffect(STICKY_WEB,actor)){
+        event_handler->displayMsg(getActorBattlerName(actor)+" is slowed by the sticky web!");
+        active_battler->changeSpeedModifier(-1);
     }
 }
 

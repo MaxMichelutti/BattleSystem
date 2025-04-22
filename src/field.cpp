@@ -22,6 +22,7 @@ bool isFieldEffectClearedByRapidSpin(FieldEffect field_effect) {
         case SPIKES:
         case SPIKES_2:
         case SPIKES_3:
+        case STICKY_WEB:
         case STEALTH_ROCKS:
             return true;
         default:
@@ -274,6 +275,8 @@ void Field::nextTurnFieldEffect() {
     for(auto it = field_effect_player.begin(); it != field_effect_player.end(); it++){
         if(it->second < 0)
             continue;
+        if(it->first == WISH)
+            continue;
         it->second--;
         if(it->second == 0)
             field_effects_to_clear.insert(it->first);
@@ -286,6 +289,8 @@ void Field::nextTurnFieldEffect() {
     for(auto it = field_effect_opponent.begin(); it != field_effect_opponent.end(); it++){
         if(it->second < 0)
             continue;
+        if(it->first == WISH)
+            continue;
         it->second--;
         if(it->second == 0)
             field_effects_to_clear.insert(it->first);
@@ -294,6 +299,22 @@ void Field::nextTurnFieldEffect() {
         clearFieldEffect(*it, OPPONENT);
     }
 }
+
+void Field::decrementFieldEffect(FieldEffect field_effect, BattleActionActor actor){
+    std::map<FieldEffect, unsigned int>::iterator it;
+    if(actor==PLAYER){
+        it = field_effect_player.find(field_effect);
+        if(it==field_effect_player.end())
+            return;
+    }else{
+        it = field_effect_opponent.find(field_effect);
+        if(it==field_effect_opponent.end())
+            return;
+    }
+    it->second--;
+    if(it->second == 0)
+        clearFieldEffect(field_effect, actor);
+}   
 
 void Field::clearWeather() {
     if(weather != CLEAR){

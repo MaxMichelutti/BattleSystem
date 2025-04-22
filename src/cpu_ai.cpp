@@ -373,6 +373,15 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             }
             break;
         }
+        case 220:{
+            // infestation
+            if(enemy_active->hasVolatileCondition(INFESTED)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
         case 20:{
             // recoil and burn opp
             if(enemy_active->canBeBurned() &&
@@ -533,7 +542,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 41:{
             // toxic spikes
-            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,OPPONENT))
+            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,PLAYER))
                 total_utility -= 10;
             else
                 total_utility += 50;
@@ -1133,7 +1142,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 139:{
             //stealth rock
-            if(field->hasFieldEffect(STEALTH_ROCKS,OPPONENT))
+            if(field->hasFieldEffect(STEALTH_ROCKS,PLAYER))
                 total_utility -= 10;
             else
                 total_utility += 50;
@@ -1260,10 +1269,18 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 159:{
             //spikes
-            if(field->hasFieldEffect(SPIKES_3,OPPONENT))
+            if(field->hasFieldEffect(SPIKES_3,PLAYER))
                 total_utility -= 10;
             else
                 total_utility += 50;
+            break;
+        }
+        case 221:{
+            //sticky web
+            if(field->hasFieldEffect(STICKY_WEB,PLAYER))
+                total_utility -= 10;
+            else
+                total_utility += 60;
             break;
         }
         case 161:{
@@ -1641,6 +1658,24 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility -= 10;
             else
                 total_utility += 60;
+            break;
+        }
+        case 218:{
+            //lower power at low HP
+            total_utility *= cpu_active->getCurrentHP() / (double)cpu_active->getMaxHP(); 
+            break;
+        }
+        case 219:{
+            // burn + power doubled if opponent has status
+            // double power
+            if(enemy_active->hasPermanentStatus())
+                total_utility *= 2;
+            // burn
+            if(enemy_active->canBeBurned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                field->getTerrain()!=MISTY_FIELD){
+                total_utility += 60 * effect_prob_mult;
+            }
             break;
         }
         default: break;

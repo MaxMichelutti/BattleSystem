@@ -215,3 +215,10 @@
 215: removes barriers and changes type depending on user
 216: trick room
 217: drop money 5 times user level
+218: power decreases with lower HP
+219: burn + double power if enemy has status
+220: infestation
+221: sticky web
+222: poison opponent -1 SPD opponent
+223: wish
+224: give opponent your status

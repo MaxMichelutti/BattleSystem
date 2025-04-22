@@ -44,6 +44,7 @@ class Attack{
     bool is_punching;
     bool is_powder;
     bool is_pulse;
+    bool is_reflectable;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
@@ -68,6 +69,7 @@ class Attack{
     bool isPunching()const;
     bool isPowder()const;
     bool isPulse()const;
+    bool isReflectable()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;
