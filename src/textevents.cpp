@@ -434,11 +434,20 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket *
             unsigned int quantity = pocket->getItemCount(it.second);
             displayMsg(std::to_string(it.first)+". "+item_data->getName()+"(x"+std::to_string(quantity)+")");
         }
+        displayMsg(std::to_string(count++) + ". Info");
         displayMsg(std::to_string(count) + ". Back");
         displayMsgNoEndl("Enter your choice:");
         item_choice = getNumberFromCin();
         if(item_choice==count){
             return std::make_pair(NO_ITEM_TYPE,0);
+        }else if(item_choice==count-1){
+            for(auto item:item_choices){
+                ItemType item_type = item.second;
+                ItemData* item_data = ItemData::getItemData(item_type);
+                displayMsg(item_data->getName()+":\t"+item_data->getDescription());
+            }
+            item_choice=0;
+            continue;
         }else if(item_choices.find(item_choice)==item_choices.end()){
             item_choice = 0;
             displayMsg("Invalid item!");
