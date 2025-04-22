@@ -988,3 +988,11 @@ unsigned int Species::getNonMegaForm(unsigned int curr_form)const{
     // form which may be non-0 
     return 0;
 }
+
+bool Species::hasForm(unsigned int form_id)const{
+    for(unsigned int i=0;i<alternate_forms_ids.size();i++){
+        if(alternate_forms_ids[i] == form_id)
+            return true;
+    }
+    return false;
+}

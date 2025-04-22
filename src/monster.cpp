@@ -34,13 +34,18 @@ Monster::Monster(unsigned int species_id, unsigned int level, unsigned int form_
 
 void Monster::init(unsigned int species_id, unsigned int level,unsigned int form_id) {
     transformation=nullptr;
-    this->form_id = form_id;
     held_item = NO_ITEM_TYPE;
     mega_ability = NO_ABILITY;
     is_mega = false;
-    this->species_id = species_id;
     has_hidden_ability = false;
     Species* spec = Species::getSpecies(species_id);
+    this->species_id = species_id;
+    if(form_id != 0 && !spec->hasForm(form_id)){
+        //error
+        std::cerr << "Error: Form " << form_id << " does not exist for species " << species_id << std::endl;
+        exit(DATA_ERROR);
+    }
+    this->form_id = form_id;
 
     // init status
     permanent_status = NO_PERMANENT_CONDITION;

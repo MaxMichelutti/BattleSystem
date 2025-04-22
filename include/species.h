@@ -152,6 +152,7 @@ class Species{
     bool canMegaEvolve(unsigned int curr_form, ItemType mega_item)const;
     unsigned int getMegaForm(unsigned int curr_form, ItemType mega_item)const;
     unsigned int getNonMegaForm(unsigned int curr_form)const;
+    bool hasForm(unsigned int form_id)const;
 };
 
 
