@@ -728,3 +728,8 @@ NAME:Houndoominite
 CATEGORY:MEGA_STONE
 DESCRIPTION:One of a variety of mysterious Mega Stones. Have Houndoom hold it, and this stone will enable it to Mega Evolve during battle.
 PRICE:100000
+# 136 TYRANITARITE
+NAME:Tyranitarite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Tyranitar hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000

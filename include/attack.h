@@ -10,9 +10,11 @@
 #include <unordered_map>
 #include "enums.h"
 #include "battler.h"
+#include "field.h"
 
 class Battler;
 class Attack;
+class Field;
 
 // always contains a nullptr at index 0
 static std::unordered_map<unsigned int,Attack*> static_attacks;
@@ -52,7 +54,7 @@ class Attack{
     ~Attack();
     unsigned int getId()const;
     Type getType()const;
-    Type getType(Battler* user)const;
+    Type getType(Battler* user, Field * field)const;
     unsigned int getPower()const;
     unsigned int getAccuracy()const;
     AttackType getCategory()const;

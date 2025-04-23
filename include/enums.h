@@ -393,7 +393,8 @@ enum Ability{
     HONEY_GATHER,
     MAGMA_ARMOR,
     MOODY,
-    SUCTION_CUPS
+    SUCTION_CUPS,
+    SAND_STREAM
 };
 
 enum ItemCategory{
@@ -546,7 +547,8 @@ enum ItemType{
     STEELIXITE,
     SCIZORITE,
     HERACRONITE,
-    HOUNDOOMINITE
+    HOUNDOOMINITE,
+    TYRANITARITE
 };
 
 #endif

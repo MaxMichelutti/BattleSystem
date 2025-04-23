@@ -250,3 +250,5 @@
 250: sketch -> permanently replaces itself with the last attack used by the opponent
 251: hits 3 times, 2nd times sdoes double dmg, third time does triple damage, accuracy is calculated at each hit
 252: heal the whole team from status condition
+253: automatically thaw out the user + chance of burn
+254: weather ball-> power doubles in non clear weather and type changes with weather

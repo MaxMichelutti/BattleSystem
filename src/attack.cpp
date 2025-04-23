@@ -144,29 +144,55 @@ Type Attack::getType()const {
     return type;
 }
 
-Type Attack::getType(Battler* user)const{
+Type Attack::getType(Battler* user, Field* field)const{
     Type attack_type = getType();
-    if(getEffectId()==238){//hidden power
-        attack_type = user->getHiddenPowerType();
-    }else if(getEffectId()==215){
-        //raging bull changes type depending on the user's form
-        switch(user->getMonster()->getFormId()){
-            case 46:{
-                attack_type=FIGHTING;
-                break;
+    switch(getEffectId()){
+        case 238:{
+            //hidden power
+            attack_type = user->getHiddenPowerType();
+            break;
+        }
+        case 215:{
+            //raging bull changes type depending on the user's form
+            switch(user->getMonster()->getFormId()){
+                case 46:{
+                    attack_type=FIGHTING;
+                    break;
+                }
+                case 47:{
+                    attack_type=WATER;
+                    break;
+                }
+                case 48:{
+                    attack_type=FIRE;
+                    break;
+                }
+                default:{
+                    attack_type=NORMAL;
+                    break;
+                }
             }
-            case 47:{
-                attack_type=WATER;
-                break;
+            break;
+        }
+        case 254:{
+            //weather ball
+            switch(field->getWeather()){
+                case RAIN:
+                    attack_type = WATER;
+                    break;
+                case SUN:
+                    attack_type = FIRE;
+                    break;
+                case SANDSTORM:
+                    attack_type = ROCK;
+                    break;
+                case HAIL:
+                    attack_type = ICE;
+                    break;
+                default:
+                    attack_type = NORMAL;
             }
-            case 48:{
-                attack_type=FIRE;
-                break;
-            }
-            default:{
-                attack_type=NORMAL;
-                break;
-            }
+            break;
         }
     }
     if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)

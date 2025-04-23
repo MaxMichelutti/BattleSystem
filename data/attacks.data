@@ -4192,3 +4192,31 @@ CATEGORY:STATUS
 TYPE:NORMAL
 TARGET:SELF
 EFFECT:126
+# 459 SACRED FIRE
+NAME:Sacred Fire
+DESCRIPTION:The target is razed with a mystical fire of great intensity. This may also leave the target with a burn.
+PP:5
+ACCURACY:95
+CATEGORY:PHYSICAL
+TYPE:FIRE
+EFFECT:253
+EFFECTCHANCE:50
+# 460 WEATHER BALL
+NAME:Weather Ball
+DESCRIPTION:This move's type and power change depending on the weather at the time the move is used.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:10
+POWER:50
+EFFECT:254
+EFFECTTARGET:SELF
+# 461 AEROBLAST
+NAME:Aeroblast
+DESCRIPTION:A vortex of air is shot at the target to inflict damage. This move has a heightened chance of landing a critical hit.
+PP:5
+TYPE:FLYING
+CATEGORY:SPECIAL
+POWER:100
+ACCURACY:95
+EFFECT:17
+EFFECTTARGET:SELF

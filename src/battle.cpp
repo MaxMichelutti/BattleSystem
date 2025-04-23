@@ -691,7 +691,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         active_user->resetConsecutiveProtect();
     }
     //reset charged if move is electric type
-    Type attack_type = attack->getType(active_user);
+    Type attack_type = attack->getType(active_user,field);
     if(attack_type == ELECTRIC && active_user->hasVolatileCondition(CHARGED)){
         active_user->removeVolatileCondition(CHARGED);
         active_user->addVolatileCondition(CHARGED_2,-1);
@@ -738,7 +738,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // apply freeze
     if(active_user->isFrozen()){
         unsigned int random_number = RNG::getRandomInteger(1,100);
-        if(random_number > 20){
+        if(random_number > 20 && attack->getEffectId()!=253){//253: sacred fire immediately thaws user out
             event_handler->displayMsg(user_mon_name+" is frozen solid!");
             forgetMoveVolatiles(active_user);
             active_user->setLastAttackFailed();
@@ -1134,7 +1134,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     AttackType category = attack->getCategory();
     if(category != STATUS){
         bool can_hit_ghosts = active_user->hasAbility(SCRAPPY);
-        Type attack_type = attack->getType(active_user);
+        Type attack_type = attack->getType(active_user,field);
         float effectiveness = getTypeEffectiveness(
             attack_type, 
             active_target->getTypes(),
@@ -1463,7 +1463,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
     unsigned int effect_chance = attack->getEffectChance();
     if(active_user->isFainted() || active_target->isFainted())
         return;
-    Type attack_type = attack->getType(active_user);
+    Type attack_type = attack->getType(active_user,field);
     bool effect_is_applied=true;
     if (effect_chance!=ALWAYS_HITS){
         if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up ,ikelihood of applying effects
@@ -1667,7 +1667,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 14:case 20:case 219:{//burn opponent
+            case 14:case 20:case 219:case 253:{//burn opponent
                 if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
                     event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
@@ -3559,7 +3559,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     }
     double attack_stat;
     double defense_stat;
-    Type attack_type = attack->getType(user_monster);
+    Type attack_type = attack->getType(user_monster,field);
     
     //check immunity
     if(effectiveness == 0)
@@ -3780,7 +3780,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     double base_power = attack->getPower();
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
 
-    Type attack_type = attack->getType(active_user);
+    Type attack_type = attack->getType(active_user,field);
 
     //effect modidifiers
     switch(effect){
@@ -4065,6 +4065,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case 251:{
             //power is 10 + 10*beat_up_index
             base_power = 10 + 10*beat_up_index;
+            break;
+        }
+        case 254:{
+            //power is doubled in non clear weather
+            if(field->getWeather() != CLEAR){
+                base_power *= 2;
+            }
             break;
         }
         default: break;
@@ -4780,6 +4787,13 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             }
             break;
         }
+        case SAND_STREAM:{
+            if(field->getWeather()!= SANDSTORM && !thereIsaCloudNine()){
+                event_handler->displayMsg(user_name+"'s Sand Stream started a sandstorm!");
+                field->setWeather(SANDSTORM,5);
+            }
+            break;
+        }
         case DRIZZLE:{
             if(field->getWeather() != RAIN && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drizzle changed the weather to rain!");
@@ -5103,7 +5117,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
 
-    Type attack_type = attack->getType(active_user);
+    Type attack_type = attack->getType(active_user,field);
     // check if attack is disabled
     if(active_user->isAttackDisabled(attack_id)){
         event_handler->displayMsg(user_mon_name+"'s "+attack->getName()+" is disabled!");
