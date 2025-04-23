@@ -161,7 +161,7 @@ static std::unordered_map<std::string,Ability> strToAbility = {
     {"CONTRARY",CONTRARY},
     {"PICKPOCKET",PICKPOCKET},
     {"HONEY_GATHER",HONEY_GATHER},
-    {"MAGNA_ARMOR",MAGMA_ARMOR}
+    {"MAGMA_ARMOR",MAGMA_ARMOR}
 };
 
 std::string abilityToString(Ability);
