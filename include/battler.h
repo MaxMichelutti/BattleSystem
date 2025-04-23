@@ -90,6 +90,9 @@ class Battler{
     // ItemType consumed_held_item;
     bool had_held_item;
     std::set<Monster*> lock_ons;// never dereference the pointers contained in this set!!!
+    unsigned int weight;
+    unsigned int height;
+    Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
     unsigned int getModifiedDefenseInternal()const;
@@ -158,6 +161,7 @@ class Battler{
     bool canSwitchOut(Battler*enemy)const;
     BattleActionActor getActor()const;
     std::set<Type> getTypes()const;
+    Type getHiddenPowerType()const;
     bool hasType(Type)const;
     void changeType(Type type);
     void addType(Type type);
@@ -215,6 +219,8 @@ class Battler{
     bool isFirstTurn()const;
     unsigned int getHeight()const;
     unsigned int getWeight()const;
+    void changeWeight(int amount);
+    void changeHeight(int amount);
     bool lastAttackFailed()const;
     void setLastAttackFailed();
     void setLastAttackHit();
@@ -262,6 +268,12 @@ class Battler{
     bool ismegaEvolved()const;
     bool megaEvolve();
     bool canMegaEvolve()const;
+    Stats getBattleStats()const;
+    void setBattleAttack(unsigned int attack);
+    void setBattleDefense(unsigned int defense);
+    void setBattleSpecialAttack(unsigned int special_attack);
+    void setBattleSpecialDefense(unsigned int special_defense);
+    void setBattleSpeed(unsigned int speed);
 };
 
 #endif

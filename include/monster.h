@@ -47,6 +47,7 @@ class Monster{
     ItemType held_item;
     ItemType consumed_item;
     unsigned int form_id;
+    Type hidden_power_type;
 
     void updateStats();
     void packAttacks();
@@ -72,6 +73,7 @@ class Monster{
     Gender getGender()const;
     Type getType1()const;
     Type getType2()const;
+    Type getHiddenPowerType()const;
     unsigned long getExperience()const;
     unsigned int getFriendship()const;
     unsigned int getMaxHP()const;

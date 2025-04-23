@@ -3954,3 +3954,151 @@ PP:15
 REFLECTABLE
 TYPE:DARK
 EFFECT:234
+# 433 CHILLY RECEPTION
+NAME:Chilly Reception
+DESCRIPTION:The user tells a chillingly bad joke before switching places with a party Pokémon in waiting. This summons a snowstorm lasting five turns.
+TYPE:ICE
+CATEGORY:STATUS
+PP:10
+EFFECT:235
+TARGET:SELF
+# 434 EERIE SPELL
+NAME:Eeerie Spell
+DESCRIPTION:The user attacks with its tremendous psychic power. This also drains 3 PP from the move last used by the target.
+TYPE:PSYCHIC
+PP:5
+CATEGORY:SPECIAL
+POWER:80
+EFFECT:236
+EFFECTTARGET:SELF
+SOUND
+# 435 PAIN SPLIT
+NAME:Pain Split
+DESCRIPTION:The user adds its HP to the target's HP, then equally splits the combined HP between the target and itself.
+PP:20
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:237
+ACCURACY:200
+# 436 HIDDEN POWER
+NAME:Hidden Power
+DESCRIPTION:A unique attack that varies in type depending on the Pokémon using it.
+PP:15
+POWER:60
+TYPE:NORMAL
+CATEGORY:SPECIAL
+EFFECT:238
+EFFECTTARGET:SELF
+# 437 TWIN BEAM
+NAME:Twin Beam
+DESCRIPTION:The user shoots mystical beams from its eyes to inflict damage. The target is hit twice in a row.
+TYPE:PSYCHIC
+PP:10
+POWER:40
+CATEGORY:SPECIAL
+EFFECT:75
+EFFECTTARGET:SELF
+# 438 HYPER DRILL
+NAME:Hyper Drill
+DESCRIPTION:The user spins the pointed part of its body at high speed to pierce the target. This attack can hit a target using a move such as Protect or Detect.
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+POWER:100
+CONTACT
+PP:5
+EFFECT:239
+EFFECTTARGET:SELF
+# 439 AUTOTOMIZE
+NAME:Autotomize
+DESCRIPTION:The user sheds part of its body to make itself lighter and sharply raise its Speed stat.
+TYPE:STEEL
+CATEGORY:STATUS
+PP:15
+TARGET:SELF
+EFFECT:240
+# 440 BARB BARRAGE
+NAME:Barb Barrage
+DESCRIPTION:The user launches countless toxic barbs to inflict damage. This may also poison the target. This move’s power is doubled if the target is already poisoned.
+TYPE:POISON
+CATEGORY:PHYSICAL
+PP:10
+POWER:60
+EFFECT:241
+EFFECTCHANCE:50
+# 441 BULLET PUNCH
+NAME:Bullet Punch
+DESCRIPTION:The user strikes the target with tough punches as fast as bullets. This move always goes first.
+TYPE:STEEL
+PUNCHING
+POWER:40
+PP:30
+PRIORITY:1
+CATEGORY:PHYSICAL
+CONTACT
+# 442 POWER SPLIT
+NAME:Power Split
+DESCRIPTION:The user employs its psychic power to average its Attack and Sp. Atk stats with those of the target.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:10
+ACCURACY:200
+EFFECT:242
+# 443 GUARD SPLIT
+NAME:Guard Split
+DESCRIPTION:The user employs its psychic power to average its Defense and Sp. Def stats with those of the target.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:10
+ACCURACY:200
+EFFECT:243
+# 444 POWER TRICK
+NAME:Power Trick
+DESCRIPTION:The user employs its psychic power to switch its Attack stat with its Defense stat.
+PP:10
+TYPE:PSYCHIC
+CATEGORY:STATUS
+EFFECT:244
+TARGET:SELF
+# 445 ARM THRUST
+NAME:Arm Thrust
+DESCRIPTION:The user attacks the target with open-palmed arm thrusts. This move hits two to five times in a row.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:20
+POWER:15
+CONTACT
+EFFECT:36
+EFFECTTARGET:SELF
+# 446 THROAT CHOP
+NAME:Throat Chop
+DESCRIPTION:The user attacks the target's throat, and the resultant suffering prevents the target from using sound-based moves for two turns.
+TYPE:DARK
+PP:15
+POWER:80
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:245
+EFFECTTARGET:SELF
+# 447 BEAT UP
+NAME:Beat Up
+DESCRIPTION:The user gets all party Pokémon to attack the target. The more party Pokémon, the greater the number of attacks.
+PP:10
+TYPE:DARK
+CATEGORY:PHYSICAL
+EFFECT:246
+EFFECTTARGET:SELF
+# 448 STRENGTH SAP
+NAME:Strength Sap
+DESCRIPTION:The user restores its own HP by the same amount as the target's Attack stat. It then lowers the target's Attack stat.
+TYPE:GRASS
+PP:10
+CATEGORY:STATUS
+EFFECT:247
+# 449 GRUDGE
+NAME:Grudge
+DESCRIPTION:If the user faints, the user's grudge fully depletes the PP of the opponent's move that knocked it out.
+TYPE:GHOST
+PP:5
+CATEGORY:STATUS
+EFFECT:248
+TARGET:SELF

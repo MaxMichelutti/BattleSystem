@@ -77,6 +77,9 @@ void Monster::init(unsigned int species_id, unsigned int level,unsigned int form
         abilities.push_back(spec->getAbility2(getFormId()));
     unsigned int random_index = RNG::getRandomInteger(0,abilities.size()-1);
     ability = abilities[random_index];
+
+    //set random hidden power type
+    hidden_power_type = static_cast<Type>(RNG::getRandomInteger(1,18));
 }
 
 void Monster::init_gender(GenderRule rule){
@@ -469,6 +472,10 @@ void Monster::printSummary()const{
         Attack* attack = Attack::getAttack(attack_id);
         attack->printSummary(current_pp);
     }
+}
+
+Type Monster::getHiddenPowerType()const{
+    return hidden_power_type;
 }
 
 bool Monster::canEvolve()const{

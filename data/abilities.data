@@ -280,3 +280,15 @@ SPEED_BOOST
 The Pokémon's Speed stat is boosted every turn.
 CURIOUS_MEDICINE
 When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes from allies.
+TELEPATHY
+The Pokémon anticipates and dodges the attacks of its allies.
+LIGHT_METAL
+Halves the Pokémon's weight.
+CONTRARY
+Reverses any stat changes affecting the Pokémon so that attempts to boost its stats instead lower them and attempts to lower its stats will boost them.
+PICKPOCKET
+The Pokémon steals the held item from attackers that make direct contact with it.
+HONEY_GATHER
+The Pokémon may gather Honey after a battle.
+MAGMA_ARMOR
+The Pokémon’s hot magma coating prevents it from being frozen.

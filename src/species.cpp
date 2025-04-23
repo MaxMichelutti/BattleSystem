@@ -935,6 +935,15 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 181:{//ampharos
             return curr_form==0 && mega_item==AMPHAROSITE;
         }
+        case 208:{//steelix
+            return curr_form==0 && mega_item==STEELIXITE;
+        }
+        case 212:{//scizor
+            return curr_form==0 && mega_item==SCIZORITE;
+        }
+        case 214:{//heracross
+            return curr_form==0 && mega_item==HERACRONITE;
+        }
         default:return false;
     }
 }
@@ -1002,7 +1011,19 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         }
         case 181:{//ampharos
             if(curr_form==0 && mega_item==AMPHAROSITE)
-                return 131;
+                return 61;
+        }
+        case 208:{//steelix
+            if(curr_form==0 && mega_item==STEELIXITE)
+                return 91;
+        }
+        case 212:{//scizor
+            if(curr_form==0 && mega_item==SCIZORITE)
+                return 93;
+        }
+        case 214:{//heracross
+            if(curr_form==0 && mega_item==HERACRONITE)
+                return 94;
         }
         default:return 0;
     }

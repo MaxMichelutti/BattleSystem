@@ -155,7 +155,13 @@ static std::unordered_map<std::string,Ability> strToAbility = {
     {"DRIZZLE",DRIZZLE},
     {"SPEED_BOOST",SPEED_BOOST},
     {"PRANKSTER",PRANKSTER},
-    {"CURIOUS_MEDICINE",CURIOUS_MEDICINE}
+    {"CURIOUS_MEDICINE",CURIOUS_MEDICINE},
+    {"TELEPATHY",TELEPATHY},
+    {"LIGHT_METAL",LIGHT_METAL},
+    {"CONTRARY",CONTRARY},
+    {"PICKPOCKET",PICKPOCKET},
+    {"HONEY_GATHER",HONEY_GATHER},
+    {"MAGNA_ARMOR",MAGMA_ARMOR}
 };
 
 std::string abilityToString(Ability);

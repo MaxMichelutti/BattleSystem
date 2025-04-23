@@ -145,11 +145,9 @@ Type Attack::getType()const {
 
 Type Attack::getType(Battler* user)const{
     Type attack_type = getType();
-    if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
-        attack_type = ELECTRIC;
-    if(user->hasAbility(AERILATE) && attack_type==NORMAL)
-        attack_type = FLYING;
-    if(getEffectId()==215){
+    if(getEffectId()==238){//hidden power
+        attack_type = user->getHiddenPowerType();
+    }else if(getEffectId()==215){
         //raging bull changes type depending on the user's form
         switch(user->getMonster()->getFormId()){
             case 46:{
@@ -170,6 +168,10 @@ Type Attack::getType(Battler* user)const{
             }
         }
     }
+    if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
+        attack_type = ELECTRIC;
+    if(user->hasAbility(AERILATE) && attack_type==NORMAL)
+        attack_type = FLYING;
     return attack_type;
 }
 

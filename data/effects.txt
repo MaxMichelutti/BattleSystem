@@ -62,7 +62,7 @@
 62: +2 SPATT user
 63: +1 Evasivenes user
 64: Damage depends on Speed delta
-65: hits through protect
+65: removes protects before hitting
 66: light screen
 67: paralysis, bypass accuracy during rain and worse accuracy during sun
 68: rollout
@@ -232,3 +232,17 @@
 232: incresed crit + poison opponent
 233: uses target attack stat instead of user
 234: torment
+235: start snow + switch out
+236: remove 3 PP of opponent last used attack
+237: equally split HP among active monsters
+238: type of attack depends on monster hidden power type
+239: hits through protect
+240: +2 speed, makes user lighter
+241: poison opponent + power doubled if opponent is poisoned
+242: power split
+243: guard split
+244: power trick
+245: prevents target from using sound based moves for 2 turns
+246: beat up: hits once for each alive monster in the user party
+247: -1 att opponent, user heals same amount as opponent attack stat before being reduced
+248: if the user faints all PP of attack that knocked user out are removed

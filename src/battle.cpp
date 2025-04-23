@@ -707,6 +707,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         event_handler->displayMsg(user_mon_name+" woke up!");
         active_user->clearPermanentStatus();
     }
+
     if(active_user->isAsleep()){
         PermanentStatusCondition new_condition = decrementSleep(status);
         active_user->setPermanentStatusForced(new_condition);
@@ -1086,6 +1087,7 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
 unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool target_attack_first){
     Battler* active_user = getActorBattler(actor);
     Battler* active_target = getActorBattler(otherBattleActionActor(actor));
+    MonsterTeam* user_team = getActorTeam(actor);
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
     // check if move is multi hit
@@ -1105,6 +1107,8 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             number_of_hits = 5;
     }else if(attack->getEffectId()==75){//double hitting moves
         number_of_hits = 2;
+    }else if(attack->getEffectId()==246){//beat up hits once for each team member
+        number_of_hits = user_team->getSize();
     }else if(active_user->hasAbility(PARENTAL_BOND)){
         // parental bond always guarantees 2 shots
         number_of_hits = 2;
@@ -1166,6 +1170,12 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         }
         //cycle in order to deal with multi hit moves
         for(unsigned int i=0;i<number_of_hits;i++){
+            if(effect_id==246 && user_team->getMonster(i)->isFainted()){
+                // beat up skips fainted monsters
+                continue;
+            }else{
+                event_handler->displayMsg(user_team->getMonster(i)->getNickname()+" attacks!");
+            }
             actual_hits++;
             if(i==1 && parental_bond_has_effect){
                 // display second attack msg for parental bond
@@ -1218,8 +1228,14 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(is_critical_hit){
                 event_handler->displayMsg("It's a critical hit!");
             }
+
+            unsigned int beatup_id = 0;
+            if(effect_id==246){
+                // beat up attack for i-th member of the team
+                beatup_id = i;
+            }
             // apply damage
-            unsigned int damage = max(computeDamage(attack->getId(), actor, is_critical_hit, target_attack_first,effectiveness,category),1);
+            unsigned int damage = max(computeDamage(attack->getId(), actor, is_critical_hit, target_attack_first,effectiveness,category,beatup_id),1);
             if(i==1 && parental_bond_has_effect){
                 // parental bond second shot is weakened in power
                 damage = max(1, damage / 4);
@@ -1288,7 +1304,13 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(effect_id==44){// if the damage of the attack kills the target, the user gains +2 ATT
                 active_user->changeAttackModifier(+2);
             }
-            if(active_target->hasVolatileCondition(DESTINY_BOND)){
+            //apply grudge effect
+            if(active_target->hasVolatileCondition(GRUDGED) && !active_user->isFainted()){
+                event_handler->displayMsg(opponent_mon_name+" removed all PPs of "+user_mon_name+"'s "+attack->getName()+"!");
+                active_user->usePP(attack->getId(),1000);//no attack should have more than 1000 PP, otherwise this code fails
+            }
+            //apply destiny bond effect
+            if(active_target->hasVolatileCondition(DESTINY_BOND) && !active_user->isFainted()){
                 event_handler->displayMsg(opponent_mon_name+" takes "+user_mon_name+" with it!");
                 active_user->addDirectDamage(active_user->getMaxHP());
             }
@@ -1462,8 +1484,26 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
 
     if(effect_is_applied){
         switch(effect){
-            case 1: { // lower attack by 1 opponent
+            case 1:case 247: { // lower attack by 1 opponent
+                //in case of 247, user heals attack stat HP
+                unsigned int attack_stat = active_target->getModifiedAttack();
                 active_target->changeAttackModifier(-1);
+                if(effect==247){
+                    //heal attack_stat HP of user
+                    unsigned int heal_amount = max(attack_stat,1);
+                    if(!active_user->hasAbility(LIQUID_OOZE)){
+                        unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                        if(actual_heal_amount>0)
+                            event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+                    }else{
+                        unsigned int actual_damage_amount = active_user->addDirectDamage(heal_amount);
+                        event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
+                        if(actual_damage_amount>0)
+                            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                        if(active_user->isFainted())
+                            return;
+                    }
+                }
                 break;
             }
             case 46:{ // lower attack by 2 opponent
@@ -1486,7 +1526,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 4:case 210:case 222:case 232:{//poison opponent
+            case 4:case 210:case 222:case 232:case 241:{//poison opponent
                 if(effect==222)
                     active_target->changeSpeedModifier(-1);
                 if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
@@ -1911,8 +1951,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 42:{// +2 speed user
+            case 42:case 240:{// +2 speed user
                 active_user->changeSpeedModifier(+2);
+                if(effect==240){
+                    unsigned int old_weight = active_user->getWeight();
+                    active_user->changeWeight(-1000);
+                    if(old_weight != active_user->getWeight())
+                        event_handler->displayMsg(user_mon_name+" became nimbler!");
+                }
                 break;
             }
             case 47:{//roost
@@ -2184,13 +2230,22 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 91:{// remove 4 PP from opponents last move used
+            case 91:case 236:{
+                // 91: remove 4 PP from opponents last move used
+                //236: remove 3 PP
+                unsigned int pp_amount;
+                if(effect == 91)
+                    pp_amount = 4;
+                else
+                    pp_amount = 3;
                 Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
                 if(last_attack == nullptr || ! active_target->hasPP(last_attack->getId())){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
                 }else{
-                    active_target->usePP(last_attack->getId(),4);
+                    active_target->usePP(last_attack->getId(),pp_amount);
                     event_handler->displayMsg(opponent_mon_name+"'s "+last_attack->getName()+" lost some PP!");
                 }
                 break;
@@ -2404,9 +2459,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     return;
                 break;
             }
-            case 124:case 231:{
+            case 124:case 231:case 235:{
                 // user switches out, 
                 // fails if trapped in the case of 124
+                // start snow in case of 235
                 if(!user_team->hasAliveBackup()){
                     if(attack->getCategory() == STATUS){
                         event_handler->displayMsg("But it failed!");
@@ -2420,6 +2476,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user->setLastAttackFailed();
                     }
                     break;
+                }
+                if(field->getWeather()!=SNOWSTORM && effect==235){
+                    event_handler->displayMsg(user_mon_name+" started a snowstorm!");
+                    field->setWeather(SNOWSTORM,5);
                 }
                 //force user to switch
                 forceSwitch(actor);
@@ -3196,6 +3256,94 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 active_target->changeSpecialAttackModifier(-1);
                 break;
             }
+            case 237:{
+                //pain split
+                unsigned int old_hp_user = active_user->getCurrentHP();
+                unsigned int old_hp_target = active_target->getCurrentHP();
+                unsigned int new_hp_user = (old_hp_user + old_hp_target) / 2;
+                unsigned int new_hp_target = (old_hp_user + old_hp_target) - new_hp_user;
+                unsigned int user_amount = 0;
+                unsigned int target_amount = 0;
+                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" share their HP!");
+                if(old_hp_user > new_hp_user){
+                    user_amount = active_user->addDirectDamage(old_hp_user - new_hp_user);
+                    event_handler->displayMsg(user_mon_name+" took "+std::to_string(user_amount)+" damage!");
+                }else if(old_hp_user < new_hp_user){
+                    user_amount = active_user->removeDamage(new_hp_user - old_hp_user);
+                    if(user_amount > 0)
+                        event_handler->displayMsg(user_mon_name+" was healed by "+std::to_string(user_amount)+" HP!");
+                }
+                if(old_hp_target > new_hp_target){
+                    target_amount = active_target->addDirectDamage(old_hp_target - new_hp_target);
+                    event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(target_amount)+" damage!");
+                }else if(old_hp_target < new_hp_target){
+                    target_amount = active_target->removeDamage(new_hp_target - old_hp_target);
+                    if(target_amount > 0)
+                        event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(target_amount)+" HP!");
+                }
+                break;
+            }
+            case 242:{
+                //power split
+                Stats user_battle_stats = active_user->getBattleStats();
+                Stats target_battle_stats = active_target->getBattleStats();
+                unsigned int user_atk = user_battle_stats.getAtk();
+                unsigned int user_spatk = user_battle_stats.getSpatk();
+                unsigned int target_atk = target_battle_stats.getAtk();
+                unsigned int target_spatk = target_battle_stats.getSpatk();
+                unsigned int new_user_atk = (user_atk + target_atk) / 2;
+                unsigned int new_user_spatk = (user_spatk + target_spatk) / 2;
+                unsigned int new_target_atk = (user_atk + target_atk) - new_user_atk;
+                unsigned int new_target_spatk = (user_spatk + target_spatk) - new_user_spatk;
+                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their attacking stats!");
+                active_user->setBattleAttack(new_user_atk);
+                active_user->setBattleSpecialAttack(new_user_spatk);
+                active_target->setBattleAttack(new_target_atk);
+                active_target->setBattleSpecialAttack(new_target_spatk);
+                break;
+            }
+            case 243:{
+                //guard split
+                Stats user_battle_stats = active_user->getBattleStats();
+                Stats target_battle_stats = active_target->getBattleStats();
+                unsigned int user_def = user_battle_stats.getDef();
+                unsigned int user_spdef = user_battle_stats.getSpdef();
+                unsigned int target_def = target_battle_stats.getDef();
+                unsigned int target_spdef = target_battle_stats.getSpdef();
+                unsigned int new_user_def = (user_def + target_def) / 2;
+                unsigned int new_user_spdef = (user_spdef + target_spdef) / 2;
+                unsigned int new_target_def = (user_def + target_def) - new_user_def;
+                unsigned int new_target_spdef = (user_spdef + target_spdef) - new_user_spdef;
+                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their defending stats!");
+                active_user->setBattleAttack(new_user_def);
+                active_user->setBattleSpecialAttack(new_user_spdef);
+                active_target->setBattleAttack(new_target_def);
+                active_target->setBattleSpecialAttack(new_target_spdef);
+                break;
+            }
+            case 244:{
+                //power trick
+                Stats user_battle_stats = active_user->getBattleStats();
+                unsigned int user_atk = user_battle_stats.getAtk();
+                unsigned int user_def = user_battle_stats.getDef();
+                active_user->setBattleAttack(user_def);
+                active_user->setBattleDefense(user_atk);
+                break;
+            }
+            case 245:{
+                //target cannot use sound based attacks for 2 turns
+                active_target->addVolatileCondition(THROAT_CHOPPED, 2);
+                break;
+            }
+            case 248:{
+                //grudge
+                if(active_user->hasVolatileCondition(GRUDGED)){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break; 
+                }
+                active_user->addVolatileCondition(GRUDGED, -1);
+            }
             default:break;
         }
     }
@@ -3252,6 +3400,7 @@ void Battle::decrementVolatiles(Battler* active_user){
         active_user->decrementVolatileCondition(TORMENTED);
     }
     active_user->removeVolatileCondition(FLINCH);
+    active_user->decrementVolatileCondition(THROAT_CHOPPED);
 }
 
 void Battle::forgetMoveVolatiles(Battler* active_user){
@@ -3329,7 +3478,8 @@ void Battle::performSwitch(BattleAction action){
     checkUproars();
 }
 
-unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool attack_after_target, float effectiveness, AttackType category){
+unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, 
+    bool attack_after_target, float effectiveness, AttackType category,unsigned int beat_up_index){
     Attack* attack = Attack::getAttack(attack_id);
     if(category == STATUS){
         return 0;
@@ -3452,7 +3602,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         attack_stat *= 0.5;
     }
     
-    double base_power = computePower(attack,user, attack_after_target);
+    double base_power = computePower(attack,user, attack_after_target,beat_up_index);
     // compute modifiers
     unsigned int level = user_monster->getLevel();
     float stab_multiplier = 1;
@@ -3557,9 +3707,10 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     return integer_damage;
 }
 
-double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_after_target){
+double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_after_target,unsigned int beat_up_index){
     Battler* active_user = getActorBattler(actor);
     Battler* active_target = getActorBattler(otherBattleActionActor(actor));
+    MonsterTeam* active_team = getActorTeam(actor);
     unsigned int effect = attack->getEffectId();
     unsigned int attack_id = attack->getId();
     // get base power
@@ -3820,6 +3971,22 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
                 base_power *= 2;
             }
             break;
+        }
+        case 241:{
+            //power is doubled if opponent is poisoned
+            if(active_target->isPoisoned()){
+                base_power *= 2;
+            }
+            break;
+        }
+        case 246:{
+            //power depends on i-th team member of the team
+            Monster* ith_monster = active_team->getMonster(beat_up_index);
+            if(ith_monster == nullptr)
+                break;
+            if(ith_monster->isFainted())
+                break;
+            base_power = ith_monster->getStats().getAtk()/10 + 5;            
         }
         default: break;
     }
@@ -4828,6 +4995,15 @@ void Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
     if(active_target->isFainted()){
         return;
     }
+    // PICKPOCKET ability effect
+    if(active_user->hasHeldItem() && 
+        canBeStolen(active_user->getHeldItem()) && 
+        !active_target->hasHeldItem() &&
+        !active_user->hasAbility(STICKY_HOLD)){
+        ItemType stolen_item = active_user->removeHeldItem();
+        active_target->setHeldItem(stolen_item);
+        event_handler->displayMsg(opponent_mon_name+" steals "+user_mon_name+"'s "+ItemData::getItemData(stolen_item)->getName()+"!");
+    }
     // CUTE CHARM ability effect
     Gender active_user_gender = active_user->getGender();
     Gender active_target_gender = active_target->getGender();
@@ -4880,6 +5056,16 @@ bool Battle::checkIfAttackFails(Attack* attack,
         return true;
     }
 
+    //check if attack fails due to throat chop
+    if(active_user->hasVolatileCondition(THROAT_CHOPPED) && 
+        attack->isSoundBased()){
+        event_handler->displayMsg(user_mon_name+" is cannot use "+attack->getName()+" sound moves!");
+        decrementVolatiles(active_user);
+        active_user->setLastAttackFailed();
+        active_user->removeVolatileCondition(LASER_FOCUS);
+        return true;
+    }
+
     // check if gravity blocks attack
     if(field->hasFullFieldEffect(GRAVITY) && attack_type==FLYING){
         event_handler->displayMsg(user_mon_name+" cannot use "+attack->getName()+" due to gravity!");
@@ -4915,6 +5101,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     // check if attack fails due to dark types being immune to prankster boosts
     if(active_target->hasType(DARK) && 
         attack->getCategory() == STATUS &&
+        attack->getTarget() == TARGET_OPPONENT &&
         attack->getPriorityLevel() < action.getPriority()){
         attack_failed = true;
     }
@@ -5157,7 +5344,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_target->removeVolatileCondition(PROTECT);
     }
     if(active_target->hasVolatileCondition(PROTECT) && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        attack->getEffectId()!=239){// SOME ATTACKS GO THROUGH PROTECT
         event_handler->displayMsg(opponent_mon_name+" protected itself!");
         // active_target->removeVolatileCondition(PROTECT);
         decrementVolatiles(active_user);

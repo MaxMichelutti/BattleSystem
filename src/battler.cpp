@@ -288,6 +288,9 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     hits_taken = 0;
     resetDamageTakenThisTurn();
     is_mold_breaker_active = false;
+    weight = monster->getWeight();
+    height = monster->getHeight();
+    battle_stats = monster->getStats();
 }
 
 void Battler::setMonster(Monster* monster){
@@ -306,6 +309,9 @@ void Battler::setMonster(Monster* monster){
     last_attack_failed = false;
     hits_taken = 0;
     had_held_item = false;
+    weight = monster->getWeight();
+    height = monster->getHeight();
+    battle_stats = monster->getStats();
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
@@ -317,6 +323,7 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(SMACKED_DOWN);
     removeVolatileCondition(UPROARING);
     removeVolatileCondition(JUST_EATEN_BERRY);
+    removeVolatileCondition(THROAT_CHOPPED);
 }
 
 Battler::~Battler() {
@@ -563,6 +570,8 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
 }
 
 bool Battler::changeAttackModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -587,12 +596,16 @@ bool Battler::changeAttackModifier(int amount) {
 }
 
 bool Battler::changeAttackModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
     return res;
 }
 
 bool Battler::changeDefenseModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     std::string name = getNickname();
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
@@ -618,12 +631,16 @@ bool Battler::changeDefenseModifier(int amount) {
 }
 
 bool Battler::changeDefenseModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res = stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
     return res;
 }
 
 bool Battler::changeSpecialAttackModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -645,12 +662,16 @@ bool Battler::changeSpecialAttackModifier(int amount) {
 
 
 bool Battler::changeSpecialAttackModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
     return res;
 }
 
 bool Battler::changeSpecialDefenseModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -671,12 +692,16 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
 }
 
 bool Battler::changeSpecialDefenseModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
     return res;
 }
 
 bool Battler::changeSpeedModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -697,12 +722,16 @@ bool Battler::changeSpeedModifier(int amount) {
 }
 
 bool Battler::changeSpeedModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
     return res;
 }
 
 bool Battler::changeAccuracyModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -732,12 +761,16 @@ bool Battler::changeAccuracyModifier(int amount) {
 }
 
 bool Battler::changeAccuracyModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
     return res;
 }
 
 bool Battler::changeEvasionModifier(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
@@ -758,6 +791,8 @@ bool Battler::changeEvasionModifier(int amount) {
 }
 
 bool Battler::changeEvasionModifierForced(int amount) {
+    if(hasAbility(CONTRARY))
+        amount = -amount;
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
     return res;
@@ -795,7 +830,7 @@ void Battler::resetBadPoisonCounter() {
 }
 
 unsigned int Battler::getModifiedAttack()const {
-    unsigned int base_attack = monster->getStats().getAtk();
+    unsigned int base_attack = battle_stats.getAtk();
     unsigned int base_modified = base_attack;
     int modifier = getAttackModifier();
     if(modifier>0){
@@ -825,7 +860,7 @@ unsigned int Battler::getModifiedSpecialDefense()const{
 }
 
 unsigned int Battler::getModifiedDefenseInternal()const {
-    unsigned int base_defense = monster->getStats().getDef();
+    unsigned int base_defense = battle_stats.getDef();
     unsigned int base_modified = base_defense;
     int modifier = getDefenseModifier();
     if(modifier>0){
@@ -840,7 +875,7 @@ unsigned int Battler::getModifiedDefenseInternal()const {
 }
 
 unsigned int Battler::getModifiedSpecialAttack()const {
-    unsigned int base_special_attack = monster->getStats().getSpatk();
+    unsigned int base_special_attack = battle_stats.getSpatk();
     unsigned int base_modified = base_special_attack;
     int modifier = getSpecialAttackModifier();
     if(modifier>0){
@@ -855,7 +890,7 @@ unsigned int Battler::getModifiedSpecialAttack()const {
 }
 
 unsigned int Battler::getModifiedSpecialDefenseInternal()const {
-    unsigned int base_special_defense = monster->getStats().getSpdef();
+    unsigned int base_special_defense = battle_stats.getSpdef();
     unsigned int base_modified = base_special_defense;
     int modifier = getSpecialDefenseModifier();
     if(modifier>0){
@@ -870,7 +905,7 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
 }
 
 unsigned int Battler::getModifiedSpeed()const {
-    unsigned int base_speed = monster->getStats().getSpdef();
+    unsigned int base_speed = battle_stats.getSpdef();
     unsigned int base_modified = base_speed;
     int modifier = getSpeedModifier();
     if(modifier>0){
@@ -1158,6 +1193,8 @@ bool Battler::canBeFrozen()const{
     if(hasPermanentStatus())
         return false;
     if(field->getWeather()==SUN && hasAbility(LEAF_GUARD))
+        return false;
+    if(hasAbility(MAGMA_ARMOR))
         return false;
     return true;
 }
@@ -1867,11 +1904,40 @@ bool Battler::clearPermanentStatus(){
 }
 
 unsigned int Battler::getHeight()const{
-    return monster->getHeight();
+    return height;
 }
 
 unsigned int Battler::getWeight()const{
-    return monster->getWeight();
+    if(hasAbility(LIGHT_METAL))
+        return max(1,weight/2);
+    return weight;
+}
+
+void Battler::changeWeight(int amount){
+    if(amount == 0)
+        return;
+    if(amount > 0){
+        weight+=amount;
+    }else{
+        amount = -amount;
+        if(amount >= weight)
+            weight = 1;
+        else
+            weight -= amount;
+    }
+}
+void Battler::changeHeight(int amount){
+    if(amount == 0)
+        return;
+    if(amount > 0){
+        height+=amount;
+    }else{
+        amount = -amount;
+        if(amount >= height)
+            height = 1;
+        else
+            height -= amount;
+    }
 }
 
 bool Battler::lastAttackFailed()const{
@@ -1956,6 +2022,10 @@ bool Battler::isMoldBreakerActive()const{
 }
 void Battler::deactivateMoldBreaker(){
     is_mold_breaker_active = false;
+}
+
+Type Battler::getHiddenPowerType()const{
+    return monster->getHiddenPowerType();
 }
 
 bool Battler::hasHeldItem()const{
@@ -2335,6 +2405,13 @@ bool Battler::megaEvolve(){
     if(monster->megaEvolve()){
         handler->displayMsg(old_nick+" mega evolved!");
         setAbility(monster->getAbility());
+        weight = monster->getWeight();
+        height = monster->getHeight();
+        types.clear();
+        types.insert(monster->getType1());
+        if(monster->getType2()!=NO_TYPE){
+            types.insert(monster->getType2());
+        }
         return true;
     }
     return false;
@@ -2344,4 +2421,23 @@ bool Battler::canMegaEvolve()const{
     if(isFainted())
         return false;
     return monster->canMegaEvolve();
+}
+
+Stats Battler::getBattleStats()const{
+    return battle_stats;
+}
+void Battler::setBattleAttack(unsigned int attack){
+    battle_stats.setAtk(attack);
+}
+void Battler::setBattleDefense(unsigned int defense){
+    battle_stats.setDef(defense);
+}
+void Battler::setBattleSpecialAttack(unsigned int special_attack){
+    battle_stats.setSpatk(special_attack);
+}
+void Battler::setBattleSpecialDefense(unsigned int special_defense){
+    battle_stats.setSpdef(special_defense);
+}
+void Battler::setBattleSpeed(unsigned int speed){
+    battle_stats.setSpd(speed);
 }

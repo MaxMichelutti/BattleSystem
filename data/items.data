@@ -708,3 +708,18 @@ NAME:Ampharosite
 CATEGORY:MEGA_STONE
 DESCRIPTION:One of a variety of mysterious Mega Stones. Have Ampharos hold it, and this stone will enable it to Mega Evolve during battle.
 PRICE:100000
+# 132 STEELIXITE
+NAME:Steelixite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Steelix hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 133 SCIZORITE
+NAME:Scizorite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Scizor hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 134 HERACRONITE
+NAME:Heracronite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Heracross hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000

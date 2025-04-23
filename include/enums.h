@@ -138,7 +138,9 @@ enum VolatileStatusCondition{
     JUST_EATEN_BERRY,
     INFESTED,
     BOUNCING,
-    TORMENTED
+    TORMENTED,
+    THROAT_CHOPPED,
+    GRUDGED
 };
 
 enum Gender{
@@ -380,7 +382,13 @@ enum Ability{
     DRIZZLE,
     SPEED_BOOST,
     PRANKSTER,
-    CURIOUS_MEDICINE
+    CURIOUS_MEDICINE,
+    TELEPATHY,
+    LIGHT_METAL,
+    CONTRARY,
+    PICKPOCKET,
+    HONEY_GATHER,
+    MAGMA_ARMOR
 };
 
 enum ItemCategory{
@@ -529,7 +537,10 @@ enum ItemType{
     DUSK_STONE,
     DAWN_STONE,
     ICE_STONE,
-    AMPHAROSITE
+    AMPHAROSITE,
+    STEELIXITE,
+    SCIZORITE,
+    HERACRONITE
 };
 
 #endif

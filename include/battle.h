@@ -129,13 +129,13 @@ class Battle{
     void applyRecoil(Attack*,unsigned int,BattleActionActor);
     unsigned int applyDamage(Attack*,BattleActionActor, bool moves_after_target);//returns the actual damage dealt
     bool checkIfMoveMisses(Attack* attack, BattleActionActor actor);//true if move results in miss
-    double computePower(Attack* attack, BattleActionActor actor, bool moves_after_target);
+    double computePower(Attack* attack, BattleActionActor actor, bool moves_after_target,unsigned int beat_up_index);
     void performAction(BattleAction action, std::vector<BattleAction>& all_actions);
     void performAttack(BattleAction action, std::vector<BattleAction>& all_actions);
     void performSwitch(BattleAction action);
     void performUseItem(BattleAction action);
     void performRechargeTurn(BattleAction action);
-    unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target,float effectiveness,AttackType category);
+    unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target,float effectiveness,AttackType category,unsigned int beat_up_index);
     void performEntryHazardCheck(BattleActionActor actor);
     bool thereIsaCloudNine();
     void removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor actor_switching_out);

@@ -269,12 +269,16 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             }
             break;
         }
-        case 4:case 232:{
+        case 4:case 232:case 241:{
             // poison opp
             if(enemy_active->canBePoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
                 field->getTerrain()!=MISTY_FIELD){
                 total_utility += 50 * effect_prob_mult;
+            }
+            if(effect==241 && enemy_active->isPoisoned()){
+                //doubles in power if opponent is already poinìsoned
+                total_utility *= 2;
             }
             break;
         }
@@ -485,7 +489,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
             break;
         }
-        case 32:case 123:case 124:case 185:case 231:{
+        case 32:case 123:case 124:case 185:case 231:case 235:{
             // involves switching
             auto enemy_types = enemy_active->getTypes();
             float effectiveness = 1;
@@ -495,6 +499,10 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                     false,false);
             }
             total_utility += 20 * effectiveness + effect_prob_mult;
+            if(effect==235 && field->getWeather()!=SNOWSTORM){
+                // set snowstorm
+                total_utility += 30;
+            }
             break;
         }
         case 33:{
@@ -552,7 +560,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 50;
             break;
         }
-        case 42:{
+        case 42:case 240:{
             // +2 speed user
             unsigned int speed_mod = cpu_active->getSpeedModifier();
             total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
@@ -888,7 +896,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 30;
             break;
         }
-        case 91:{
+        case 91:case 236:{
             //remove 4 PP from enemy last used attack
             if(enemy_active->getLastAttackUsed()==0)
                 total_utility -= 10;
@@ -1767,6 +1775,55 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             //utiility is doubled if user does not hold items
             if(!cpu_active->hasHeldItem())
                 total_utility *= 2;
+            break;
+        }
+        case 234:{
+            //torment opponent
+            if(!enemy_active->hasVolatileCondition(TORMENTED))
+                total_utility += 60;
+            else
+                total_utility -= 10;
+            break;
+        }
+        case 237:{
+            //pain split
+            unsigned int user_hp = cpu_active->getCurrentHP();
+            unsigned int enemy_hp = enemy_active->getCurrentHP();
+            if(enemy_hp<=user_hp){
+                total_utility-=25;
+                break;
+            }
+            unsigned int percent = (user_hp*100)/enemy_hp;
+            total_utility += 50 - percent;
+            break;
+        }
+        case 242:{
+            //power split
+            Stats user_stats = cpu_active->getStats();
+            Stats enemy_stats = enemy_active->getStats();
+            if(user_stats.getAtk() < enemy_stats.getAtk() + 1)
+                total_utility += 20;
+            if(user_stats.getSpatk() < enemy_stats.getSpatk() + 1)
+                total_utility += 20;
+            break;
+        }
+        case 243:{
+            //guard split
+            Stats user_stats = cpu_active->getStats();
+            Stats enemy_stats = enemy_active->getStats();
+            if(user_stats.getDef() < enemy_stats.getDef() + 1)
+                total_utility += 15;
+            if(user_stats.getSpdef() < enemy_stats.getSpdef() + 1)
+                total_utility += 15;
+            break;
+        }
+        case 244:{
+            //power trick
+            Stats user_stats = cpu_active->getStats();
+            if(user_stats.getAtk() < user_stats.getDef())
+                total_utility += 10;
+            else
+                total_utility -= 10;
             break;
         }
         default: break;
