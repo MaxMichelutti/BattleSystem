@@ -4164,3 +4164,31 @@ CATEGORY:STATUS
 EFFECT:250
 NO_METRONOME
 NO_SKETCH
+# 456 TRIPLE KICK
+NAME:Triple Kick
+DESCRIPTION:A consecutive three-kick attack that becomes more powerful with each successive hit.
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:10
+ACCURACY:90
+POWER:10
+CONTACT
+EFFECT:251
+EFFECTTARGET:SELF
+# 457 HEAL BELL
+NAME:Heal Bell
+DESCRIPTION:The user makes a soothing bell chime to cure the status conditions of all its fellow party Pokémon and allies.
+PP:5
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:252
+TARGET:SELF
+SOUND
+# 458 MILK DRINK
+NAME:Milk Drink
+DESCRIPTION:The user restores its own HP by up to half its max HP.
+PP:5
+CATEGORY:STATUS
+TYPE:NORMAL
+TARGET:SELF
+EFFECT:126

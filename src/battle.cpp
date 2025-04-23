@@ -1118,6 +1118,8 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         number_of_hits = 2;
     }else if(attack->getEffectId()==246){//beat up hits once for each team member
         number_of_hits = user_team->getSize();
+    }else if(attack->getEffectId()==251){//triple kick hits at most 3 times
+        number_of_hits = 3;
     }else if(active_user->hasAbility(PARENTAL_BOND)){
         // parental bond always guarantees 2 shots
         number_of_hits = 2;
@@ -1185,6 +1187,10 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }else{
                 event_handler->displayMsg(user_team->getMonster(i)->getNickname()+" attacks!");
             }
+            if(effect_id==251 && i>0 && checkIfMoveMisses(attack,actor)){
+                //attack misses at i-th hit
+                break;
+            }
             actual_hits++;
             if(i==1 && parental_bond_has_effect){
                 // display second attack msg for parental bond
@@ -1239,8 +1245,9 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }
 
             unsigned int beatup_id = 0;
-            if(effect_id==246){
+            if(effect_id==246 || effect_id==251){
                 // beat up attack for i-th member of the team
+                // triple kick attack for i-th hit has different power each time
                 beatup_id = i;
             }
             // apply damage
@@ -3380,6 +3387,26 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
+            case 252:{
+                //heal all team of status conditions
+                bool has_effect=false;
+                for(unsigned int i=0;i<user_team->getSize();i++){
+                    Monster* user_mon = user_team->getMonster(i);
+                    if(user_mon->isFainted())
+                        continue;
+                    if(attack->isSoundBased() && user_mon->getAbility() == SOUNDPROOF)//heal bell does not affect soundproof holders
+                        continue;
+                    if(user_mon->getPermanentStatus()==NO_PERMANENT_CONDITION)
+                        continue;
+                    user_mon->setPermanentStatus(NO_PERMANENT_CONDITION);
+                    has_effect=true;
+                }
+                if(!has_effect){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             default:break;
         }
     }
@@ -4033,6 +4060,11 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
                 base_power = 80;
             else
                 base_power = 40;
+            break;
+        }
+        case 251:{
+            //power is 10 + 10*beat_up_index
+            base_power = 10 + 10*beat_up_index;
             break;
         }
         default: break;

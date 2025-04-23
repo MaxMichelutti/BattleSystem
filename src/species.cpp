@@ -23,6 +23,12 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return USE_EVO_ITEM_DAY;
     if(evo_method == "USE_ITEM_NIGHT")
         return USE_EVO_ITEM_NIGHT;
+    if(evo_method=="LEVEL_ATK")
+        return LEVEL_ATK;
+    if(evo_method=="LEVEL_DEF")
+        return LEVEL_DEF;
+    if(evo_method=="LEVEL_EQUAL_ATK_DEF")
+        return LEVEL_EQUAL_ATK_DEF;
     // return LEVEL as default
     return LEVEL;
 }
@@ -49,6 +55,12 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "USE_ITEM_DAY";
         case USE_EVO_ITEM_NIGHT:
             return "USE_ITEM_NIGHT";
+        case LEVEL_ATK:
+            return "LEVEL_ATK";
+        case LEVEL_DEF:
+            return "LEVEL_DEF";
+        case LEVEL_EQUAL_ATK_DEF:
+            return "LEVEL_EQUAL_ATK_DEF";
         default:
             return "LEVEL";
     }

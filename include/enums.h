@@ -236,7 +236,10 @@ enum EvolutionMethod{
     FRIENDSHIP_NIGHT,
     FRIENDSHIP_DAY,
     USE_EVO_ITEM_DAY,
-    USE_EVO_ITEM_NIGHT
+    USE_EVO_ITEM_NIGHT,
+    LEVEL_ATK,
+    LEVEL_DEF,
+    LEVEL_EQUAL_ATK_DEF
 };
 
 enum Ability{
