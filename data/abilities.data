@@ -277,4 +277,6 @@ The Pokémon takes no damage when hit by Grass-type moves. Instead, its Attack s
 DRIZZLE
 The Pokémon makes it rain when it enters a battle.
 SPEED_BOOST
-The Pokémon's Speed stat is boosted every turn. 
+The Pokémon's Speed stat is boosted every turn.
+CURIOUS_MEDICINE
+When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes from allies.

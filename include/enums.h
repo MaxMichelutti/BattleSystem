@@ -379,7 +379,8 @@ enum Ability{
     SAP_SIPPER,
     DRIZZLE,
     SPEED_BOOST,
-    PRANKSTER
+    PRANKSTER,
+    CURIOUS_MEDICINE
 };
 
 enum ItemCategory{
