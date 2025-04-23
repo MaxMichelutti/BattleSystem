@@ -292,3 +292,7 @@ HONEY_GATHER
 The Pokémon may gather Honey after a battle.
 MAGMA_ARMOR
 The Pokémon’s hot magma coating prevents it from being frozen.
+MOODY
+Every turn, one of the Pokémon's stats will be boosted sharply but another stat will be lowered.
+SUCTION_CUPS
+The Pokémon uses suction cups to stay in one spot. This protects it from moves and items that would force it to switch out.

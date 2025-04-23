@@ -23,6 +23,7 @@ const unsigned int MINIMIZE_ID = 261;
 const unsigned int DEFENSE_CURL_ID = 126;
 const unsigned int FOCUS_PUNCH_ID = 330;
 const unsigned int PURSUIT_ID = 388;
+const unsigned int SKETCH_ID = 455;
 
 const unsigned int MAX_UNSIGNED = 4294967295;
 

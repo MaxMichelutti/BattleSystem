@@ -129,6 +129,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_powder = (data.find("powder") != data.end());
     is_pulse = (data.find("pulse") != data.end());
     is_reflectable = (data.find("reflectable") != data.end());
+    is_sketchable = (data.find("no_sketch") == data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -235,6 +236,10 @@ bool Attack::isSoundBased()const {
     return is_sound_based;
 }
 
+bool Attack::canBeSketched()const {
+    return is_sketchable;
+}
+
 bool Attack::isPunching()const {
     return is_punching;
 }
@@ -295,6 +300,8 @@ void Attack::loadAttacks(){
             parsed_data["sound"] = "true";
         }else if(line.rfind("NO_METRONOME",0)==0){
             parsed_data["no_metronome"] = "true";
+        }else if(line.rfind("NO_SKETCH",0)==0){
+            parsed_data["no_sketch"] = "true";
         }else if(line.rfind("POWDER",0)==0){
             parsed_data["powder"] = "true";
         }else if(line.rfind("PULSE",0)==0){

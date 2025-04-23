@@ -386,6 +386,24 @@ bool Monster::forgetAttack(unsigned int attack_id) {
     return true;
 }
 
+bool Monster::replaceAttack(unsigned int old_attack_id, unsigned int new_attack_id){
+    if(hasAttack(new_attack_id))
+        return false;
+    if(!hasAttack(old_attack_id))
+        return false;
+    if(new_attack_id==0 || new_attack_id==STRUGGLE_ID)
+        return false;
+    for(int i=0;i<4;i++){
+        if(attack_ids[i].attack_id == old_attack_id){
+            attack_ids[i].attack_id = new_attack_id;
+            attack_ids[i].current_pp = Attack::getAttack(new_attack_id)->getMaxPP();
+            packAttacks();
+            return true;
+        }
+    }
+    return false;
+}
+
 void Monster::gainExperience(unsigned long exp) {
     experience += exp;
     unsigned int level_after_exp_gain = getLevelFromExp(experience, Species::getSpecies(species_id)->getExpCurve(getFormId()));

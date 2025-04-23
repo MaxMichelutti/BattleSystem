@@ -1090,6 +1090,15 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     MonsterTeam* user_team = getActorTeam(actor);
     std::string user_mon_name = getActorBattlerName(actor);
     std::string opponent_mon_name = getActorBattlerName(otherBattleActionActor(actor));
+    // check if present heals instead of dealing damage (20% chance)
+    if(attack->getEffectId() == 249 && RNG::getRandomInteger(1,5)==1){
+        // present heals the target
+        unsigned int heal_amount = (active_target->getMaxHP()+3) / 4;
+        unsigned int actual_heal = active_target->removeDamage(heal_amount);
+        if(actual_heal>0)
+            event_handler->displayMsg(user_mon_name+"'s present healed "+opponent_mon_name+" for "+std::to_string(actual_heal)+" HP!");
+        return 0;
+    }
     // check if move is multi hit
     unsigned int number_of_hits = 1;
     bool parental_bond_has_effect = false;
@@ -2260,11 +2269,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 93:{//Mimic
+                Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
+                if(last_attack==nullptr || !last_attack->canBeSketched()){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break;
+                }
                 if(!active_user->setMimickedAttack(active_target->getLastAttackUsed())){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else{
-                    Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
                     event_handler->displayMsg(user_mon_name+" mimicked "+opponent_mon_name+"'s "+last_attack->getName()+"!");
                 }
                 break;
@@ -2444,7 +2458,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 123:{
                 // target is forced to switch
-                if(!target_team->hasAliveBackup()){
+                if(!target_team->hasAliveBackup() || 
+                    active_target->hasAbility(SUCTION_CUPS)){
                     if(attack->getCategory() == STATUS){
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
@@ -3344,6 +3359,27 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 active_user->addVolatileCondition(GRUDGED, -1);
             }
+            case 250:{
+                //sketch
+                unsigned int last_attack_target_id = active_target->getLastAttackUsed();
+                Attack* last_attack_target = Attack::getAttack(last_attack_target_id);
+                if(last_attack_target == nullptr){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break;
+                }
+                if(!last_attack_target->canBeSketched()){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break;
+                }
+                if(!active_user->getMonster()->replaceAttack(SKETCH_ID,last_attack_target_id)){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    break;
+                }
+                break;
+            }
             default:break;
         }
     }
@@ -3987,6 +4023,17 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             if(ith_monster->isFainted())
                 break;
             base_power = ith_monster->getStats().getAtk()/10 + 5;            
+        }
+        case 249:{
+            //present: power can be among 40, 80 & 120
+            unsigned int random_number = RNG::getRandomInteger(1,80);
+            if(random_number<=10)
+                base_power = 120;
+            else if(random_number<=40)
+                base_power = 80;
+            else
+                base_power = 40;
+            break;
         }
         default: break;
     }
@@ -5603,6 +5650,83 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
             // user gets +1 speed
             event_handler->displayMsg(user_name+"' Speed Boost activates!");
             active_user->changeSpeedModifier(1);
+            break;
+        }
+        case MOODY:{
+            //user gets +2 in a random stat and -1 in another
+            event_handler->displayMsg(user_name+"'s Moody activates!");
+            unsigned int random_stat_high = RNG::getRandomInteger(0,6);
+            unsigned int random_stat_low =random_stat_high;
+            int count = 0;
+            while(random_stat_high == random_stat_low){
+                random_stat_low = RNG::getRandomInteger(0,6);
+                if(++count>20){//avoid infinite looping
+                    random_stat_low = (random_stat_high + 1)%7;
+                    break;
+                }
+            }
+            switch(random_stat_high){
+                case 0:{
+                    active_user->changeAttackModifier(2);
+                    break;
+                }
+                case 1:{
+                    active_user->changeDefenseModifier(2);
+                    break;
+                }
+                case 2:{
+                    active_user->changeSpecialAttackModifier(2);
+                    break;
+                }
+                case 3:{
+                    active_user->changeSpecialDefenseModifier(2);
+                    break;
+                }
+                case 4:{
+                    active_user->changeSpeedModifier(2);
+                    break;
+                }
+                case 5:{
+                    active_user->changeAccuracyModifier(2);
+                    break;
+                }
+                case 6:{
+                    active_user->changeEvasionModifier(2);
+                    break;
+                }
+                default:break; 
+            }
+            switch(random_stat_low){
+                case 0:{
+                    active_user->changeAttackModifier(-1);
+                    break;
+                }
+                case 1:{
+                    active_user->changeDefenseModifier(-1);
+                    break;
+                }
+                case 2:{
+                    active_user->changeSpecialAttackModifier(-1);
+                    break;
+                }
+                case 3:{
+                    active_user->changeSpecialDefenseModifier(-1);
+                    break;
+                }
+                case 4:{
+                    active_user->changeSpeedModifier(-1);
+                    break;
+                }
+                case 5:{
+                    active_user->changeAccuracyModifier(-1);
+                    break;
+                }
+                case 6:{
+                    active_user->changeEvasionModifier(-1);
+                    break;
+                }
+                default:break; 
+            }
             break;
         }
         default:break;

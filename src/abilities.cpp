@@ -64,6 +64,8 @@ bool isAbilityIgnorable(Ability ability){
         case SAP_SIPPER:
         case SNOW_CLOAK:
         case MAGMA_ARMOR:
+        case SUCTION_CUPS:
+        case LIGHT_METAL:
             return true;
         default:return false;
     }        

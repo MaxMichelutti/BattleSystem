@@ -161,6 +161,7 @@ CATEGORY:PHYSICAL
 CONTACT
 TYPE:NONE
 NO_METRONOME
+NO_SKETCH
 # 19 OUTRAGE
 NAME:Outrage
 DESCRIPTION:The user rampages and attacks for two to three turns. The user then becomes confused. 
@@ -4102,3 +4103,64 @@ PP:5
 CATEGORY:STATUS
 EFFECT:248
 TARGET:SELF
+# 450 OCTAZOOKA
+NAME:Octazooka
+DESCRIPTION:The user attacks by spraying ink in the target's face. This may also lower the target's accuracy.
+TYPE:WATER
+CATEGORY:SPECIAL
+PP:10
+ACCURACY:85
+POWER:65
+EFFECT:15
+EFFECTCHANCE:50
+# 451 PRESENT
+NAME:Present
+DESCRIPTION:The user attacks by giving the target a gift with a hidden trap. The gift restores HP sometimes, however.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:15
+ACCURACY:90
+EFFECT:249
+EFFECTTARGET:SELF
+# 452 STEEL WING
+NAME:Steel Wing
+DESCRIPTION:The target is hit with wings of steel. This may also boost the user's Defense stat.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+ACCURACY:90
+PP:25
+POWER:70
+CONTACT
+EFFECT:23
+EFFECTTARGET:SELF
+EFFECTCHANCE:10
+# 453 COMEUPPANCE
+NAME:Comeuppance
+DESCRIPTION:The user retaliates with much greater force against the opponent that last inflicted damage on it.
+TYPE:DARK
+PP:10
+CATEGORY:PHYSICAL
+CONTACT
+EFFECTTARGET:SELF
+EFFECT:206
+# 454 PSYSHIELD BASH
+NAME:Psyshield Bash
+DESCRIPTION:Cloaking itself in psychic energy, the user slams into the target. This also boosts the user’s Defense stat.
+TYPE:PSYCHIC
+CATEGORY:PHYSICAL
+PP:10
+POWER:70
+ACCURACY:90
+CONTACT
+EFFECT:23
+EFFECTTARGET:SELF
+# 455 SKETCH
+NAME:Sketch
+DESCRIPTION:This move enables the user to permanently learn the move last used by the target. Once used, Sketch disappears.
+PP:1
+TARGET:SELF
+TYPE:NORMAL
+CATEGORY:STATUS
+EFFECT:250
+NO_METRONOME
+NO_SKETCH

@@ -944,6 +944,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 214:{//heracross
             return curr_form==0 && mega_item==HERACRONITE;
         }
+        case 229:{//houndoom
+            return curr_form==0 && mega_item==HOUNDOOMINITE;
+        }
         default:return false;
     }
 }
@@ -1024,6 +1027,10 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 214:{//heracross
             if(curr_form==0 && mega_item==HERACRONITE)
                 return 94;
+        }
+        case 229:{//houndoom
+            if(curr_form==0 && mega_item==HOUNDOOMINITE)
+                return 97;
         }
         default:return 0;
     }

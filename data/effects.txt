@@ -246,3 +246,5 @@
 246: beat up: hits once for each alive monster in the user party
 247: -1 att opponent, user heals same amount as opponent attack stat before being reduced
 248: if the user faints all PP of attack that knocked user out are removed
+249: present -> attack has 20% chance to heal target, or may do damage with different random base power among 40 (40% chance), 80 (30% chance) and 120 (10% chance)
+250: sketch -> permanently replaces itself with the last attack used by the opponent

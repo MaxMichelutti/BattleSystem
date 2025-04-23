@@ -388,7 +388,9 @@ enum Ability{
     CONTRARY,
     PICKPOCKET,
     HONEY_GATHER,
-    MAGMA_ARMOR
+    MAGMA_ARMOR,
+    MOODY,
+    SUCTION_CUPS
 };
 
 enum ItemCategory{
@@ -540,7 +542,8 @@ enum ItemType{
     AMPHAROSITE,
     STEELIXITE,
     SCIZORITE,
-    HERACRONITE
+    HERACRONITE,
+    HOUNDOOMINITE
 };
 
 #endif

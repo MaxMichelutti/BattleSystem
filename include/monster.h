@@ -93,6 +93,7 @@ class Monster{
     bool hasAttack(unsigned int attack_id)const;
     bool learnAttack(unsigned int attack_id);
     bool forgetAttack(unsigned int attack_id);
+    bool replaceAttack(unsigned int old_attack_id, unsigned int new_attack_id);
     void gainExperience(unsigned long exp);
     static Monster* generateRandomMonster(unsigned int species_id);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level);
