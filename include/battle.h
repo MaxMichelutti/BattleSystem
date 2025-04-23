@@ -116,6 +116,7 @@ class Battle{
     void applyWeatherPostDamage(BattleActionActor actor);
     void applyFieldEffectsPostDamage(BattleActionActor actor);
     void applyTerrainPostDamage(BattleActionActor actor);
+    void applyAbilityPostDamage(BattleActionActor actor);
     void applySwitchInAbilitiesEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor);

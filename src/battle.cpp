@@ -419,6 +419,19 @@ void Battle::performTurn(){
         if(player_action.getAttackId()==PURSUIT_ID)
             player_action.setPriority(11);
     }
+    // 2.15 check prankster modifications
+    if(player_active->hasAbility(PRANKSTER) && isAttackingActionType(player_action.getActionType())){
+        Attack* attack = Attack::getAttack(player_action.getAttackId());
+        if(attack->getCategory() == STATUS){
+            player_action.setPriority(player_action.getPriority() + 1);
+        }
+    }
+    if(opponent_active->hasAbility(PRANKSTER) && isAttackingActionType(opponent_action.getActionType())){
+        Attack* attack = Attack::getAttack(opponent_action.getAttackId());
+        if(attack->getCategory() == STATUS){
+            opponent_action.setPriority(opponent_action.getPriority() + 1);
+        }
+    }
     // 2.2 apply trick room
     if(field->hasFullFieldEffect(TRICK_ROOM)){
         player_action.setSpeed(MAX_UNSIGNED - player_action.getSpeed());
@@ -977,7 +990,8 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor){
             switch(attack->getEffectId()){
                 case 4:case 5:case 14:
                 case 16:case 61:case 67:
-                case 76:{
+                case 76:case 104:case 210:
+                case 222:case 232:{
                     if(attack_accuracy > 50)
                         attack_accuracy = 50;
                     break;
@@ -1100,6 +1114,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
     unsigned int actual_damage = 0;
     unsigned int total_actual_damage = 0;
     unsigned int actual_hits = 0;
+    unsigned int effect_id = attack->getEffectId();
     // get category
     AttackType category = attack->getCategory();
     if(category != STATUS){
@@ -1110,10 +1125,10 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             active_target->getTypes(),
             active_target->isTouchingGround(),
             can_hit_ghosts,
-            attack->getEffectId() == 196
+            effect_id == 196
         );
         // check for immunity for sheer cold
-        if(attack->getEffectId() == 156 && active_target->hasType(ICE)){
+        if(effect_id == 156 && active_target->hasType(ICE)){
             effectiveness = 0;
         }
         // check for immunity for soundproof
@@ -1128,7 +1143,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         if(effectiveness == 0){
             event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
             decrementVolatiles(active_user);
-            if(attack->getEffectId() == 171 || attack->getEffectId() == 174){
+            if(effect_id == 171 || effect_id == 174){
                 // user takes 50% maxHP recoil damage
                 unsigned int max_hp = active_user->getMaxHP();
                 unsigned int damage = max_hp / 2;
@@ -1138,7 +1153,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             return 0;
         }
         // compute effective category for attack
-        if(attack->getEffectId()==210){//shell side arm chooses which category to be
+        if(effect_id==210){//shell side arm chooses which category to be
             unsigned int physical_dmg = baseDamage(active_user->getLevel(), attack->getPower(), active_user->getModifiedAttack(), active_target->getModifiedDefense());
             unsigned int special_dmg = baseDamage(active_user->getLevel(), attack->getPower(), active_user->getModifiedSpecialAttack(), active_target->getModifiedSpecialDefense());
             if(physical_dmg > special_dmg){
@@ -1170,7 +1185,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(active_user->hasHeldItem(RAZOR_CLAW)){//razor claw makes crits more likely for the user
                 crit_level+=1;
             }
-            if((attack->getEffectId() == 17 || attack->getEffectId()==197) 
+            if((effect_id == 17 || effect_id==197 || effect_id==232) 
                 && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
                 crit_level+=1;
             }
@@ -1193,7 +1208,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             }else if(crit_level>=3){
                 is_critical_hit = true;
             }
-            if(attack->getEffectId()==189)//always crits unless abilities deny it
+            if(effect_id==189)//always crits unless abilities deny it
                 is_critical_hit = true;
             // check for crit immunity
             if(active_target->hasAbility(SHELL_ARMOR) || //shell armor blocks crits
@@ -1209,10 +1224,10 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 // parental bond second shot is weakened in power
                 damage = max(1, damage / 4);
             }
-            if(attack->getEffectId() == 150 && damage >= active_target->getCurrentHP()){// user cannot be killed by this move
+            if(effect_id == 150 && damage >= active_target->getCurrentHP()){// user cannot be killed by this move
                 damage = active_target->getCurrentHP()-1;
             }
-            if(attack->getEffectId() == 103 || attack->getEffectId()==156){//one hit KO
+            if(effect_id == 103 || effect_id==156){//one hit KO
                 event_handler->displayMsg("It's a one hit KO!");//notice that this may only OHKO the substitute!
                 damage = active_target->getMaxHP();
             }
@@ -1225,7 +1240,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             
             bool makes_contact = false;
             if(attack->makesContact() || 
-                (attack->getEffectId() == 210 && category==PHYSICAL))//shell side arm becomes physical sometimes
+                (effect_id == 210 && category==PHYSICAL))//shell side arm becomes physical sometimes
                 makes_contact=true;
 
             // contact effects
@@ -1270,7 +1285,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         
         // check if target is dead
         if(active_target->isFainted()){
-            if(attack->getEffectId()==44){// if the damage of the attack kills the target, the user gains +2 ATT
+            if(effect_id==44){// if the damage of the attack kills the target, the user gains +2 ATT
                 active_user->changeAttackModifier(+2);
             }
             if(active_target->hasVolatileCondition(DESTINY_BOND)){
@@ -1295,7 +1310,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             if(active_target->isFrozen() && attack_type==FIRE)
                 active_target->clearPermanentStatus();
             ItemType held_item = active_target->getHeldItem();
-            unsigned int effect_id = attack->getEffectId();
+            // unsigned int effect_id = effect_id;
             if((held_item==KINGS_ROCK || held_item==RAZOR_FANG) &&//kings rock effect
                 actual_damage>0 &&
                 effect_id!=21 && effect_id!=45 && effect_id!=105 && effect_id!=141 && effect_id!=195 && effect_id!=197 &&// attacks that cause flinch
@@ -1471,7 +1486,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
-            case 4:case 210:case 222:{//poison opponent
+            case 4:case 210:case 222:case 232:{//poison opponent
                 if(effect==222)
                     active_target->changeSpeedModifier(-1);
                 if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
@@ -2290,6 +2305,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 break;
             }
+            case 234:{//torment
+                if(!active_target->hasVolatileCondition(TORMENTED))
+                    event_handler->displayMsg(opponent_mon_name+" was tormented! It wiil be unable to use the same move in twice in a row!");
+                else{
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             case 107:{//turn opponent into water type
                 auto types = active_target->getTypes();
                 if(types.size() == 1 && active_target->hasType(WATER)){
@@ -2380,12 +2404,21 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     return;
                 break;
             }
-            case 124:{
-                //user switches out, fails if trapped
-                if((!user_team->hasAliveBackup() || !active_user->canSwitchOut(active_target)) && 
-                    attack->getCategory() == STATUS){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+            case 124:case 231:{
+                // user switches out, 
+                // fails if trapped in the case of 124
+                if(!user_team->hasAliveBackup()){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
+                if(!active_user->canSwitchOut(active_target) && effect==124){
+                    if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
                     break;
                 }
                 //force user to switch
@@ -3215,6 +3248,9 @@ void Battle::decrementVolatiles(Battler* active_user){
     if(active_user->hasVolatileCondition(TAUNTED)){
         active_user->decrementVolatileCondition(TAUNTED);
     }
+    if(active_user->hasVolatileCondition(TORMENTED)){
+        active_user->decrementVolatileCondition(TORMENTED);
+    }
     active_user->removeVolatileCondition(FLINCH);
 }
 
@@ -3382,6 +3418,12 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         special_defense_stat = enemy_monster->getModifiedSpecialDefense();
     }
 
+    // apply foul play effect
+    if(effect==233){
+        // foul play uses the target's attack stat
+        physical_attack_stat = enemy_monster->getModifiedAttack();
+    }
+
     if(field->getWeather() == SNOWSTORM && enemy_monster->hasType(ICE)){
         //ice types increase their defense stat under snowstorm
         physical_defense_stat *= 1.5;
@@ -3396,17 +3438,17 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     }else{
         attack_stat = special_attack_stat;
         defense_stat = special_defense_stat; 
-        if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
-            burn_multiplier *= 0.5;
-        }
+        // if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
+        //     burn_multiplier *= 0.5;
+        // }
     }
-    if(attack->getEffectId()==100){
+    if(effect==100){
         //self destructing moves halve enemy defense stat
         defense_stat *= 0.5;
     }
     if((attack_type==FIRE || attack_type==ICE) &&
         enemy_monster->hasAbility(THICK_FAT)){
-        //THICK FAT reduces damage from fire and ice moves by 50%
+        //THICK FAT reduces damage from fire and ice moves by 50% by halving the attack stat
         attack_stat *= 0.5;
     }
     
@@ -3772,6 +3814,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             base_power *= active_user->getCurrentHP() / (double)active_user->getMaxHP();
             break;
         }
+        case 230:{
+            //power is doubled if user does not hold items
+            if(!active_user->hasHeldItem()){
+                base_power *= 2;
+            }
+            break;
+        }
         default: break;
     }
 
@@ -3981,6 +4030,14 @@ void Battle::applyPostDamage(){
     // apply volatile
     for(auto actor: actors){
         applyVolatileStatusPostDamage(actor);
+        if(isOver()){
+            return;
+        }
+    }
+
+    // apply abilities
+    for(auto actor: actors){
+        applyAbilityPostDamage(actor);
         if(isOver()){
             return;
         }
@@ -4477,6 +4534,13 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             }
             break;
         }
+        case DRIZZLE:{
+            if(field->getWeather() != RAIN && !thereIsaCloudNine()){
+                event_handler->displayMsg(user_name+"'s Drizzle changed the weather to rain!");
+                field->setWeather(RAIN,5);
+            }
+            break;
+        }
         case SNOW_WARNING:{
             if(field->getWeather() != SNOWSTORM && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Snow Warning started a Snow storm!");
@@ -4790,6 +4854,26 @@ bool Battle::checkIfAttackFails(Attack* attack,
         event_handler->displayMsg(user_mon_name+"'s "+attack->getName()+" is disabled!");
         // active_user->setLastAttackUsed(action.getAttackId());
         // last_attack_used_id = attack_id;
+        decrementVolatiles(active_user);
+        active_user->setLastAttackFailed();
+        active_user->removeVolatileCondition(LASER_FOCUS);
+        return true;
+    }
+
+    //check if attack fails due to taunt
+    if(active_user->hasVolatileCondition(TAUNTED) && 
+        attack->getCategory() == STATUS){
+        event_handler->displayMsg(user_mon_name+" is taunted and cannot use "+attack->getName()+"!");
+        decrementVolatiles(active_user);
+        active_user->setLastAttackFailed();
+        active_user->removeVolatileCondition(LASER_FOCUS);
+        return true;
+    }
+
+    //check if attack fails due to torment
+    if(active_user->hasVolatileCondition(TORMENTED) && 
+        attack->getId() == active_user->getLastAttackUsed()){
+        event_handler->displayMsg(user_mon_name+" is tormented and cannot use "+attack->getName()+"!");
         decrementVolatiles(active_user);
         active_user->setLastAttackFailed();
         active_user->removeVolatileCondition(LASER_FOCUS);
@@ -5318,6 +5402,22 @@ void Battle::applyScheduledFutureSights(){
     // clear the scheduled future sights that were executed this turn from the end
     for(int i = to_remove.size()-1; i >= 0; i--){
         scheduled_futuresights.erase(scheduled_futuresights.begin()+to_remove[i]);
+    }
+}
+
+void Battle::applyAbilityPostDamage(BattleActionActor actor){
+    Battler* active_user = getActorBattler(actor);
+    std::string user_name = getActorBattlerName(actor);
+    if(active_user->isFainted())
+        return;
+    switch(active_user->getAbility()){
+        case SPEED_BOOST:{
+            // user gets +1 speed
+            event_handler->displayMsg(user_name+"' Speed Boost activates!");
+            active_user->changeSpeedModifier(1);
+            break;
+        }
+        default:break;
     }
 }
 

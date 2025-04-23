@@ -274,3 +274,7 @@ HUGE_POWER
 Doubles the Pokémon's Attack stat.
 SAP_SIPPER
 The Pokémon takes no damage when hit by Grass-type moves. Instead, its Attack stat is boosted.
+DRIZZLE
+The Pokémon makes it rain when it enters a battle.
+SPEED_BOOST
+The Pokémon's Speed stat is boosted every turn. 

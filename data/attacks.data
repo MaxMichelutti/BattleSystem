@@ -114,10 +114,8 @@ DESCRIPTION:The user restores its own HP. The amount of HP regained varies with 
 PP:5
 CATEGORY:STATUS
 EFFECT:8
-EFFECTTARGET:SELF
-TYPE:GRASS
-ACCURACY:200
 TARGET:SELF
+TYPE:GRASS
 # 14 POWER WHIP
 NAME:Power Whip
 DESCRIPTION:The user violently whirls its vines, tentacles, or the like to harshly lash the target.
@@ -3889,3 +3887,70 @@ CATEGORY:PHYSICAL
 CONTACT
 EFFECT:229
 EFFECTTARGET:SELF
+# 426 ACROBATICS
+NAME:Acrobatics
+DESCRIPTION:The user nimbly strikes the target. This attack does massive damage if the user isn't holding an item.
+TYPE:FLYING
+CATEGORY:PHYSICAL
+POWER:55
+PP:15
+CONTACT
+EFFECT:230
+EFFECTTARGET:SELF
+# 427 U TURN
+NAME:U-turn
+DESCRIPTION:After making its attack, the user rushes back to switch places with a party Pokémon in waiting.
+PP:20
+POWER:70
+TYPE:BUG
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:231
+EFFECTTARGET:SELF
+# 428 POISON TAIL
+NAME:Poison Tail
+DESCRIPTION:The user hits the target with its tail. This move has a heightened chance of landing a critical hit and may also poison the target.
+TYPE:POISON
+CATEGORY:PHYSICAL
+PP:25
+CONTACT
+POWER:50
+EFFECT:232
+EFFECTCHANCE:10
+# 429 MORNING SUN
+NAME:Morning Sun
+DESCRIPTION:The user restores its own HP. The amount of HP regained varies with the weather.
+CATEGORY:STATUS
+TYPE:NORMAL
+PP:5
+EFFECT:8
+TARGET:SELF
+# 430 SNARL
+NAME:Snarl
+DESCRIPTION:The user yells as if it's ranting about something, which lowers the Sp. Atk stats of opposing Pokémon.
+TYPE:DARK
+PP:15
+CATEGORY:SPECIAL
+SOUND
+NO_METRONOME
+POWER:55
+ACCURACY:95
+EFFECT:88
+# 431 FOUL PLAY
+NAME:Foul Play
+DESCRIPTION:The user turns the target's strength against it. The higher the target's Attack stat, the greater the damage this move inflicts.
+TYPE:DARK
+CONTACT
+CATEGORY:PHYSICAL
+PP:15
+POWER:95
+EFFECT:233
+EFFECTTARGET:SELF
+# 432 TORMENT
+NAME:Torment
+DESCRIPTION:The user torments and enrages the target, making it incapable of using the same move twice in a row.
+CATEGORY:STATUS
+PP:15
+REFLECTABLE
+TYPE:DARK
+EFFECT:234

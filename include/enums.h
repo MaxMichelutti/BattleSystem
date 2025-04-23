@@ -137,7 +137,8 @@ enum VolatileStatusCondition{
     SWITCHING_OUT,
     JUST_EATEN_BERRY,
     INFESTED,
-    BOUNCING
+    BOUNCING,
+    TORMENTED
 };
 
 enum Gender{
@@ -228,7 +229,12 @@ enum EvolutionMethod{
     USE_EVO_ITEM,
     TRADE,
     LEVEL_NIGHT,
-    FRIENDSHIP
+    FRIENDSHIP,
+    TRADE_ITEM,
+    FRIENDSHIP_NIGHT,
+    FRIENDSHIP_DAY,
+    USE_EVO_ITEM_DAY,
+    USE_EVO_ITEM_NIGHT
 };
 
 enum Ability{
@@ -370,7 +376,10 @@ enum Ability{
     SUPER_LUCK,
     MAGIC_BOUNCE,
     HUGE_POWER,
-    SAP_SIPPER
+    SAP_SIPPER,
+    DRIZZLE,
+    SPEED_BOOST,
+    PRANKSTER
 };
 
 enum ItemCategory{

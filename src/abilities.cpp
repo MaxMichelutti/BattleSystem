@@ -61,6 +61,8 @@ bool isAbilityIgnorable(Ability ability){
         case MARVEL_SCALE:
         case MULTISCALE:
         case MAGIC_BOUNCE:
+        case SAP_SIPPER:
+        case SNOW_CLOAK:
             return true;
         default:return false;
     }        

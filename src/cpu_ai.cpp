@@ -269,7 +269,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             }
             break;
         }
-        case 4:{
+        case 4:case 232:{
             // poison opp
             if(enemy_active->canBePoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -485,7 +485,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
             break;
         }
-        case 32:case 123:case 124:case 185:{
+        case 32:case 123:case 124:case 185:case 231:{
             // involves switching
             auto enemy_types = enemy_active->getTypes();
             float effectiveness = 1;
@@ -1763,6 +1763,12 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
             break;
         }
+        case 230:{
+            //utiility is doubled if user does not hold items
+            if(!cpu_active->hasHeldItem())
+                total_utility *= 2;
+            break;
+        }
         default: break;
     }
     total_utility *= accuracy / 90.0;
@@ -1942,6 +1948,10 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
         if(curr_pp==0){continue;}
         if(attack_id==0){continue;}
         if(active_user->getDisabledAttack() == attack_id){continue;}
+        if(active_user->hasVolatileCondition(TORMENTED) && 
+            active_user->getLastAttackUsed() == attack_id){//cannot use the same move twice in a row
+            continue;
+        }
         Attack* attack = Attack::getAttack(attack_id);
         if(attack->getCategory() == STATUS && active_user->hasVolatileCondition(TAUNTED))//cannot use status moves when taunted
             continue;

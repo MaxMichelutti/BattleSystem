@@ -13,6 +13,16 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return LEVEL_NIGHT;
     if(evo_method == "FRIENDSHIP")
         return FRIENDSHIP;
+    if(evo_method == "TRADE_ITEM")
+        return TRADE_ITEM;
+    if(evo_method == "FRIENDSHIP_NIGHT")
+        return FRIENDSHIP_NIGHT;
+    if(evo_method == "FRIENDSHIP_DAY")
+        return FRIENDSHIP_DAY;
+    if(evo_method == "USE_ITEM_DAY")
+        return USE_EVO_ITEM_DAY;
+    if(evo_method == "USE_ITEM_NIGHT")
+        return USE_EVO_ITEM_NIGHT;
     // return LEVEL as default
     return LEVEL;
 }
@@ -29,6 +39,16 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "LEVEL_NIGHT";
         case FRIENDSHIP:
             return "FRIENDSHIP";
+        case TRADE_ITEM:
+            return "TRADE_ITEM";
+        case FRIENDSHIP_NIGHT:
+            return "FRIENDSHIP_NIGHT";
+        case FRIENDSHIP_DAY:
+            return "FRIENDSHIP_DAY";
+        case USE_EVO_ITEM_DAY:
+            return "USE_ITEM_DAY";
+        case USE_EVO_ITEM_NIGHT:
+            return "USE_ITEM_NIGHT";
         default:
             return "LEVEL";
     }

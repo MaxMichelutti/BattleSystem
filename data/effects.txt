@@ -192,7 +192,7 @@
 192: change type to resist opponent last attack
 193: block opponent
 194: use another move known by the monster, only works while sleeping
-195: only usable while sleeping, 30% flinch opponent
+195: only usable while sleeping, + flinch opponent
 196: supereffective against water
 197: sky attack, flinch opponent, incresaed critical hit
 198: held items are switched between user and target
@@ -223,7 +223,12 @@
 223: wish
 224: give opponent your status
 225: +3 DEF user
-226: bounce
+226: bounce, also chance of paralysis
 227: hits flying targets and does double damage
 228: -1 ATT SPATT opponent
 229: recoil 1/2 damage dealt
+230: power is doubled if user does not hold items
+231: user switches out always, even if trapped
+232: incresed crit + poison opponent
+233: uses target attack stat instead of user
+234: torment

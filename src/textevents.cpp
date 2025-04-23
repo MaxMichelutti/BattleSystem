@@ -177,11 +177,16 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
     for (auto it = available_attacks.begin(); it != available_attacks.end(); it++){
         choices.insert({counter++, {it->first, it->second}});
         Attack *attack = Attack::getAttack(it->first);
-        if (it->second > 0 &&
-            !player_active->isAttackDisabled(it->first) &&//disable check
-            (attack->getCategory() != STATUS || !player_active->hasVolatileCondition(TAUNTED))){//taunt check
-            has_usable_attack = true;
+        if (it->second == 0)
+            continue;
+        if(player_active->isAttackDisabled(it->first))//disable check
+            continue;
+        if(attack->getCategory() == STATUS && player_active->hasVolatileCondition(TAUNTED))//taunt check
+            continue;
+        if(player_active->hasVolatileCondition(TORMENTED) && player_active->getLastAttackUsed() == it->first){//cannot use the same move twice in a row when tormented
+            continue;
         }
+        has_usable_attack = true;
     }
     // force struggle if no choice can be selected
     if (!has_usable_attack){
@@ -230,6 +235,9 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
                 Attack *attack = Attack::getAttack(attack_id);
                 if(attack->getCategory() == STATUS && player_active->hasVolatileCondition(TAUNTED)){
                     displayMsg("You cannot use a status move while taunted! Please choose another one.");
+                    choice = 0;
+                }else if(player_active->hasVolatileCondition(TORMENTED) && player_active->getLastAttackUsed()==attack_id){//torment
+                    displayMsg("Torment does not allow your Pokèmon to use the same attack twice in a row! Please choose another one.");
                     choice = 0;
                 }else if (current_pp > 0){
                     return attack_id;
