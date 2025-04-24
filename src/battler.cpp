@@ -2166,6 +2166,34 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             res = true;
             break;
         }
+        case ELECTRIC_SEED:{
+            if(field->getTerrain() != ELECTRIC_FIELD)
+                return false;
+            changeDefenseModifier(1);
+            res = true;
+            break;
+        }
+        case GRASSY_SEED:{
+            if(field->getTerrain() != GRASSY_FIELD)
+                return false;
+            changeDefenseModifier(1);
+            res = true;
+            break;
+        }
+        case MISTY_SEED:{
+            if(field->getTerrain() != MISTY_FIELD)
+                return false;
+            changeSpecialDefenseModifier(1);
+            res = true;
+            break;
+        }
+        case PSYCHIC_SEED:{
+            if(field->getTerrain() != PSYCHIC_FIELD)
+                return false;
+            changeSpecialDefenseModifier(1);
+            res = true;
+            break;
+        }
         default:
             break;
     }   

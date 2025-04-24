@@ -206,8 +206,13 @@ unsigned int flingPower(ItemType item_type){
         case ICE_STONE:
         case LUCKY_EGG:
             return 30;
+        case ICY_ROCK:
+            return 40;
         case DUBIOUS_DISC:
             return 50;
+        case DAMP_ROCK:
+        case HEAT_ROCK:
+            return 60;
         case POWER_ANKLET:
         case POWER_BELT:
         case POWER_BRACER:
@@ -245,6 +250,11 @@ bool canItemBeConsumed(ItemType item_type){
         return true;
     }
     switch(item_type){
+        case ELECTRIC_SEED:
+        case GRASSY_SEED:
+        case MISTY_SEED:
+        case PSYCHIC_SEED:
+            return true;
         default:
             return false;
     }

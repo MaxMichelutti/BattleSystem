@@ -609,7 +609,15 @@ enum ItemType{
     POWER_BELT,
     POWER_LENS,
     POWER_BAND,
-    POWER_ANKLET
+    POWER_ANKLET,
+    HEAT_ROCK,
+    DAMP_ROCK,
+    SMOOTH_ROCK,
+    ICY_ROCK,
+    ELECTRIC_SEED,
+    GRASSY_SEED,
+    MISTY_SEED,
+    PSYCHIC_SEED,
 };
 
 #endif

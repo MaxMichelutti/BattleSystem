@@ -1878,7 +1878,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();   
                 }else
-                    field->setWeather(RAIN,5);
+                    field->setWeather(RAIN,active_user->hasHeldItem(DAMP_ROCK)?8:5);
                 break;
             }
             case 28:{ // +2 ATT SPATT SPD, -1 DEF SPDEF
@@ -2196,7 +2196,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else
-                    field->setWeather(SANDSTORM,5);
+                    field->setWeather(SANDSTORM,active_user->hasHeldItem(SMOOTH_ROCK)?8:5);
                 break;
             }
             case 78:{// -1 ATT DEF user
@@ -2390,8 +2390,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 if(field->getTerrain() == GRASSY_FIELD){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
-                }else
+                }else{
                     field->setTerrain(GRASSY_FIELD,5);
+                    consumeSeeds();
+                }
                 break;
             }
             case 102:{//transform
@@ -2587,7 +2589,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 }
                 if(field->getWeather()!=SNOWSTORM && effect==235){
                     event_handler->displayMsg(user_mon_name+" started a snowstorm!");
-                    field->setWeather(SNOWSTORM,5);
+                    field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
                 }
                 //force user to switch
                 forceSwitch(actor);
@@ -2807,8 +2809,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 if(field->getTerrain() == ELECTRIC_FIELD){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
-                }else
+                }else{
                     field->setTerrain(ELECTRIC_FIELD,5);
+                    consumeSeeds();
+                }
                 break;
             }
             case 149:{
@@ -2892,7 +2896,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else
-                    field->setWeather(SNOWSTORM,5);
+                    field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
                 break;
             }
             case 154:{
@@ -3111,7 +3115,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }else{
-                    field->setWeather(SUN,5);
+                    field->setWeather(SUN,active_user->hasHeldItem(HEAT_ROCK)?8:5);
                 }
                 break;
             }
@@ -3302,6 +3306,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                 }else{
                     field->setTerrain(MISTY_FIELD,5);
+                    consumeSeeds();
                 }
                 break;
             }
@@ -4878,32 +4883,31 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         case DROUGHT:{
             if(field->getWeather() != SUN && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drought made the sun shine harshly!");
-                field->setWeather(SUN,5);
+                field->setWeather(SUN,user_active->hasHeldItem(HEAT_ROCK)?8:5);
             }
             break;
         }
         case SAND_STREAM:{
             if(field->getWeather()!= SANDSTORM && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Sand Stream started a sandstorm!");
-                field->setWeather(SANDSTORM,5);
+                field->setWeather(SANDSTORM,user_active->hasHeldItem(SMOOTH_ROCK)?8:5);
             }
             break;
         }
         case DRIZZLE:{
             if(field->getWeather() != RAIN && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drizzle changed the weather to rain!");
-                field->setWeather(RAIN,5);
+                field->setWeather(RAIN,user_active->hasHeldItem(DAMP_ROCK)?8:5);
             }
             break;
         }
         case SNOW_WARNING:{
             if(field->getWeather() != SNOWSTORM && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Snow Warning started a Snow storm!");
-                field->setWeather(SNOWSTORM,5);
+                field->setWeather(SNOWSTORM,user_active->hasHeldItem(ICY_ROCK)?8:5);
             }
             break;
         }
-
         case FOREWARN:{
             if(!target_active->isFainted()){
                 auto target_attacks = target_active->getAttacks();
@@ -5003,6 +5007,7 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             if(field->getTerrain()!=MISTY_FIELD){
                 event_handler->displayMsg(user_name+"'s Misty Surge activates!");
                 field->setTerrain(MISTY_FIELD,5);
+                consumeSeeds();
             }
             break;
         }
@@ -5023,6 +5028,44 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         !user_active->isFainted()){
         user_active->addVolatileCondition(UNNERVED,-1);
         event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
+    }
+    // seeds
+    consumeSeeds();
+}
+
+void Battle::consumeSeeds(){
+    std::vector<Battler*> battlers = {player_active, opponent_active};
+    for(Battler* user: battlers){
+        if(user->isFainted())
+            continue;
+        if(user->hasHeldItem(ELECTRIC_SEED) &&
+            field->getTerrain() == ELECTRIC_FIELD &&
+            user->isTouchingGround() &&
+            user->getDefenseModifier()!=MAX_MODIFIER){
+            event_handler->displayMsg(user->getNickname()+"'s Electric Seed boosts its Def!");
+            user->consumeHeldItem();
+        }
+        if(user->hasHeldItem(PSYCHIC_SEED) &&
+            field->getTerrain() == PSYCHIC_FIELD &&
+            user->isTouchingGround() &&
+            user->getSpecialDefenseModifier()!=MAX_MODIFIER){
+            event_handler->displayMsg(user->getNickname()+"'s Psychic Seed boosts its Sp. Def!");
+            user->consumeHeldItem();
+        }
+        if(user->hasHeldItem(GRASSY_SEED) &&
+            field->getTerrain() == GRASSY_FIELD &&
+            user->isTouchingGround() &&
+            user->getDefenseModifier()!=MAX_MODIFIER){
+            event_handler->displayMsg(user->getNickname()+"'s Grassy Seed boosts its Def!");
+            user->consumeHeldItem();
+        }
+        if(user->hasHeldItem(MISTY_SEED) &&
+            field->getTerrain() == MISTY_FIELD &&
+            user->isTouchingGround() &&
+            user->getSpecialDefenseModifier()!=MAX_MODIFIER){
+            event_handler->displayMsg(user->getNickname()+"'s Psychic Seed boosts its Sp. Def!");
+            user->consumeHeldItem();
+        }
     }
 }
 

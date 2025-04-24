@@ -1038,3 +1038,43 @@ NAME:Power Anklet
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. Holding this anklet reduces a Pokémon's Speed in battle but allows its Speed stat to grow more quickly.
 PRICE:10000
+# 198 HEAT ROCK
+NAME:Heat Rock
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder changes the weather to harsh sunlight, the sunlight will persist for longer than usual.
+PRICE:8000
+# 199 DAMP ROCK
+NAME:Damp Rock
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder changes the weather to rain, the rain will persist for longer than usual.
+PRICE:8000
+# 200 SMOOTH ROCK
+NAME:Smooth Rock
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder changes the weather to a sandstorm, the storm will persist for longer than usual.
+PRICE:8000
+# 201 ICY ROCK
+NAME:Icy Rock
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder changes the weather to snow, the snow will persist for longer than usual.
+PRICE:8000
+# 202 ELECTRIC SEED
+NAME:Electric Seed
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the terrain becomes Electric Terrain, the holder will use this seed to boost its own Defense stat.
+PRICE:20000
+# 203 GRASSY SEED
+NAME:Grassy Seed
+CATEGORY:HELD
+DESCRIPTION:
+PRICE:20000
+# 204 MISTY SEED
+NAME:Misty Seed
+CATEGORY:HELD
+DESCRIPTION:
+PRICE:20000
+# 205 PSYCHIC SEED
+NAME:Psychic Seed
+CATEGORY:HELD
+DESCRIPTION:
+PRICE:20000

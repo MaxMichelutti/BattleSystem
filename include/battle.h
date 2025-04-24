@@ -151,6 +151,7 @@ class Battle{
     void givePlayerExperience(Monster* defeated_monster);
     void checkForExp();
     void tryToCatchWildMonster(ItemType item);
+    void consumeSeeds();
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
