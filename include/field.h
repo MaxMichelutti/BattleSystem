@@ -17,6 +17,7 @@ bool isFieldEffectTrapping(FieldEffect field_effect);
 class Field{
     private:
     Weather weather;
+    Weather default_weather;
     Terrain terrain;
     EventHandler* event_handler;
     std::map<FieldEffect,unsigned int> field_effect_player;
@@ -24,6 +25,7 @@ class Field{
     std::map<FieldEffect,unsigned int> full_field_effects;
     unsigned int turns_to_clear_weather;
     unsigned int turns_to_clear_terrain;
+    void displayWeatherChange();
     public:
     Field();
     Field(EventHandler* event_handler);
@@ -57,6 +59,8 @@ class Field{
     bool clearFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor);
     bool hasFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor)const;
     void decrementFieldEffect(FieldEffect field_effect, BattleActionActor actor);
+    void setDefaultWeather(Weather weather);
+    
 };
 
 #endif

@@ -47,6 +47,7 @@ bool isFieldEffectTrapping(FieldEffect field_effect) {
 
 Field::Field() {
     weather = CLEAR;
+    default_weather = CLEAR;
     terrain = NO_TERRAIN;
     turns_to_clear_weather = 0;
     turns_to_clear_terrain = 0;
@@ -54,6 +55,7 @@ Field::Field() {
 
 Field::Field(EventHandler* event_handler) {
     weather = CLEAR;
+    default_weather = CLEAR;
     terrain = NO_TERRAIN;
     turns_to_clear_weather = 0;
     turns_to_clear_terrain = 0;
@@ -105,9 +107,8 @@ void Field::setWeather(Weather new_weather){
     setWeather(new_weather,5);
 }
 
-void Field::setWeather(Weather new_weather, unsigned int length) {
-    this->weather = new_weather;
-    switch(new_weather){
+void Field::displayWeatherChange(){
+    switch(weather){
         case RAIN:
             event_handler->displayMsg("It started to rain!");
             break;
@@ -121,11 +122,21 @@ void Field::setWeather(Weather new_weather, unsigned int length) {
             event_handler->displayMsg("A sandstorm started!");
             break;
         case SNOWSTORM:
-            event_handler->displayMsg("A snowstorm started!");
+            event_handler->displayMsg("Snow started to fall!");
+            break;
+        case CLEAR:
+            event_handler->displayMsg("The weather cleared!");
             break;
         default:break;
     }
+}
+
+void Field::setWeather(Weather new_weather, unsigned int length) {
+    if(new_weather == weather)
+        return;
+    this->weather = new_weather;
     turns_to_clear_weather = length;
+    displayWeatherChange();
 }
 
 void Field::setTerrain(Terrain terrain) {
@@ -317,9 +328,9 @@ void Field::decrementFieldEffect(FieldEffect field_effect, BattleActionActor act
 }   
 
 void Field::clearWeather() {
-    if(weather != CLEAR){
-        weather = CLEAR;
-        event_handler->displayMsg("The weather cleared!");
+    if(weather != default_weather){
+        weather = default_weather;
+        displayWeatherChange();
     }
 }
 
@@ -407,4 +418,8 @@ void Field::clearFieldSide(BattleActionActor actor){
         if(had_tailwind)
             field_effect_opponent[TAILWIND] = tailwind_turns;
     }
+}
+
+void Field::setDefaultWeather(Weather weather){
+    default_weather = weather;
 }

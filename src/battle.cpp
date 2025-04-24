@@ -199,7 +199,8 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     field = new Field(handler);
     player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,handler);
     opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,handler);
-    field->setWeather(weather,-1);
+    field->setDefaultWeather(weather);
+    field->setWeather(weather);
     field->setTerrain(terrain,-1);
     turn = 0;
     last_attack_used_id = 0;
