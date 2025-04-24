@@ -1842,7 +1842,16 @@ unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
     std::vector<unsigned int> choices;
     for(auto it = available_attacks.begin(); it != available_attacks.end(); it++){
         if(it->second == 0){continue;}
+        Attack* attack = Attack::getAttack(it->first);
         if(active_monster->getDisabledAttack() == it->first){continue;}
+        if((active_monster->hasVolatileCondition(TAUNTED)||active_monster->hasHeldItem(ASSULT_VEST))&&
+            attack->getCategory() == STATUS){
+            continue;
+        }
+        if(active_monster->hasVolatileCondition(TORMENTED) && 
+            active_monster->getLastAttackUsed() == it->first){
+            continue;
+        }
         choices.push_back(it->first);
     }
     if(choices.empty()){
@@ -2005,7 +2014,7 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
         if(curr_pp==0){continue;}
         if(attack_id==0){continue;}
         if(active_user->getDisabledAttack() == attack_id){continue;}
-        if(active_user->hasVolatileCondition(TORMENTED) && 
+        if((active_user->hasVolatileCondition(TORMENTED) || active_user->hasHeldItem(ASSULT_VEST)) && 
             active_user->getLastAttackUsed() == attack_id){//cannot use the same move twice in a row
             continue;
         }

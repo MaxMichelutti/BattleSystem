@@ -239,6 +239,7 @@ unsigned int flingPower(ItemType item_type){
         case SHINY_STONE:
         case DUSK_STONE:
         case DAWN_STONE:
+        case ASSULT_VEST:
             return 80;
         case DEEP_SEA_TOOTH:
             return 90;

@@ -1113,3 +1113,8 @@ NAME:Mental Herb
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. The holder will be able to shake off move-binding effects to move freely—but only once.
 PRICE:10000
+# 213 ASSAULT VEST
+NAME:Assault Vest
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This offensive vest boosts the holder's Sp. Def stat but prevents the use of status moves.
+PRICE:50000

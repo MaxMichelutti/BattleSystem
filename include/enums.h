@@ -625,7 +625,8 @@ enum ItemType{
     TOXIC_ORB,
     POISON_BARB,
     WHITE_HERB,
-    MENTAL_HERB
+    MENTAL_HERB,
+    ASSULT_VEST
 };
 
 #endif

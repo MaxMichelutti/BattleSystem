@@ -939,6 +939,8 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
     if(field->getWeather() == SANDSTORM && hasType(ROCK)){
         base_modified = base_modified * 1.5;
     }
+    if(hasHeldItem(ASSULT_VEST))
+        base_modified = base_modified * 1.5;
     return base_modified;
 }
 

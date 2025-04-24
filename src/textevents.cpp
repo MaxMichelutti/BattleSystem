@@ -202,7 +202,7 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
             continue;
         if(player_active->isAttackDisabled(it->first))//disable check
             continue;
-        if(attack->getCategory() == STATUS && player_active->hasVolatileCondition(TAUNTED))//taunt check
+        if(attack->getCategory() == STATUS && (player_active->hasVolatileCondition(TAUNTED) || player_active->hasHeldItem(ASSULT_VEST)))//taunt check
             continue;
         if(player_active->hasVolatileCondition(TORMENTED) && player_active->getLastAttackUsed() == it->first){//cannot use the same move twice in a row when tormented
             continue;
@@ -245,7 +245,7 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
             choice = 0;
             continue;
         }else if (player_active->isAttackDisabled(choices[choice].first)){//disable check
-            displayMsg("This attack is currently disabled! Please choose another one.");
+            displayMsg("This attack is currently disabled! Please choose a different attack.");
             choice = 0;
             continue;
         }else{
@@ -255,16 +255,19 @@ unsigned int TextEventHandler::chooseAttack(Battler *player_active){
                 unsigned int current_pp = it->second.second;
                 Attack *attack = Attack::getAttack(attack_id);
                 if(attack->getCategory() == STATUS && player_active->hasVolatileCondition(TAUNTED)){
-                    displayMsg("You cannot use a status move while taunted! Please choose another one.");
+                    displayMsg("You cannot use a status move while taunted! Please choose a different attack.");
+                    choice = 0;
+                }else if(attack->getCategory() == STATUS && player_active->hasHeldItem(ASSULT_VEST)){
+                    displayMsg("Assault Vest prevents the use of Status moves! Please choose a different attack.");
                     choice = 0;
                 }else if(player_active->hasVolatileCondition(TORMENTED) && player_active->getLastAttackUsed()==attack_id){//torment
-                    displayMsg("Torment does not allow your Pokèmon to use the same attack twice in a row! Please choose another one.");
+                    displayMsg("Torment does not allow your Pokèmon to use the same attack twice in a row! Please choose a different attack.");
                     choice = 0;
-                }else if (current_pp > 0){
-                    return attack_id;
+                }else if (current_pp == 0){
+                    displayMsg("there is no PP left for this attack! Please choose a different attack.");
+                    choice = 0;
                 }else{
-                    displayMsg("You have no PP left for this attack! Please choose another one.");
-                    choice = 0;
+                    return attack_id;
                 }
             }else{
                 choice = 0;

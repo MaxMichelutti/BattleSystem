@@ -5347,10 +5347,13 @@ bool Battle::checkIfAttackFails(Attack* attack,
         return true;
     }
 
-    //check if attack fails due to taunt
-    if(active_user->hasVolatileCondition(TAUNTED) && 
+    //check if attack fails due to taunt (or having assault vest)
+    if((active_user->hasVolatileCondition(TAUNTED) || active_user->hasHeldItem(ASSULT_VEST)) && 
         attack->getCategory() == STATUS){
-        event_handler->displayMsg(user_mon_name+" is taunted and cannot use "+attack->getName()+"!");
+        if(active_user->hasHeldItem(ASSULT_VEST))
+            event_handler->displayMsg(user_mon_name+"' Assault Vest prevents the use of Status moves!");
+        else if(active_user->hasVolatileCondition(TAUNTED))
+            event_handler->displayMsg(user_mon_name+" is taunted and cannot use "+attack->getName()+"!");
         decrementVolatiles(active_user);
         active_user->setLastAttackFailed();
         active_user->removeVolatileCondition(LASER_FOCUS);
