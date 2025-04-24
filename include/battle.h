@@ -124,7 +124,9 @@ class Battle{
     void applyFieldEffectsPostDamage(BattleActionActor actor);
     void applyTerrainPostDamage(BattleActionActor actor);
     void applyAbilityPostDamage(BattleActionActor actor);
+    void applyItemPostDamage(BattleActionActor actor);
     void applySwitchInAbilitiesEffects(BattleActionActor actor);
+    void applySwitchInItemsEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor);
     void applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);

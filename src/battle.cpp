@@ -242,22 +242,30 @@ void Battle::startBattle(){
             applyImpostorSwitchIn(OPPONENT);
             applySwitchInAbilitiesEffects(PLAYER);
             applySwitchInAbilitiesEffects(OPPONENT);
+            applySwitchInItemsEffects(PLAYER);
+            applySwitchInItemsEffects(OPPONENT);
         }else{
             applyImpostorSwitchIn(OPPONENT);
             applyImpostorSwitchIn(PLAYER);
             applySwitchInAbilitiesEffects(OPPONENT);
             applySwitchInAbilitiesEffects(PLAYER);
+            applySwitchInItemsEffects(PLAYER);
+            applySwitchInItemsEffects(OPPONENT);
         }
     }else if(speed_player > speed_opponent){
         applyImpostorSwitchIn(PLAYER);
         applyImpostorSwitchIn(OPPONENT);
         applySwitchInAbilitiesEffects(PLAYER);
         applySwitchInAbilitiesEffects(OPPONENT);
+        applySwitchInItemsEffects(PLAYER);
+        applySwitchInItemsEffects(OPPONENT);
     }else{
         applyImpostorSwitchIn(OPPONENT);
         applyImpostorSwitchIn(PLAYER);
         applySwitchInAbilitiesEffects(OPPONENT);
         applySwitchInAbilitiesEffects(PLAYER);
+        applySwitchInItemsEffects(PLAYER);
+        applySwitchInItemsEffects(OPPONENT);
     }   
 
     while(!isOver()){
@@ -1959,6 +1967,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
                     applyImpostorSwitchIn(other_actor);
                     applySwitchInAbilitiesEffects(other_actor);
+                    applySwitchInItemsEffects(other_actor);
                     performEntryHazardCheck(other_actor);
                     checkUproars();
                     if(active_target->isFainted())
@@ -2299,6 +2308,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     event_handler->displayMsg(user_mon_name+" was fully healed!");
                     applyImpostorSwitchIn(actor);
                     applySwitchInAbilitiesEffects(actor);
+                    applySwitchInItemsEffects(actor);
                     performEntryHazardCheck(actor);
                     checkUproars();
                     if(active_user->isFainted())
@@ -3105,6 +3115,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 removeVolatilesFromOpponentOfMonsterLeavingField(actor);
                 applyImpostorSwitchIn(actor);
                 applySwitchInAbilitiesEffects(actor);
+                applySwitchInItemsEffects(actor);
                 performEntryHazardCheck(actor);
                 checkUproars();
                 player_active->addSeenOpponent(opponent_active->getMonster());
@@ -3280,6 +3291,53 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     case RAZOR_FANG:{
                         //flinch
                         active_target->addVolatileCondition(FLINCH, 1);
+                        break;
+                    }
+                    case FLAME_ORB:{
+                        if(active_target->canBeBurned())
+                            active_target->setPermanentStatus(BURN);
+                        break;
+                    }
+                    case LIGHT_BALL:{
+                        if(active_target->canBeParalyzed())
+                            active_target->setPermanentStatus(PARALYSIS);
+                        break;
+                    }
+                    case TOXIC_ORB:{
+                        if(active_target->canBeBadlyPoisoned())
+                            active_target->setPermanentStatus(BAD_POISON);
+                        break;
+                    }
+                    case POISON_BARB:{
+                        if(active_target->canBePoisoned())
+                            active_target->setPermanentStatus(POISONED);
+                        break;
+                    }
+                    case WHITE_HERB:{
+                        //reset decreased stat changes of target
+                        if(active_target->getAttackModifier()<0)
+                            active_target->setAttackModifier(0);
+                        if(active_target->getSpecialAttackModifier()<0)
+                            active_target->setSpecialAttackModifier(0);
+                        if(active_target->getDefenseModifier()<0)
+                            active_target->setDefenseModifier(0);
+                        if(active_target->getSpecialDefenseModifier()<0)
+                            active_target->setSpecialDefenseModifier(0);
+                        if(active_target->getSpeedModifier()<0)
+                            active_target->setSpeedModifier(0);
+                        if(active_target->getAccuracyModifier()<0)
+                            active_target->setAccuracyModifier(0);
+                        if(active_target->getEvasionModifier()<0)
+                            active_target->setEvasionModifier(0);
+                        break;
+                    }
+                    case MENTAL_HERB:{
+                        //reset target volatiles
+                        active_target->removeVolatileCondition(INFATUATION);
+                        active_target->removeVolatileCondition(ENCORE);
+                        active_target->removeVolatileCondition(TAUNTED);
+                        active_target->removeVolatileCondition(TORMENTED);
+                        active_target->removeDisable();
                         break;
                     }
                     default:break;
@@ -3636,6 +3694,7 @@ void Battle::performSwitch(BattleAction action){
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
     applyImpostorSwitchIn(action.getActor());
     applySwitchInAbilitiesEffects(action.getActor());
+    applySwitchInItemsEffects(action.getActor());
     performEntryHazardCheck(action.getActor());
     checkUproars();
     player_active->addSeenOpponent(opponent_active->getMonster());
@@ -4331,6 +4390,12 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
+        case POISON_BARB:{
+            if(attack_type == POISON){
+                base_power *= 1.2;
+            }
+            break;
+        }
         default:break;
     }
 
@@ -4354,6 +4419,14 @@ void Battle::applyPostDamage(){
         }else{
             actors.push_back(OPPONENT);
             actors.push_back(PLAYER);
+        }
+    }
+    // apply items
+    for(auto actor: actors){
+        applyItemPostDamage(actor);
+        checkForExp();
+        if(isOver()){
+            return;
         }
     }
     // update field
@@ -4401,7 +4474,7 @@ void Battle::applyPostDamage(){
         }
     }
 
-    
+    //field effects
     for(auto actor: actors){
         applyFieldEffectsPostDamage(actor);
         checkForExp();
@@ -5035,8 +5108,6 @@ void Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         user_active->addVolatileCondition(UNNERVED,-1);
         event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
     }
-    // seeds
-    consumeSeeds();
 }
 
 void Battle::consumeSeeds(){
@@ -5086,7 +5157,7 @@ void Battle::applyImpostorSwitchIn(BattleActionActor actor){
         user_active->transformInto(target_active->getMonster());
         event_handler->displayMsg(user_name+" transformed into "+target_name+"!");
         // apply effects again since ability may have changed
-        applyImpostorSwitchIn(actor);
+        // applyImpostorSwitchIn(actor);
         applySwitchInAbilitiesEffects(actor);
         return;
     }
@@ -5772,6 +5843,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     removeVolatilesFromOpponentOfMonsterLeavingField(actor_switching_out);
     applyImpostorSwitchIn(actor_switching_out);
     applySwitchInAbilitiesEffects(actor_switching_out);
+    applySwitchInItemsEffects(actor_switching_out);
     performEntryHazardCheck(actor_switching_out);
     checkUproars();
     checkForExp();
@@ -6240,5 +6312,34 @@ void Battle::performEscape(BattleAction action){
         is_wild_battle_over = true;
     }else{
         event_handler->displayMsg("Player couldn't get away!");
+    }
+}
+
+void Battle::applySwitchInItemsEffects(BattleActionActor actor){
+    // seeds
+    consumeSeeds();
+}
+
+void Battle::applyItemPostDamage(BattleActionActor actor){
+    // items
+    Battler* active_user = getActorBattler(actor);
+    switch(active_user->getHeldItem()){
+        case FLAME_ORB:{
+            // burn user
+            if(active_user->hasPermanentStatus())
+                break;
+            active_user->setPermanentStatus(BURN);
+            event_handler->displayMsg(active_user->getNickname()+" is burned by the Flame Orb!");
+            break;
+        }
+        case TOXIC_ORB:{
+            // poison user
+            if(active_user->hasPermanentStatus())
+                break;
+            active_user->setPermanentStatus(BAD_POISON);
+            event_handler->displayMsg(active_user->getNickname()+" is badly poisoned by the Toxic Orb!");
+            break;
+        }
+        default:break;
     }
 }

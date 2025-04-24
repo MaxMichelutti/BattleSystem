@@ -206,6 +206,10 @@ unsigned int flingPower(ItemType item_type){
         case ICE_STONE:
         case LUCKY_EGG:
         case SMOKE_BALL:
+        case FLAME_ORB:
+        case LIGHT_BALL:
+        case TOXIC_ORB:
+        case POISON_BARB:
             return 30;
         case ICY_ROCK:
             return 40;
@@ -255,6 +259,8 @@ bool canItemBeConsumed(ItemType item_type){
         case GRASSY_SEED:
         case MISTY_SEED:
         case PSYCHIC_SEED:
+        case WHITE_HERB:
+        case MENTAL_HERB:
             return true;
         default:
             return false;

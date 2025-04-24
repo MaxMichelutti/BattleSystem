@@ -275,6 +275,8 @@ class Battler{
     void setBattleSpecialDefense(unsigned int special_defense);
     void setBattleSpeed(unsigned int speed);
     void addSeenOpponent(Monster* opponent);
+    bool canConsumeWhiteHerb()const;
+    void removeDisable();
 };
 
 #endif

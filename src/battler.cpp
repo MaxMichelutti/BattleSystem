@@ -442,6 +442,12 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
     //eat persim berry in case of confusion
     if(hasVolatileCondition(CONFUSION) && hasHeldItem(PERSIM_BERRY))
         tryEatStatusBerry();
+    // try to consume held item
+    if((hasVolatileCondition(TAUNTED) || hasVolatileCondition(TORMENTED) ||
+        hasVolatileCondition(INFATUATION) || hasVolatileCondition(ENCORE)) && 
+        hasHeldItem(MENTAL_HERB))
+        consumeHeldItem();
+        
 }
 
 void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
@@ -592,6 +598,8 @@ bool Battler::changeAttackModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -600,6 +608,8 @@ bool Battler::changeAttackModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -627,6 +637,8 @@ bool Battler::changeDefenseModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -635,6 +647,8 @@ bool Battler::changeDefenseModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -657,6 +671,8 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -666,6 +682,8 @@ bool Battler::changeSpecialAttackModifierForced(int amount) {
         amount = -amount;
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -688,6 +706,8 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -696,6 +716,8 @@ bool Battler::changeSpecialDefenseModifierForced(int amount) {
         amount = -amount;
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -718,6 +740,8 @@ bool Battler::changeSpeedModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -726,6 +750,8 @@ bool Battler::changeSpeedModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -757,6 +783,8 @@ bool Battler::changeAccuracyModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -765,6 +793,8 @@ bool Battler::changeAccuracyModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -787,6 +817,8 @@ bool Battler::changeEvasionModifier(int amount) {
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
     }
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -795,6 +827,8 @@ bool Battler::changeEvasionModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
     return res;
 }
 
@@ -844,6 +878,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
         base_modified*=2;
+    if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
+        base_modified*=2;
     return base_modified;
 }
 
@@ -886,6 +922,8 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     if(hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
         base_modified = base_modified * 3 / 2;
     }
+    if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles special attack of pikachu
+        base_modified*=2;
     return base_modified;
 }
 
@@ -1329,6 +1367,8 @@ bool Battler::disableAttack(unsigned int attack_id, unsigned int turns){
         return false;
     disabled_attack_id = attack_id;
     disabled_turns_left = turns;
+    if(hasHeldItem(MENTAL_HERB))
+        consumeHeldItem();
     return true;
 }
 bool Battler::isAttackDisabled(unsigned int attack)const{
@@ -2064,7 +2104,15 @@ bool Battler::hasHeldItem(ItemType item)const{
 ItemType Battler::setHeldItem(ItemType item){
     if(item != NO_ITEM_TYPE)
         had_held_item = false;
-    return monster->setHeldItem(item);
+    ItemType old_item = monster->setHeldItem(item);
+    if(canConsumeWhiteHerb())
+        consumeHeldItem();
+    if((hasDiabledAttack() || hasVolatileCondition(INFATUATION) ||
+        hasVolatileCondition(ENCORE) || hasVolatileCondition(TAUNTED) ||
+        hasVolatileCondition(TORMENTED))&&hasHeldItem(MENTAL_HERB)){
+        consumeHeldItem();
+    }
+    return old_item;
 }
 ItemType Battler::removeHeldItem(){
     ItemType res = monster->removeHeldItem();
@@ -2194,6 +2242,64 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 return false;
             changeSpecialDefenseModifier(1);
             res = true;
+            break;
+        }
+        case WHITE_HERB:{
+            if(getAttackModifier() < 0){
+                setAttackModifier(0);
+                res = true;
+            }
+            if(getSpecialAttackModifier() < 0){
+                setSpecialAttackModifier(0);
+                res = true;
+            }
+            if(getDefenseModifier() < 0){
+                setDefenseModifier(0);
+                res = true;
+            }
+            if(getSpecialDefenseModifier() < 0){
+                setSpecialDefenseModifier(0);
+                res = true;
+            }
+            if(getSpeedModifier() < 0){
+                setSpeedModifier(0);
+                res = true;
+            }
+            if(getAccuracyModifier() < 0){
+                setAccuracyModifier(0);
+                res = true;
+            }
+            if(getEvasionModifier() < 0){
+                setEvasionModifier(0);
+                res = true;
+            }
+            if(res)
+                handler->displayMsg(getNickname()+"'s White Herb restored its stats!");
+            break;
+        }
+        case MENTAL_HERB:{
+            if(hasDiabledAttack()){
+                removeDisable();
+                res = true;
+            }
+            if(hasVolatileCondition(TORMENTED)){
+                removeVolatileCondition(TORMENTED);
+                res = true;
+            }
+            if(hasVolatileCondition(ENCORE)){
+                removeVolatileCondition(ENCORE);
+                res = true;
+            }
+            if(hasVolatileCondition(TAUNTED)){
+                removeVolatileCondition(TAUNTED);
+                res = true;
+            }
+            if(hasVolatileCondition(INFATUATION)){
+                removeVolatileCondition(INFATUATION);
+                res = true;
+            }
+            if(res)
+                handler->displayMsg(getNickname()+"'s Mental Herb cured it of some conditions!");
             break;
         }
         default:
@@ -2485,4 +2591,29 @@ void Battler::setBattleSpeed(unsigned int speed){
 }
 void Battler::addSeenOpponent(Monster* opponent){
     monster->addSeenOpponent(opponent);
+}
+
+bool Battler::canConsumeWhiteHerb()const{
+    if(!hasHeldItem(WHITE_HERB))
+        return false;
+    if(getAttackModifier() < 0)
+        return true;
+    if(getSpecialAttackModifier() < 0)
+        return true;
+    if(getDefenseModifier() < 0)
+        return true;
+    if(getSpecialDefenseModifier() < 0)
+        return true;
+    if(getSpeedModifier() < 0)
+        return true;
+    if(getAccuracyModifier() < 0)
+        return true;
+    if(getEvasionModifier() < 0)
+        return true;
+    return false;
+}
+
+void Battler::removeDisable(){
+    disabled_attack_id = 0;
+    disabled_turns_left = 0;
 }

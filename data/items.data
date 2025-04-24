@@ -1083,3 +1083,33 @@ NAME:Smoke Ball
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. It enables the holder to flee from any wild Pokémon encounter without fail.
 PRICE:15000
+# 207 FLAME ORB
+NAME:Flame Orb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a bizarre orb that gives off heat when touched and will affect the holder with a burn during battle.
+PRICE:15000
+# 208 LIGHT BALL
+NAME:Light Ball
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Pikachu. It's a mysterious orb that boosts Pikachu’s Attack and Sp. Atk stats.
+PRICE:15000
+# 209 TOXIC ORB
+NAME:Toxic Orb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a bizarre orb that exudes toxins when touched and will badly poison the holder during battle.
+PRICE:15000
+# 210 POISON BARB
+NAME:Poison Barb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This small poisonous barb boosts the power of the holder's Poison-type moves.
+PRICE:3000
+# 211 WHITE HERB
+NAME:White Herb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It will restore any lowered stat in battle—but only once.
+PRICE:20000
+# 212 MENTAL HERB
+NAME:Mental Herb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. The holder will be able to shake off move-binding effects to move freely—but only once.
+PRICE:10000

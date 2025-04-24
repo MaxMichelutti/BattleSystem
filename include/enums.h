@@ -619,7 +619,13 @@ enum ItemType{
     GRASSY_SEED,
     MISTY_SEED,
     PSYCHIC_SEED,
-    SMOKE_BALL
+    SMOKE_BALL,
+    FLAME_ORB,
+    LIGHT_BALL,
+    TOXIC_ORB,
+    POISON_BARB,
+    WHITE_HERB,
+    MENTAL_HERB
 };
 
 #endif
