@@ -144,6 +144,8 @@ bool canBeStolen(ItemType item_type){
         return false;
     if(item_data->getCategory() == MEGA_STONE)
         return false;
+    if(item_data->getCategory() == BALL)
+        return false;
     switch (item_type){
         default:
             return true;
@@ -202,9 +204,17 @@ unsigned int flingPower(ItemType item_type){
         case MOON_STONE:
         case SUN_STONE:
         case ICE_STONE:
+        case LUCKY_EGG:
             return 30;
         case DUBIOUS_DISC:
             return 50;
+        case POWER_ANKLET:
+        case POWER_BELT:
+        case POWER_BRACER:
+        case POWER_WEIGHT:
+        case POWER_LENS:
+        case POWER_BAND:
+            return 70;
         case CHIPPED_POT:
         case CRACKED_POT:
         case MASTERPIECE_TEACUP:

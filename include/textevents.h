@@ -17,15 +17,15 @@ class TextEventHandler : public EventHandler {
     public:
     TextEventHandler();
     ~TextEventHandler();
-    BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*);
+    BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*,bool);
     unsigned int chooseAttack(Battler*);
     unsigned int chooseSwitch(MonsterTeam*);
     unsigned int chooseSwitchForced(MonsterTeam*);
     unsigned int chooseItemTarget(ItemType,MonsterTeam*,Battler*);
     unsigned int chooseTargetAttack(Battler*,MonsterTeam*,unsigned int target);
     bool chooseWetherToMegaEvolve(Battler*,MonsterTeam*);
-    std::pair<ItemType,unsigned int> chooseItem(Bag*,MonsterTeam*,Battler*);
-    std::pair<ItemType,unsigned int> chooseItemFromPocket(Pocket*,MonsterTeam*,Battler*);
+    std::pair<ItemType,unsigned int> chooseItem(Bag*,MonsterTeam*,Battler*,bool);
+    std::pair<ItemType,unsigned int> chooseItemFromPocket(Pocket*,MonsterTeam*,Battler*,bool);
     void displayMsg(const std::string& msg);
     void displayMsgNoEndl(const std::string& msg);
     void displayBattleSituation(Battler*,MonsterTeam*,Battler*,MonsterTeam*);

@@ -274,6 +274,7 @@ class Battler{
     void setBattleSpecialAttack(unsigned int special_attack);
     void setBattleSpecialDefense(unsigned int special_defense);
     void setBattleSpeed(unsigned int speed);
+    void addSeenOpponent(Monster* opponent);
 };
 
 #endif

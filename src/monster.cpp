@@ -31,6 +31,37 @@ Monster::Monster(unsigned int species_id, unsigned int level, unsigned int form_
     init(species_id, level, form_id);
 }
 
+Monster::Monster(Monster* other){
+    transformation = nullptr;
+    held_item = other->getHeldItem();
+    mega_ability = NO_ABILITY;
+    is_mega = false;
+    has_hidden_ability = other->has_hidden_ability;
+    species_id = other->getSpeciesId();
+    form_id = other->getFormId();
+    permanent_status = other->getPermanentStatus();
+    level = other->getLevel();
+    nature = other->getNature();
+    gender = other->getGender();
+    experience = other->getExperience();
+    nickname = other->getNickname();
+    stats = other->getStats();
+    individual = other->getIndividual();
+    effort = other->getEffort();
+    for (int i = 0; i < 4; i++) {
+        attack_ids[i].attack_id = other->attack_ids[i].attack_id;
+        attack_ids[i].current_pp = other->attack_ids[i].current_pp;
+    }
+    ability = other->getAbility();
+    hidden_power_type = other->getHiddenPowerType();
+    damage = other->getDamage();
+    friendship = other->getFriendship();
+    seen_opponents.clear();
+    consumed_item = NO_ITEM_TYPE;
+    ball_containing_monster = POKE_BALL;
+    updateStats();
+}
+
 
 void Monster::init(unsigned int species_id, unsigned int level,unsigned int form_id) {
     transformation=nullptr;
@@ -38,6 +69,7 @@ void Monster::init(unsigned int species_id, unsigned int level,unsigned int form
     mega_ability = NO_ABILITY;
     is_mega = false;
     has_hidden_ability = false;
+    ball_containing_monster = POKE_BALL;
     Species* spec = Species::getSpecies(species_id);
     this->species_id = species_id;
     if(form_id != 0 && !spec->hasForm(form_id)){
@@ -252,6 +284,8 @@ void Monster::changeFriendship(int amount) {
         else
             friendship += amount;
     }else if(amount > 0){
+        if(ball_containing_monster==LUXURY_BALL)
+            amount += 1;
         if(friendship == MAX_FRIENDSHIP)
             return;
         if(friendship + amount > MAX_FRIENDSHIP)
@@ -404,15 +438,17 @@ bool Monster::replaceAttack(unsigned int old_attack_id, unsigned int new_attack_
     return false;
 }
 
-void Monster::gainExperience(unsigned long exp) {
+void Monster::gainExperience(unsigned long exp,EventHandler* handler) {
+    if(level >= MAX_LEVEL)//stop gaining experience at max level
+        return;
     experience += exp;
     unsigned int level_after_exp_gain = getLevelFromExp(experience, Species::getSpecies(species_id)->getExpCurve(getFormId()));
     while(level < level_after_exp_gain){
-        levelUp();
+        levelUp(handler);
     }
 }
 
-void Monster::levelUp() {
+void Monster::levelUp(EventHandler* event_handler) {
     level++;
     updateStats();
     // TODO(): allow for learning new moves when levelling up
@@ -696,6 +732,7 @@ void Monster::clearBattleData(){
     if(isMegaEvolved()){
         cancelMega();
     }
+    seen_opponents.clear();
 }
 
 void Monster::transformInto(Monster* other){
@@ -1251,4 +1288,41 @@ void Monster::cancelMega(){
     updateStats();
     is_mega = false;
     mega_ability = NO_ABILITY;
+}
+
+void Monster::addSeenOpponent(Monster* opponent){
+    seen_opponents.insert(opponent);
+}
+bool Monster::hasSeenOpponent(Monster* opponent)const{
+    if(opponent == nullptr)
+        return false;
+    auto it = seen_opponents.find(opponent);
+    if(it != seen_opponents.end()){
+        return true;
+    }
+    return false;
+}
+
+bool Monster::isPastEvoLevel()const{
+    Species* spec = Species::getSpecies(species_id);
+    unsigned int min_evo_level = MAX_LEVEL;
+    for(const Evolution &evo: spec->getEvolutions(getFormId())){
+        if(evo.getEvolutionMethod() == LEVEL){
+            unsigned int evo_level = evo.getMethodCondition();
+            if(evo_level < min_evo_level)
+                min_evo_level = evo_level;
+        }
+    }
+    return level > min_evo_level;
+}
+
+void Monster::setBall(ItemType ball){
+    if(ball == NO_ITEM_TYPE)
+        return;
+    ItemData* item_data = ItemData::getItemData(ball);
+    if(item_data == nullptr)
+        return;
+    if(item_data->getCategory() != BALL)
+        return;
+    ball_containing_monster = ball;
 }

@@ -733,3 +733,308 @@ NAME:Tyranitarite
 CATEGORY:MEGA_STONE
 DESCRIPTION:One of a variety of mysterious Mega Stones. Have Tyranitar hold it, and this stone will enable it to Mega Evolve during battle.
 PRICE:100000
+# 137 GARDEVOIRITE
+NAME:Gardevoirite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Gardevoir hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 138 BLAZIKENITE
+NAME:Blazikenite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Blaziken hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 139 MEDICHAMITE
+NAME:Medichamite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Medicham hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 140 AGGRONITE
+NAME:Aggronite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Aggron hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 141 BANETTETITE
+NAME:Banettetite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Banette hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 142 LUCARIONITE
+NAME:Lucarionite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Lucario hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 143 ABOMASITE
+NAME:Abomasite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Abomasnow hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 144 ABSOLITE
+NAME:Absolite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Absol hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 145 MAWILITE
+NAME:Mawilite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Mawile hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 146 MANECTITE
+NAME:Manectite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Manectric hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 147 GARCHOMPITE
+NAME:Garchompite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Garchomp hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 148 LATIASITE
+NAME:Latiasite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Latias hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 149 LATIOSITE
+NAME:Latiosite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Latios hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 150 SWAMPERTITE
+NAME:Swampertite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Swampert hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 151 SCEPTILITE
+NAME:Sceptilite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Sceptile hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 152 SABLENITE
+NAME:Sablenite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Sableye hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 153 ALTARIANITE
+NAME:Altarianite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Altaria hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 154 GALLADITE
+NAME:Galladite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Gallade hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 155 AUDINITE
+NAME:Audinite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Audino hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 156 METAGROSSITE
+NAME:Metagrossite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Metagross hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 157 SHARPEDONITE
+NAME:Sharpedonite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Sharpedo hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 158 GLALITITE
+NAME:Glalitite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Glalie hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 159 DIANCITE
+NAME:Diancite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Diancie hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 160 LOPUNNITE
+NAME:Lopunnite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Lopunny hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 161 SALAMENCITE
+NAME:Salamencite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Salamence hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 162 CAMERUPTITE
+NAME:Cameruptite
+CATEGORY:MEGA_STONE
+DESCRIPTION:One of a variety of mysterious Mega Stones. Have Camerupt hold it, and this stone will enable it to Mega Evolve during battle.
+PRICE:100000
+# 163 POKE BALL
+NAME:Poké Ball
+CATEGORY:BALL
+DESCRIPTION:A device for catching wild Pokémon. It's thrown like a ball at a Pokémon, comfortably encapsulating its target.
+PRICE:200
+# 164 GREAT BALL
+NAME:Great Ball
+CATEGORY:BALL
+DESCRIPTION:A good, high-performance Poké Ball that provides a higher success rate for catching Pokémon than a standard Poké Ball.
+PRICE:600
+# 165 ULTRA BALL
+NAME:Ultra Ball
+CATEGORY:BALL
+DESCRIPTION:An ultra-high performance Poké Ball that provides a higher success rate for catching Pokémon than a Great Ball.
+PRICE:800
+# 166 MASTER BALL
+NAME:Master Ball
+CATEGORY:BALL
+DESCRIPTION:The very best Poké Ball with the ultimate level of performance. With it, you will catch any wild Pokémon without fail.
+PRICE:100000
+# 167 SAFARI BALL
+NAME:Safari Ball
+CATEGORY:BALL
+DESCRIPTION:A special Poké Ball used in locales such as the Safari Zone in the Kanto region and the Great Marsh in the Sinnoh region.
+PRICE:1000
+# 168 FAST BALL
+NAME:Fast Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon that are usually very quick to run away.
+PRICE:1000
+# 169 LEVEL BALL
+NAME:Safari Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that becomes more effective the lower the level of the Pokémon compared to your own Pokémon.
+PRICE:1000
+# 170 LURE BALL
+NAME:Lure Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon in or on the water.
+PRICE:1000
+# 171 HEAVY BALL
+NAME:Heavy Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that becomes more effective the heavier the Pokémon is.
+PRICE:1000
+# 172 LOVE BALL
+NAME:Love Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon of the opposite gender to your own Pokémon.
+PRICE:1000
+# 173 FRIEND BALL
+NAME:Friend Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that makes a wild Pokémon more friendly toward you immediately after it's caught.
+PRICE:1000
+# 174 MOON BALL
+NAME:Moon Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon that can be evolved using a Moon Stone.
+PRICE:1000
+# 175 SPORT BALL
+NAME:Sport Ball
+CATEGORY:BALL
+DESCRIPTION:A special Poké Ball that was used during the Bug-Catching Contest in the Johto region.
+PRICE:1000
+# 176 NET BALL
+NAME:Net Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Water- or Bug-type Pokémon.
+PRICE:1000
+# 177 DIVE BALL
+NAME:Dive Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon in or on the water.
+PRICE:1000
+# 178 NEST BALL
+NAME:Nest Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that becomes more effective the lower the level of the wild Pokémon.
+PRICE:1000
+# 179 REPEAT BALL
+NAME:Repeat Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching a Pokémon of a species that you've caught before.
+PRICE:1000
+# 180 TIMER BALL
+NAME:Timer Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that becomes more effective at catching Pokémon the more turns that are taken in battle.
+PRICE:1000
+# 181 LUXURY BALL
+NAME:Luxury Ball
+CATEGORY:BALL
+DESCRIPTION:A particularly comfortable Poké Ball that makes a wild Pokémon quickly grow friendlier after being caught.
+PRICE:3000
+# 182 PREMIER BALL
+NAME:Premier Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat rare Poké Ball made to commemorate a special occasion of some sort.
+PRICE:200
+# 183 DUSK BALL
+NAME:Dusk Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon at night or in dark places, such as caves.
+PRICE:1000
+# 184 HEAL BALL
+NAME:Heal Ball
+CATEGORY:BALL
+DESCRIPTION:A remedial Poké Ball that restores HP and eliminates status conditions for a Pokémon caught with it.
+PRICE:300
+# 185 QUICK BALL
+NAME:Quick Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective at catching Pokémon when used first thing in a battle.
+PRICE:1000
+# 186 CHERISH BALL
+NAME:Cherish Ball
+CATEGORY:BALL
+DESCRIPTION:A quite rare Poké Ball made to commemorate a special occasion of some sort.
+PRICE:100000
+# 187 PARK BALL
+NAME:Park Ball
+CATEGORY:BALL
+DESCRIPTION:A special Poké Ball used in the Pal Park.
+PRICE:1000
+# 188 DREAM BALL
+NAME:Dream Ball
+CATEGORY:BALL
+DESCRIPTION:A somewhat different Poké Ball that is more effective when catching Pokémon that are asleep.
+PRICE:1000
+# 189 BEAST BALL
+NAME:Beast Ball
+CATEGORY:BALL
+DESCRIPTION:A special Poké Ball designed to catch Ultra Beasts. It has a low success rate for catching others.
+PRICE:1000
+# 190 STRANGE BALL
+NAME:Strange Ball
+CATEGORY:BALL
+DESCRIPTION:A misterious Poké Ball that has caught Pokémon that have travelled through time and space.
+PRICE:1000
+# 191 LUCKY EGG
+NAME:Lucky Egg
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's an egg filled with happiness that earns the holder extra Exp. Points.
+PRICE:5000
+# 192 POWER WEIGHT
+NAME:Power Weight
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this weight reduces a Pokémon's Speed in battle but allows its HP stat to grow more quickly.
+PRICE:10000
+# 193 POWER BRACER
+NAME:Power Bracer
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this bracer reduces a Pokémon's Speed in battle but allows its Attack stat to grow more quickly.
+PRICE:10000
+# 194 POWER BELT
+NAME:Power Belt
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this belt reduces a Pokémon's Speed in battle but allows its Defense stat to grow more quickly.
+PRICE:10000
+# 195 POWER LENS
+NAME:Power Lens
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this lens reduces a Pokémon's Speed in battle but allows its Sp. Atk stat to grow more quickly.
+PRICE:10000
+# 196 POWER BAND
+NAME:Power Band
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this band reduces a Pokémon's Speed in battle but allows its Sp. Def stat to grow more quickly.
+PRICE:10000
+# 197 POWER ANKLET
+NAME:Power Anklet
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this anklet reduces a Pokémon's Speed in battle but allows its Speed stat to grow more quickly.
+PRICE:10000

@@ -27,11 +27,11 @@ class EventHandler{
     public:
     EventHandler();
     ~EventHandler();
-    virtual BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*) = 0;
+    virtual BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*,bool) = 0;
     virtual unsigned int chooseAttack(Battler*) = 0;
     virtual unsigned int chooseSwitch(MonsterTeam*) = 0;
     virtual unsigned int chooseSwitchForced(MonsterTeam*) = 0;
-    virtual std::pair<ItemType,unsigned int> chooseItem(Bag*,MonsterTeam*,Battler*) = 0;//returns pair <ITEM TO USE, MONSTER INDEX IN TEAM TO USE ITEM ON>
+    virtual std::pair<ItemType,unsigned int> chooseItem(Bag*,MonsterTeam*,Battler*,bool) = 0;//returns pair <ITEM TO USE, MONSTER INDEX IN TEAM TO USE ITEM ON>
     virtual void displayMsg(const std::string& msg) = 0;
     virtual void displayBattleSituation(Battler*,MonsterTeam*,Battler*,MonsterTeam*) = 0;
 };

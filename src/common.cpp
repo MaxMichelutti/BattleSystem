@@ -922,3 +922,21 @@ FormKind stringToFormKind(std::string formkind){
         return HISUIAN_FORM;
     return NO_FORM_KIND;
 }
+
+// Experience ------------------------------------------------------------------------------------------------------------
+
+unsigned int computeExperience(
+    unsigned int base,unsigned int level,bool active_participation, 
+    unsigned int level_active, bool is_traded,bool uses_lucky_egg, 
+    bool is_past_evo_level){
+    double participation_value = active_participation ? 1 : 2;
+    double power_arg = (double)(2*level+10)/(double)(level+level_active+10);
+    unsigned int exp_gained = ((base*level/5)*(1/participation_value)*pow(power_arg,2.5)+1);
+    if(is_traded)
+        exp_gained*=1.5;
+    if(uses_lucky_egg)
+        exp_gained*=1.5;
+    if(is_past_evo_level)
+        exp_gained = exp_gained*4915/4096;
+    return exp_gained;
+}

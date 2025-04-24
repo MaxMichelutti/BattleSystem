@@ -3,7 +3,7 @@
 TextEventHandler::TextEventHandler() {}
 TextEventHandler::~TextEventHandler() {}
 
-BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam *player_team, Battler *opponent_active, Field *field, Bag *bag){
+BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam *player_team, Battler *opponent_active, Field *field, Bag *bag, bool is_wild_battle){
     BattleAction forced_action = forcedAction(PLAYER, player_active, field);
     if (forced_action.getActionType() != ATTACK){
         return forced_action;
@@ -74,7 +74,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 choice = 0;
                 continue;
             }
-            auto item = chooseItem(bag, player_team, player_active);
+            auto item = chooseItem(bag, player_team, player_active,is_wild_battle);
             if (item.first == NO_ITEM_TYPE){
                 choice = 0;
                 continue;
@@ -389,7 +389,7 @@ void TextEventHandler::displayBattleSituation(Battler *user_active, MonsterTeam 
     std::cout << std::endl;
 }
 
-std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterTeam* team,Battler* active_monster){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterTeam* team,Battler* active_monster,bool is_wild_battle){
     if (bag->isEmpty())
         return std::make_pair(NO_ITEM_TYPE,0);
     auto pockets = bag->getPockets();
@@ -414,7 +414,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterT
             continue;
         }else{
             ItemCategory category = pocket_choices[pocket_choice];
-            auto result = chooseItemFromPocket(bag->getPocket(category),team, active_monster);
+            auto result = chooseItemFromPocket(bag->getPocket(category),team, active_monster, is_wild_battle);
             if(result.first == NO_ITEM_TYPE){//means "go back"
                 pocket_choice = 0;
                 continue;
@@ -424,7 +424,7 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItem(Bag *bag, MonsterT
     }
 }
 
-std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket * pocket,MonsterTeam* team,Battler* active_monster){
+std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket * pocket,MonsterTeam* team,Battler* active_monster,bool is_wild_battle){
     if(pocket->isEmpty())
         return std::make_pair(NO_ITEM_TYPE,0);
     auto items = pocket->getItems();
@@ -463,8 +463,24 @@ std::pair<ItemType,unsigned int> TextEventHandler::chooseItemFromPocket(Pocket *
             continue;
         }else{
             ItemType res = item_choices[item_choice];
-            unsigned int target = chooseItemTarget(res,team,active_monster);
-            if(target == 10){//10 equals go back, 0 equals active monster
+            ItemData* item_data = ItemData::getItemData(res);
+            unsigned int target;
+            ItemCategory item_category = item_data->getCategory();
+            if(item_category == BERRY || item_category==MEDICINE){//items used on a monster
+                target = chooseItemTarget(res,team,active_monster);
+                if(target == 10){//10 equals go back, 0 equals active monster
+                    item_choice = 0;
+                    continue;
+                }
+            }else if(item_category==BALL){// items used in wild battles on opponent
+                if(!is_wild_battle){
+                    displayMsg("You cannot use a ball in a trainer battle!");
+                    item_choice = 0;
+                    continue;
+                }
+                target = 0;
+            }else{//unusable items in battle
+                displayMsg("You cannot use this item in battle!");
                 item_choice = 0;
                 continue;
             }

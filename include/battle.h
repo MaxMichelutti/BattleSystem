@@ -103,6 +103,11 @@ class Battle{
     ItemType item_on_the_ground_opponent;
     std::set<Monster*> uproaring_monsters;//never dereference this pointers!!!
     std::vector<ScheduledFutureSight> scheduled_futuresights;
+    bool is_wild_battle;
+    bool battle_gives_exp;
+    bool caught_wild_monster;
+    std::set<Monster*> monsters_defeated_by_player;
+
     unsigned int money;
     void checkUproars();
     void incrementTurn();
@@ -142,6 +147,9 @@ class Battle{
     void forceSwitch(BattleActionActor actor);
     void applyScheduledFutureSights();
     void addMoney(unsigned int money);
+    void givePlayerExperience(Monster* defeated_monster);
+    void checkForExp();
+    void tryToCatchWildMonster(ItemType item);
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
@@ -153,6 +161,8 @@ class Battle{
     bool playerWon()const;
     bool opponentWon()const;
     unsigned int getMoney()const;
+    void setWild();
+    void setBattleGivesExp();
 };
 
 #endif

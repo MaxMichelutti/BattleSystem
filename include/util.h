@@ -2,6 +2,8 @@
 #define __UTIL_MON_H__
 #include <string>
 #include <sstream>
+#include <chrono>
+#include <ctime>
 
 template <typename T> T max_template(T a, T b) {
     return a > b ? a : b;
@@ -21,5 +23,8 @@ std::string internalToDisplay(std::string str);
 bool is_number(const std::string& s);
 
 double baseDamage(unsigned int level, unsigned int base_power, unsigned int attack, unsigned int defense);
+
+bool isDay();
+bool isNight();
 
 #endif

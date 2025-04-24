@@ -182,6 +182,9 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     this->opponent_bag = opponent_bag;
     item_on_the_ground_player = NO_ITEM_TYPE;
     item_on_the_ground_opponent = NO_ITEM_TYPE;
+    battle_gives_exp = false;
+    is_wild_battle = false;
+    caught_wild_monster = false;
 }
 
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
@@ -206,6 +209,9 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     this->opponent_bag = opponent_bag;
     item_on_the_ground_player = NO_ITEM_TYPE;
     item_on_the_ground_opponent = NO_ITEM_TYPE;
+    battle_gives_exp = false;
+    is_wild_battle = false;
+    caught_wild_monster = false;
 }
 
 Battle::~Battle() {
@@ -222,6 +228,7 @@ void Battle::startBattle(){
     event_handler->displayMsg("Turn "+std::to_string(turn+1));
     unsigned int speed_player = player_active->getModifiedSpeed();
     unsigned int speed_opponent = opponent_active->getModifiedSpeed();
+    player_active->addSeenOpponent(opponent_active->getMonster());
     if(speed_player == speed_opponent){
         if(RNG::coinFlip()){
             applyImpostorSwitchIn(PLAYER);
@@ -247,7 +254,6 @@ void Battle::startBattle(){
     }   
 
     while(!isOver()){
-        
         performTurn();
         incrementTurn();
     }
@@ -360,6 +366,8 @@ bool Battle::isUproar() {
 }
 
 bool Battle::isOver()const {
+    if(caught_wild_monster)
+        return true;
     return player_team->isDead() || opponent_team->isDead();
 }
 
@@ -385,7 +393,7 @@ void Battle::performTurn(){
     std::cout<<"Choosing action player "<<std::endl;
     std::cout.flush();
     #endif
-    BattleAction player_action = event_handler->chooseAction(player_active,player_team,opponent_active,field,player_bag);
+    BattleAction player_action = event_handler->chooseAction(player_active,player_team,opponent_active,field,player_bag,is_wild_battle);
     #ifdef DEBUG
     std::cout<<"Choosing action CPU "<<std::endl;
     std::cout.flush();
@@ -440,21 +448,23 @@ void Battle::performTurn(){
     // 2.5 apply action speed mods
     player_active->tryEatStartOfTurnBerry();
     opponent_active->tryEatStartOfTurnBerry();
+    if(player_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
+        //quick draw gives 30% chance to the user to act first in its priority bracket
+        player_active->addVolatileCondition(MOVING_FIRST,1);
+    }
+    if(opponent_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
+        opponent_active->addVolatileCondition(MOVING_FIRST,1);
+    }
+    //apply moving first condition
     if(player_active->hasVolatileCondition(MOVING_FIRST)){
         player_active->removeVolatileCondition(MOVING_FIRST);
-        player_action.setSpeed(MAX_UNSIGNED);
-    }
-    if(player_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
-        //quick draw gives 30% chance to the user to act first in its priority
         player_action.setSpeed(MAX_UNSIGNED);
     }
     if(opponent_active->hasVolatileCondition(MOVING_FIRST)){
         opponent_active->removeVolatileCondition(MOVING_FIRST);
         opponent_action.setSpeed(MAX_UNSIGNED);
     }
-    if(opponent_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
-        opponent_action.setSpeed(MAX_UNSIGNED);
-    }
+    
     // 3: sort actions by priority
     #ifdef DEBUG
     std::cout<<"Computing action order "<<std::endl;
@@ -491,6 +501,7 @@ void Battle::performTurn(){
     // 4: perform actions
     for(auto action: actions){
         performAction(action, actions);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -501,6 +512,12 @@ void Battle::performTurn(){
             player_active->cancelAbilityNeutralization();
             opponent_active->cancelAbilityNeutralization();
         }
+        if(player_active->isFainted()){
+            removeVolatilesFromOpponentOfMonsterLeavingField(PLAYER);
+        }
+        if(opponent_active->isFainted()){
+            removeVolatilesFromOpponentOfMonsterLeavingField(OPPONENT);
+        }
     }
     // std::cout<<"ATTACKS DONE!"<<std::endl;std::cout.flush();
     #ifdef DEBUG
@@ -508,6 +525,7 @@ void Battle::performTurn(){
     std::cout.flush();
     #endif
     applyScheduledFutureSights();
+    checkForExp();
     if(isOver()){return;}
     // 4.5 check if something is dead and in case remove some volatiles
     if(thereIsNeutralizingGas()){
@@ -593,6 +611,11 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
 void Battle::performUseItem(BattleAction action){
     ItemType item_to_use = action.getItemToUse();
     ItemData* item_data = ItemData::getItemData(item_to_use);
+    if(item_data==nullptr){
+        event_handler->displayMsg("Item not found!");
+        return;
+    }
+    ItemCategory item_category = item_data->getCategory();
     std::string player_name;
     Bag * bag_used;
     if(action.getActor() == PLAYER){
@@ -602,32 +625,51 @@ void Battle::performUseItem(BattleAction action){
         player_name = "Opponent";
         bag_used = opponent_bag;
     }
-    unsigned int target = action.getSwitchId();
-    if(target==0){
-        //use on active
-        Battler* active_target = getActorBattler(action.getActor());
-        if(active_target->isFainted()){
-            return;
+    switch(item_category){
+        case MEDICINE:case BERRY:{
+            unsigned int target = action.getSwitchId();
+            if(target==0){
+                //use on active
+                Battler* active_target = getActorBattler(action.getActor());
+                // if(active_target->isFainted()){
+                //     return;
+                // }
+                if(!active_target->itemWouldHaveEffect(item_to_use)){
+                    event_handler->displayMsg(player_name+" tried to use "+item_data->getName()+" on "+active_target->getNickname()+"!");
+                    event_handler->displayMsg("But it had no effect!");
+                    return;
+                }else{
+                    event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+"!");
+                    active_target->useItem(item_to_use,action.getAttackId());
+                    bag_used->removeItem(item_to_use);
+                }
+            }else{
+                //use on bench
+                MonsterTeam* target_team = getActorTeam(action.getActor());
+                Monster* monster_target = target_team->getMonster(target);
+                if(!monster_target->itemWouldHaveEffect(item_to_use)){
+                    event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+", but it had no effect!");
+                    return;
+                }else{
+                    event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+"!");
+                    monster_target->useItem(item_to_use, event_handler, action.getAttackId());
+                    bag_used->removeItem(item_to_use);
+                }
+            }
+            break;
         }
-        if(!active_target->itemWouldHaveEffect(item_to_use)){
-            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+", but it had no effect!");
-            return;
-        }else{
-            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+active_target->getNickname()+"!");
-            active_target->useItem(item_to_use,action.getAttackId());
-            bag_used->removeItem(item_to_use);
+        case BALL:{
+            if(!is_wild_battle){
+                event_handler->displayMsg("You cannot use a ball in a trainer battle!");
+                return;
+            }
+            tryToCatchWildMonster(item_to_use);
+            break;
         }
-    }else{
-        //use on bench
-        MonsterTeam* target_team = getActorTeam(action.getActor());
-        Monster* monster_target = target_team->getMonster(target);
-        if(!monster_target->itemWouldHaveEffect(item_to_use)){
-            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+", but it had no effect!");
-            return;
-        }else{
-            event_handler->displayMsg(player_name+" used "+item_data->getName()+" on "+monster_target->getNickname()+"!");
-            monster_target->useItem(item_to_use, event_handler, action.getAttackId());
-            bag_used->removeItem(item_to_use);
+        default:{
+            event_handler->displayMsg(player_name+" tried to use "+item_data->getName()+"!");
+            event_handler->displayMsg("But it had no effect!");
+            break;
         }
     }
 }
@@ -1181,11 +1223,13 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         }
         //cycle in order to deal with multi hit moves
         for(unsigned int i=0;i<number_of_hits;i++){
-            if(effect_id==246 && user_team->getMonster(i)->isFainted()){
+            if(effect_id==246){
+                if(user_team->getMonster(i)->isFainted()){
                 // beat up skips fainted monsters
                 continue;
-            }else{
-                event_handler->displayMsg(user_team->getMonster(i)->getNickname()+" attacks!");
+                }else{
+                    event_handler->displayMsg(user_team->getMonster(i)->getNickname()+" attacks!");
+                }
             }
             if(effect_id==251 && i>0 && checkIfMoveMisses(attack,actor)){
                 //attack misses at i-th hit
@@ -3011,6 +3055,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 applySwitchInAbilitiesEffects(actor);
                 performEntryHazardCheck(actor);
                 checkUproars();
+                player_active->addSeenOpponent(opponent_active->getMonster());
                 break;
             }
             case 187:{
@@ -3037,6 +3082,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     field->setFieldEffect(MIST, 5, actor);
                     event_handler->displayMsg(user_mon_name+" is shrouded in mist!");
                 }
+                break;
             }
             case 191:{
                 //user change type to first attack type
@@ -3539,6 +3585,7 @@ void Battle::performSwitch(BattleAction action){
     applySwitchInAbilitiesEffects(action.getActor());
     performEntryHazardCheck(action.getActor());
     checkUproars();
+    player_active->addSeenOpponent(opponent_active->getMonster());
 }
 
 unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, 
@@ -4261,6 +4308,7 @@ void Battle::applyPostDamage(){
     // apply weather
     for(auto actor: actors){
         applyWeatherPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4269,6 +4317,7 @@ void Battle::applyPostDamage(){
     // apply terrain effects
     for(auto actor: actors){
         applyTerrainPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4276,6 +4325,7 @@ void Battle::applyPostDamage(){
     // apply permanent
     for(auto actor: actors){
         applyPermanentStatusPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4283,6 +4333,7 @@ void Battle::applyPostDamage(){
     // apply volatile
     for(auto actor: actors){
         applyVolatileStatusPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4291,6 +4342,7 @@ void Battle::applyPostDamage(){
     // apply abilities
     for(auto actor: actors){
         applyAbilityPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4299,6 +4351,7 @@ void Battle::applyPostDamage(){
     
     for(auto actor: actors){
         applyFieldEffectsPostDamage(actor);
+        checkForExp();
         if(isOver()){
             return;
         }
@@ -4960,7 +5013,10 @@ std::string Battle::getActorBattlerName(BattleActionActor actor){
     if(actor == PLAYER){
         return "Player's "+player_active->getNickname();
     }else{
-        return "Opponent's "+opponent_active->getNickname();
+        if(is_wild_battle)
+            return "Wild "+opponent_active->getNickname();
+        else
+            return "Opponent's "+opponent_active->getNickname();
     }
 }
 
@@ -5627,6 +5683,8 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     applySwitchInAbilitiesEffects(actor_switching_out);
     performEntryHazardCheck(actor_switching_out);
     checkUproars();
+    checkForExp();
+    player_active->addSeenOpponent(opponent_active->getMonster());
 }
 
 void Battle::applyScheduledFutureSights(){
@@ -5638,7 +5696,7 @@ void Battle::applyScheduledFutureSights(){
             to_remove.push_back(i);
             Battler* target_active = getActorBattler(it.target);
             std::string target_name = getActorBattlerName(it.target);
-            event_handler->displayMsg("Future Sight hits "+target_name+"!");
+            event_handler->displayMsg("Future Sight tries to hit "+target_name+"!");
             if(target_active->isFainted()){
                 event_handler->displayMsg("But it failed!");
                 continue;
@@ -5789,4 +5847,274 @@ unsigned int Battle::getMoney()const{
 }
 void Battle::addMoney(unsigned int money){
     this->money += money;
+}
+
+void Battle::setWild(){
+    if(opponent_team->getSize()>1){
+        //error: cannot have wild battles with teams of size > 1
+        event_handler->displayMsg("Error: cannot have wild battles with teams of size > 1");
+        exit(1);
+    }
+    is_wild_battle = true;
+}
+void Battle::setBattleGivesExp(){
+    battle_gives_exp = true;
+}
+
+void Battle::givePlayerExperience(Monster* defeated_mon){
+    // gain EXPERIENCE
+    Species * defeated_spec = Species::getSpecies(defeated_mon->getSpeciesId());
+    unsigned int defeated_form_id = defeated_mon->getFormId();
+    unsigned int base_exp = defeated_spec->getExpYield(defeated_form_id);
+    unsigned int level = defeated_mon->getLevel();
+    unsigned int level_player_active = player_active->getLevel();  
+    std::vector<Monster*> player_experience_gainers;
+    for(unsigned int i=0;i<player_team->getSize();i++){
+        Monster* player_mon = player_team->getMonster(i);
+        if(player_mon==nullptr)
+            continue;
+        if(player_mon->isFainted())
+            continue;
+        if(player_mon->hasSeenOpponent(defeated_mon))
+            player_experience_gainers.push_back(player_mon);
+    }
+    for(Monster* mon: player_experience_gainers){
+        //gain EXP
+        unsigned int exp_gained = computeExperience(base_exp,level,true,level_player_active,
+            false,(mon->getHeldItem()==LUCKY_EGG),mon->isPastEvoLevel());
+        event_handler->displayMsg(mon->getNickname()+" gained "+std::to_string(exp_gained)+" EXP!");
+        mon->gainExperience(exp_gained,event_handler);
+        // gain EVs
+        Stats ev_gained = defeated_spec->getEVYield(defeated_form_id);
+        mon->changeEffortHp(ev_gained.getHp());
+        mon->changeEffortAtk(ev_gained.getAtk());
+        mon->changeEffortDef(ev_gained.getDef());
+        mon->changeEffortSpatk(ev_gained.getSpatk());
+        mon->changeEffortSpdef(ev_gained.getSpdef());
+        mon->changeEffortSpd(ev_gained.getSpd());
+        //gain EVs from held items
+        if(mon->getHeldItem()==POWER_WEIGHT)
+            mon->changeEffortHp(8);
+        if(mon->getHeldItem()==POWER_BRACER)
+            mon->changeEffortAtk(8);
+        if(mon->getHeldItem()==POWER_BELT)
+            mon->changeEffortDef(8);
+        if(mon->getHeldItem()==POWER_LENS)
+            mon->changeEffortSpatk(8);
+        if(mon->getHeldItem()==POWER_BAND)
+            mon->changeEffortSpdef(8);
+        if(mon->getHeldItem()==POWER_ANKLET)
+            mon->changeEffortSpd(8);
+    }
+}
+
+void Battle::checkForExp(){
+    if(opponent_active->isFainted() && 
+        battle_gives_exp && 
+        monsters_defeated_by_player.find(opponent_active->getMonster()) == monsters_defeated_by_player.end()){
+        monsters_defeated_by_player.insert(opponent_active->getMonster());
+        givePlayerExperience(opponent_active->getMonster());
+    }
+}
+
+void Battle::tryToCatchWildMonster(ItemType ball_used){
+    ItemData* ball_data = ItemData::getItemData(ball_used);
+    if(ball_data==nullptr || ball_data->getCategory()!=BALL)
+        return;
+    event_handler->displayMsg("Player throws a "+ball_data->getName()+"!");
+    Battler* active_user = getActorBattler(PLAYER);
+    Battler* active_target = getActorBattler(OPPONENT);
+    unsigned int form = active_target->getMonster()->getFormId();
+    Species * spec = Species::getSpecies(form);
+    unsigned int base_catch_rate = spec->getCatchRate(form);
+    if(ball_used==MASTER_BALL){
+        caught_wild_monster = true;
+    }else{
+        //try with other balls
+        double ball_bonus=1;
+        switch(ball_used){
+            case GREAT_BALL:{
+                ball_bonus = 1.5;
+                break;
+            }
+            case ULTRA_BALL:{
+                ball_bonus = 2;
+                break;
+            }
+            case LEVEL_BALL:{
+                unsigned int player_level = player_active->getLevel();
+                unsigned int wild_level = active_target->getLevel();
+                if(player_level >= 4 * wild_level){
+                    ball_bonus = 8;
+                }else if(player_level >= 2 * wild_level){
+                    ball_bonus = 4;
+                }else if(player_level > wild_level){
+                    ball_bonus = 2;
+                }
+                break;
+            }
+            case MOON_BALL:{
+                auto evos = spec->getEvolutions(form);
+                bool evolves_with_moon_stone = false;
+                for(auto evo:evos){
+                    EvolutionMethod method = evo.getEvolutionMethod();
+                    if(method!=USE_EVO_ITEM &&
+                        method!=USE_EVO_ITEM_DAY &&
+                        method!=USE_EVO_ITEM_NIGHT)
+                        continue;
+                    ItemType necessary_item = static_cast<ItemType>(evo.getMethodCondition());
+                    if(necessary_item == MOON_STONE){
+                        evolves_with_moon_stone = true;
+                        break;
+                    }
+                }
+                if(evolves_with_moon_stone){
+                    ball_bonus = 4;
+                }
+                break;
+            }
+            case LOVE_BALL:{
+                Gender wild_gender = active_target->getGender();
+                Gender player_mon_gender = active_user->getGender();
+                if(areMaleAndFemale(wild_gender,player_mon_gender) && 
+                    active_user->getMonster()->getSpeciesId() == spec->getId()){
+                    ball_bonus = 8;
+                }
+                break;
+            }
+            case HEAVY_BALL:{
+                unsigned int weight = active_target->getWeight();
+                if(weight>4096){
+                    base_catch_rate = max(255,40+base_catch_rate);
+                }else if(weight>3072){
+                    base_catch_rate = max(255,30+base_catch_rate);
+                }else if(weight>2048){
+                    base_catch_rate = max(255,20+base_catch_rate);
+                }else if(weight<1024){
+                    base_catch_rate = max(1,base_catch_rate-20);
+                }
+                break;
+            }
+            case FAST_BALL:{
+                unsigned int base_speed = spec->getBaseStats(form).getSpd();
+                if(base_speed>=100)
+                    ball_bonus=4;
+                break;
+            }
+            case NET_BALL:{
+                if(active_target->hasType(BUG) || active_target->hasType(WATER)){
+                    ball_bonus = 3.5;
+                }
+                break;
+            }
+            case NEST_BALL:{
+                unsigned int wild_level = active_target->getLevel();
+                if(wild_level <= 29){
+                    ball_bonus = (int)((41-wild_level)/10.0)/4096.0;
+                }
+                break;
+            }
+            case REPEAT_BALL:{
+                //IF user had previously caught the same species in the past
+                // boost to 3.5x
+                break;
+            }
+            case TIMER_BALL:{
+                ball_bonus = min(4.0,1 + turn*1229.0/4096.0);
+                break;
+            }
+            case LURE_BALL:{
+                //bonus_ball = 4 if battle happened in water
+                break;
+            }
+            case DIVE_BALL:{
+                //bonus_ball = 3.5 if battle happened in water
+                break;
+            }
+            case DUSK_BALL:{
+                if(isNight())
+                    ball_bonus = 3.5;
+                //bonus_ball = 3 if battle happened in cave
+                break;
+            }
+            case QUICK_BALL:{
+                if(turn == 0)
+                    ball_bonus = 5;
+                break;
+            }
+            case DREAM_BALL:{
+                if(active_target->isAsleep())
+                    ball_bonus = 4;
+                break;
+            }
+            case BEAST_BALL:{
+                // bonus_ball = 5 if used on ultra beast
+                ball_bonus=410/4096.0;
+                break;
+            }
+            default:{
+                ball_bonus = 1;
+                break;
+            }
+        }
+        double status_bonus;
+        switch(active_target->getPermanentStatus()){
+            case SLEEP_1:
+            case SLEEP_2:
+            case SLEEP_3:
+            case SLEEP_4:
+            case FREEZE:{
+                status_bonus = 2;
+                break;
+            }
+            case PARALYSIS:
+            case POISONED:
+            case BAD_POISON:
+            case BURN:{
+                status_bonus = 1.5;
+                break;
+            }
+            default:{
+                status_bonus = 1;
+                break;
+            }
+        }
+        unsigned int catching_probability=max(1,
+            (1.0 - (2.0 * active_target->getCurrentHP())/(3.0 * active_target->getMaxHP()))*ball_bonus*status_bonus*base_catch_rate);
+        if(catching_probability > 255){
+            caught_wild_monster = true;
+        }else{
+            unsigned int random_number = RNG::getRandomInteger(0,255);
+            if(random_number < catching_probability)
+                caught_wild_monster = true;
+        }
+    }
+    if(caught_wild_monster){
+        event_handler->displayMsg(active_target->getNickname()+" was caught!");
+        Monster * caught_monster = new Monster(active_target->getMonster());
+        caught_monster->setBall(ball_used);
+        if(ball_used == FRIEND_BALL){
+            unsigned int old_friendship = caught_monster->getFriendship();
+            int friendship_gain = 200 - old_friendship;
+            if(friendship_gain > 0){
+                caught_monster->changeFriendship(friendship_gain);
+            }
+        }else if(ball_used == HEAL_BALL){
+            //recover damage
+            caught_monster->removeDamage(caught_monster->getMaxHP());
+            // recover status
+            caught_monster->setPermanentStatus(NO_PERMANENT_CONDITION);
+            //recover all PP
+            auto attacks = caught_monster->getAttacks();
+            for(auto attack:attacks){
+                caught_monster->recoverPP(attack.first,1000);
+            }
+        }
+        if(!player_team->isFull())
+            player_team->addMonster(caught_monster);//add a clone of the caught monster to the player team
+        if(battle_gives_exp)
+            givePlayerExperience(active_target->getMonster());
+    }else{
+        event_handler->displayMsg(active_target->getNickname()+" broke free!");
+    }
 }

@@ -3861,7 +3861,7 @@ EFFECT:226
 EFFECTCHANCE:30
 # 423 ROCK TOMB
 NAME:Rock Tomb
-DESCRIPTION:
+DESCRIPTION:The user hurls boulders at the target to inflict damage. This also lowers the target's Speed stat by cutting off its movement.
 TYPE:ROCK
 CATEGORY:PHYSICAL
 ACCURACY:95

@@ -48,10 +48,12 @@ class Monster{
     ItemType consumed_item;
     unsigned int form_id;
     Type hidden_power_type;
+    std::set<Monster*> seen_opponents;
+    ItemType ball_containing_monster;
 
     void updateStats();
     void packAttacks();
-    void levelUp();
+    void levelUp(EventHandler*handler);
     void init(unsigned int species_id, unsigned int level,unsigned int form_id);
     void init_stats();
     void init_gender(GenderRule);
@@ -60,6 +62,7 @@ class Monster{
     Monster(unsigned int species_id);
     Monster(unsigned int species_id, unsigned int level);
     Monster(unsigned int species_id, unsigned int level,unsigned int form_id);
+    Monster(Monster* other);
     ~Monster();
     unsigned int getSpeciesId()const;
     Stats getStats()const;
@@ -94,7 +97,7 @@ class Monster{
     bool learnAttack(unsigned int attack_id);
     bool forgetAttack(unsigned int attack_id);
     bool replaceAttack(unsigned int old_attack_id, unsigned int new_attack_id);
-    void gainExperience(unsigned long exp);
+    void gainExperience(unsigned long exp,EventHandler* handler);
     static Monster* generateRandomMonster(unsigned int species_id);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level,unsigned int form_id);
@@ -133,6 +136,10 @@ class Monster{
     bool isMegaEvolved()const;
     bool canMegaEvolve()const;
     void cancelMega();
+    void addSeenOpponent(Monster* opponent);
+    bool hasSeenOpponent(Monster* opponent)const;
+    bool isPastEvoLevel()const;
+    void setBall(ItemType ball);
 };
 
 #endif

@@ -940,6 +940,18 @@ unsigned int Battler::getModifiedSpeed()const {
     if(field->getWeather()==SANDSTORM && hasAbility(SAND_RUSH)){//Sand rush doubles speed under sandstorm
         base_modified = base_modified * 2;
     }
+    if(hasHeldItem(POWER_ANKLET))
+        base_modified = base_modified * 0.5;
+    if(hasHeldItem(POWER_BELT))
+        base_modified = base_modified * 0.5;
+    if(hasHeldItem(POWER_BRACER))
+        base_modified = base_modified * 0.5;
+    if(hasHeldItem(POWER_WEIGHT))
+        base_modified = base_modified * 0.5;
+    if(hasHeldItem(POWER_LENS))
+        base_modified = base_modified * 0.5;
+    if(hasHeldItem(POWER_BAND))
+        base_modified = base_modified * 0.5;
     return base_modified;
 }
 
@@ -2167,7 +2179,7 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
         return false;
     if(isFainted())
         return false;
-    // ItemData* item_data = ItemData::getItemData(item_type);
+    ItemData* item_data = ItemData::getItemData(item_type);
     bool res = monster->itemWouldHaveEffect(item_type);
     switch (item_type){
         case FULL_HEAL:
@@ -2440,4 +2452,7 @@ void Battler::setBattleSpecialDefense(unsigned int special_defense){
 }
 void Battler::setBattleSpeed(unsigned int speed){
     battle_stats.setSpd(speed);
+}
+void Battler::addSeenOpponent(Monster* opponent){
+    monster->addSeenOpponent(opponent);
 }

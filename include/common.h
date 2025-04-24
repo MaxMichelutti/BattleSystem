@@ -8,6 +8,7 @@
 #include <set>
 #include <unordered_map>
 #include "enums.h"
+#include <math.h>
 
 std::string permanentStatusConditionToString(PermanentStatusCondition status);
 PermanentStatusCondition stringToPermanentStatusCondition(std::string status);
@@ -17,11 +18,8 @@ Gender stringToGender(std::string);
 std::string genderToString(Gender);
 bool areMaleAndFemale(Gender,Gender);
 
-
 GenderRule stringToGenderRule(std::string);
 std::string genderRuleToString(GenderRule);
-
-
 
 Nature stringToNature(std::string nature);
 std::string natureToString(Nature nature);
@@ -36,6 +34,8 @@ float getTypeEffectiveness(Type attacker, Type defender_1, Type defender_2, bool
 float getTypeEffectiveness(Type attacker, Type defender, bool is_touching_ground, bool can_hit_ghosts, bool is_freeze_dry);
 float getTypeEffectiveness(Type attacker, std::set<Type> defender, bool is_touching_ground, bool can_hit_ghosts, bool is_freeze_dry);
 std::set<Type> getAllTypesSet();
+
+unsigned int computeExperience(unsigned int base,unsigned int level,bool active_participation, unsigned int level_active, bool is_traded,bool uses_lucky_egg, bool is_past_evo_level);
 
 class Stats{
     protected:
