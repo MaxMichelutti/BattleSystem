@@ -960,6 +960,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
 
     // apply effects
     applyAttackEffect(attack,action.getActor());
+    if(caught_wild_monster)//some attacks may end wild battles as a side effect
+        return;
     // these pointers may have changed due to move effects!!!
     active_user = getActorBattler(action.getActor());
     active_target = getActorBattler(otherBattleActionActor(action.getActor()));
@@ -1895,7 +1897,21 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 break;
             }
             case 32:{// whirlwind/roar/dragontail
-                if(! target_team->hasAliveBackup()){
+                if(active_target->getActor()==OPPONENT  && is_wild_battle){
+                    if(!active_target->hasAbility(SUCTION_CUPS) &&
+                        !active_target->hasVolatileCondition(INGRAINED)){
+                        //ends the wild battle
+                        caught_wild_monster = true;
+                    }else{
+                        if(attack->getCategory()==STATUS){
+                            event_handler->displayMsg("But it failed!");
+                            active_user->setLastAttackFailed();
+                        }
+                    }
+                    break;
+                }
+                if(! target_team->hasAliveBackup() || active_target->hasAbility(SUCTION_CUPS) || 
+                    active_target->hasVolatileCondition(INGRAINED)){
                     if(attack->getCategory()==STATUS){
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
@@ -2509,8 +2525,20 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             }
             case 123:{
                 // target is forced to switch
+                if(is_wild_battle && active_target->getActor()==OPPONENT){
+                    if(!active_target->hasAbility(SUCTION_CUPS) && 
+                        !active_target->hasVolatileCondition(INGRAINED)){
+                        //ends the wild battle
+                        caught_wild_monster = true;
+                    }else if(attack->getCategory() == STATUS){
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
                 if(!target_team->hasAliveBackup() || 
-                    active_target->hasAbility(SUCTION_CUPS)){
+                    active_target->hasAbility(SUCTION_CUPS) ||
+                    active_target->hasVolatileCondition(INGRAINED)){
                     if(attack->getCategory() == STATUS){
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
@@ -2529,6 +2557,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 // user switches out, 
                 // fails if trapped in the case of 124
                 // start snow in case of 235
+                if(effect==124 && is_wild_battle && active_user->getActor()==OPPONENT){
+                    if(active_user->canSwitchOut(active_target)){
+                        caught_wild_monster = true;
+                    }else{
+                        event_handler->displayMsg("But it failed!");
+                        active_user->setLastAttackFailed();
+                    }
+                    break;
+                }
                 if(!user_team->hasAliveBackup()){
                     if(attack->getCategory() == STATUS){
                         event_handler->displayMsg("But it failed!");

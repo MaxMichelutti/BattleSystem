@@ -1317,8 +1317,6 @@ bool Monster::isPastEvoLevel()const{
 }
 
 void Monster::setBall(ItemType ball){
-    if(ball == NO_ITEM_TYPE)
-        return;
     ItemData* item_data = ItemData::getItemData(ball);
     if(item_data == nullptr)
         return;
