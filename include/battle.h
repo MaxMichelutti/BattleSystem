@@ -106,6 +106,7 @@ class Battle{
     bool is_wild_battle;
     bool battle_gives_exp;
     bool caught_wild_monster;
+    bool is_wild_battle_over;
     std::set<Monster*> monsters_defeated_by_player;
 
     unsigned int money;

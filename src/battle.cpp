@@ -185,6 +185,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     battle_gives_exp = false;
     is_wild_battle = false;
     caught_wild_monster = false;
+    is_wild_battle_over = false;
 }
 
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
@@ -212,6 +213,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     battle_gives_exp = false;
     is_wild_battle = false;
     caught_wild_monster = false;
+    is_wild_battle_over = false;
 }
 
 Battle::~Battle() {
@@ -367,6 +369,8 @@ bool Battle::isUproar() {
 
 bool Battle::isOver()const {
     if(caught_wild_monster)
+        return true;
+    if(is_wild_battle_over)
         return true;
     return player_team->isDead() || opponent_team->isDead();
 }
@@ -960,7 +964,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
 
     // apply effects
     applyAttackEffect(attack,action.getActor());
-    if(caught_wild_monster)//some attacks may end wild battles as a side effect
+    if(is_wild_battle_over)//some attacks may end wild battles as a side effect
         return;
     // these pointers may have changed due to move effects!!!
     active_user = getActorBattler(action.getActor());
@@ -1901,7 +1905,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     if(!active_target->hasAbility(SUCTION_CUPS) &&
                         !active_target->hasVolatileCondition(INGRAINED)){
                         //ends the wild battle
-                        caught_wild_monster = true;
+                        is_wild_battle_over = true;
                     }else{
                         if(attack->getCategory()==STATUS){
                             event_handler->displayMsg("But it failed!");
@@ -2529,7 +2533,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     if(!active_target->hasAbility(SUCTION_CUPS) && 
                         !active_target->hasVolatileCondition(INGRAINED)){
                         //ends the wild battle
-                        caught_wild_monster = true;
+                        is_wild_battle_over = true;
                     }else if(attack->getCategory() == STATUS){
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
@@ -2559,7 +2563,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 // start snow in case of 235
                 if(effect==124 && is_wild_battle && active_user->getActor()==OPPONENT){
                     if(active_user->canSwitchOut(active_target)){
-                        caught_wild_monster = true;
+                        is_wild_battle_over = true;
                     }else{
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
