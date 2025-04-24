@@ -14,6 +14,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
         displayMsg("1. Attack");
         displayMsg("2. Switch");
         displayMsg("3. Item");
+        displayMsg("4. Run");
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
         if (choice == 1){
@@ -95,6 +96,26 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 item.second,
                 item.first,
+                false);
+        }else if(choice == 4){//run
+            if(!is_wild_battle){
+                displayMsg("You cannot run away from a trainer battle!");
+                choice = 0;
+                continue;
+            }
+            if(!player_active->canSwitchOut(opponent_active)){
+                displayMsg("You cannot run! " + player_active->getNickname() + " is trapped!");
+                choice = 0;
+                continue;
+            }
+            return BattleAction(
+                PLAYER,
+                ESCAPE,
+                0,
+                0,
+                player_active->getModifiedSpeed(),
+                0,
+                NO_ITEM_TYPE,
                 false);
         }else{
             displayMsg("Invalid choice. Please try again.");

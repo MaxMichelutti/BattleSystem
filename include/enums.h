@@ -70,7 +70,8 @@ enum BattleActionType{
     RECHARGE_TURN,
     SKY_ATTACK,
     USE_ITEM,
-    BOUNCE
+    BOUNCE,
+    ESCAPE
 };
 enum PermanentStatusCondition{
     NO_PERMANENT_CONDITION,
@@ -618,6 +619,7 @@ enum ItemType{
     GRASSY_SEED,
     MISTY_SEED,
     PSYCHIC_SEED,
+    SMOKE_BALL
 };
 
 #endif

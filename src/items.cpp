@@ -205,6 +205,7 @@ unsigned int flingPower(ItemType item_type){
         case SUN_STONE:
         case ICE_STONE:
         case LUCKY_EGG:
+        case SMOKE_BALL:
             return 30;
         case ICY_ROCK:
             return 40;

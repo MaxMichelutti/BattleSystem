@@ -108,6 +108,7 @@ class Battle{
     bool caught_wild_monster;
     bool is_wild_battle_over;
     std::set<Monster*> monsters_defeated_by_player;
+    unsigned int runaway_attempts;
 
     unsigned int money;
     void checkUproars();
@@ -152,6 +153,7 @@ class Battle{
     void checkForExp();
     void tryToCatchWildMonster(ItemType item);
     void consumeSeeds();
+    void performEscape(BattleAction action);
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);

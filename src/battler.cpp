@@ -1024,6 +1024,8 @@ void Battler::setAbility(Ability ability) {
 bool Battler::canSwitchOut(Battler* enemy)const {
     if(hasAbility(RUN_AWAY))
         return true;
+    if(hasHeldItem(SMOKE_BALL))
+        return true;
     if(hasVolatileCondition(INGRAINED))
         return false;
     if(hasType(GHOST))

@@ -71,6 +71,8 @@ BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsign
         this->priority = 10;
     else if(action_type == USE_ITEM)
         this->priority = 20;
+    else if(action_type == ESCAPE)
+        this->priority = 100;
 }
 BattleAction::~BattleAction() {}
 
@@ -186,6 +188,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     is_wild_battle = false;
     caught_wild_monster = false;
     is_wild_battle_over = false;
+    runaway_attempts = 0;
 }
 
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
@@ -215,6 +218,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     is_wild_battle = false;
     caught_wild_monster = false;
     is_wild_battle_over = false;
+    runaway_attempts = 0;
 }
 
 Battle::~Battle() {
@@ -610,6 +614,8 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
         performRechargeTurn(action);
     }else if(atype == USE_ITEM){
         performUseItem(action);
+    }else if(atype == ESCAPE){
+        performEscape(action);
     }
 }
 
@@ -6201,5 +6207,38 @@ void Battle::tryToCatchWildMonster(ItemType ball_used){
             givePlayerExperience(active_target->getMonster());
     }else{
         event_handler->displayMsg(active_target->getNickname()+" broke free!");
+    }
+}
+
+void Battle::performEscape(BattleAction action){
+    if(!is_wild_battle){
+        event_handler->displayMsg("You cannot escape from trainer battles!");
+        return;
+    }
+    runaway_attempts++;
+    Battler* active_user = getActorBattler(PLAYER);
+    Battler* active_target = getActorBattler(OPPONENT);
+    active_user->removeVolatileCondition(LASER_FOCUS);
+    std::string user_name = getActorBattlerName(PLAYER);
+    unsigned int user_speed = active_user->getModifiedSpeed();
+    unsigned int target_speed = max(1,active_target->getModifiedSpeed());
+    bool escape_successful = false;
+    if(!active_user->canSwitchOut(active_target)){
+        event_handler->displayMsg(user_name+" is trapped and cannot escape!");
+        return;
+    }else if(user_speed > target_speed){
+        escape_successful = true;
+    }else{
+        unsigned int escape_odds = ((user_speed*32)/(target_speed/4))+30*runaway_attempts;
+        unsigned int random_number = RNG::getRandomInteger(0,255);
+        if(random_number < escape_odds){
+            escape_successful = true;
+        }
+    }
+    if(escape_successful){
+        event_handler->displayMsg("Player got away safely!");
+        is_wild_battle_over = true;
+    }else{
+        event_handler->displayMsg("Player couldn't get away!");
     }
 }
