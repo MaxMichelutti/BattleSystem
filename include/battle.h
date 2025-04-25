@@ -159,7 +159,7 @@ class Battle{
     void consumeSeeds();
     void performEscape(BattleAction action);
     bool tryEjectPack(BattleActionActor actor);
-    bool changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
+    void changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
     void checkRoomService();
     public:
     Battle();

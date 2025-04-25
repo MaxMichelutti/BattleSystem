@@ -611,6 +611,9 @@ bool Battler::changeAttackModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -621,6 +624,9 @@ bool Battler::changeAttackModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -662,6 +668,9 @@ bool Battler::changeDefenseModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -672,6 +681,9 @@ bool Battler::changeDefenseModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -708,6 +720,9 @@ bool Battler::changeSpecialAttackModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -719,6 +734,9 @@ bool Battler::changeSpecialAttackModifierForced(int amount) {
         amount = -amount;
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -755,6 +773,9 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -765,6 +786,9 @@ bool Battler::changeSpecialDefenseModifierForced(int amount) {
         amount = -amount;
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -801,6 +825,9 @@ bool Battler::changeSpeedModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -811,6 +838,9 @@ bool Battler::changeSpeedModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -856,6 +886,9 @@ bool Battler::changeAccuracyModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -866,6 +899,9 @@ bool Battler::changeAccuracyModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -902,6 +938,9 @@ bool Battler::changeEvasionModifier(int amount) {
             opponent->changeAttackModifier(2);
         }
     }
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -912,6 +951,9 @@ bool Battler::changeEvasionModifierForced(int amount) {
         amount = -amount;
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
+    if(res && amount<0){
+        addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;

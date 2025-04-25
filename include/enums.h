@@ -142,7 +142,8 @@ enum VolatileStatusCondition{
     BOUNCING,
     TORMENTED,
     THROAT_CHOPPED,
-    GRUDGED
+    GRUDGED,
+    STAT_JUST_DROPPED
 };
 
 enum Gender{

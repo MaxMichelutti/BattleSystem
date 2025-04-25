@@ -238,6 +238,7 @@ void Battle::startBattle(){
     unsigned int speed_player = player_active->getModifiedSpeed();
     unsigned int speed_opponent = opponent_active->getModifiedSpeed();
     player_active->addSeenOpponent(opponent_active->getMonster());
+    resetOpponents();
     if(speed_player == speed_opponent){
         if(RNG::coinFlip()){
             applyImpostorSwitchIn(PLAYER);
@@ -311,6 +312,9 @@ void Battle::incrementTurn(){
     // remove endure effects
     player_active->removeVolatileCondition(ENDURE);
     opponent_active->removeVolatileCondition(ENDURE);
+    // remove stat just dropped
+    player_active->removeVolatileCondition(STAT_JUST_DROPPED);
+    opponent_active->removeVolatileCondition(STAT_JUST_DROPPED);
     // remove focus
     player_active->removeVolatileCondition(FOCUSED);
     opponent_active->removeVolatileCondition(FOCUSED);
@@ -539,7 +543,16 @@ void Battle::performTurn(){
     std::cout.flush();
     #endif
     // 4: perform actions
+    bool player_was_changed = false;
+    bool opponent_was_changed = false;
     for(auto action: actions){
+        //skip acxtions that were assigned to a different monster
+        if(action.getActor()==PLAYER && player_was_changed){
+            continue;
+        }
+        if(action.getActor()==OPPONENT && opponent_was_changed){
+            continue;
+        }
         performAction(action, actions);
         checkForExp();
         if(isOver()){
@@ -558,6 +571,10 @@ void Battle::performTurn(){
         if(opponent_active->isFainted()){
             removeVolatilesFromOpponentOfMonsterLeavingField(OPPONENT);
         }
+        if(tryEjectPack(PLAYER))
+            player_was_changed = true;
+        if(tryEjectPack(OPPONENT))
+            opponent_was_changed = true;
     }
     // std::cout<<"ATTACKS DONE!"<<std::endl;std::cout.flush();
     #ifdef DEBUG
@@ -1430,15 +1447,13 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
             //weak armor activation
             if(actual_damage>0 && active_target->hasAbility(WEAK_ARMOR) && !active_target->isFainted() && category==PHYSICAL){
                 StatCV changes = {{2,-1},{5,2}};
-                if(changeStats(otherBattleActionActor(actor),changes,false))
-                    break;
+                changeStats(otherBattleActionActor(actor),changes,false);
             }
             // berserk activation
             if((active_target->getCurrentHP()>=active_target->getMaxHP()/2) && 
                 (active_target->getCurrentHP()<active_target->getMaxHP()/2) && active_target->hasAbility(BERSERK)){
                 StatCV changes = {{1,1}};
-                if(changeStats(otherBattleActionActor(actor),changes,false))
-                    break;
+                changeStats(otherBattleActionActor(actor),changes,false);
             }
             // berry check
             active_target->tryEatLowHPBerry();            
@@ -1859,8 +1874,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
             case 4:case 210:case 222:case 232:case 241:{//poison opponent
                 if(effect==222){
                     StatCV changes = {{5,-1}};
-                    if(changeStats(other_actor,changes,false))
-                        return;
+                    changeStats(other_actor,changes,false);
                 }   // active_target->changeSpeedModifier(-1);
                 if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
@@ -2270,11 +2284,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         player_active->cancelAbilityNeutralization();
                         opponent_active->cancelAbilityNeutralization();
                     }
+                    player_active->addSeenOpponent(opponent_active->getMonster());
                     removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
                     applyImpostorSwitchIn(other_actor);
-                    applySwitchInAbilitiesEffects(other_actor);
-                    applySwitchInItemsEffects(other_actor);
-                    performEntryHazardCheck(other_actor);
+                    if (applySwitchInAbilitiesEffects(other_actor))
+                        return;
+                    if (applySwitchInItemsEffects(other_actor))
+                        return;
+                    if (performEntryHazardCheck(other_actor))
+                        return;
                     checkUproars();
                     if(active_target->isFainted())
                         return;
@@ -2646,6 +2664,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                         active_user = opponent_active;
                         event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
                     }
+                    resetOpponents();
                     if(thereIsNeutralizingGas()){
                         player_active->neutralizeAbility();
                         opponent_active->neutralizeAbility();
@@ -2660,10 +2679,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->removeDamage(maxHP);
                     active_user->clearPermanentStatus();
                     event_handler->displayMsg(user_mon_name+" was fully healed!");
+                    player_active->addSeenOpponent(opponent_active->getMonster());
                     applyImpostorSwitchIn(actor);
-                    applySwitchInAbilitiesEffects(actor);
-                    applySwitchInItemsEffects(actor);
-                    performEntryHazardCheck(actor);
+                    if(applySwitchInAbilitiesEffects(actor))
+                        return;
+                    if(applySwitchInItemsEffects(actor))
+                        return;
+                    if(performEntryHazardCheck(actor))
+                        return;
                     checkUproars();
                     if(active_user->isFainted())
                         return;
@@ -3512,12 +3535,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     opponent_active->cancelAbilityNeutralization();
                 }
                 removeVolatilesFromOpponentOfMonsterLeavingField(actor);
-                applyImpostorSwitchIn(actor);
-                applySwitchInAbilitiesEffects(actor);
-                applySwitchInItemsEffects(actor);
-                performEntryHazardCheck(actor);
-                checkUproars();
                 player_active->addSeenOpponent(opponent_active->getMonster());
+                applyImpostorSwitchIn(actor);
+                if(applySwitchInAbilitiesEffects(actor))
+                    return;
+                if(applySwitchInItemsEffects(actor))
+                    return;
+                if(performEntryHazardCheck(actor))
+                    return;
+                checkUproars();
                 break;
             }
             case 187:{
@@ -4115,9 +4141,12 @@ void Battle::performSwitch(BattleAction action){
     resetOpponents();
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
     applyImpostorSwitchIn(action.getActor());
-    applySwitchInAbilitiesEffects(action.getActor());
-    applySwitchInItemsEffects(action.getActor());
-    performEntryHazardCheck(action.getActor());
+    if(applySwitchInAbilitiesEffects(action.getActor()))
+        return;
+    if(applySwitchInItemsEffects(action.getActor()))
+        return;
+    if(performEntryHazardCheck(action.getActor()))
+        return;
     checkUproars();
     
 }
@@ -5199,6 +5228,7 @@ void Battle::applyTerrainPostDamage(BattleActionActor actor){
         }
         default: break;
     }
+    tryEjectPack(actor);
 }
     
 
@@ -5252,6 +5282,7 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
         }
         default: break;
     }
+    tryEjectPack(actor);
 }
 
 void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
@@ -5463,9 +5494,9 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             }else{
                 active_user->setPermanentStatus(SLEEP_4);
             }
-            
         }
     }
+    tryEjectPack(actor);
 }
 
 void Battle::applyWeatherPostDamage(BattleActionActor actor){
@@ -5573,6 +5604,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
         }
         default: break;
     }
+    tryEjectPack(actor);
 }
 
 void Battle::applyFieldEffectsPostDamage(BattleActionActor actor){
@@ -5603,6 +5635,7 @@ void Battle::applyFieldEffectsPostDamage(BattleActionActor actor){
     //         default:break;
     //     }
     // }   
+    tryEjectPack(actor);
 }
 
 
@@ -5672,9 +5705,9 @@ bool Battle::performEntryHazardCheck(BattleActionActor actor){
         event_handler->displayMsg(getActorBattlerName(actor)+" is slowed by the sticky web!");
         // active_battler->changeSpeedModifier(-1);
         StatCV changes = {{5,1}};
-        return changeStats(actor, changes, false);
+        changeStats(actor, changes, false);
     }
-    return false;
+    return tryEjectPack(actor);
 }
 
 bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
@@ -5724,16 +5757,14 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                 //     tryEjectPack(otherBattleActionActor(actor));
                 // }
                 StatCV changes = {{0,-1}};
-                if(changeStats(otherBattleActionActor(actor), changes, false))
-                    return true;
+                changeStats(otherBattleActionActor(actor), changes, false);
                 if(target_active->hasHeldItem(ADRENALINE_ORB)){
                     int modifier = target_active->getSpeedModifier();
                     if(!((modifier==MAX_MODIFIER && !target_active->hasAbility(CONTRARY))||
                         (modifier==MIN_MODIFIER && target_active->hasAbility(CONTRARY)))){
                         target_active->consumeHeldItem();
                         StatCV changes = {{5,1}};
-                        if(changeStats(otherBattleActionActor(actor), changes, false))
-                            return true;
+                        changeStats(otherBattleActionActor(actor), changes, false);
                     }
                 }
             }
@@ -5828,8 +5859,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                     // user_active->changeAttackModifier(1);
                     changes.push_back({1,1});
                 }
-                if(changeStats(actor, changes, false))
-                    return true;
+                changeStats(actor, changes, false);
             }
             break;
         }
@@ -5876,7 +5906,8 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         user_active->addVolatileCondition(UNNERVED,-1);
         event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
     }
-    return false;
+    // check for EJECT PACK
+    return tryEjectPack(actor);
 }
 
 void Battle::consumeSeeds(){
@@ -5959,7 +5990,7 @@ void Battle::applyImpostorSwitchIn(BattleActionActor actor){
         event_handler->displayMsg(user_name+" transformed into "+target_name+"!");
         // apply effects again since ability may have changed
         // applyImpostorSwitchIn(actor);
-        applySwitchInAbilitiesEffects(actor);
+        // applySwitchInAbilitiesEffects(actor);
         return;
     }
 }
@@ -6040,8 +6071,7 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
         //     tryEjectPack(actor);
         // }
         StatCV changes = {{5,-1}};
-        if(changeStats(actor, changes, false))
-            return true;
+        changeStats(actor, changes, false);
     }
 
     // STATIC ability effect
@@ -6803,8 +6833,7 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
             event_handler->displayMsg(user_name+"' Speed Boost activates!");
             // active_user->changeSpeedModifier(1);
             StatCV changes = {{5,1}};
-            if(changeStats(actor,changes,false))
-                return;
+            changeStats(actor,changes,false);
             break;
         }
         case MOODY:{
@@ -6821,12 +6850,12 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
                 }
             }
             StatCV changes = {{random_stat_high,2},{random_stat_low,-1}};
-            if(changeStats(actor,changes,true))
-                return;
+            changeStats(actor,changes,true);
             break;
         }
         default:break;
     }
+    tryEjectPack(actor);
 }
 
 bool Battle::thereIsNeutralizingGas(){
@@ -7152,7 +7181,7 @@ bool Battle::applySwitchInItemsEffects(BattleActionActor actor){
     consumeSeeds();
     // room service
     checkRoomService();
-    return false;
+    return tryEjectPack(actor);
 }
 
 void Battle::applyItemPostDamage(BattleActionActor actor){
@@ -7217,21 +7246,24 @@ void Battle::applyItemPostDamage(BattleActionActor actor){
         }
         default:break;
     }
+    tryEjectPack(actor);
 }
 
 bool Battle::tryEjectPack(BattleActionActor actor){
     Battler* active_user = getActorBattler(actor);
     MonsterTeam* active_team = getActorTeam(actor);
-    if(active_user->hasHeldItem(EJECT_PACK) && !active_user->isFainted() && active_team->hasAliveBackup()){
+    if(active_user->hasHeldItem(EJECT_PACK) && !active_user->isFainted() && 
+        active_team->hasAliveBackup() && active_user->hasVolatileCondition(STAT_JUST_DROPPED)){
         // event_handler->displayMsg(active_user->getNickname()+" is switched out by the Eject Pack!");
         active_user->consumeHeldItem();
         forceSwitch(actor);
         return true;
     }
+    active_user->removeVolatileCondition(STAT_JUST_DROPPED);
     return false;
 }
 
-bool Battle::changeStats(BattleActionActor actor,StatCV& changes,bool forced){
+void Battle::changeStats(BattleActionActor actor,StatCV& changes,bool forced){
     Battler* active_battler = getActorBattler(actor);
     std::map<unsigned int,int> stats_successfully_increased;
     std::map<unsigned int,int> stats_successfully_decreased;
@@ -7340,9 +7372,9 @@ bool Battle::changeStats(BattleActionActor actor,StatCV& changes,bool forced){
             }
         }
     }
-    if(!stats_successfully_decreased.empty())
-        return tryEjectPack(actor);
-    return false;
+    // if(!stats_successfully_decreased.empty())
+    //     return tryEjectPack(actor);
+    // return false;
 }
 
 void Battle::resetOpponents(){
