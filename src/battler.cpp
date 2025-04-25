@@ -1671,8 +1671,18 @@ void Battler::transformInto(Monster* other){
     this->attacks_used.clear();
 }
 
-unsigned int Battler::addDamage(unsigned int amount, AttackType category, float effectiveness, Battler* attacker){
-    // BE CAREFUL: Attacker may be nullptr!!!
+std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType category, float effectiveness, bool is_sound){
+    //try damage the substitute
+    if(hasSubstitute() && !is_sound){
+        handler->displayMsg("The substitute took the hit!");
+        if(amount >= substituteHP){
+            amount = substituteHP;
+            removeSubstitute();
+        }else{
+            substituteHP -= amount;
+        }
+        return {amount,true};
+    }
     unsigned int currentHP = monster->getCurrentHP();
     if(isAtFullHP() && hasAbility(MULTISCALE)){
         handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
@@ -1714,11 +1724,14 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category, float 
     else if(category==SPECIAL)
         setSpecialDamageTakenThisTurn(dmg);
     if(isFainted()){
+        if(hasSubstitute()){
+            removeSubstitute();
+        }
         handler->displayMsg(getNickname()+" fainted!");
-        return dmg;
+        return {dmg,false};
     }
     
-    return dmg;
+    return {dmg,false};
 }
 
 void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness,Battler*attacker){
@@ -1790,8 +1803,13 @@ void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness
 
 unsigned int Battler::addDirectDamage(unsigned int amount){
     unsigned int dmg = monster->addDamage(amount);
-    if(isFainted())
+    if(isFainted()){
+        if(hasSubstitute()){
+            removeSubstitute();
+        }
         handler->displayMsg(getNickname()+" fainted!");
+        return dmg;
+    }
     // berry check
     tryEatLowHPBerry();
     return dmg;
@@ -2856,4 +2874,19 @@ void Battler::removeDisable(){
 
 void Battler::setOpponent(Battler* opponent){
     this->opponent = opponent;
+}
+
+bool Battler::hasSubstitute()const{
+    return substituteHP > 0;
+}
+
+void Battler::setSubstituteHP(unsigned int amount){
+    substituteHP = amount;
+}
+
+void Battler::removeSubstitute(){
+    if(substituteHP > 0){
+        handler->displayMsg(getNickname()+"'s substitute faded!");
+        substituteHP = 0;
+    }
 }

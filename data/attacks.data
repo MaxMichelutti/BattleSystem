@@ -4220,3 +4220,18 @@ POWER:100
 ACCURACY:95
 EFFECT:17
 EFFECTTARGET:SELF
+# 462 LEAFAGE
+NAME:leafage
+DESCRIPTION:The user attacks by pelting the target with leaves.
+TYPE:GRASS
+PP:40
+POWER:40
+CATEGORY:PHYSICAL
+# 463 SHED TAIL
+NAME:Shed Tail
+DESCRIPTION:The user creates a substitute for itself using its own HP before switching places with a party Pokémon in waiting.
+PP:10
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:255
+TARGET:SELF

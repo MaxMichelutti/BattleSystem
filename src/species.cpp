@@ -962,6 +962,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 248:{//tyranitar
             return curr_form==0 && mega_item==TYRANITARITE;
         }
+        case 254:{//sceptile
+            return curr_form==0 && mega_item==SCEPTILITE;
+        }
         default:return false;
     }
 }
@@ -1050,6 +1053,10 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 248:{//tyranitar
             if(curr_form==0 && mega_item==TYRANITARITE)
                 return 98;
+        }
+        case 254:{//sceptile
+            if(curr_form==0 && mega_item==SCEPTILITE)
+                return 99;
         }
         default:return 0;
     }

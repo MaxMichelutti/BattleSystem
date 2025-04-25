@@ -95,6 +95,7 @@ class Battler{
     unsigned int height;
     bool had_flying_type;
     Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
+    unsigned int substituteHP;
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
     unsigned int getModifiedDefenseInternal()const;
@@ -212,7 +213,7 @@ class Battler{
     bool hasMimickedAttack()const;
     unsigned int getMaxPPForAttack(unsigned int attack_id)const;
     void transformInto(Monster* other);
-    unsigned int addDamage(unsigned int amount, AttackType category, float effectiveness, Battler* attacker);
+    std::pair<unsigned int,bool> addDamage(unsigned int amount, AttackType category, float effectiveness, bool is_sound);
     unsigned int addDirectDamage(unsigned int amount);
     unsigned int getCurrentHP()const;
     unsigned int getMaxHP()const;
@@ -280,6 +281,9 @@ class Battler{
     bool canConsumeWhiteHerb()const;
     void removeDisable();
     void setOpponent(Battler* opponent);
+    bool hasSubstitute()const;
+    void setSubstituteHP(unsigned int amount);
+    void removeSubstitute();
 };
 
 #endif

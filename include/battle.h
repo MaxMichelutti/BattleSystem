@@ -130,7 +130,7 @@ class Battle{
     bool applySwitchInAbilitiesEffects(BattleActionActor actor);
     bool applySwitchInItemsEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
-    void applyAttackEffect(Attack* attack,BattleActionActor actor);
+    void applyAttackEffect(Attack* attack,BattleActionActor actor, unsigned int actual_dmg, bool hits_substitute);
     bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
     bool thereIsNeutralizingGas();
@@ -139,7 +139,7 @@ class Battle{
     Battler* getActorBattler(BattleActionActor actor);
     MonsterTeam* getActorTeam(BattleActionActor actor);
     void applyRecoil(Attack*,unsigned int,BattleActionActor);
-    unsigned int applyDamage(Attack*,BattleActionActor, bool moves_after_target, double effectiveness, bool acts_second);//returns the actual damage dealt
+    std::pair<unsigned int,bool> applyDamage(Attack*,BattleActionActor, bool moves_after_target, double effectiveness, bool acts_second);//returns the actual damage dealt
     bool checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool acts_second);//true if move results in miss
     double computePower(Attack* attack, BattleActionActor actor, bool moves_after_target,unsigned int beat_up_index);
     void performAction(BattleAction action, std::vector<BattleAction>& all_actions);
