@@ -2423,7 +2423,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     active_user->setLastAttackFailed();
                 }else{
                     event_handler->displayMsg(user_mon_name+" is stockpiling!");
-                    bool res = active_user->incrementStockpiles();
+                    active_user->incrementStockpiles();
                     // active_user->changeDefenseModifier(+1);
                     // active_user->changeSpecialDefenseModifier(+1);
                     // if(res && active_user->hasAbility(CONTRARY))
