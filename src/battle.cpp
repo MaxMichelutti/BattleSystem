@@ -1565,6 +1565,61 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                     event_handler->displayMsg("But it failed!");
                 }
             }
+            if(active_target->hasHeldItem(ABSORB_BULB) && actual_damage>0 && attack_type==WATER){
+                // Absorb bulb effect
+                int modifier = active_target->getSpecialAttackModifier();
+                if(!((modifier == MAX_MODIFIER && !active_target->hasAbility(CONTRARY))||
+                    (modifier == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
+                    active_target->consumeHeldItem();
+                    // event_handler->displayMsg(opponent_mon_name+"'s Absorb Bulb triggers!");
+                    StatCV changes = {{3,1}};
+                    changeStats(otherBattleActionActor(actor),changes,true);
+                }
+            }
+            if(active_target->hasHeldItem(LUMINOUS_MOSS) && actual_damage>0 && attack_type==WATER){
+                // Luminous moss effect
+                int modifier = active_target->getSpecialDefenseModifier();
+                if(!((modifier == MAX_MODIFIER && !active_target->hasAbility(CONTRARY))||
+                    (modifier == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
+                    active_target->consumeHeldItem();
+                    // event_handler->displayMsg(opponent_mon_name+"'s Luminous Moss triggers!");
+                    StatCV changes = {{4,1}};
+                    changeStats(otherBattleActionActor(actor),changes,true);
+                }
+            }
+            if(active_target->hasHeldItem(CELL_BATTERY) && actual_damage>0 && attack_type==ELECTRIC){
+                // Cell Battery effect
+                int modifier = active_target->getAttackModifier();
+                if(!((modifier == MAX_MODIFIER && !active_target->hasAbility(CONTRARY))||
+                    (modifier == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
+                    active_target->consumeHeldItem();
+                    // event_handler->displayMsg(opponent_mon_name+"'s Cell Battery triggers!");
+                    StatCV changes = {{1,1}};
+                    changeStats(otherBattleActionActor(actor),changes,true);
+                }
+            }
+            if(active_target->hasHeldItem(SNOWBALL) && actual_damage>0 && attack_type==ICE){
+                // Snowball effect
+                int modifier = active_target->getAttackModifier();
+                if(!((modifier == MAX_MODIFIER && !active_target->hasAbility(CONTRARY))||
+                    (modifier == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
+                    active_target->consumeHeldItem();
+                    StatCV changes = {{1,1}};
+                    changeStats(otherBattleActionActor(actor),changes,true);
+                }
+            }
+            if(active_target->hasHeldItem(SNOWBALL) && actual_damage>0 && effectiveness>1.1){
+                // weakness policy effect
+                int modifier1 = active_target->getAttackModifier();
+                int modifier2 = active_target->getSpecialAttackModifier();
+                if(!((modifier1 == MAX_MODIFIER && modifier2 == MAX_MODIFIER && !active_target->hasAbility(CONTRARY))||
+                    (modifier1 == MIN_MODIFIER && modifier2 == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
+                    active_target->consumeHeldItem();
+                    StatCV changes = {{1,2},{3,2}};
+                    changeStats(otherBattleActionActor(actor),changes,true);
+                }
+            }
+            
         }
     }else{
         //active_user->setLastAttackUsed(attack->getId());
@@ -4761,6 +4816,102 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
+        case BLACK_BELT:{
+            if(attack_type == FIGHTING){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case BLACK_GLASSES:{
+            if(attack_type == DARK){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case CHARCOAL:{
+            if(attack_type == FIRE){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case DRAGON_FANG:{
+            if(attack_type == DRAGON){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case FAIRY_FEATHER:{
+            if(attack_type == FAIRY){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case HARD_STONE:{
+            if(attack_type == ROCK){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case MAGNET:{
+            if(attack_type == ELECTRIC){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case MIRACLE_SEED:{
+            if(attack_type == GRASS){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case MYSTIC_WATER:{
+            if(attack_type == WATER){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case NEVER_MELT_ICE:{
+            if(attack_type == ICE){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case SILK_SCARF:{
+            if(attack_type == NORMAL){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case SHARP_BEAK:{
+            if(attack_type == FLYING){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case SOFT_SAND:{
+            if(attack_type == GROUND){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case SILVER_POWDER:{
+            if(attack_type == BUG){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case SPELL_TAG:{
+            if(attack_type == GHOST){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case TWISTED_SPOON:{
+            if(attack_type == PSYCHIC){
+                base_power *= 1.2;
+            }
+            break;
+        }
         case METRONOME_ITEM:{
             if(active_user->getLastAttackUsed() == attack_id){
                 unsigned int metronome_counter = active_user->getSameAttackCounter() - 1;
@@ -5423,6 +5574,16 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                 StatCV changes = {{0,-1}};
                 if(changeStats(otherBattleActionActor(actor), changes, false))
                     return true;
+                if(target_active->hasHeldItem(ADRENALINE_ORB)){
+                    unsigned int modifier = target_active->getSpeedModifier();
+                    if(!((modifier==MAX_MODIFIER && !target_active->hasAbility(CONTRARY))||
+                        (modifier==MIN_MODIFIER && target_active->hasAbility(CONTRARY)))){
+                        target_active->consumeHeldItem();
+                        StatCV changes = {{5,1}};
+                        if(changeStats(otherBattleActionActor(actor), changes, false))
+                            return true;
+                    }
+                }
             }
             break;
         }
@@ -6879,6 +7040,27 @@ void Battle::applyItemPostDamage(BattleActionActor actor){
             unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
             if(actual_heal_amount>0)
                 event_handler->displayMsg(active_user->getNickname()+" healed "+std::to_string(actual_heal_amount)+" HP!");
+            break;
+        }
+        case BLACK_SLUDGE:{
+            //black sludge behaves like leftovers for poison types
+            // and like sticky barb for non-poison types
+            if(!active_user->hasType(POISON)){
+                //same as sticky barb
+                if(active_user->hasAbility(MAGIC_GUARD))
+                    break;
+                unsigned int max_hp = active_user->getMaxHP();
+                unsigned int damage = max(max_hp / 8,1);
+                unsigned int actual_damage = active_user->addDirectDamage(damage);
+                event_handler->displayMsg(active_user->getNickname()+" took "+std::to_string(actual_damage)+" damage from the Sticky Barb!");
+            }else{
+                //same as leftovers
+                unsigned int max_hp = active_user->getMaxHP();
+                unsigned int heal_amount = max(max_hp / 16,1);
+                unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(active_user->getNickname()+" healed "+std::to_string(actual_heal_amount)+" HP!");
+            }
             break;
         }
         default:break;

@@ -175,6 +175,16 @@ unsigned int Monster::getSpeciesId()const {
     return species_id;
 }
 
+bool Monster::isTransformed()const{
+    return transformation != nullptr;
+}
+
+unsigned int Monster::getTransformedSpeciesId()const{
+    if(transformation == nullptr)
+        return 0;
+    return transformation->getSpeciesId();
+}
+
 Stats Monster::getStats()const {
     if(transformation != nullptr)
         return transformation->getStats();
@@ -543,6 +553,11 @@ bool Monster::canEvolve()const{
         }
     }
     return false;
+}
+
+bool Monster::hasEvolutions()const{
+    Species* spec = Species::getSpecies(species_id);
+    return spec->getEvolutions(getFormId()).size() > 0;
 }
 
 void Monster::evolve(){

@@ -226,12 +226,30 @@ unsigned int flingPower(ItemType item_type){
         case SCOPE_LENS:
         case THROAT_SPRAY:
         case BERRY_JUICE:
+        case ABSORB_BULB:
+        case LUMINOUS_MOSS:
+        case SNOWBALL:
+        case CELL_BATTERY:
+        case SOUL_DEW:
+        case ADRENALINE_ORB:
+        case BLACK_SLUDGE:
+        case BLACK_BELT:
+        case BLACK_GLASSES:
+        case CHARCOAL:
+        case MAGNET:
+        case MIRACLE_SEED:
+        case MYSTIC_WATER:
+        case NEVER_MELT_ICE:
+        case SPELL_TAG:
+        case TWISTED_SPOON:
             return 30;
         case LUCKY_PUNCH:
         case ICY_ROCK:
+        case EVIOLITE:
             return 40;
         case DUBIOUS_DISC:
         case EJECT_PACK:
+        case SHARP_BEAK:
             return 50;
         case DAMP_ROCK:
         case HEAT_ROCK:
@@ -247,6 +265,7 @@ unsigned int flingPower(ItemType item_type){
         case POWER_WEIGHT:
         case POWER_LENS:
         case POWER_BAND:
+        case DRAGON_FANG:
             return 70;
         case CHIPPED_POT:
         case CRACKED_POT:
@@ -267,11 +286,14 @@ unsigned int flingPower(ItemType item_type){
         case QUICK_CLAW:
         case SAFETY_GOGGLES:
         case STICKY_BARB:
+        case WEAKNESS_POLICY:
             return 80;
         case DEEP_SEA_TOOTH:
         case GRIP_CLAW:
+        case THICK_CLUB:
             return 90;
         case ROOM_SERVICE:
+        case HARD_STONE:
             return 100;
         case IRON_BALL:
             return 130;
@@ -304,6 +326,12 @@ bool canItemBeConsumed(ItemType item_type){
         case ROOM_SERVICE:
         case THROAT_SPRAY:
         case BERRY_JUICE:
+        case ABSORB_BULB:
+        case LUMINOUS_MOSS:
+        case CELL_BATTERY:
+        case SNOWBALL:
+        case WEAKNESS_POLICY:
+        case ADRENALINE_ORB:
             return true;
         default:
             return false;

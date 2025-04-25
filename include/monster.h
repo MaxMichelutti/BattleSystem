@@ -118,6 +118,8 @@ class Monster{
     void clearBattleData();
     unsigned int getMaxPPForAttack(unsigned int attack_id)const;
     void transformInto(Monster* other);
+    bool isTransformed()const;
+    unsigned int getTransformedSpeciesId()const;
     unsigned int getHeight()const;
     unsigned int getWeight()const;
     bool useItem(ItemType item, EventHandler*, unsigned int data);
@@ -140,6 +142,7 @@ class Monster{
     bool hasSeenOpponent(Monster* opponent)const;
     bool isPastEvoLevel()const;
     void setBall(ItemType ball);
+    bool hasEvolutions()const;
 };
 
 #endif

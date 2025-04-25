@@ -1390,3 +1390,144 @@ NAME:Berry Juice
 CATEGORY:MEDICINE
 DESCRIPTION:A 100 percent pure juice made from Berries. It can be used to restore 20 HP to a Pokémon.
 PRICE:1500
+# 268 ABSORB BULB
+NAME:Absorb Bulb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This single-use bulb boosts the Sp. Atk stat if the holder is damaged by a Water-type attack.
+PRICE:5000
+# 269 LUMINOUS MOSS
+NAME:Luminous Moss
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This single-use luminous moss boosts the Sp. Def stat if the holder is damaged by a Water-type move.
+PRICE:5000
+# 270 CELL BATTERY
+NAME:Cell Battery
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This single-use battery boosts the Attack stat if the holder is damaged by an Electric-type attack.
+PRICE:5000
+# 271 SNOWBALL
+NAME:Snowball
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This single-use ball of snow boosts the Attack stat if the holder is damaged by an Ice-type move.
+PRICE:5000
+# 272 WEAKNESS POLICY
+NAME:Weakness Policy
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder is hit with a move it's weak to, this policy sharply boosts its Attack and Sp. Atk stats.
+PRICE:50000
+# 273 EVIOLITE
+NAME:Eviolite
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This mysterious evolutionary lump boosts the Defense and Sp. Def stats when held by a Pokémon that can still evolve.
+PRICE:50000
+# 274 METAL POWDER
+NAME:Metal Powder
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Ditto. Extremely fine yet hard, this odd powder boosts Ditto's Defense stat.
+PRICE:1000
+# 275 QUICK POWDER
+NAME:Quick Powder
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Ditto. Extremely fine yet hard, this odd powder boosts Ditto's Speed stat.
+PRICE:1000
+# 276 SOUL DEW
+NAME:Soul Dew
+% implement when Latios and Latias are implemented
+CATEGORY:HELD
+DESCRIPTION:A wondrous orb to be held by Latios or Latias. It boosts the power of their Psychic- and Dragon-type moves.
+PRICE:1000
+# 277 THICK CLUB
+NAME:Thick Club
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Cubone or Marowak. This hard bone of unknown origin boosts their Attack stat.
+PRICE:1000
+# 278 ADRENALINE ORB
+NAME:Adrenaline Orb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This orb boosts the Speed stat if the holder is intimidated.
+PRICE:5000
+# 279 BLACK SLUDGE
+NAME:Black Sludge
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder is a Poison type, this sludge will gradually restore its HP. It damages any other type.
+PRICE:10000
+# 280 BLACK BELT
+NAME:Black Belt
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This belt helps with focus and boosts the power of the holder's Fighting-type moves.
+PRICE:3000
+# 281 BLACK GLASSES
+NAME:Black Glasses
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a pair of shady-looking glasses that boost the power of the holder's Dark-type moves.
+PRICE:3000
+# 282 CHARCOAL
+NAME:Charcoal
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a combustible fuel that boosts the power of the holder's Fire-type moves.
+PRICE:3000
+# 283 DRAGON FANG
+NAME:Dragon Fang
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This hard, sharp fang boosts the power of the holder's Dragon-type moves.
+PRICE:3000
+# 284 FAIRY FEATHER
+NAME:Fairy Feather
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This feather, which gleams faintly when hit by light, boosts the power of the holder's Fairy-type moves.
+PRICE:3000
+# 285 HARD STONE
+NAME:Hard Stone
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a durable stone that boosts the power of the holder's Rock-type moves.
+PRICE:3000
+# 286 MAGNET
+NAME:Magnet
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a powerful magnet that boosts the power of the holder's Electric-type moves.
+PRICE:3000
+# 287 MIRACLE SEED
+NAME:Miracle Seed
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a seed imbued with life-force that boosts the power of the holder's Grass-type moves.
+PRICE:3000
+# 288 MYSTIC WATER
+NAME:Mystic Water
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This teardrop-shaped gem boosts the power of the holder's Water-type moves.
+PRICE:3000
+# 289 NEVER MELT ICE
+NAME:Never-Melt Ice
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a heat-repelling piece of ice that boosts the power of the holder's Ice-type moves.
+PRICE:3000
+# 290 SHARP BEAK
+NAME:Sharp Beak
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a long, sharp beak that boosts the power of the holder's Flying-type moves.
+PRICE:3000
+# 291 SILK SCARF
+NAME:Silk Scarf
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a sumptuous scarf that boosts the power of the holder's Normal-type moves.
+PRICE:3000
+# 292 SOFT SAND
+NAME:Soft Sand
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a loose, silky sand that boosts the power of the holder's Ground-type moves.
+PRICE:3000
+# 293 SILVER POWDER
+NAME:Silver Powder
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a shiny silver powder that boosts the power of the holder's Bug-type moves.
+PRICE:3000
+# 294 SPELL TAG
+NAME:Spell Tag
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a sinister, eerie tag that boosts the power of the holder's Ghost-type moves. 
+PRICE:3000
+# 295 TWISTED SPOON
+NAME:Twisted Spoon
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This spoon is imbued with telekinetic energy and boosts the power of the holder's Psychic-type moves.
+PRICE:3000

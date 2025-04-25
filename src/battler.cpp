@@ -967,6 +967,10 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=2;
     if(hasHeldItem(CHOICE_BAND))
         base_modified*=1.5;
+    if(hasHeldItem(THICK_CLUB) &&
+        (monster->getSpeciesId()==104 || monster->getSpeciesId()==105 ||//thick club doubles attack of cubone and marowak
+        monster->getTransformedSpeciesId()==104 || monster->getTransformedSpeciesId()==105))//and of a Monster transformed into cubone or marowak
+        base_modified*=2;
     return base_modified;
 }
 
@@ -994,6 +998,10 @@ unsigned int Battler::getModifiedDefenseInternal()const {
     if(hasAbility(MARVEL_SCALE) && hasPermanentStatus()){
         base_modified = base_modified * 3 / 2;
     }
+    if(hasHeldItem(EVIOLITE) && monster->hasEvolutions())
+        base_modified = base_modified * 1.5;
+    if(hasHeldItem(METAL_POWDER)&& monster->getSpeciesId()==132 && !monster->isTransformed())//metal powder oncreases defense of ditto
+        base_modified*=1.5;
     return base_modified;
 }
 
@@ -1030,6 +1038,10 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
     }
     if(hasHeldItem(ASSULT_VEST))
         base_modified = base_modified * 1.5;
+    if(hasHeldItem(EVIOLITE) && monster->hasEvolutions())
+        base_modified = base_modified * 1.5;
+    if(hasHeldItem(METAL_POWDER)&& monster->getSpeciesId()==132 && !monster->isTransformed())//metal powder oncreases defense of ditto
+        base_modified*=1.5;
     return base_modified;
 }
 
@@ -1085,6 +1097,8 @@ unsigned int Battler::getModifiedSpeed()const {
         base_modified *= 1.5;
     if(hasHeldItem(IRON_BALL))
         base_modified *= 0.5;
+    if(hasHeldItem(QUICK_POWDER)&& monster->getSpeciesId()==132 && !monster->isTransformed())//metal powder increases speed of ditto
+        base_modified*=2;
     return base_modified;
 }
 
