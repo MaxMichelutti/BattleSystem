@@ -2187,7 +2187,7 @@ void Battler::hitOnceMore(Type attack_type){
         hasAbility(RATTLED)){
         handler->displayMsg(getNickname()+"'s Rattled boosts its Speed!");
         bool res = changeSpeedModifier(1);
-        if(res && opponent->hasHeldItem(MENTAL_HERB)){
+        if(res && opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
             opponent->changeSpeedModifier(1);
         }
@@ -2336,7 +2336,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         case APICOT_BERRY:
         case MARANGA_BERRY:{
             bool item_res = changeSpecialDefenseModifier(1);
-            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+            if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
                 opponent->changeSpecialDefenseModifier(1);
             }
@@ -2346,7 +2346,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         case GANION_BERRY:
         case KEE_BERRY:{
                 bool item_res = changeDefenseModifier(1);
-                if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                     opponent->consumeHeldItem();
                     opponent->changeDefenseModifier(1);
                 }
@@ -2355,7 +2355,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             }
         case LIECHI_BERRY:{
             bool item_res = changeAttackModifier(1);
-            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+            if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
                 opponent->changeAttackModifier(1);
             }
@@ -2364,7 +2364,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         }
         case SALAC_BERRY:{
             bool item_res = changeSpeedModifier(1);
-            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+            if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
                 opponent->changeSpeedModifier(1);
             }
@@ -2373,7 +2373,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         }
         case PETAYA_BERRY:{
             bool item_res = changeSpecialAttackModifier(1);
-            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+            if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
                 opponent->changeSpecialAttackModifier(1);
             }
@@ -2386,7 +2386,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             switch(random_integer){
                 case 0:{
                     bool item_res = changeAttackModifier(2);
-                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
                         opponent->changeAttackModifier(2);
                     }
@@ -2394,7 +2394,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 }
                 case 1: {
                     bool item_res = changeSpecialAttackModifier(2);
-                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
                         opponent->changeSpecialAttackModifier(2);
                     }
@@ -2402,7 +2402,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 }
                 case 2:{
                     bool item_res = changeDefenseModifier(2);
-                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
                         opponent->changeDefenseModifier(2);
                     }
@@ -2410,7 +2410,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 }
                 case 3:{
                     bool item_res = changeSpecialDefenseModifier(2);
-                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
                         opponent->changeSpecialDefenseModifier(2);
                     }
@@ -2418,7 +2418,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 }
                 case 4:{
                     bool item_res = changeSpeedModifier(2);
-                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
                         opponent->changeSpeedModifier(2);
                     }
@@ -2531,7 +2531,7 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         }
         case BLUNDER_POLICY:{
             bool item_res = changeSpeedModifier(2);
-            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+            if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
                 opponent->changeSpeedModifier(2);
             }
