@@ -63,6 +63,7 @@ class Modifiers{
 class Battler{
     private:
     Monster* monster;
+    Battler* opponent;
     std::map<VolatileStatusCondition, int> volatile_conditions;
     Modifiers stat_modifiers;
     Ability battler_ability;
@@ -92,6 +93,7 @@ class Battler{
     std::set<Monster*> lock_ons;// never dereference the pointers contained in this set!!!
     unsigned int weight;
     unsigned int height;
+    bool had_flying_type;
     Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
@@ -190,8 +192,8 @@ class Battler{
     bool setPermanentStatusForced(PermanentStatusCondition status);
     bool clearPermanentStatus();
     unsigned int getStockpiles()const;
-    void incrementStockpiles();
-    void resetStockpiles();
+    bool incrementStockpiles();
+    bool resetStockpiles();
     bool isAbilitySuppressed()const;
     void suppressAbility();
     bool isFainted()const;
@@ -277,6 +279,7 @@ class Battler{
     void addSeenOpponent(Monster* opponent);
     bool canConsumeWhiteHerb()const;
     void removeDisable();
+    void setOpponent(Battler* opponent);
 };
 
 #endif

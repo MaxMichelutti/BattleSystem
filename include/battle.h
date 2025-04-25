@@ -23,6 +23,8 @@ class ItemData;
 class Bag;
 class Monster;
 
+using StatCV = std::vector<std::pair<unsigned int,int>>;
+
 struct ScheduledFutureSight{
     unsigned int turns_left;
     unsigned int user_special_attack;
@@ -125,19 +127,20 @@ class Battle{
     void applyTerrainPostDamage(BattleActionActor actor);
     void applyAbilityPostDamage(BattleActionActor actor);
     void applyItemPostDamage(BattleActionActor actor);
-    void applySwitchInAbilitiesEffects(BattleActionActor actor);
-    void applySwitchInItemsEffects(BattleActionActor actor);
+    bool applySwitchInAbilitiesEffects(BattleActionActor actor);
+    bool applySwitchInItemsEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor);
-    void applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
+    bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
     bool thereIsNeutralizingGas();
+    void resetOpponents();
     std::string getActorBattlerName(BattleActionActor actor);
     Battler* getActorBattler(BattleActionActor actor);
     MonsterTeam* getActorTeam(BattleActionActor actor);
     void applyRecoil(Attack*,unsigned int,BattleActionActor);
-    unsigned int applyDamage(Attack*,BattleActionActor, bool moves_after_target);//returns the actual damage dealt
-    bool checkIfMoveMisses(Attack* attack, BattleActionActor actor);//true if move results in miss
+    unsigned int applyDamage(Attack*,BattleActionActor, bool moves_after_target, double effectiveness, bool acts_second);//returns the actual damage dealt
+    bool checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool acts_second);//true if move results in miss
     double computePower(Attack* attack, BattleActionActor actor, bool moves_after_target,unsigned int beat_up_index);
     void performAction(BattleAction action, std::vector<BattleAction>& all_actions);
     void performAttack(BattleAction action, std::vector<BattleAction>& all_actions);
@@ -145,10 +148,9 @@ class Battle{
     void performUseItem(BattleAction action);
     void performRechargeTurn(BattleAction action);
     unsigned int computeDamage(unsigned int attack_id, BattleActionActor user, bool critical_hit, bool moves_after_target,float effectiveness,AttackType category,unsigned int beat_up_index);
-    void performEntryHazardCheck(BattleActionActor actor);
+    bool performEntryHazardCheck(BattleActionActor actor);
     bool thereIsaCloudNine();
     void removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor actor_switching_out);
-    void forceSwitch(BattleActionActor actor);
     void applyScheduledFutureSights();
     void addMoney(unsigned int money);
     void givePlayerExperience(Monster* defeated_monster);
@@ -156,6 +158,9 @@ class Battle{
     void tryToCatchWildMonster(ItemType item);
     void consumeSeeds();
     void performEscape(BattleAction action);
+    bool tryEjectPack(BattleActionActor actor);
+    bool changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
+    void checkRoomService();
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
@@ -169,6 +174,7 @@ class Battle{
     unsigned int getMoney()const;
     void setWild();
     void setBattleGivesExp();
+    void forceSwitch(BattleActionActor actor);
 };
 
 #endif

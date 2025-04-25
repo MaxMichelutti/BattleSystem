@@ -800,6 +800,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                 amount=max(1,getMaxHP()/3);
                 break;
             case POTION:
+            case BERRY_JUICE:
                 amount=20;
                 break;
             case SUPER_POTION:
@@ -1010,6 +1011,7 @@ bool Monster::itemWouldHaveEffect(ItemType item_type)const{
         //healing items
         switch(item_type){
             case POTION:
+            case BERRY_JUICE:
             case SUPER_POTION:
             case HYPER_POTION:
             case MAX_POTION:

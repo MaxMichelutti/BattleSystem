@@ -18,11 +18,15 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
         displayMsgNoEndl("Enter your choice: ");
         choice = getNumberFromCin();
         if (choice == 1){
-            if (player_active->hasVolatileCondition(ENCORE)){
-                // force use of encored move
+            if (player_active->hasVolatileCondition(ENCORE) ||
+                ((player_active->hasHeldItem(CHOICE_BAND) || 
+                    player_active->hasHeldItem(CHOICE_SCARF) ||
+                    player_active->hasHeldItem(CHOICE_SPECS)) && player_active->getLastAttackUsed() != 0)){
+                // force use of encored move or choice band repeating move
                 unsigned int attack_id = player_active->getLastAttackUsed();
                 Attack *attack = Attack::getAttack(attack_id);
-                player_active->decrementVolatileCondition(ENCORE);
+                if(player_active->hasVolatileCondition(ENCORE))
+                    player_active->decrementVolatileCondition(ENCORE);
                 return BattleAction(
                     PLAYER,
                     ATTACK,
@@ -50,7 +54,7 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 NO_ITEM_TYPE,
                 mega_evolve);
         }else if (choice == 2){
-            if (!player_active->canSwitchOut(opponent_active)){
+            if (!player_active->canSwitchOut(opponent_active) && !player_active->hasHeldItem(SHED_SHELL)){
                 displayMsg("You cannot switch! " + player_active->getNickname() + " is trapped!");
                 choice = 0;
                 continue;

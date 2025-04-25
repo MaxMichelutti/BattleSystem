@@ -1864,11 +1864,16 @@ unsigned int CPUAI::chooseRandomAttack(Battler* active_monster)const{
 BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_team, Battler* enemy_active,Field* field,Bag*bag)const{
     BattleAction forced_action = forcedAction(OPPONENT, active_monster,field);
     if(forced_action.getActionType() != ATTACK){return forced_action;}
-    if(active_monster->hasVolatileCondition(ENCORE)){
+    if(active_monster->hasVolatileCondition(ENCORE) || (
+        (active_monster->hasHeldItem(CHOICE_BAND) ||
+        active_monster->hasHeldItem(CHOICE_SPECS) ||
+        active_monster->hasHeldItem(CHOICE_SCARF)) && active_monster->getLastAttackUsed() != 0
+    )){
         // force use of encored move
         unsigned int attack_id = active_monster->getLastAttackUsed();
         Attack *attack = Attack::getAttack(attack_id);
-        active_monster->decrementVolatileCondition(ENCORE);
+        if(active_monster->hasVolatileCondition(ENCORE))
+            active_monster->decrementVolatileCondition(ENCORE);
         return BattleAction(
             OPPONENT,
             ATTACK,
@@ -1905,6 +1910,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         NO_ITEM_TYPE,
         false);
     bool mega_evolution_choice = active_monster->canMegaEvolve() && !monster_team->hasMega();
+    bool can_switch_out = active_monster->canSwitchOut(enemy_active) || 
+        active_monster->hasHeldItem(SHED_SHELL);
     if(attack_choice == nullptr && switch_choice == nullptr){
         if(item_choice!=nullptr)
             delete item_choice;
@@ -1914,7 +1921,7 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         delete switch_choice;
         if(item_choice!=nullptr)
             delete item_choice;
-        if(!active_monster->canSwitchOut(enemy_active))
+        if(!can_switch_out)
             return struggle_action;
         return BattleAction(
             OPPONENT,
@@ -1955,7 +1962,7 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 item_id,
                 false);
         }
-    }else if(attack_choice->utility >= switch_choice->utility || !active_monster->canSwitchOut(enemy_active)){
+    }else if(attack_choice->utility >= switch_choice->utility || !can_switch_out){
         unsigned int attack_id = attack_choice->choice_id;
         int attack_utility = attack_choice->utility;
         delete attack_choice;
@@ -2100,6 +2107,7 @@ int CPUAI::computeItemUtility(ItemType item_id, Battler* cpu_active)const{
             heal_percent = 25;
             break;
         case POTION:
+        case BERRY_JUICE:
             heal_percent = min(100,2000 / cpu_active->getMaxHP());
             break;
         case SUPER_POTION:

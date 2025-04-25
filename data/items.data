@@ -1118,3 +1118,275 @@ NAME:Assault Vest
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. This offensive vest boosts the holder's Sp. Def stat but prevents the use of status moves.
 PRICE:50000
+# 214 AIR BALLOON
+NAME:Air Balloon
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This balloon makes the holder float in the air. If the holder is hit with an attack, the balloon will burst.
+PRICE:15000
+# 215 ABILITY SHIELD
+NAME:Ability Shield
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This cute and rather unique-looking shield protects the holder from having its Ability changed by others.
+PRICE:20000
+# 216 BIG ROOT
+NAME:Big Root
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This root boosts the amount of HP the holder restores to itself when it uses HP-stealing moves.
+PRICE:10000
+# 217 BRIGHT POWDER
+NAME:Bright Powder
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This glittery powder casts a tricky glare that lowers the accuracy of opposing Pokémon's moves.
+PRICE:30000
+# 218 CHOICE BAND
+NAME:Choice Band
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This curious headband boosts the holder's Attack stat but only allows the use of a single move.
+PRICE:100000
+# 219 CHOICE SPECS
+NAME:Choice Specs
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. These curious glasses boost the holder's Sp. Atk stat but only allows the use of a single move.
+PRICE:100000
+# 220 CHOICE SCARF
+NAME:Choice Scarf
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This curious scarf boosts the holder's Speed stat but only allows the use of a single move.
+PRICE:100000
+# 221 BINDING BAND
+NAME:Binding Band
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This band boosts the power of binding moves used by the holder.
+PRICE:20000
+# 222 BLUNDER POLICY
+NAME:Blunder Policy
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder misses with a move due to low accuracy, this policy will sharply boost its Speed stat.
+PRICE:30000
+# 223 AMULET COIN
+NAME:Amulet Coin
+CATEGORY:HELD
+% no effect in battle, only activates once battle is over
+DESCRIPTION:An item to be held by a Pokémon. It doubles any prize money received as long as the holder joins the battle at least once.
+PRICE:30000
+# 224 CLEAR AMULET
+NAME:Clear Amulet
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This clear, sparkling amulet protects the holder from having its stats lowered by moves used against it or by other Pokémon's Abilities.
+PRICE:30000
+# 225 COVERT CLOAK
+NAME:Covert Cloak
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This hooded cloak conceals the holder, tricking the eyes of its enemies and protecting it from the additional effects of moves.
+PRICE:20000
+# 226 DESTINY KNOT
+NAME:Destiny Knot
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Should the holder of this bright-red thread become infatuated, the Pokémon it is infatuated with will be similarly afflicted.
+PRICE:20000
+# 227 EJECT BUTTON
+NAME:Eject Button
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder is damaged by an attack, it will be switched out of battle to be replaced by another Pokémon on your team.
+PRICE:30000
+# 228 EJECT PACK
+NAME:Eject Pack
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder's stats are lowered, it will be switched out of battle.
+PRICE:30000
+# 229 EXPERT BELT
+NAME:Expert Belt
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a well-worn belt that slightly boosts the power of the holder's supereffective moves.
+PRICE:30000
+# 230 FLOAT STONE
+NAME:Float Stone
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This very light stone reduces the weight of the holder.
+PRICE:10000
+# 231 FOCUS BAND
+NAME:Focus Band
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder is hit with a move that should knock it out, it may be able to endure with 1 HP.
+PRICE:10000
+# 232 FOCUS SASH
+NAME:Focus Sash
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder has full HP and is hit with a move that should knock it out, it will endure with 1 HP—but only once.
+PRICE:50000
+# 233 GRIP CLAW
+NAME:Grip Claw
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder uses moves that deal damage over several turns, such as Bind or Wrap, their effects will last longer than usual.
+PRICE:10000
+# 234 HEAVY DUTY BOOTS
+NAME:Heavy-Duty Boots
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. These boots protect the holder from the effects of traps and the like set on the battlefield.
+PRICE:20000
+# 235 IRON BALL
+NAME:Iron Ball
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It lowers the holder's Speed stat and makes the holder vulnerable to Ground-type moves even if it is a Flying type or is levitating.
+PRICE:20000
+# 236 LAGGING TAIL
+NAME:Lagging Tail
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. A tail of something, this item is tremendously heavy and makes the holder move slower than usual.
+PRICE:20000
+# 237 LAX INCENSE
+NAME:Lax Incense
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. The curious aroma of this incense may cause moves to miss its holder.
+PRICE:5000
+# 238 LEEK
+NAME:Leek
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Farfetch'd. This very long and stiff stalk of leek boosts the critical-hit ratio of Farfetch'd's moves.
+PRICE:5000
+# 239 LIFE ORB
+NAME:Life Orb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It boosts the power of the holder's moves, but the holder also loses a small amount of HP with each attack it lands.
+PRICE:50000
+# 240 LIGHT CLAY
+NAME:Light Clay
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder uses protective moves like Light Screen or Reflect, their effects will last longer than usual.
+PRICE:20000
+# 241 LOADED DICE
+NAME:Loaded Dice
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This loaded dice always rolls a good number, and holding one can ensure that the holder's multistrike moves hit more times.
+PRICE:20000
+# 242 LUCK INCENSE
+NAME:Luck Incense
+CATEGORY:HELD
+% same effect as AMULET COIN
+DESCRIPTION:An item to be held by a Pokémon. It doubles any prize money received as long as the holder joins the battle at least once.
+PRICE:11000
+# 243 LUCKY PUNCH
+NAME:Lucky Punch
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Chansey. This lucky boxing glove boosts the critical-hit ratio of Chansey's moves.
+PRICE:5000
+# 244 MACHO BRACE
+NAME:Macho Brace
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Holding this stiff, heavy brace reduces a Pokémon's Speed in battle but allows its stats to grow more quickly.
+PRICE:5000
+# 245 METRONOME
+NAME:Metronome
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It boosts the power of a move that's used repeatedly. Once the chain is broken, the move's power returns to normal.
+PRICE:15000
+# 246 MIRROR HERB
+NAME:Mirror Herb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This herb will allow the holder to mirror an opponent's stat increases to boost its own stats—but only once.
+PRICE:30000
+# 247 MUSCLE BAND
+NAME:Muscle Band
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This headband exudes strength, slightly boosting the power of the holder's physical moves.
+PRICE:8000
+# 248 POWER HERB
+NAME:Power Herb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It allows the holder to immediately use a move that normally requires a turn to charge—but only once.
+PRICE:30000
+# 249 PROTECTIVE PADS
+NAME:Protective Pads
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. These pads protect the holder from effects triggered by making direct contact with another Pokémon.
+PRICE:15000
+# 250 PUNCHING GLOVE
+NAME:Punching Glove
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This protective glove boosts the power of the holder's punching moves and prevents direct contact with targets.
+PRICE:15000
+# 251 QUICK CLAW
+NAME:Quick Claw
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This light, sharp claw lets the holder move first occasionally.
+PRICE:8000
+# 252 RED CARD
+NAME:Red Card
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder is damaged by an attack, the mysterious power of this card can remove the attacker from the battle.
+PRICE:30000
+# 253 RING TARGET
+NAME:Ring Target
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Moves that would normally have no effect due to type matchups will still hit the holder. 
+PRICE:10000
+# 254 ROCKY HELMET
+NAME:Rocky Helmet
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If another Pokémon makes direct contact with the holder, that Pokémon will be damaged.
+PRICE:50000
+# 255 ROOM SERVICE
+NAME:Room Service
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If Trick Room takes effect, this item will lower the holder's Speed stat.
+PRICE:20000
+# 256 SAFETY GOGGLES
+NAME:Safety Goggles
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. These goggles protect the holder from both sandstorm damage and the effects of powders and spores.
+PRICE:20000
+# 257 SCOPE LENS
+NAME:Scope Lens
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a lens for scoping out weak points. It boosts the holder's critical-hit ratio.
+PRICE:15000
+# 258 SHED SHELL
+NAME:Shed Shell
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. Hard and sturdy, this discarded carapace enables the holder to switch out of battle without fail.
+PRICE:20000
+# 259 STICKY BARB
+NAME:Sticky Barb
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It damages the holder every turn and may latch on to Pokémon that make direct contact with the holder.
+PRICE:10000
+# 260 LEFTOVERS
+NAME:Leftovers
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. The holder's HP is slowly but steadily restored throughout a battle.
+PRICE:20000
+# 261 TERRAIN EXTENDER
+NAME:Terrain Extender
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It extends the duration of terrain caused by the holder's move or Ability.
+PRICE:15000
+# 262 THROAT SPRAY
+NAME:Throat Spray
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. If the holder uses a sound-based move, this throat spray will boost its Sp. Atk stat. 
+PRICE:20000
+# 263 UTILITY UMBRELLA
+NAME:Utility Umbrella
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This sturdy umbrella protects the holder from the effects of rain and harsh sunlight.
+PRICE:15000
+# 264 WIDE LENS
+NAME:Wide Lens
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. It's a magnifying lens that slightly boosts the accuracy of the holder's moves.
+PRICE:20000
+# 265 WISE GLASSES
+NAME:Wise Glasses
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This thick pair of glasses slightly boosts the power of the holder's special moves.
+PRICE:8000
+# 266 ZOOM LENS
+NAME:Zoom Lens
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. When the holder acts after its target, its move will be more accurate than usual.
+PRICE:10000
+# 267 BERRY JUICE
+NAME:Berry Juice
+CATEGORY:MEDICINE
+DESCRIPTION:A 100 percent pure juice made from Berries. It can be used to restore 20 HP to a Pokémon.
+PRICE:1500

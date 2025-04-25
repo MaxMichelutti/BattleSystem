@@ -285,6 +285,7 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     disabled_turns_left = 0;
     turns_in_battle = 0;
     last_attack_failed = false;
+    had_flying_type = false;
     hits_taken = 0;
     resetDamageTakenThisTurn();
     is_mold_breaker_active = false;
@@ -586,6 +587,10 @@ bool Battler::changeAttackModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     if(hasAbility(HYPER_CUTTER) && amount < 0){
         handler->displayMsg(getNickname()+"'s Hyper Cutter prevents the Attack reduction!");
         return false;
@@ -594,9 +599,17 @@ bool Battler::changeAttackModifier(int amount) {
     displayStatModifyResult(res,amount,"Attack");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -625,6 +638,10 @@ bool Battler::changeDefenseModifier(int amount) {
         handler->displayMsg(name+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     if(hasAbility(BIG_PECKS) && amount < 0){
         handler->displayMsg(name+"'s Defense cannot be lowered!");
         return false;
@@ -633,9 +650,17 @@ bool Battler::changeDefenseModifier(int amount) {
     displayStatModifyResult(res,amount,"Defense");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -663,13 +688,25 @@ bool Battler::changeSpecialAttackModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -698,13 +735,25 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -732,13 +781,25 @@ bool Battler::changeSpeedModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -766,6 +827,10 @@ bool Battler::changeAccuracyModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     if(hasAbility(ILLUMINATE) && amount<0){
         handler->displayMsg(getNickname()+"'s Accuracy cannot be lowered!");
         return false;
@@ -779,9 +844,17 @@ bool Battler::changeAccuracyModifier(int amount) {
     displayStatModifyResult(res,amount,"Accuracy");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -809,13 +882,25 @@ bool Battler::changeEvasionModifier(int amount) {
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
+    if(hasHeldItem(CLEAR_AMULET) && amount < 0){
+        handler->displayMsg(getNickname()+"'s Clear amulet prevents Stat reductions!");
+        return false;
+    }
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
         changeSpecialAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpecialAttackModifier(2);
+        }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
         changeAttackModifier(2);
+        if(opponent->hasHeldItem(MIRROR_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeAttackModifier(2);
+        }
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -880,6 +965,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
         base_modified*=2;
+    if(hasHeldItem(CHOICE_BAND))
+        base_modified*=1.5;
     return base_modified;
 }
 
@@ -924,6 +1011,8 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     }
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles special attack of pikachu
         base_modified*=2;
+    if(hasHeldItem(CHOICE_SPECS))
+        base_modified*=1.5;
     return base_modified;
 }
 
@@ -981,17 +1070,21 @@ unsigned int Battler::getModifiedSpeed()const {
         base_modified = base_modified * 2;
     }
     if(hasHeldItem(POWER_ANKLET))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
     if(hasHeldItem(POWER_BELT))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
     if(hasHeldItem(POWER_BRACER))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
     if(hasHeldItem(POWER_WEIGHT))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
     if(hasHeldItem(POWER_LENS))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
     if(hasHeldItem(POWER_BAND))
-        base_modified = base_modified * 0.5;
+        base_modified *= 0.5;
+    if(hasHeldItem(CHOICE_SCARF))
+        base_modified *= 1.5;
+    if(hasHeldItem(IRON_BALL))
+        base_modified *= 0.5;
     return base_modified;
 }
 
@@ -1006,6 +1099,8 @@ unsigned int Battler::getModifiedAccuracy()const {
     }
     if(hasAbility(COMPOUND_EYES))
         modified_accuracy *= 13 / 10;
+    if(hasHeldItem(WIDE_LENS))
+        modified_accuracy *= 1.1;
     return modified_accuracy;
 }
 
@@ -1028,6 +1123,8 @@ void Battler::resetAllStatChanges(){
 }
 
 Ability Battler::getAbility()const {
+    if(hasHeldItem(ABILITY_SHIELD))
+        return battler_ability;
     if(has_ability_neutralized)
         return NO_ABILITY;
     if(has_ability_suppressed)
@@ -1038,9 +1135,7 @@ Ability Battler::getAbility()const {
 }
 
 bool Battler::hasAbility(Ability ability)const{
-    if(getAbility() == ability)
-        return true;
-    return false;
+    return getAbility() == ability;
 }
 
 Ability Battler::getNonNeutralizedAbility()const{
@@ -1056,7 +1151,9 @@ void Battler::cancelAbilityNeutralization(){
     has_ability_neutralized = false;
 }
 
-void Battler::setAbility(Ability ability) {
+void Battler::setAbility(Ability ability){
+    if(hasHeldItem(ABILITY_SHIELD))
+        return;
     if(isAbilitySuppressed())
         has_ability_suppressed = false;
     this->battler_ability = ability;
@@ -1179,6 +1276,10 @@ bool Battler::isTouchingGround()const{
         return true;
     if(hasVolatileCondition(INGRAINED))
         return true;
+    if(hasHeldItem(IRON_BALL))
+        return true;
+    if(hasHeldItem(AIR_BALLOON))
+        return false;
     if(hasVolatileCondition(MAGNET_RISE))
         return false;
     if(hasAbility(LEVITATE))
@@ -1309,9 +1410,10 @@ bool Battler::canBeBadlyPoisoned()const{
 }
 
 void Battler::landOnGround(){
-    // if(hasType(FLYING)){
-    //     types.erase(FLYING);
-    // }
+    if(hasType(FLYING)){
+        types.erase(FLYING);
+        had_flying_type = true;
+    }
     addVolatileCondition(GROUNDED,5);
 }
 
@@ -1319,9 +1421,9 @@ void Battler::leaveGround(){
     if(!hasVolatileCondition(GROUNDED))
         return;
     removeVolatileCondition(GROUNDED);
-    // if(monster->hasType(FLYING)){
-    //     types.insert(FLYING);
-    // }
+    if(had_flying_type){
+        types.insert(FLYING);
+    }
 }
 
 bool Battler::hasPermanentStatus()const{
@@ -1332,23 +1434,30 @@ unsigned int Battler::getStockpiles()const{
     return stockpiles;
 }
 
-void Battler::incrementStockpiles(){
+bool Battler::incrementStockpiles(){
     if(stockpiles < 3){
-        changeDefenseModifier(+1);
-        changeSpecialDefenseModifier(+1);
+        bool res = changeDefenseModifier(+1);
+        res = res || changeSpecialDefenseModifier(+1);
         stockpiles++;
+        return res;
     }
+    return false;
 }
 
-void Battler::resetStockpiles(){
+bool Battler::resetStockpiles(){
     if(stockpiles>0){
-        changeDefenseModifier(-stockpiles);
-        changeSpecialDefenseModifier(-stockpiles);
+        bool res = changeDefenseModifier(-stockpiles);
+        res = res || changeSpecialDefenseModifier(-stockpiles);
+        stockpiles = 0;
+        return res;
     }
     stockpiles = 0;
+    return false;
 }
 
 void Battler::suppressAbility(){
+    if(hasHeldItem(ABILITY_SHIELD))
+        return;
     has_ability_suppressed=true;
 }
 
@@ -1518,13 +1627,30 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category, float 
         hasAbility(STURDY)){
         handler->displayMsg(getNickname()+" endures the hit!");
         amount = currentHP - 1;
-    }
-    if(currentHP < amount &&
+    }else if(currentHP != 1 && 
+        currentHP < amount &&
+        hasHeldItem(FOCUS_BAND) &&
+        RNG::getRandomInteger(1,10)==1){
+        handler->displayMsg(getNickname()+"'s endures the it thanks to its Focus Band!");
+        amount = currentHP - 1;
+    }else if(currentHP != 1 && 
+        currentHP < amount &&
+        hasHeldItem(FOCUS_SASH)){
+        consumeHeldItem();
+        handler->displayMsg(getNickname()+"'s endures the it thanks to its Focus Sash!");
+        amount = currentHP - 1;
+    }else if(//currentHP != 1 &&
+        currentHP < amount &&
         hasVolatileCondition(ENDURE)){
         handler->displayMsg(getNickname()+" endures the hit!");
         amount = currentHP - 1;
     }
     unsigned int dmg = monster->addDamage(amount);
+    if(hasHeldItem(AIR_BALLOON)){
+        ItemData* item_data = ItemData::getItemData(AIR_BALLOON);
+        handler->displayMsg(getNickname()+"'s "+item_data->getName()+" popped!");
+        removeHeldItem();
+    }
     if(dmg>0)
         removeVolatileCondition(FOCUSED);
     if(category==PHYSICAL)
@@ -1535,17 +1661,7 @@ unsigned int Battler::addDamage(unsigned int amount, AttackType category, float 
         handler->displayMsg(getNickname()+" fainted!");
         return dmg;
     }
-    //weak armor activation
-    if(dmg>0 && hasAbility(WEAK_ARMOR) && !isFainted() && category==PHYSICAL){
-        changeDefenseModifier(-1);
-        changeSpeedModifier(2);
-    }
-    // berserk activation
-    if((currentHP>=getMaxHP()/2) && (getCurrentHP()<getMaxHP()/2) && hasAbility(BERSERK)){
-        changeSpecialAttackModifier(1);
-    }
-    // berry check
-    tryEatLowHPBerry();
+    
     return dmg;
 }
 
@@ -1720,13 +1836,14 @@ void Battler::tryEatLowHPBerry(){
     ItemData* item_data = ItemData::getItemData(held_item);
     if(item_data==nullptr)  
         return;
-    if(item_data->getCategory()!=BERRY) 
+    if(item_data->getCategory()!=BERRY && held_item!=BERRY_JUICE) 
         return;
-    if(hasVolatileCondition(UNNERVED))
+    if(item_data->getCategory()==BERRY && hasVolatileCondition(UNNERVED))
         return;
     switch(held_item){
         //berries activating at below 50% health
         case ORAN_BERRY:
+        case BERRY_JUICE:
         case SITRUS_BERRY:{
             if(getCurrentHP() >= getMaxHP()/2)
                 return;
@@ -1964,9 +2081,12 @@ unsigned int Battler::getHeight()const{
 }
 
 unsigned int Battler::getWeight()const{
+    unsigned int res = weight;
     if(hasAbility(LIGHT_METAL))
-        return max(1,weight/2);
-    return weight;
+        res = max(1,res/2);
+    if(hasHeldItem(FLOAT_STONE))
+        res = max(1,res/2);
+    return res;
 }
 
 void Battler::changeWeight(int amount){
@@ -2010,7 +2130,11 @@ void Battler::hitOnceMore(Type attack_type){
     if((attack_type == BUG || attack_type == DARK || attack_type == GHOST) &&
         hasAbility(RATTLED)){
         handler->displayMsg(getNickname()+"'s Rattled boosts its Speed!");
-        changeSpeedModifier(1);
+        bool res = changeSpeedModifier(1);
+        if(res && opponent->hasHeldItem(MENTAL_HERB)){
+            opponent->consumeHeldItem();
+            opponent->changeSpeedModifier(1);
+        }
     }
 }
 unsigned int Battler::numberOfHitsTaken()const{
@@ -2155,28 +2279,48 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         }
         case APICOT_BERRY:
         case MARANGA_BERRY:{
-            changeSpecialDefenseModifier(1);
+            bool item_res = changeSpecialDefenseModifier(1);
+            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                opponent->consumeHeldItem();
+                opponent->changeSpecialDefenseModifier(1);
+            }
             res = true;
             break;
         }
         case GANION_BERRY:
         case KEE_BERRY:{
-                changeDefenseModifier(1);
+                bool item_res = changeDefenseModifier(1);
+                if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                    opponent->consumeHeldItem();
+                    opponent->changeDefenseModifier(1);
+                }
                 res = true;
                 break;
             }
         case LIECHI_BERRY:{
-            changeAttackModifier(1);
+            bool item_res = changeAttackModifier(1);
+            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                opponent->consumeHeldItem();
+                opponent->changeAttackModifier(1);
+            }
             res = true;
             break;
         }
         case SALAC_BERRY:{
-            changeSpeedModifier(1);
+            bool item_res = changeSpeedModifier(1);
+            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                opponent->consumeHeldItem();
+                opponent->changeSpeedModifier(1);
+            }
             res = true;
             break;
         }
         case PETAYA_BERRY:{
-            changeSpecialAttackModifier(1);
+            bool item_res = changeSpecialAttackModifier(1);
+            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                opponent->consumeHeldItem();
+                opponent->changeSpecialAttackModifier(1);
+            }
             res = true;
             break;
         }
@@ -2184,21 +2328,46 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             // sharply boost random stat
             int random_integer = RNG::getRandomInteger(0,4);
             switch(random_integer){
-                case 0:
-                    changeAttackModifier(2);
+                case 0:{
+                    bool item_res = changeAttackModifier(2);
+                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                        opponent->consumeHeldItem();
+                        opponent->changeAttackModifier(2);
+                    }
                     break;
-                case 1:
-                    changeSpecialAttackModifier(2);
+                }
+                case 1: {
+                    bool item_res = changeSpecialAttackModifier(2);
+                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                        opponent->consumeHeldItem();
+                        opponent->changeSpecialAttackModifier(2);
+                    }
                     break;
-                case 2:
-                    changeDefenseModifier(2);
+                }
+                case 2:{
+                    bool item_res = changeDefenseModifier(2);
+                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                        opponent->consumeHeldItem();
+                        opponent->changeDefenseModifier(2);
+                    }
                     break;
-                case 3:
-                    changeSpecialDefenseModifier(2);
+                }
+                case 3:{
+                    bool item_res = changeSpecialDefenseModifier(2);
+                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                        opponent->consumeHeldItem();
+                        opponent->changeSpecialDefenseModifier(2);
+                    }
                     break;
-                case 4:
-                    changeSpeedModifier(2);
+                }
+                case 4:{
+                    bool item_res = changeSpeedModifier(2);
+                    if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                        opponent->consumeHeldItem();
+                        opponent->changeSpeedModifier(2);
+                    }
                     break;
+                }
                 default:break;
             }
             break;
@@ -2218,34 +2387,34 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             res = true;
             break;
         }
-        case ELECTRIC_SEED:{
-            if(field->getTerrain() != ELECTRIC_FIELD)
-                return false;
-            changeDefenseModifier(1);
-            res = true;
-            break;
-        }
-        case GRASSY_SEED:{
-            if(field->getTerrain() != GRASSY_FIELD)
-                return false;
-            changeDefenseModifier(1);
-            res = true;
-            break;
-        }
-        case MISTY_SEED:{
-            if(field->getTerrain() != MISTY_FIELD)
-                return false;
-            changeSpecialDefenseModifier(1);
-            res = true;
-            break;
-        }
-        case PSYCHIC_SEED:{
-            if(field->getTerrain() != PSYCHIC_FIELD)
-                return false;
-            changeSpecialDefenseModifier(1);
-            res = true;
-            break;
-        }
+        // case ELECTRIC_SEED:{
+        //     if(field->getTerrain() != ELECTRIC_FIELD)
+        //         return false;
+        //     changeDefenseModifier(1);
+        //     res = true;
+        //     break;
+        // }
+        // case GRASSY_SEED:{
+        //     if(field->getTerrain() != GRASSY_FIELD)
+        //         return false;
+        //     changeDefenseModifier(1);
+        //     res = true;
+        //     break;
+        // }
+        // case MISTY_SEED:{
+        //     if(field->getTerrain() != MISTY_FIELD)
+        //         return false;
+        //     changeSpecialDefenseModifier(1);
+        //     res = true;
+        //     break;
+        // }
+        // case PSYCHIC_SEED:{
+        //     if(field->getTerrain() != PSYCHIC_FIELD)
+        //         return false;
+        //     changeSpecialDefenseModifier(1);
+        //     res = true;
+        //     break;
+        // }
         case WHITE_HERB:{
             if(getAttackModifier() < 0){
                 setAttackModifier(0);
@@ -2304,6 +2473,15 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
                 handler->displayMsg(getNickname()+"'s Mental Herb cured it of some conditions!");
             break;
         }
+        case BLUNDER_POLICY:{
+            bool item_res = changeSpeedModifier(2);
+            if(item_res && opponent->hasHeldItem(MENTAL_HERB)){
+                opponent->consumeHeldItem();
+                opponent->changeSpeedModifier(2);
+            }
+            res = true;
+            break;
+        }
         default:
             break;
     }   
@@ -2317,7 +2495,7 @@ bool Battler::itemWouldHaveEffect(ItemType item_type)const{
         return false;
     if(isFainted())
         return false;
-    ItemData* item_data = ItemData::getItemData(item_type);
+    // ItemData* item_data = ItemData::getItemData(item_type);
     bool res = monster->itemWouldHaveEffect(item_type);
     switch (item_type){
         case FULL_HEAL:
@@ -2554,7 +2732,7 @@ bool Battler::megaEvolve(){
     std::string old_nick = getNickname();
     if(monster->megaEvolve()){
         handler->displayMsg(old_nick+" mega evolved!");
-        setAbility(monster->getAbility());
+        battler_ability = monster->getAbility();
         weight = monster->getWeight();
         height = monster->getHeight();
         types.clear();
@@ -2618,4 +2796,8 @@ bool Battler::canConsumeWhiteHerb()const{
 void Battler::removeDisable(){
     disabled_attack_id = 0;
     disabled_turns_left = 0;
+}
+
+void Battler::setOpponent(Battler* opponent){
+    this->opponent = opponent;
 }

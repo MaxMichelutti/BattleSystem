@@ -210,13 +210,35 @@ unsigned int flingPower(ItemType item_type){
         case LIGHT_BALL:
         case TOXIC_ORB:
         case POISON_BARB:
+        case ABILITY_SHIELD:
+        case BINDING_BAND:
+        case AMULET_COIN:
+        case CLEAR_AMULET:
+        case COVERT_CLOAK:
+        case EJECT_BUTTON:
+        case FLOAT_STONE:
+        case LIGHT_CLAY:
+        case METRONOME_ITEM:
+        case MIRROR_HERB:
+        case LOADED_DICE:
+        case PROTECTIVE_PADS:
+        case PUNCHING_GLOVE:
+        case SCOPE_LENS:
+        case THROAT_SPRAY:
             return 30;
+        case LUCKY_PUNCH:
         case ICY_ROCK:
             return 40;
         case DUBIOUS_DISC:
+        case EJECT_PACK:
             return 50;
         case DAMP_ROCK:
         case HEAT_ROCK:
+        case LEEK:
+        case MACHO_BRACE:
+        case ROCKY_HELMET:
+        case TERRAIN_EXTENDER:
+        case UTILITY_UMBRELLA:
             return 60;
         case POWER_ANKLET:
         case POWER_BELT:
@@ -240,9 +262,18 @@ unsigned int flingPower(ItemType item_type){
         case DUSK_STONE:
         case DAWN_STONE:
         case ASSULT_VEST:
+        case BLUNDER_POLICY:
+        case QUICK_CLAW:
+        case SAFETY_GOGGLES:
+        case STICKY_BARB:
             return 80;
         case DEEP_SEA_TOOTH:
+        case GRIP_CLAW:
             return 90;
+        case ROOM_SERVICE:
+            return 100;
+        case IRON_BALL:
+            return 130;
         default:
             return 10;
     }
@@ -262,6 +293,16 @@ bool canItemBeConsumed(ItemType item_type){
         case PSYCHIC_SEED:
         case WHITE_HERB:
         case MENTAL_HERB:
+        case BLUNDER_POLICY:
+        case EJECT_BUTTON:
+        case EJECT_PACK:
+        case FOCUS_SASH:
+        case MIRROR_HERB:
+        case POWER_HERB:
+        case RED_CARD:
+        case ROOM_SERVICE:
+        case THROAT_SPRAY:
+        case BERRY_JUICE:
             return true;
         default:
             return false;

@@ -177,20 +177,32 @@ Type Attack::getType(Battler* user, Field* field)const{
         case 254:{
             //weather ball
             switch(field->getWeather()){
-                case RAIN:
-                    attack_type = WATER;
+                case RAIN:{
+                    if(user->hasHeldItem(UTILITY_UMBRELLA))
+                        attack_type = NORMAL;
+                    else
+                        attack_type = WATER;
                     break;
-                case SUN:
-                    attack_type = FIRE;
+                }
+                case SUN:{
+                    if(user->hasHeldItem(UTILITY_UMBRELLA))
+                        attack_type = NORMAL;
+                    else
+                        attack_type = FIRE;
                     break;
-                case SANDSTORM:
+                }
+                case SANDSTORM:{
                     attack_type = ROCK;
                     break;
-                case HAIL:
+                }
+                case HAIL:{
                     attack_type = ICE;
                     break;
-                default:
+                }
+                default:{
                     attack_type = NORMAL;
+                    break;
+                }
             }
             break;
         }
