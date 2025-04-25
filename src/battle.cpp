@@ -1335,7 +1335,6 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 category = PHYSICAL;
             }
         }
-        bool contact_forces_user_switch = false;
         //cycle in order to deal with multi hit moves
         for(unsigned int i=0;i<number_of_hits;i++){
             if(effect_id==246){
@@ -1467,7 +1466,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 makes_contact=true;
 
             // contact effects
-            contact_forces_user_switch = applyContactEffects(attack,actor,makes_contact);
+            applyContactEffects(attack,actor,makes_contact);
             if(active_target->isFainted()){
                 if(actor == PLAYER)
                     turn_of_player_last_kill = turn;
@@ -1492,7 +1491,7 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 changeStats(otherBattleActionActor(actor),changes,true);
             }
             active_target->tryEatAfterGettingHitBerry(category,effectiveness,active_user);
-            if(active_user->isFainted() || contact_forces_user_switch)
+            if(active_user->isFainted())
                 break;
             //restore HP with shell bell
             if(active_user->hasHeldItem(SHELL_BELL) && actual_damage>0){
@@ -1527,8 +1526,6 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 StatCV changes = {{1,2}};
                 changeStats(actor,changes,false);
             }
-            if(contact_forces_user_switch)
-                return 0;
             //apply grudge effect
             if(active_target->hasVolatileCondition(GRUDGED) && !active_user->isFainted()){
                 event_handler->displayMsg(opponent_mon_name+" removed all PPs of "+user_mon_name+"'s "+attack->getName()+"!");
@@ -1558,8 +1555,6 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
         }else{
             if(active_target->isFrozen() && attack_type==FIRE)
                 active_target->clearPermanentStatus();
-            if(contact_forces_user_switch)
-                return 0;
             ItemType held_item = active_target->getHeldItem();
             // unsigned int effect_id = effect_id;
             if((held_item==KINGS_ROCK || held_item==RAZOR_FANG) &&//kings rock effect
@@ -2431,8 +2426,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                     bool res = active_user->incrementStockpiles();
                     // active_user->changeDefenseModifier(+1);
                     // active_user->changeSpecialDefenseModifier(+1);
-                    if(res && active_user->hasAbility(CONTRARY))
-                        tryEjectPack(actor);
+                    // if(res && active_user->hasAbility(CONTRARY))
+                    //     tryEjectPack(actor);
                 }
                 break;
             }
@@ -2465,8 +2460,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor){
                 // NOTICE THAT I DO NOT BREAK HERE!!!
             }case 57:{// spit up
                 bool res = active_user->resetStockpiles();
-                if(res && !active_user->hasAbility(CONTRARY))
-                    tryEjectPack(actor);
+                // if(res && !active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
                 break;
             }
             case 58:{ // suppress ability
