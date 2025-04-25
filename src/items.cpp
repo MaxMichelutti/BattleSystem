@@ -14,6 +14,7 @@ std::string ItemCategoryToString(ItemCategory category){
         case MEGA_STONE: return "Mega Stone";
         case FOSSIL: return "Fossil";
         case GEM: return "Gem";
+        case PLATE: return "Plate";
         default: return "Unknown Category";
     }
 }
@@ -30,6 +31,7 @@ ItemCategory StringToItemCategory(std::string category){
     else if (category == "MEGA_STONE") return MEGA_STONE;
     else if (category == "FOSSIL") return FOSSIL;
     else if (category == "GEM") return GEM;
+    else if (category == "PLATE") return PLATE;
     else return NO_CATEGORY; // Default case
 }
 

@@ -80,7 +80,7 @@ void Bag::addItem(ItemType item, unsigned int amount) {
     if (item_data == nullptr) return;
     ItemCategory category = item_data->getCategory();
     if (pockets.find(category) == pockets.end()) {
-        pockets[category] = new Pocket(ItemCategoryToString(category));
+        pockets[category] = new Pocket(ItemCategoryToString(category)+"s");
     }
     pockets[category]->addItem(item, amount);
 }

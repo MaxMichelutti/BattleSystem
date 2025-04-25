@@ -411,7 +411,8 @@ enum ItemCategory{
     GENERAL_ITEM,
     MEGA_STONE,
     FOSSIL,
-    GEM
+    GEM,
+    PLATE
 };
 
 enum ItemType{

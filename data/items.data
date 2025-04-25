@@ -1533,87 +1533,87 @@ DESCRIPTION:An item to be held by a Pokémon. This spoon is imbued with telekine
 PRICE:3000
 # 296 FIST PLATE
 NAME:Fist Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of the fighting spirit and boosts the power of the holder’s Fighting-type moves.
 PRICE:10000
 # 297 SKY PLATE
 NAME:Sky Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of flight and boosts the power of the holder’s Flying-type moves.
 PRICE:10000
 # 298 TOXIC PLATE
 NAME:Toxic Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of poison and boosts the power of the holder’s Poison-type moves.
 PRICE:10000
 # 299 EARTH PLATE
 NAME:Earth Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of the earth and boosts the power of the holder’s Ground-type moves.
 PRICE:10000
 # 300 STONE PLATE
 NAME:Stone Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of rock and boosts the power of the holder’s Rock-type moves.
 PRICE:10000
 # 301 INSECT PLATE
 NAME:Insect Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of bugs and boosts the power of the holder’s Bug-type moves.
 PRICE:10000
 # 302 SPOOKY PLATE
 NAME:Spooky Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of ghosts and boosts the power of the holder’s Ghost-type moves.
 PRICE:10000
 # 303 IRON PLATE
 NAME:Iron Plate
-CATEGORY:HELD
-DESCRIPTION: 	An item to be held by a Pokémon. This stone tablet is imbued with the essence of steel and boosts the power of the holder’s Steel-type moves.
+CATEGORY:PLATE
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of steel and boosts the power of the holder’s Steel-type moves.
 PRICE:10000
 # 304 FLAME PLATE
 NAME:Flame Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of fire and boosts the power of the holder’s Fire-type moves.
 PRICE:10000
 # 305 SPLASH PLATE
 NAME:Splash Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of water and boosts the power of the holder’s Water-type moves.
 PRICE:10000
 # 306 MEADOW PLATE
 NAME:Meadow Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of plants and boosts the power of the holder’s Grass-type moves.
 PRICE:10000
 # 307 ZAP PLATE
 NAME:Zap Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of electricity and boosts the power of the holder’s Electric-type moves.
 PRICE:10000
 # 308 MIND PLATE
 NAME:Mind Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of psychic energy and boosts the power of the holder’s Psychic-type moves.
 PRICE:10000
 # 309 ICICLE PLATE
 NAME:Icicle Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of ice and boosts the power of the holder’s Ice-type moves.
 PRICE:10000
 # 310 DRACO PLATE
 NAME:Draco Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of dragons and boosts the power of the holder’s Dragon-type moves.
 PRICE:10000
 # 311 DREAD PLATE
 NAME:Dread Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of darkness and boosts the power of the holder’s Dark-type moves.
 PRICE:10000
 # 312 PIXIE PLATE
 NAME:Pixie Plate
-CATEGORY:HELD
+CATEGORY:PLATE
 DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of fairies and boosts the power of the holder’s Fairy-type moves.
 PRICE:150000
 # 313 FIRE GEM
