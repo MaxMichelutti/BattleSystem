@@ -491,9 +491,9 @@ void Battle::performTurn(){
         opponent_action.setSpeed(MAX_UNSIGNED);
     }
 
-    if(player_active->hasHeldItem(LAGGING_TAIL))
+    if(player_active->hasHeldItem(LAGGING_TAIL) || player_active->hasHeldItem(FULL_INCENSE))
         player_active->addVolatileCondition(MOVING_LAST,1);
-    if(opponent_active->hasHeldItem(LAGGING_TAIL))
+    if(opponent_active->hasHeldItem(LAGGING_TAIL) || opponent_active->hasHeldItem(FULL_INCENSE))
         opponent_active->addVolatileCondition(MOVING_LAST,1);
     //apply moving last condition
     if(player_active->hasVolatileCondition(MOVING_LAST)){
@@ -4854,6 +4854,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case HARD_STONE:
+        case ROCK_INCENSE:
         case STONE_PLATE:{
             if(attack_type == ROCK){
                 base_power *= 1.2;
@@ -4868,6 +4869,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case MIRACLE_SEED:
+        case ROSE_INCENSE:
         case MEADOW_PLATE:{
             if(attack_type == GRASS){
                 base_power *= 1.2;
@@ -4875,6 +4877,8 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case MYSTIC_WATER:
+        case WAVE_INCENSE:
+        case SEA_INCENSE:
         case SPLASH_PLATE:{
             if(attack_type == WATER){
                 base_power *= 1.2;
@@ -4923,7 +4927,8 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case TWISTED_SPOON:
-        case MIND_PLATE:{
+        case MIND_PLATE:
+        case ODD_INCENSE:{
             if(attack_type == PSYCHIC){
                 base_power *= 1.2;
             }

@@ -412,7 +412,8 @@ enum ItemCategory{
     MEGA_STONE,
     FOSSIL,
     GEM,
-    PLATE
+    PLATE,
+    INCENSE,
 };
 
 enum ItemType{
@@ -746,7 +747,14 @@ enum ItemType{
     DARK_GEM,
     STEEL_GEM,
     NORMAL_GEM,
-    FAIRY_GEM
+    FAIRY_GEM,
+    FULL_INCENSE,
+    ODD_INCENSE,
+    PURE_INCENSE,
+    ROCK_INCENSE,
+    ROSE_INCENSE,
+    SEA_INCENSE,
+    WAVE_INCENSE,
 };
 
 #endif

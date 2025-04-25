@@ -1236,7 +1236,7 @@ DESCRIPTION:An item to be held by a Pokémon. A tail of something, this item is 
 PRICE:20000
 # 237 LAX INCENSE
 NAME:Lax Incense
-CATEGORY:HELD
+CATEGORY:INCENSE
 DESCRIPTION:An item to be held by a Pokémon. The curious aroma of this incense may cause moves to miss its holder.
 PRICE:5000
 # 238 LEEK
@@ -1261,7 +1261,7 @@ DESCRIPTION:An item to be held by a Pokémon. This loaded dice always rolls a go
 PRICE:20000
 # 242 LUCK INCENSE
 NAME:Luck Incense
-CATEGORY:HELD
+CATEGORY:INCENSE
 % same effect as AMULET COIN
 DESCRIPTION:An item to be held by a Pokémon. It doubles any prize money received as long as the holder joins the battle at least once.
 PRICE:11000
@@ -1706,4 +1706,39 @@ NAME:Fairy Gem
 CATEGORY:GEM
 DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of fairies and will boost the power of a Fairy-type move—but only once.
 PRICE:15000
-
+# 331 FULL INCENSE
+NAME:Full Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that makes the holder move slower than usual.
+PRICE:5000
+# 332 ODD INCENSE
+NAME:Odd Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Psychic-type moves.
+PRICE:2000
+# 333 PURE INCENSE
+NAME:Pure Incense
+CATEGORY:INCENSE
+% only works outside of battle
+DESCRIPTION:An item to be held by a Pokémon. It helps keep wild Pokémon away when the holder is the head of the party.
+PRICE:6000
+# 334 ROCK INCENSE
+NAME:Rock Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Rock-type moves.
+PRICE:2000
+# 335 ROSE INCENSE
+NAME:Rose Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Grass-type moves.
+PRICE:2000
+# 336 SEA INCENSE
+NAME:Sea Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Water-type moves. 
+PRICE:2000
+# 337 WAVE INCENSE
+NAME:Wave Incense
+CATEGORY:INCENSE
+DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Water-type moves.
+PRICE:2000
