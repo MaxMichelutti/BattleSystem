@@ -5723,7 +5723,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                 if(changeStats(otherBattleActionActor(actor), changes, false))
                     return true;
                 if(target_active->hasHeldItem(ADRENALINE_ORB)){
-                    unsigned int modifier = target_active->getSpeedModifier();
+                    int modifier = target_active->getSpeedModifier();
                     if(!((modifier==MAX_MODIFIER && !target_active->hasAbility(CONTRARY))||
                         (modifier==MIN_MODIFIER && target_active->hasAbility(CONTRARY)))){
                         target_active->consumeHeldItem();
