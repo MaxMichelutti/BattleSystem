@@ -225,6 +225,7 @@ unsigned int flingPower(ItemType item_type){
         case PUNCHING_GLOVE:
         case SCOPE_LENS:
         case THROAT_SPRAY:
+        case BERRY_JUICE:
             return 30;
         case LUCKY_PUNCH:
         case ICY_ROCK:
