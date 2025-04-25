@@ -755,6 +755,9 @@ enum ItemType{
     ROSE_INCENSE,
     SEA_INCENSE,
     WAVE_INCENSE,
+    ADAMANT_ORB,
+    LUSTROUS_ORB,
+    GRISEOUS_ORB
 };
 
 #endif

@@ -1742,3 +1742,21 @@ NAME:Wave Incense
 CATEGORY:INCENSE
 DESCRIPTION:An item to be held by a Pokémon. This incense has a curious aroma that boosts the power of the holder's Water-type moves.
 PRICE:2000
+# 338 ADAMANT ORB
+NAME:Adamant Orb
+% effect only apply to dialga
+CATEGORY:HELD
+DESCRIPTION:A brightly shining gem to be held by Dialga. It boosts the power of Dialga’s Dragon- and Steel-type moves.
+PRICE:10000
+# 339 LUSTROUS ORB
+NAME:Lustrous Orb
+% effect only apply to palkia
+CATEGORY:HELD
+DESCRIPTION:A beautifully shining gem to be held by Palkia. It boosts the power of Palkia’s Dragon- and Water-type moves.
+PRICE:10000
+# 340 GRISEOUS ORB 
+NAME:Griseous Orb
+% effect only apply to giratina
+CATEGORY:HELD
+DESCRIPTION:A shining gem to be held by Giratina. It boosts the power of Giratina's Dragon- and Ghost-type moves.
+PRICE:10000

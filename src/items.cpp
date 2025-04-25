@@ -266,6 +266,9 @@ unsigned int flingPower(ItemType item_type){
         case ROCKY_HELMET:
         case TERRAIN_EXTENDER:
         case UTILITY_UMBRELLA:
+        case ADAMANT_ORB:
+        case LUSTROUS_ORB:
+        case GRISEOUS_ORB:
             return 60;
         case POWER_ANKLET:
         case POWER_BELT:
