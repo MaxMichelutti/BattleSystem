@@ -4804,73 +4804,85 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     // item modifiers
     ItemType item = active_user->getHeldItem();
     switch(item){
-        case METAL_COAT:{
+        case METAL_COAT:
+        case IRON_PLATE:{
             if(attack_type == STEEL){
                 base_power *= 1.2;
             }
             break;
         }
-        case POISON_BARB:{
+        case POISON_BARB:
+        case TOXIC_PLATE:{
             if(attack_type == POISON){
                 base_power *= 1.2;
             }
             break;
         }
-        case BLACK_BELT:{
+        case BLACK_BELT:
+        case FIST_PLATE:{
             if(attack_type == FIGHTING){
                 base_power *= 1.2;
             }
             break;
         }
-        case BLACK_GLASSES:{
+        case BLACK_GLASSES:
+        case DREAD_PLATE:{
             if(attack_type == DARK){
                 base_power *= 1.2;
             }
             break;
         }
-        case CHARCOAL:{
+        case CHARCOAL:
+        case FLAME_PLATE:{
             if(attack_type == FIRE){
                 base_power *= 1.2;
             }
             break;
         }
-        case DRAGON_FANG:{
+        case DRAGON_FANG:
+        case DRACO_PLATE:{
             if(attack_type == DRAGON){
                 base_power *= 1.2;
             }
             break;
         }
-        case FAIRY_FEATHER:{
+        case FAIRY_FEATHER:
+        case PIXIE_PLATE:{
             if(attack_type == FAIRY){
                 base_power *= 1.2;
             }
             break;
         }
-        case HARD_STONE:{
+        case HARD_STONE:
+        case STONE_PLATE:{
             if(attack_type == ROCK){
                 base_power *= 1.2;
             }
             break;
         }
-        case MAGNET:{
+        case MAGNET:
+        case ZAP_PLATE:{
             if(attack_type == ELECTRIC){
                 base_power *= 1.2;
             }
             break;
         }
-        case MIRACLE_SEED:{
+        case MIRACLE_SEED:
+        case MEADOW_PLATE:{
             if(attack_type == GRASS){
                 base_power *= 1.2;
             }
             break;
         }
-        case MYSTIC_WATER:{
+        case MYSTIC_WATER:
+        case SPLASH_PLATE:{
             if(attack_type == WATER){
                 base_power *= 1.2;
             }
             break;
         }
-        case NEVER_MELT_ICE:{
+        case NEVER_MELT_ICE:
+        case ICICLE_PLATE:{
             if(attack_type == ICE){
                 base_power *= 1.2;
             }
@@ -4882,31 +4894,36 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
-        case SHARP_BEAK:{
+        case SHARP_BEAK:
+        case SKY_PLATE:{
             if(attack_type == FLYING){
                 base_power *= 1.2;
             }
             break;
         }
-        case SOFT_SAND:{
+        case SOFT_SAND:
+        case EARTH_PLATE:{
             if(attack_type == GROUND){
                 base_power *= 1.2;
             }
             break;
         }
-        case SILVER_POWDER:{
+        case SILVER_POWDER:
+        case INSECT_PLATE:{
             if(attack_type == BUG){
                 base_power *= 1.2;
             }
             break;
         }
-        case SPELL_TAG:{
+        case SPELL_TAG:
+        case SPOOKY_PLATE:{
             if(attack_type == GHOST){
                 base_power *= 1.2;
             }
             break;
         }
-        case TWISTED_SPOON:{
+        case TWISTED_SPOON:
+        case MIND_PLATE:{
             if(attack_type == PSYCHIC){
                 base_power *= 1.2;
             }
@@ -4936,6 +4953,132 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case PUNCHING_GLOVE:{
             if(attack->isPunching()){
                 base_power *= 1.1;
+            }
+            break;
+        }
+        case FIRE_GEM:{
+            if(attack_type == FIRE){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case WATER_GEM:{
+            if(attack_type == WATER){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case GRASS_GEM:{
+            if(attack_type == GRASS){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case ELECTRIC_GEM:{
+            if(attack_type == ELECTRIC){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case ICE_GEM:{
+            if(attack_type == ICE){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case FIGHTING_GEM:{
+            if(attack_type == FIGHTING){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case BUG_GEM:{
+            if(attack_type == BUG){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case DARK_GEM:{
+            if(attack_type == DARK){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case GHOST_GEM:{
+            if(attack_type == GHOST){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case DRAGON_GEM:{
+            if(attack_type == DRAGON){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case FAIRY_GEM:{
+            if(attack_type == FAIRY){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case ROCK_GEM:{
+            if(attack_type == ROCK){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case GROUND_GEM:{
+            if(attack_type == GROUND){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case PSYCHIC_GEM:{
+            if(attack_type == PSYCHIC){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case STEEL_GEM:{
+            if(attack_type == STEEL){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case POISON_GEM:{
+            if(attack_type == POISON){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case FLYING_GEM:{
+            if(attack_type == FLYING){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
+            }
+            break;
+        }
+        case NORMAL_GEM:{
+            if(attack_type == NORMAL){
+                base_power *= 1.3;
+                active_user->consumeHeldItem();
             }
             break;
         }

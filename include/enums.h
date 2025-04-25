@@ -410,7 +410,8 @@ enum ItemCategory{
     HELD_ITEM,
     GENERAL_ITEM,
     MEGA_STONE,
-    FOSSIL
+    FOSSIL,
+    GEM
 };
 
 enum ItemType{
@@ -709,7 +710,42 @@ enum ItemType{
     SOFT_SAND,
     SILVER_POWDER,
     SPELL_TAG,
-    TWISTED_SPOON
+    TWISTED_SPOON,
+    FIST_PLATE,
+    SKY_PLATE,
+    TOXIC_PLATE,
+    EARTH_PLATE,
+    STONE_PLATE,
+    INSECT_PLATE,
+    SPOOKY_PLATE,
+    IRON_PLATE,
+    FLAME_PLATE,
+    SPLASH_PLATE,
+    MEADOW_PLATE,
+    ZAP_PLATE,
+    MIND_PLATE,
+    ICICLE_PLATE,
+    DRACO_PLATE,
+    DREAD_PLATE,
+    PIXIE_PLATE,
+    FIRE_GEM,
+    WATER_GEM,
+    ELECTRIC_GEM,
+    GRASS_GEM,
+    ICE_GEM,
+    FIGHTING_GEM,
+    POISON_GEM,
+    GROUND_GEM,
+    FLYING_GEM,
+    PSYCHIC_GEM,
+    BUG_GEM,
+    ROCK_GEM,
+    GHOST_GEM,
+    DRAGON_GEM,
+    DARK_GEM,
+    STEEL_GEM,
+    NORMAL_GEM,
+    FAIRY_GEM
 };
 
 #endif

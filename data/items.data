@@ -1531,3 +1531,179 @@ NAME:Twisted Spoon
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. This spoon is imbued with telekinetic energy and boosts the power of the holder's Psychic-type moves.
 PRICE:3000
+# 296 FIST PLATE
+NAME:Fist Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of the fighting spirit and boosts the power of the holder’s Fighting-type moves.
+PRICE:10000
+# 297 SKY PLATE
+NAME:Sky Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of flight and boosts the power of the holder’s Flying-type moves.
+PRICE:10000
+# 298 TOXIC PLATE
+NAME:Toxic Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of poison and boosts the power of the holder’s Poison-type moves.
+PRICE:10000
+# 299 EARTH PLATE
+NAME:Earth Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of the earth and boosts the power of the holder’s Ground-type moves.
+PRICE:10000
+# 300 STONE PLATE
+NAME:Stone Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of rock and boosts the power of the holder’s Rock-type moves.
+PRICE:10000
+# 301 INSECT PLATE
+NAME:Insect Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of bugs and boosts the power of the holder’s Bug-type moves.
+PRICE:10000
+# 302 SPOOKY PLATE
+NAME:Spooky Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of ghosts and boosts the power of the holder’s Ghost-type moves.
+PRICE:10000
+# 303 IRON PLATE
+NAME:Iron Plate
+CATEGORY:HELD
+DESCRIPTION: 	An item to be held by a Pokémon. This stone tablet is imbued with the essence of steel and boosts the power of the holder’s Steel-type moves.
+PRICE:10000
+# 304 FLAME PLATE
+NAME:Flame Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of fire and boosts the power of the holder’s Fire-type moves.
+PRICE:10000
+# 305 SPLASH PLATE
+NAME:Splash Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of water and boosts the power of the holder’s Water-type moves.
+PRICE:10000
+# 306 MEADOW PLATE
+NAME:Meadow Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of plants and boosts the power of the holder’s Grass-type moves.
+PRICE:10000
+# 307 ZAP PLATE
+NAME:Zap Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of electricity and boosts the power of the holder’s Electric-type moves.
+PRICE:10000
+# 308 MIND PLATE
+NAME:Mind Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of psychic energy and boosts the power of the holder’s Psychic-type moves.
+PRICE:10000
+# 309 ICICLE PLATE
+NAME:Icicle Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of ice and boosts the power of the holder’s Ice-type moves.
+PRICE:10000
+# 310 DRACO PLATE
+NAME:Draco Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of dragons and boosts the power of the holder’s Dragon-type moves.
+PRICE:10000
+# 311 DREAD PLATE
+NAME:Dread Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of darkness and boosts the power of the holder’s Dark-type moves.
+PRICE:10000
+# 312 PIXIE PLATE
+NAME:Pixie Plate
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. This stone tablet is imbued with the essence of fairies and boosts the power of the holder’s Fairy-type moves.
+PRICE:150000
+# 313 FIRE GEM
+NAME:Fire Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of fire and will boost the power of a Fire-type move—but only once.
+PRICE:15000
+# 314 WATER GEM
+NAME:Water Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of water and will boost the power of a Water-type move—but only once.
+PRICE:15000
+# 315 ELECTRIC GEM
+NAME:Electric Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of electricity and will boost the power of an Electric-type move—but only once.
+PRICE:15000
+# 316 GRASS GEM
+NAME:Grass Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of plants and will boost the power of a Grass-type move—but only once.
+PRICE:15000
+# 317 ICE GEM
+NAME:Ice Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of ice and will boost the power of an Ice-type move—but only once.
+PRICE:15000
+# 318 FIGHTING GEM
+NAME:Fighting Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of the fighting spirit and will boost the power of a Fighting-type move—but only once.
+PRICE:15000
+# 319 POISON GEM
+NAME:Poison Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of poison and will boost the power of a Poison-type move—but only once.
+PRICE:15000
+# 320 GROUND GEM
+NAME:Ground Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of the earth and will boost the power of a Ground-type move—but only once.
+PRICE:15000
+# 321 FLYING GEM
+NAME:Flying Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of flight and will boost the power of a Flying-type move—but only once.
+PRICE:15000
+# 322 PSYCHIC GEM
+NAME:Psychic Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of psychic energy and will boost the power of a Psychic-type move—but only once.
+PRICE:15000
+# 323 BUG GEM
+NAME:Bug Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of bugs and will boost the power of a Bug-type move—but only once.
+PRICE:15000
+# 324 ROCK GEM
+NAME:Rock Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of rock and will boost the power of a Rock-type move—but only once.
+PRICE:15000
+# 325 GHOST GEM
+NAME:Ghost Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of ghosts and will boost the power of a Ghost-type move—but only once.
+PRICE:15000
+# 326 DRAGON GEM
+NAME:Dragon Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of dragons and will boost the power of a Dragon-type move—but only once.
+PRICE:15000
+# 327 DARK GEM
+NAME:Dark Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of darkness and will boost the power of a Dark-type move—but only once.
+PRICE:15000
+# 328 STEEL GEM
+NAME:Steel Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of steel and will boost the power of a Steel-type move—but only once.
+PRICE:15000
+# 329 NORMAL GEM
+NAME:Normal Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of normalcy and will boost the power of a Normal-type move—but only once.
+PRICE:15000
+# 330 FAIRY GEM
+NAME:Fairy Gem
+CATEGORY:GEM
+DESCRIPTION:An item to be held by a Pokémon. This gem is imbued with the essence of fairies and will boost the power of a Fairy-type move—but only once.
+PRICE:15000
+

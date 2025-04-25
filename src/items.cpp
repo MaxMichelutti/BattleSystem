@@ -13,6 +13,7 @@ std::string ItemCategoryToString(ItemCategory category){
         case GENERAL_ITEM: return "General Item";
         case MEGA_STONE: return "Mega Stone";
         case FOSSIL: return "Fossil";
+        case GEM: return "Gem";
         default: return "Unknown Category";
     }
 }
@@ -28,6 +29,7 @@ ItemCategory StringToItemCategory(std::string category){
     else if (category == "GENERAL") return GENERAL_ITEM;
     else if (category == "MEGA_STONE") return MEGA_STONE;
     else if (category == "FOSSIL") return FOSSIL;
+    else if (category == "GEM") return GEM;
     else return NO_CATEGORY; // Default case
 }
 
@@ -143,6 +145,8 @@ bool canBeStolen(ItemType item_type){
     if(item_data == nullptr)
         return false;
     if(item_data->getCategory() == MEGA_STONE)
+        return false;
+    if(item_data->getCategory() == GEM)
         return false;
     if(item_data->getCategory() == BALL)
         return false;
@@ -291,6 +295,23 @@ unsigned int flingPower(ItemType item_type){
         case DEEP_SEA_TOOTH:
         case GRIP_CLAW:
         case THICK_CLUB:
+        case FIST_PLATE:
+        case SKY_PLATE:
+        case TOXIC_PLATE:
+        case EARTH_PLATE:
+        case STONE_PLATE:
+        case INSECT_PLATE:
+        case SPOOKY_PLATE:
+        case IRON_PLATE:
+        case FLAME_PLATE:
+        case SPLASH_PLATE:
+        case ZAP_PLATE:
+        case DRACO_PLATE:
+        case MIND_PLATE:
+        case ICICLE_PLATE:
+        case MEADOW_PLATE:
+        case PIXIE_PLATE:
+        case DREAD_PLATE:
             return 90;
         case ROOM_SERVICE:
         case HARD_STONE:
@@ -332,6 +353,24 @@ bool canItemBeConsumed(ItemType item_type){
         case SNOWBALL:
         case WEAKNESS_POLICY:
         case ADRENALINE_ORB:
+        case FIRE_GEM:
+        case WATER_GEM:
+        case ELECTRIC_GEM:
+        case GRASS_GEM:
+        case ICE_GEM:
+        case FIGHTING_GEM:
+        case POISON_GEM:
+        case GROUND_GEM:
+        case FLYING_GEM:
+        case PSYCHIC_GEM:
+        case BUG_GEM:
+        case ROCK_GEM:
+        case GHOST_GEM:
+        case DRAGON_GEM:
+        case DARK_GEM:
+        case FAIRY_GEM:
+        case NORMAL_GEM:
+        case STEEL_GEM:
             return true;
         default:
             return false;
