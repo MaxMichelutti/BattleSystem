@@ -757,7 +757,8 @@ enum ItemType{
     WAVE_INCENSE,
     ADAMANT_ORB,
     LUSTROUS_ORB,
-    GRISEOUS_ORB
+    GRISEOUS_ORB,
+    SHELL_BELL
 };
 
 #endif

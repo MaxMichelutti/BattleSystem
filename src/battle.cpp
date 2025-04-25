@@ -1460,12 +1460,10 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                     turn_of_opponent_last_kill = turn;
                 break;
             }
-            if(active_user->isFainted())
-                break;
             
             // justified increase attack by 1 when hit by a dark move
-            if(attack_type && active_user->hasAbility(JUSTIFIED)){
-                event_handler->displayMsg(user_mon_name+"'s Justified triggers!");
+            if(attack_type==DARK && active_target->hasAbility(JUSTIFIED) && !active_target->isFainted()){
+                event_handler->displayMsg(opponent_mon_name+"'s Justified triggers!");
                 // active_user->changeAttackModifierForced(1);
                 StatCV changes = {{1,1}};
                 changeStats(actor,changes,true);
@@ -1478,10 +1476,16 @@ unsigned int Battle::applyDamage(Attack* attack,BattleActionActor actor, bool ta
                 StatCV changes = {{1,12}};
                 changeStats(otherBattleActionActor(actor),changes,true);
             }
-
             active_target->tryEatAfterGettingHitBerry(category,effectiveness,active_user);
-            if(contact_forces_user_switch)
+            if(active_user->isFainted() || contact_forces_user_switch)
                 break;
+            //restore HP with shell bell
+            if(active_user->hasHeldItem(SHELL_BELL) && actual_damage>0){
+                unsigned int shell_bell_heal = max(1,actual_damage / 8);
+                unsigned int actual_shell_bell_heal = active_user->removeDamage(shell_bell_heal);
+                if(actual_shell_bell_heal>0)
+                    event_handler->displayMsg(user_mon_name+" restored "+std::to_string(actual_shell_bell_heal)+" HP thanks to its Shell Bell!");
+            }
         }
         // check super effectiveness
         // std::cout<<"Effectiveness: "<<effectiveness<<std::endl;

@@ -1760,3 +1760,8 @@ NAME:Griseous Orb
 CATEGORY:HELD
 DESCRIPTION:A shining gem to be held by Giratina. It boosts the power of Giratina's Dragon- and Ghost-type moves.
 PRICE:10000
+# 341 SHELL BELL
+NAME:Shell Bell
+CATEGORY:HELD
+DESCRIPTION:An item to be held by a Pokémon. The holder restores a little HP to itself every time it inflicts damage with an attack.
+PRICE:20000

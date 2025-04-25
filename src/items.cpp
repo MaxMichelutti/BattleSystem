@@ -250,6 +250,7 @@ unsigned int flingPower(ItemType item_type){
         case NEVER_MELT_ICE:
         case SPELL_TAG:
         case TWISTED_SPOON:
+        case SHELL_BELL:
             return 30;
         case LUCKY_PUNCH:
         case ICY_ROCK:
