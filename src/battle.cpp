@@ -833,7 +833,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         event_handler->displayMsg(user_mon_name+" flinched!");
         if(active_user->hasAbility(STEADFAST)){
             StatCV changes = {{5,1}};
-            changeStats(actor,changes,true);
+            changeStats(actor,changes,false);
             // active_user->changeSpeedModifierForced(1);
         }
         forgetMoveVolatiles(active_user);
@@ -1078,7 +1078,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         // throat spray activates if the user uses a sound based move
         active_user->consumeHeldItem();
         StatCV changes = {{3,1}};
-        changeStats(action.getActor(),changes,true);
+        changeStats(action.getActor(),changes,false);
     }
 
     // decrement volatile
@@ -1478,7 +1478,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 event_handler->displayMsg(opponent_mon_name+"'s Justified triggers!");
                 // active_user->changeAttackModifierForced(1);
                 StatCV changes = {{1,1}};
-                changeStats(actor,changes,true);
+                changeStats(actor,changes,false);
             }
 
             //anger point raises attack of taget when hit by a crit
@@ -1486,7 +1486,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 event_handler->displayMsg(opponent_mon_name+"'s Anger Point triggers!");
                 // active_target->changeAttackModifierForced(12);
                 StatCV changes = {{1,12}};
-                changeStats(otherBattleActionActor(actor),changes,true);
+                changeStats(otherBattleActionActor(actor),changes,false);
             }
             active_target->tryEatAfterGettingHitBerry(category,effectiveness,active_user);
             if(active_user->isFainted())
@@ -1622,7 +1622,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                     active_target->consumeHeldItem();
                     // event_handler->displayMsg(opponent_mon_name+"'s Absorb Bulb triggers!");
                     StatCV changes = {{3,1}};
-                    changeStats(otherBattleActionActor(actor),changes,true);
+                    changeStats(otherBattleActionActor(actor),changes,false);
                 }
             }
             if(active_target->hasHeldItem(LUMINOUS_MOSS) && actual_damage.first>0 && !actual_damage.second && attack_type==WATER){
@@ -1633,7 +1633,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                     active_target->consumeHeldItem();
                     // event_handler->displayMsg(opponent_mon_name+"'s Luminous Moss triggers!");
                     StatCV changes = {{4,1}};
-                    changeStats(otherBattleActionActor(actor),changes,true);
+                    changeStats(otherBattleActionActor(actor),changes,false);
                 }
             }
             if(active_target->hasHeldItem(CELL_BATTERY) && actual_damage.first>0 && !actual_damage.second && attack_type==ELECTRIC){
@@ -1644,7 +1644,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                     active_target->consumeHeldItem();
                     // event_handler->displayMsg(opponent_mon_name+"'s Cell Battery triggers!");
                     StatCV changes = {{1,1}};
-                    changeStats(otherBattleActionActor(actor),changes,true);
+                    changeStats(otherBattleActionActor(actor),changes,false);
                 }
             }
             if(active_target->hasHeldItem(SNOWBALL) && actual_damage.first>0 && !actual_damage.second && attack_type==ICE){
@@ -1654,7 +1654,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                     (modifier == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
                     active_target->consumeHeldItem();
                     StatCV changes = {{1,1}};
-                    changeStats(otherBattleActionActor(actor),changes,true);
+                    changeStats(otherBattleActionActor(actor),changes,false);
                 }
             }
             if(active_target->hasHeldItem(SNOWBALL) && actual_damage.first>0 && !actual_damage.second && effectiveness>1.1){
@@ -1665,7 +1665,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                     (modifier1 == MIN_MODIFIER && modifier2 == MIN_MODIFIER && active_target->hasAbility(CONTRARY)))){
                     active_target->consumeHeldItem();
                     StatCV changes = {{1,2},{3,2}};
-                    changeStats(otherBattleActionActor(actor),changes,true);
+                    changeStats(otherBattleActionActor(actor),changes,false);
                 }
             }
         }
@@ -1909,8 +1909,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 return;
             unsigned int attack_stat = active_target->getModifiedAttack();
             // bool res = active_target->changeAttackModifier(-1);
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{1,-1}};
-            changeStats(other_actor,changes,false);                
+            changeStats(other_actor,changes,false);      
             if(effect==247){
                 //heal attack_stat HP of user
                 unsigned int heal_amount = max(attack_stat,1);
@@ -1939,6 +1947,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{1,-2}};
             changeStats(other_actor,changes,false);
             break;
@@ -1971,8 +1987,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_target->isFainted())
                 return;
             if(effect==222){
-                StatCV changes = {{5,-1}};
-                changeStats(other_actor,changes,false);
+                if(!hits_substitute || 
+                    active_user->hasAbility(INFILTRATOR)){
+                    StatCV changes = {{5,-1}};
+                    changeStats(other_actor,changes,false);
+                }
             }   // active_target->changeSpeedModifier(-1);
             if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                 !active_user->hasAbility(INFILTRATOR)){
@@ -2083,6 +2102,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{7,-2}};
             changeStats(other_actor,changes,false);
             break;
@@ -2179,6 +2206,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{6,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -2225,6 +2260,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{5,-2}};
             changeStats(other_actor,changes,false);
             break;
@@ -2285,6 +2328,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{2,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -2358,6 +2409,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 // res = active_target->changeAttackModifier(2);
             // if(res && active_target->hasAbility(CONTRARY))
             //     tryEjectPack(other_actor);
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                break;
+            }
             changeStats(other_actor,changes,false);
             break;
         }
@@ -2420,6 +2475,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{4,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -2430,6 +2493,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{4,-2}};
             changeStats(other_actor,changes,false);
             break;
@@ -2821,6 +2892,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{5,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -2841,7 +2920,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_user->isFainted())
                 return;
             StatCV changes = {{1,-1},{2,-1}};
-            changeStats(actor,changes,false);
+            changeStats(actor,changes,true);
             break;
         }
         case 79:{//nothing happens
@@ -3256,6 +3335,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{5,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -3724,6 +3811,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             // res = res || active_target->changeSpecialAttackModifier(-12);
             // if(res && !active_target->hasAbility(CONTRARY))
             //     tryEjectPack(other_actor);
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{1,-12},{3,-12}};
             changeStats(other_actor,changes,false);
             break;
@@ -3883,6 +3978,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{1,-1},{2,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -4255,6 +4358,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{7,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -4266,6 +4377,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{5,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -4360,6 +4479,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //     tryEjectPack(other_actor);
             if(active_target->isFainted())
                 return;
+            if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
             StatCV changes = {{1,-1},{3,-1}};
             changeStats(other_actor,changes,false);
             break;
@@ -7156,7 +7283,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_target->hasAbility(LIGHTNING_ROD) && 
         attack_type==ELECTRIC &&
         attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         // active_target->changeSpecialAttackModifier(1);
         StatCV changes = {{3,1}};
@@ -7167,7 +7295,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_target->hasAbility(SAP_SIPPER) && 
         attack_type==GRASS &&
         attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         // active_target->changeAttackModifier(1);
         StatCV changes = {{1,1}};
@@ -7178,7 +7307,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_target->hasAbility(FLASH_FIRE) && 
         attack_type==FIRE &&
         attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         active_target->addVolatileCondition(FLASH_FIRED, -1);
         attack_absorbed = true;
@@ -7190,7 +7320,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_target->hasAbility(WATER_ABSORB)) && 
         attack_type==WATER &&
         attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" absorbed the water attack!");
         actual_heal_amount = active_target->removeDamage(heal_amount);
         event_handler->displayMsg(opponent_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
@@ -7200,7 +7331,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_target->hasAbility(VOLT_ABSORB) && 
         attack_type==ELECTRIC &&
         attack->getCategory()!=STATUS && 
-        attack->getTarget()==TARGET_OPPONENT){
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" absorbed the electric attack!");
         actual_heal_amount = active_target->removeDamage(heal_amount);
         attack_absorbed = true;
