@@ -11,6 +11,8 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return TRADE;
     if(evo_method == "LEVEL_NIGHT")
         return LEVEL_NIGHT;
+    if(evo_method == "LEVEL_DAY")
+        return LEVEL_DAY;
     if(evo_method == "FRIENDSHIP")
         return FRIENDSHIP;
     if(evo_method == "TRADE_ITEM")
@@ -29,6 +31,8 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return LEVEL_DEF;
     if(evo_method=="LEVEL_EQUAL_ATK_DEF")
         return LEVEL_EQUAL_ATK_DEF;
+    if(evo_method=="CASCOON_SILCOON" || evo_method=="SILCOON_CASCOON")
+        return CASCOON_SILCOON;
     // return LEVEL as default
     return LEVEL;
 }
@@ -43,6 +47,8 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "TRADE";
         case LEVEL_NIGHT:
             return "LEVEL_NIGHT";
+        case LEVEL_DAY:
+            return "LEVEL_DAY";
         case FRIENDSHIP:
             return "FRIENDSHIP";
         case TRADE_ITEM:
@@ -61,6 +67,8 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "LEVEL_DEF";
         case LEVEL_EQUAL_ATK_DEF:
             return "LEVEL_EQUAL_ATK_DEF";
+        case CASCOON_SILCOON:
+            return "CASCOON_SILCOON";
         default:
             return "LEVEL";
     }

@@ -547,9 +547,52 @@ bool Monster::canEvolve()const{
     for(const Evolution &evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
             case LEVEL:
+            case CASCOON_SILCOON:{
                 if(level >= evo.getMethodCondition())
                     return true;
-            default: continue;
+                break;
+            }
+            case LEVEL_NIGHT:{
+                if(level >= evo.getMethodCondition() && isNight())
+                    return true;
+                break;
+            }
+            case LEVEL_DAY:{
+                if(level >= evo.getMethodCondition() && isDay())
+                    return true;
+                break;
+            }
+            case LEVEL_ATK:{
+                if(level >= evo.getMethodCondition() && stats.getAtk() > stats.getDef())
+                    return true;
+                break;
+            }
+            case LEVEL_DEF:{
+                if(level >= evo.getMethodCondition() && stats.getDef() > stats.getAtk())
+                    return true;
+                break;
+            }
+            case LEVEL_EQUAL_ATK_DEF:{
+                if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk())
+                    return true;
+                break;
+            }
+            case FRIENDSHIP_NIGHT:{
+                if(isNight() && friendship >= evo.getMethodCondition())
+                    return true;
+                break;
+            }
+            case FRIENDSHIP_DAY:{
+                if(isDay() && friendship >= evo.getMethodCondition())
+                    return true;
+                break;
+            }
+            case FRIENDSHIP:{
+                if(friendship >= evo.getMethodCondition())
+                    return true;
+                break;
+            }
+            default: break;
         }
     }
     return false;
@@ -564,13 +607,87 @@ void Monster::evolve(){
     if(!canEvolve())
         return;
     Species* spec = Species::getSpecies(species_id);
+    bool already_flipped = false;
     for(const Evolution& evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
-            case LEVEL:
+            case LEVEL:{
                 if(level >= evo.getMethodCondition()){
                     completeEvolution(evo.getTargetSpeciesId());
                     return;
                 }
+                break;
+            }
+            case LEVEL_NIGHT:{
+                if(level >= evo.getMethodCondition() && isNight()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_DAY:{
+                if(level >= evo.getMethodCondition() && isDay()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_ATK:{
+                if(level >= evo.getMethodCondition() && stats.getAtk() > stats.getDef()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_DEF:{
+                if(level >= evo.getMethodCondition() && stats.getDef() > stats.getAtk()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_EQUAL_ATK_DEF:{
+                if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case FRIENDSHIP:{
+                if(friendship >= evo.getMethodCondition()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case FRIENDSHIP_NIGHT:{
+                if(friendship >= evo.getMethodCondition() && isNight()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case FRIENDSHIP_DAY:{
+                if(friendship >= evo.getMethodCondition() && isDay()){
+                    completeEvolution(evo.getTargetSpeciesId());
+                    return;
+                }
+                break;
+            }
+            case CASCOON_SILCOON:{
+                if(level >= evo.getMethodCondition()){
+                    if(!already_flipped){
+                        already_flipped = true;
+                        if(RNG::coinFlip()){
+                            completeEvolution(evo.getTargetSpeciesId());
+                            return;
+                        }
+                    }else{
+                        completeEvolution(evo.getTargetSpeciesId());
+                        return;
+                    }
+                }
+                break;
+            }
             default: continue;
         }
     }

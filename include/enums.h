@@ -234,6 +234,7 @@ enum EvolutionMethod{
     USE_EVO_ITEM,
     TRADE,
     LEVEL_NIGHT,
+    LEVEL_DAY,
     FRIENDSHIP,
     TRADE_ITEM,
     FRIENDSHIP_NIGHT,
@@ -242,7 +243,8 @@ enum EvolutionMethod{
     USE_EVO_ITEM_NIGHT,
     LEVEL_ATK,
     LEVEL_DEF,
-    LEVEL_EQUAL_ATK_DEF
+    LEVEL_EQUAL_ATK_DEF,
+    CASCOON_SILCOON
 };
 
 enum Ability{
