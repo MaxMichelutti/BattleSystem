@@ -1496,8 +1496,17 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             attack->getEffectTarget() == TARGET_OPPONENT){
             effect_is_applied = false;
         }
+        Monster * old_user = active_user->getMonster();
+        ItemType user_held_item = active_user->getHeldItem();
         if(effect_is_applied)
             applyAttackEffect(attack,actor,otherBattleActionActor(actor),actual_damage.second);
+        active_user = getActorBattler(actor);
+        Monster * new_user = active_user->getMonster();
+        bool user_changed = false;
+        if(old_user != new_user){
+            // user changed due to move effect
+            user_changed = true;
+        }
         
         // check if target is dead
         if(active_target->isFainted()){
@@ -1509,12 +1518,12 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 changeStats(actor,changes,false);
             }
             //apply grudge effect
-            if(active_target->hasVolatileCondition(GRUDGED) && !active_user->isFainted()){
+            if(active_target->hasVolatileCondition(GRUDGED) && !active_user->isFainted() && !user_changed){
                 event_handler->displayMsg(opponent_mon_name+" removed all PPs of "+user_mon_name+"'s "+attack->getName()+"!");
                 active_user->usePP(attack->getId(),1000);//no attack should have more than 1000 PP, otherwise this code fails
             }
             //apply destiny bond effect
-            if(active_target->hasVolatileCondition(DESTINY_BOND) && !active_user->isFainted()){
+            if(active_target->hasVolatileCondition(DESTINY_BOND) && !active_user->isFainted() && !user_changed){
                 event_handler->displayMsg(opponent_mon_name+" takes "+user_mon_name+" with it!");
                 active_user->addDirectDamage(active_user->getMaxHP());
             }
@@ -1526,7 +1535,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 unsigned int actual_aftermath_damage = active_user->addDirectDamage(aftermath_damage);
                 event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_aftermath_damage)+" damage!");
             }
-            if(!active_user->isFainted() && active_user->hasAbility(MOXIE) && active_user->getAttackModifier()!=MAX_MODIFIER){
+            if(!active_user->isFainted() && active_user->hasAbility(MOXIE) && active_user->getAttackModifier()!=MAX_MODIFIER && !user_changed){
                 // moxie increases attack by 1 when a target is KOed by a user's attack
                 event_handler->displayMsg(user_mon_name+"'s Moxie triggers!");
                 // active_user->changeAttackModifier(1);
@@ -1537,9 +1546,8 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
         }else{
             if(active_target->isFrozen() && attack_type==FIRE)
                 active_target->clearPermanentStatus();
-            ItemType held_item = active_target->getHeldItem();
             // unsigned int effect_id = effect_id;
-            if((held_item==KINGS_ROCK || held_item==RAZOR_FANG) &&//kings rock effect
+            if((user_held_item==KINGS_ROCK || user_held_item==RAZOR_FANG) &&//kings rock effect
                 actual_damage.first>0 && !actual_damage.second &&
                 effect_id!=21 && effect_id!=45 && effect_id!=105 && effect_id!=141 && effect_id!=195 && effect_id!=197 &&// attacks that cause flinch
                 RNG::getRandomInteger(1,10)==1){//10% chance
@@ -1553,13 +1561,13 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 return {total_actual_damage,actual_damage.second};
             }
             if(active_target->hasHeldItem(RED_CARD) && user_team->hasAliveBackup() && 
-                actual_damage.first>0 && !actual_damage.second){
+                actual_damage.first>0 && !actual_damage.second && !user_changed){
                 // Red card effect
                 active_target->consumeHeldItem();
                 event_handler->displayMsg(opponent_mon_name+" used its Red Card!");
                 if(!active_user->hasAbility(SUCTION_CUPS) && !active_user->hasVolatileCondition(INGRAINED)){
-                    event_handler->displayMsg(opponent_mon_name+" was forced to switch!");
-                    forceSwitch(otherBattleActionActor(actor));
+                    event_handler->displayMsg(user_mon_name+" was forced to switch!");
+                    forceSwitch(actor);
                     return {total_actual_damage,actual_damage.second};
                 }else{
                     event_handler->displayMsg("But it failed!");
