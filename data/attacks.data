@@ -4243,3 +4243,11 @@ CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:256
 TARGET:SELF
+# 465 CHILLING WATER
+NAME:Chilling Water
+DESCRIPTION:The user attacks the target by showering it with water that's so cold it saps the target's power. This also lowers the target's Attack stat.
+PP:20
+POWER:50
+TYPE:WATER
+CATEGORY:SPECIAL
+EFFECT:1

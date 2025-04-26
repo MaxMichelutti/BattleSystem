@@ -965,6 +965,12 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 254:{//sceptile
             return curr_form==0 && mega_item==SCEPTILITE;
         }
+        case 257:{//blaziken
+            return curr_form==0 && mega_item==BLAZIKENITE;
+        }
+        case 260:{//swampert
+            return curr_form==0 && mega_item==SWAMPERTITE;
+        }
         default:return false;
     }
 }
@@ -1057,6 +1063,14 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 254:{//sceptile
             if(curr_form==0 && mega_item==SCEPTILITE)
                 return 99;
+        }
+        case 257:{//blaziken
+            if(curr_form==0 && mega_item==BLAZIKENITE)
+                return 100;
+        }
+        case 260:{//swampert
+            if(curr_form==0 && mega_item==SWAMPERTITE)
+                return 101;
         }
         default:return 0;
     }
