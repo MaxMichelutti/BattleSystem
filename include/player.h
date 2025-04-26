@@ -1,20 +1,27 @@
-#ifndef __PLAYER_H___
-#define __PLAYER_H___
+#ifndef __MONSTER_PLAYER_H__
+#define __MONSTER_PLAYER_H__
 #include "common.h"
+#include "events.h"
 #include "bag.h"
 #include "team.h"
 #include <string>
 #include <iostream>
-#include "textevents.h"
+
+class Player;
+class MonsterTeam;
+class Bag;
+class EventHandler;
+
+static Player* global_player;
 
 class Player{
     std::string name;
     MonsterTeam* team;
     Bag* bag;
     unsigned int money;
-    Player();
     EventHandler* event_handler;
-    
+    Player();
+
     public:
     static void createPlayer();
     static Player* getPlayer();
@@ -29,7 +36,5 @@ class Player{
     EventHandler* getEventHandler()const;
     void setEventHandler(EventHandler* event_handler);
 };
-
-static Player* global_player = nullptr;
 
 #endif

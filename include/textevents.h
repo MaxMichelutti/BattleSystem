@@ -11,6 +11,12 @@
 #include "team.h"
 #include "bag.h"
 
+class BattleAction;
+class Battler;
+class Field;
+class Bag;
+class MonsterTeam;
+
 class TextEventHandler : public EventHandler {
     private:
     unsigned int getNumberFromCin();

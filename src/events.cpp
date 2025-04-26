@@ -129,6 +129,17 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             NO_ITEM_TYPE,
             false);
     }
+    if(active->hasVolatileCondition(VANISHED)){
+        return BattleAction(
+            actor,
+            PHANTOM_FORCE,
+            264,
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false);
+    }
     if(active->hasVolatileCondition(UPROARING)){
         return BattleAction(
             actor,

@@ -982,6 +982,21 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 282:{//gardevoir
             return curr_form==0 && mega_item==GARDEVOIRITE;
         }
+        case 302:{//sableye
+            return curr_form==0 && mega_item==SABLENITE;
+        }
+        case 303:{//mawile
+            return curr_form==0 && mega_item==MAWILITE;
+        }
+        case 306:{//aggron
+            return curr_form==0 && mega_item==AGGRONITE;
+        }
+        case 308:{//medicham
+            return curr_form==0 && mega_item==MEDICHAMITE;
+        }
+        case 310:{//manectric
+            return curr_form==0 && mega_item==MANECTITE;
+        }
         default:return false;
     }
 }
@@ -1086,6 +1101,26 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 282:{//gardevoir
             if(curr_form==0 && mega_item==GARDEVOIRITE)
                 return 104;
+        }
+        case 302:{//sableye
+            if(curr_form==0 && mega_item==SABLENITE)
+                return 105;
+        }
+        case 303:{//mawile
+            if(curr_form==0 && mega_item==MAWILITE)
+                return 106;
+        }
+        case 306:{//aggron
+            if(curr_form==0 && mega_item==AGGRONITE)
+                return 107;
+        }
+        case 308:{//medicham
+            if(curr_form==0 && mega_item==MEDICHAMITE)
+                return 108;
+        }
+        case 310:{//manectric
+            if(curr_form==0 && mega_item==MANECTITE)
+                return 109;
         }
         default:return 0;
     }

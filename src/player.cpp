@@ -5,7 +5,7 @@ Player::Player(){
     team = new MonsterTeam();
     bag = new Bag();
     money = 0;
-    event_handler = new TextEventHandler();
+    event_handler = nullptr;
 }
 void Player::createPlayer(){
     if(global_player == nullptr){

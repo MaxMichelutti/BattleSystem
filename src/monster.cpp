@@ -691,11 +691,12 @@ void Monster::evolve(){
             }
             case SHEDINJA:{
                 if(level >= evo.getMethodCondition()){
-                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    // first try to add Shedinja to the team
                     Player* player = Player::getPlayer();
                     MonsterTeam* team = player->getTeam();
                     Bag* bag = player->getBag();
                     if(!team->isFull() && bag->hasItem(POKE_BALL)){
+                        //Shedinja can be gained if there is space in the team and if a Poke Ball from the bag can be used
                         bag->removeItem(POKE_BALL);
                         Monster* cloned_nincada = new Monster(this);
                         cloned_nincada->setNickname("Shedinja");
@@ -706,6 +707,8 @@ void Monster::evolve(){
                         cloned_nincada->evolveIntoShedinja();
                         team->addMonster(cloned_nincada);
                     }
+                    // then evolve into Ninjask
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;

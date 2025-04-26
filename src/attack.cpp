@@ -133,6 +133,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_reflectable = (data.find("reflectable") != data.end());
     is_sketchable = (data.find("no_sketch") == data.end());
     is_wind = (data.find("wind") != data.end());
+    is_biting = (data.find("biting") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -216,6 +217,8 @@ Type Attack::getType(Battler* user, Field* field)const{
         attack_type = FLYING;
     if(user->hasAbility(PIXILATE) && attack_type==NORMAL)
         attack_type = FAIRY;
+    if(user->hasAbility(NORMALIZE))
+        return NORMAL;
     return attack_type;
 }
 
@@ -281,6 +284,10 @@ bool Attack::isSoundBased()const {
 
 bool Attack::canBeSketched()const {
     return is_sketchable;
+}
+
+bool Attack::isBiting()const {
+    return is_biting;
 }
 
 bool Attack::isPunching()const {
@@ -355,6 +362,8 @@ void Attack::loadAttacks(){
             parsed_data["wind"] = "true";
         }else if(line.rfind("REFLECTABLE",0)==0){
             parsed_data["reflectable"] = "true";
+        }else if(line.rfind("BITING",0)==0){
+            parsed_data["biting"] = "true";
         }else{
             std::cout<<"Error: Unknown line in attack file: " << line << std::endl;
         }

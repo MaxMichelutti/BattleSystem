@@ -308,3 +308,15 @@ TRUANT
 Each time the Pokémon uses a move, it spends the next turn loafing around.
 WONDER_GUARD
 Its mysterious power only lets supereffective moves hit the Pokémon.
+NORMALIZE
+All the Pokémon's moves become Normal type. The power of those moves is boosted a little.
+STALL
+The Pokémon is always the last to use its moves.
+HEAVY_METAL
+Doubles the Pokémon's weight.
+PURE_POWER
+Using its pure power, the Pokémon doubles its Attack stat.
+STRONG_JAW
+The Pokémon's strong jaw boosts the power of its biting moves.
+ROUGH_SKIN
+The Pokémon's rough skin damages attackers that make direct contact with it.

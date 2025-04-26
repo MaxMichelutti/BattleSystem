@@ -23,6 +23,7 @@ bool isAttackingActionType(BattleActionType action_type){
         case FLY:
         case ROLLOUT:
         case BOUNCE:
+        case PHANTOM_FORCE:
         case DIG:
         case DIVE:
         case UPROAR:
@@ -750,7 +751,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     }
     // sleep
     // remove sleep during uproars
-    if(active_user->isAsleep() && isUproar()){
+    if(active_user->isAsleep() && isUproar() && !active_user->hasAbility(SOUNDPROOF)){
         event_handler->displayMsg(user_mon_name+" woke up!");
         active_user->clearPermanentStatus();
     }
@@ -1957,7 +1958,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                     active_user->setLastAttackFailed();
                 break;
             }
-            if(isUproar()){
+            if(isUproar() && !active_target->hasAbility(SOUNDPROOF)){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg(user_mon_name+"But it failed!");
                     active_user->setLastAttackFailed();
@@ -2028,7 +2029,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            if(active_target->hasAbility(INSOMNIA) || active_target->hasHeldItem(ABILITY_SHIELD)){
+            if(active_target->hasAbility(INSOMNIA) || 
+                active_target->hasHeldItem(ABILITY_SHIELD) || 
+                abilityCannotBeChanged(active_target->getAbility())){
                 event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                 active_user->setLastAttackFailed();
             }else{
@@ -3007,7 +3010,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         case 95:{//rest
             if(active_user->isFainted())
                 return;
-            if(isUproar()){
+            if(isUproar() && !active_user->hasAbility(SOUNDPROOF)){
                 event_handler->displayMsg(user_mon_name+" But it failed!");
                 active_user->setLastAttackFailed();
                 break;
@@ -3350,7 +3353,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_user->getAbility() == active_target->getAbility() ||
                 active_target->hasAbility(NO_ABILITY) ||
                 active_user->hasAbility(NO_ABILITY) ||
-                !isAbilityTraceable(active_target->getAbility()) ||
+                abilityCannotBeChanged(active_user->getAbility()) ||
+                abilityCannotBeCopied(active_target->getAbility()) ||
                 active_user->hasHeldItem(ABILITY_SHIELD)){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
@@ -4594,6 +4598,21 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
+        case 265:{
+            //user ability is copied to target
+            if(active_target->isFainted())
+                return;
+            if(active_user->hasAbility(NO_ABILITY) ||
+                abilityCannotBeCopied(active_user->getAbility()) ||
+                abilityCannotBeChanged(active_target->getAbility())){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;   
+            }
+            active_target->setAbility(active_user->getAbility());
+            event_handler->displayMsg(opponent_mon_name+"gained "+user_mon_name+"'s ability!");
+            break;
+        }
         default:break;
     }
 }
@@ -4662,6 +4681,7 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(OUTRAGING);
     active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
     active_user->removeVolatileCondition(CHARGING_SOLARBLADE);
+    active_user->removeVolatileCondition(VANISHED);
     active_user->removeVolatileCondition(FLYING_HIGH);
     active_user->removeVolatileCondition(BOUNCING);
     active_user->removeVolatileCondition(UNDERGROUND);
@@ -4844,8 +4864,9 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
             attack_stat = user_monster->getModifiedDefense();
         if(user_monster->hasHeldItem(CHOICE_BAND))
             attack_stat*=1.5;
-        if(user_monster->hasAbility(HUGE_POWER)){
-            //HUGE POWER doubles the attack stat
+        if(user_monster->hasAbility(HUGE_POWER) ||
+            user_monster->hasAbility(PURE_POWER)){
+            //HUGE POWER doubles the attack stat (PURE POWER has the same effect)
             attack_stat *= 2;
         }
         defense_stat = physical_defense_stat;   
@@ -5240,7 +5261,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         }
         case 218:{
             //power decreases with lower HP user
-            base_power *= active_user->getCurrentHP() / (double)active_user->getMaxHP();
+            base_power *= (double)active_user->getCurrentHP() / (double)active_user->getMaxHP();
             break;
         }
         case 230:{
@@ -5298,8 +5319,8 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         }
         case 259:{
             //power depends on target HP
-            unsigned int current_hp = active_target->getCurrentHP();
-            unsigned int max_hp = active_target->getMaxHP();
+            double current_hp = active_target->getCurrentHP();
+            double max_hp = active_target->getMaxHP();
             base_power = 100.0 * current_hp / max_hp;
             break;
         }
@@ -5411,6 +5432,12 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             if(attack->getType() == NORMAL){
                 base_power *= 1.2;
             }
+            break;
+        }
+        case STRONG_JAW:{
+            //boost power of biting moves
+            if(attack->isBiting())
+                base_power*=1.5;
             break;
         }
         default: break;
@@ -6111,7 +6138,7 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
         active_user->decrementVolatileCondition(MAGNET_RISE);
     }
     // drowsyness
-    if(isUproar()){
+    if(isUproar() && !active_user->hasAbility(SOUNDPROOF)){
         active_user->removeVolatileCondition(DROWSY);
     }
     if(active_user->hasVolatileCondition(DROWSY)){
@@ -6361,7 +6388,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             if(!mon->isFainted())
                 continue;
             Ability mon_ability = mon->getAbility();
-            if(isAbilityTraceable(mon_ability)){
+            if(!abilityCannotBeCopied(mon_ability)){
                 final_choice = mon_ability;
                 break;
             }
@@ -6697,70 +6724,19 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
         return false;
 
     // TANGLING HAIR decreses attacker speed
-    if(active_target->hasAbility(TANGLING_HAIR)){
-        // bool res = active_user->changeSpeedModifier(-1);
-        // if(res && !active_user->hasAbility(CONTRARY)){
-        //     tryEjectPack(actor);
-        // }
-        StatCV changes = {{5,-1}};
-        changeStats(actor, changes, false);
-    }
+    
 
-    // STATIC ability effect
-    if(active_target->hasAbility(STATIC) && 
-        active_user->canBeParalyzed() &&
-        RNG::getRandomInteger(0,2)==0){
-        event_handler->displayMsg(opponent_mon_name+"'s Static triggers!");
-        active_user->setPermanentStatus(PARALYSIS);
-        if(active_user->hasAbility(SYNCHRONIZE) && 
-            !active_target->hasPermanentStatus()){
-            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
-            active_target->setPermanentStatus(PARALYSIS);
+    // apply target ability effects
+    switch(active_target->getAbility()){
+        case TANGLING_HAIR:{
+            StatCV changes = {{5,-1}};
+            changeStats(actor, changes, false);
+            break;
         }
-    }
-    // POISON POINT ability effect
-    if(active_target->hasAbility(POISON_POINT) && 
-        active_user->canBePoisoned() &&
-        RNG::getRandomInteger(0,2)==0){
-        event_handler->displayMsg(opponent_mon_name+"'s Poison Point triggers!");
-        active_user->setPermanentStatus(POISONED);
-        if(active_user->hasAbility(SYNCHRONIZE) && 
-            !active_target->hasPermanentStatus()){
-            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
-            active_target->setPermanentStatus(POISONED);
-        }
-    }
-    // FLAME BODY ability effect
-    if(active_target->hasAbility(FLAME_BODY) && 
-        active_user->canBeBurned() &&
-        RNG::getRandomInteger(0,2)==0){
-        event_handler->displayMsg(opponent_mon_name+"'s Flame Body triggers!");
-        active_user->setPermanentStatus(BURN);
-        if(active_user->hasAbility(SYNCHRONIZE) && 
-            !active_target->hasPermanentStatus()){
-            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
-            active_target->setPermanentStatus(BURN);
-        }
-    }
-    // EFFECT SPORE ability effect
-    if(active_target->hasAbility(EFFECT_SPORE) && 
-        !active_user->hasType(GRASS) &&
-        !active_user->hasAbility(OVERCOAT) &&
-        !active_user->hasHeldItem(SAFETY_GOGGLES)){
-        unsigned int random_number = RNG::getRandomInteger(1,100);
-        if(random_number<10){//poison
-            if(active_user->canBePoisoned()){
-                event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
-                active_user->setPermanentStatus(POISONED);
-                if(active_user->hasAbility(SYNCHRONIZE) && 
-                    !active_target->hasPermanentStatus()){
-                    event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
-                    active_target->setPermanentStatus(POISONED);
-                }
-            }
-        }else if(random_number<20){//paralysis
-            if(active_user->canBeParalyzed()){
-                event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
+        case STATIC:{
+            if(active_user->canBeParalyzed() &&
+                RNG::getRandomInteger(0,2)==0){
+                event_handler->displayMsg(opponent_mon_name+"'s Static triggers!");
                 active_user->setPermanentStatus(PARALYSIS);
                 if(active_user->hasAbility(SYNCHRONIZE) && 
                     !active_target->hasPermanentStatus()){
@@ -6768,54 +6744,123 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
                     active_target->setPermanentStatus(PARALYSIS);
                 }
             }
-        }else if(random_number<=30){//sleep
-            if(active_user->canFallAsleep() && !isUproar()){
-                event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
-                unsigned int random_number = RNG::getRandomInteger(1,3);
-                if(random_number == 1)
-                    active_user->setPermanentStatus(SLEEP_3);
-                else if(random_number == 2)
-                    active_user->setPermanentStatus(SLEEP_2);
-                else
-                    active_user->setPermanentStatus(SLEEP_4);
+            break;
+        }
+        case POISON_POINT:{
+            if(active_user->canBePoisoned() &&
+                RNG::getRandomInteger(0,2)==0){
+                event_handler->displayMsg(opponent_mon_name+"'s Poison Point triggers!");
+                active_user->setPermanentStatus(POISONED);
+                if(active_user->hasAbility(SYNCHRONIZE) && 
+                    !active_target->hasPermanentStatus()){
+                    event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                    active_target->setPermanentStatus(POISONED);
+                }
             }
+            break;
         }
-    }
-    // CURSED BODY
-    if(active_target->hasAbility(CURSED_BODY) && RNG::getRandomInteger(1,100)<=30){
-        unsigned int last_attack_used_id =active_user->getLastAttackUsed();
-        Attack * last_attack_used = Attack::getAttack(last_attack_used_id);
-        if(last_attack_used_id!=0 && 
-            last_attack_used_id!=STRUGGLE_ID && 
-            !active_user->hasDiabledAttack()){
-            event_handler->displayMsg(user_mon_name+"'s "+last_attack_used->getName()+" was disabled by "+opponent_mon_name+"'s Cursed Body!");
-            active_user->disableAttack(last_attack_used_id,5);
+        case FLAME_BODY:{
+            if(active_user->canBeBurned() &&
+                RNG::getRandomInteger(0,2)==0){
+                event_handler->displayMsg(opponent_mon_name+"'s Flame Body triggers!");
+                active_user->setPermanentStatus(BURN);
+                if(active_user->hasAbility(SYNCHRONIZE) && 
+                    !active_target->hasPermanentStatus()){
+                    event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                    active_target->setPermanentStatus(BURN);
+                }
+            }
+            break;
         }
+        case EFFECT_SPORE:{
+            if(!active_user->hasType(GRASS) &&
+                !active_user->hasAbility(OVERCOAT) &&
+                !active_user->hasHeldItem(SAFETY_GOGGLES)){
+                unsigned int random_number = RNG::getRandomInteger(1,100);
+                if(random_number<10){//poison
+                    if(active_user->canBePoisoned()){
+                        event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
+                        active_user->setPermanentStatus(POISONED);
+                        if(active_user->hasAbility(SYNCHRONIZE) && 
+                            !active_target->hasPermanentStatus()){
+                            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                            active_target->setPermanentStatus(POISONED);
+                        }
+                    }
+                }else if(random_number<20){//paralysis
+                    if(active_user->canBeParalyzed()){
+                        event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
+                        active_user->setPermanentStatus(PARALYSIS);
+                        if(active_user->hasAbility(SYNCHRONIZE) && 
+                            !active_target->hasPermanentStatus()){
+                            event_handler->displayMsg(user_mon_name+"'s Synchronize triggers!");
+                            active_target->setPermanentStatus(PARALYSIS);
+                        }
+                    }
+                }else if(random_number<=30){//sleep
+                    if(active_user->canFallAsleep() && !isUproar()){
+                        event_handler->displayMsg(opponent_mon_name+"'s Effect Spore triggers!");
+                        unsigned int random_number = RNG::getRandomInteger(1,3);
+                        if(random_number == 1)
+                            active_user->setPermanentStatus(SLEEP_3);
+                        else if(random_number == 2)
+                            active_user->setPermanentStatus(SLEEP_2);
+                        else
+                            active_user->setPermanentStatus(SLEEP_4);
+                    }
+                }
+            }
+            break;
+        }
+        case CURSED_BODY:{
+            if(RNG::getRandomInteger(1,100)<=30){
+                unsigned int last_attack_used_id =active_user->getLastAttackUsed();
+                Attack * last_attack_used = Attack::getAttack(last_attack_used_id);
+                if(last_attack_used_id!=0 && 
+                    last_attack_used_id!=STRUGGLE_ID && 
+                    !active_user->hasDiabledAttack()){
+                    event_handler->displayMsg(user_mon_name+"'s "+last_attack_used->getName()+" was disabled by "+opponent_mon_name+"'s Cursed Body!");
+                    active_user->disableAttack(last_attack_used_id,5);
+                }
+            }
+            break;
+        }
+        case PICKPOCKET:{
+            if(!active_target->isFainted() &&
+                active_user->hasHeldItem() && 
+                canBeStolen(active_user->getHeldItem()) && 
+                !active_target->hasHeldItem() &&
+                !active_user->hasAbility(STICKY_HOLD)){
+                ItemType stolen_item = active_user->removeHeldItem();
+                active_target->setHeldItem(stolen_item);
+                event_handler->displayMsg(opponent_mon_name+" steals "+user_mon_name+"'s "+ItemData::getItemData(stolen_item)->getName()+"!");
+            }
+            break;
+        }
+        case CUTE_CHARM:{
+            Gender active_user_gender = active_user->getGender();
+            Gender active_target_gender = active_target->getGender();
+            bool can_attract = areMaleAndFemale(active_user_gender,active_target_gender) && !active_user->hasAbility(OBLIVIOUS);
+            if(active_target->hasAbility(CUTE_CHARM) && can_attract
+                && RNG::getRandomInteger(0,2)==0){
+                active_user->addVolatileCondition(INFATUATION, -1);
+                if(active_user->hasHeldItem(DESTINY_KNOT))
+                    active_target->addVolatileCondition(INFATUATION, -1);
+            }
+            break;
+        }
+        case ROUGH_SKIN:{
+            if(active_user->isFainted())
+                return false;
+            event_handler->displayMsg(opponent_mon_name+"'s Rough Skin hurts "+user_mon_name+"!");
+            unsigned int rough_skin_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_rough_skin_damage = active_user->addDirectDamage(rough_skin_damage);
+            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            break;
+        }
+        default: break;
     }
-    // check if target is dead
-    if(active_target->isFainted()){
-        return false;
-    }
-    // PICKPOCKET ability effect
-    if(active_target->hasAbility(PICKPOCKET) &&
-        active_user->hasHeldItem() && 
-        canBeStolen(active_user->getHeldItem()) && 
-        !active_target->hasHeldItem() &&
-        !active_user->hasAbility(STICKY_HOLD)){
-        ItemType stolen_item = active_user->removeHeldItem();
-        active_target->setHeldItem(stolen_item);
-        event_handler->displayMsg(opponent_mon_name+" steals "+user_mon_name+"'s "+ItemData::getItemData(stolen_item)->getName()+"!");
-    }
-    // CUTE CHARM ability effect
-    Gender active_user_gender = active_user->getGender();
-    Gender active_target_gender = active_target->getGender();
-    bool can_attract = areMaleAndFemale(active_user_gender,active_target_gender) && !active_user->hasAbility(OBLIVIOUS);
-    if(active_target->hasAbility(CUTE_CHARM) && can_attract
-        && RNG::getRandomInteger(0,2)==0){
-        active_user->addVolatileCondition(INFATUATION, -1);
-        if(active_user->hasHeldItem(DESTINY_KNOT))
-            active_target->addVolatileCondition(INFATUATION, -1);
-    }
+    
     return false;
 }
 
@@ -6918,7 +6963,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_target->knowsAttack(action.getAttackId())){ 
         attack_failed = true;
     }
-    // check if OHKO fails
+    // check if OHKO fails due to sturdy
     if((attack->getEffectId() == 103 || attack->getEffectId() == 156) && active_target->hasAbility(STURDY)){
         event_handler->displayMsg(opponent_mon_name+" is protected by Sturdy!");
         active_user->setLastAttackUsed(action.getAttackId());
@@ -7072,7 +7117,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     //charge solar blade
     if(attack->getEffectId() == 263 && !active_user->hasVolatileCondition(CHARGING_SOLARBLADE)){// Solar blade
-        active_user->addVolatileCondition(CHARGING_SOLARBEAM, 5);
+        active_user->addVolatileCondition(CHARGING_SOLARBLADE, 5);
         if(active_user->hasHeldItem(POWER_HERB)){
             event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Solar Blade immediately!");
             active_user->consumeHeldItem();
@@ -7152,6 +7197,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_user->hasVolatileCondition(UNDERGROUND)){
         active_user->removeVolatileCondition(UNDERGROUND);
     }
+    //charge phantom force
+    if(attack->getEffectId() == 264 && !active_user->hasVolatileCondition(VANISHED)){// Phantom force
+        active_user->addVolatileCondition(VANISHED, 5);
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Phantom force immediately!");
+            active_user->consumeHeldItem();
+        }else{
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(VANISHED)){
+        active_user->removeVolatileCondition(VANISHED);
+    }
     //charge dive
     if(attack->getEffectId() == 136 && !active_user->hasVolatileCondition(UNDERWATER)){// Dive
         active_user->addVolatileCondition(UNDERWATER, 5);
@@ -7200,7 +7261,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         return true;
     }
     // protect
-    if(attack->getEffectId()==65){
+    if(attack->getEffectId()==65 || attack->getEffectId()==264){
         active_target->removeVolatileCondition(PROTECT);
     }
     if(active_target->hasVolatileCondition(PROTECT) && 
@@ -7997,42 +8058,40 @@ void Battle::changeStats(BattleActionActor actor,StatCV& changes,bool forced){
             stats_successfully_decreased.insert({change.first,change.second>0?change.second:-change.second});
         }
     }
-    if(!stats_successfully_increased.empty()){
-        if(active_battler->hasHeldItem(MIRROR_HERB)){
-            //mirror herb
-            active_battler->consumeHeldItem();
-            for(auto change: stats_successfully_increased){
-                switch(change.first){
-                    case 1:{//ATT
-                        active_battler->changeAttackModifier(change.second);
-                        break;
-                    }
-                    case 2:{//DEF
-                        active_battler->changeDefenseModifier(change.second);
-                        break;
-                    }
-                    case 3:{//SPATT
-                        active_battler->changeSpecialAttackModifier(change.second);
-                        break;
-                    }
-                    case 4:{//SPDEF
-                        active_battler->changeSpecialDefenseModifier(change.second);
-                        break;
-                    }
-                    case 5:{//SPEED
-                        active_battler->changeSpeedModifier(change.second);
-                        break;
-                    }
-                    case 6:{//ACC
-                        active_battler->changeAccuracyModifier(change.second);
-                        break;
-                    }
-                    case 7:{//EVA
-                        active_battler->changeEvasionModifier(change.second);
-                        break;
-                    }
-                    default:break;
+    if(!stats_successfully_increased.empty() && active_battler->hasHeldItem(MIRROR_HERB)){
+        //mirror herb
+        active_battler->consumeHeldItem();
+        for(auto change: stats_successfully_increased){
+            switch(change.first){
+                case 1:{//ATT
+                    active_battler->changeAttackModifier(change.second);
+                    break;
                 }
+                case 2:{//DEF
+                    active_battler->changeDefenseModifier(change.second);
+                    break;
+                }
+                case 3:{//SPATT
+                    active_battler->changeSpecialAttackModifier(change.second);
+                    break;
+                }
+                case 4:{//SPDEF
+                    active_battler->changeSpecialDefenseModifier(change.second);
+                    break;
+                }
+                case 5:{//SPEED
+                    active_battler->changeSpeedModifier(change.second);
+                    break;
+                }
+                case 6:{//ACC
+                    active_battler->changeAccuracyModifier(change.second);
+                    break;
+                }
+                case 7:{//EVA
+                    active_battler->changeEvasionModifier(change.second);
+                    break;
+                }
+                default:break;
             }
         }
     }
@@ -8168,6 +8227,8 @@ void Battle::applyBattleActionModifiers(BattleAction& action, BattleAction& othe
     }
     // check for lagging tail and full incense
     if(user_active->hasHeldItem(LAGGING_TAIL) || user_active->hasHeldItem(FULL_INCENSE))
+        user_active->addVolatileCondition(MOVING_LAST,1);
+    if(user_active->hasAbility(STALL))
         user_active->addVolatileCondition(MOVING_LAST,1);
     // apply moving last condition
     if(user_active->hasVolatileCondition(MOVING_LAST)){

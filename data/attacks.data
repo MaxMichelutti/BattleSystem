@@ -4539,3 +4539,83 @@ CONTACT
 CATEGORY:PHYSICAL
 EFFECT:16
 EFFECTCHANCE:30
+# 488 MIND READER
+NAME:Mind Reader
+DESCRIPTION:The user senses the target's movements with its mind to ensure its next attack does not miss the target.
+PP:5
+TARGET:SELF
+EFFECT:147
+CATEGORY:STATUS
+TYPE:NORMAL
+# 489 PHANTOM FORCE
+NAME:Phantom Force
+DESCRIPTION:The user vanishes somewhere, then strikes the target on the next turn. This move hits even if the target protects itself.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+PP:10
+POWER:90
+CONTACT
+EFFECT:164
+EFFECTTARGET:SELF
+# 490 BOOMBURST
+NAME:Boomburst
+DESCRIPTION:The user attacks everything around it with the destructive power of a terrible explosive sound.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+SOUND
+PP:10
+POWER:140
+# 491 HEADLONG RUSH
+NAME:Headlong Rush
+DESCRIPTION:The user smashes into the target in a full-body tackle. This also lowers the user’s Defense and Sp. Def stats.
+TYPE:GROUND
+PP:5
+POWER:120
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:115
+EFFECTTARGET:SELF
+# 492 WILD CHARGE
+NAME:Wild Charge
+DESCRIPTION:The user shrouds itself in electricity and smashes into its target. This also damages the user a little.
+TYPE:ELECTRIC
+CATEGORY:PHYSICAL
+PP:15
+POWER:90
+CONTACT
+EFFECT:6
+EFFECTTARGET:SELF
+# 493 ENTRAINMENT
+NAME:Entrainment
+DESCRIPTION:The user dances with an odd rhythm that compels the target to mimic it, making the target's Ability the same as the user's.
+TYPE:NORMAL
+CATEGORY:STATUS
+PP:15
+EFFECT:265
+TARGET:SELF
+# 494 TAIL GLOW
+NAME:Tail Glow
+DESCRIPTION:The user stares at flashing lights to focus its mind, drastically boosting its Sp. Atk stat.
+TYPE:BUG
+PP:20
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:62
+# 495 NOBLE ROAR
+NAME:Noble Roar
+DESCRIPTION:Letting out a noble roar, the user intimidates the target and lowers the target's Attack and Sp. Atk stats.
+TYPE:NORMAL
+SOUND
+CATEGORY:STATUS
+PP:30
+REFLECTABLE
+EFFECT:228
+# 496 WATER SPOUT
+NAME:Water Spout
+DESCRIPTION:The user spouts water to damage opposing Pokémon. The lower the user's HP, the lower the move's power.
+PP:5
+POWER:150
+CATEGORY:SPECIAL
+TYPE:WATER
+EFFECT:218
+EFFECTTARGET:SELF

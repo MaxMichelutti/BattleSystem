@@ -99,6 +99,35 @@ bool doesAbilityIgnoreIntimidate(Ability ability){
     return false;
 }
 
+bool abilityCannotBeCopied(Ability ability){
+    switch(ability){
+        case TRACE:
+        case IMPOSTOR:
+        case NEUTRALIZING_GAS:
+        case POWER_OF_ALCHEMY:
+        case PARENTAL_BOND:
+            return true;
+        default: return false;
+    }
+    return false;
+}
+
+bool abilityCannotBeChanged(Ability ability){
+    switch(ability){
+        case TRUANT:
+            return true;
+        default: return false;
+    }
+    return false;
+}
+
+bool abilityCannotBeSuppressed(Ability ability){
+    switch(ability){
+        default: return false;
+    }
+    return false;
+}
+
 // Ability Item ------------------------------------------------------------------------------------------------------------
 AbilityItem::AbilityItem(){
     igname = "";

@@ -5,9 +5,14 @@
 #include "battle.h"
 #include "textevents.h"
 #include "abilities.h"
+#include "player.h"
 #include "items.h"
 
 int main(int argc, char** argv) {
+    Player::createPlayer();
+    Player* player = Player::getPlayer();
+    player->setName("Player");
+    player->addMoney(10000);
     Attack::loadAttacks();
     Species::loadSpecies();
     AbilityItem::initAbilities();

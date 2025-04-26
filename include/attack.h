@@ -50,6 +50,7 @@ class Attack{
     bool is_reflectable;
     bool is_sketchable;
     bool is_wind;
+    bool is_biting;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
@@ -78,6 +79,7 @@ class Attack{
     bool canBeSketched()const;
     bool canBeMetronomed()const;
     bool canBeCopycat()const;
+    bool isBiting()const;
     bool isWind()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();

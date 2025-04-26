@@ -357,90 +357,122 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
     }
     volatile_conditions.insert({condition,duration});
     switch(condition){
-        case GROUNDED:
+        case GROUNDED:{
             if(monster->hasType(FLYING)){
                 handler->displayMsg(getNickname()+" lands on the ground!");
             }
             break;
-        case FLYING_HIGH:
+        }
+        case FLYING_HIGH:{
             handler->displayMsg(getNickname()+" flies high!");
             break;
-        case UNDERGROUND:
+        }
+        case UNDERGROUND:{
             handler->displayMsg(getNickname()+" digs under ground!");
             break;
-        case CHARGING_SKYATTACK:
+        }
+        case CHARGING_SKYATTACK:{
             handler->displayMsg(getNickname()+" became cloaked in a harsh light!");
             break;
-        case UNDERWATER:
+        }
+        case UNDERWATER:{
             handler->displayMsg(getNickname()+" dives deep!");
             break;
-        case INFATUATION:
+        }
+        case INFATUATION:{
             handler->displayMsg(getNickname()+" is infatuated!");
             break;
-        case CONFUSION:
+        }
+        case CONFUSION:{
             handler->displayMsg(getNickname()+" is confused!");
             break;
-        case FIRESPIN:
+        }
+        case FIRESPIN:{
             handler->displayMsg(getNickname()+" is trapped in a vortex of fire!");
             break;
-        case INFESTED:
+        }
+        case INFESTED:{
             handler->displayMsg(getNickname()+" is infested!");
             break;
-        case WHIRLPOOL:
+        }
+        case WHIRLPOOL:{
             handler->displayMsg(getNickname()+" is trapped in a whirlpool of water!");
             break;
-        case SANDTOMB:
+        }
+        case SANDTOMB:{
             handler->displayMsg(getNickname()+" is trapped in a vortex of sand!");
             break;
-        case WRAP:
+        }
+        case WRAP:{
             handler->displayMsg(getNickname()+" is trapped in a wrap!");
             break;
-        case BIND:
+        }
+        case BIND:{
             handler->displayMsg(getNickname()+" is binded by the its opponent!");
             break;
-        case LEECH_SEED:
+        }
+        case LEECH_SEED:{
             handler->displayMsg(getNickname()+" is seeded!");
             break;
-        case LASER_FOCUS:
+        }
+        case LASER_FOCUS:{
             handler->displayMsg(getNickname()+" is focusing its energy!");
             break;
-        case FOCUS_ENERGY:
+        }
+        case FOCUS_ENERGY:{
             handler->displayMsg(getNickname()+" is getting pumped!");
             break;
+        }
         case MEAN_LOOK:
-        case BLOCKED:
+        case BLOCKED:{
             handler->displayMsg(getNickname()+" cannot escape!");
             break;
-        case TAUNTED:
+        }
+        case TAUNTED:{
             handler->displayMsg(getNickname()+" is taunted!");
             break;
-        case PROTECT:
+        }
+        case PROTECT:{
             handler->displayMsg(getNickname()+" protects itself!");
             break;
-        case IMPRISON:
+        }
+        case IMPRISON:{
             handler->displayMsg(getNickname()+" cannot use attacks known by its opponent!");
             break;
+        }
         case CHARGING_SOLARBEAM:
-            handler->displayMsg(getNickname()+" coolects power from the sun!");
+        case CHARGING_SOLARBLADE:{
+            handler->displayMsg(getNickname()+" collects power from the sun!");
             break;
-        case DROWSY:
+        }
+        case VANISHED:{
+            handler->displayMsg(getNickname()+" vanished!");
+            break;
+        }
+        case DROWSY:{
             handler->displayMsg(getNickname()+" is drowsy!");
             break;
-        case CURSED:
+        }
+        case CURSED:{
             handler->displayMsg(getNickname()+" was cursed!");
             break;
-        case DESTINY_BOND:
+        }
+        case DESTINY_BOND:{
             handler->displayMsg(getNickname()+" tries to knock out whoever knocks it out!");
             break;
-        case CHARGED:
+        }
+        case CHARGED:{
             handler->displayMsg(getNickname()+" is charging its next Electric type attack!");
             break;
-        case FOCUSED:
+        }
+        case FOCUSED:{
             handler->displayMsg(getNickname()+" is focusing!");
             break;
-        case INGRAINED:
+        }
+        case INGRAINED:{
             handler->displayMsg(getNickname()+" plants its roots on the ground!");
             break;
+        }
         default:
             break;
     }
@@ -2190,6 +2222,8 @@ unsigned int Battler::getWeight()const{
     unsigned int res = weight;
     if(hasAbility(LIGHT_METAL))
         res = max(1,res/2);
+    if(hasAbility(HEAVY_METAL))
+        res = res*2;
     if(hasHeldItem(FLOAT_STONE))
         res = max(1,res/2);
     return res;

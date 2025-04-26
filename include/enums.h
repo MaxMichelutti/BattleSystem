@@ -64,6 +64,7 @@ enum BattleActionType{
     SOLAR_BEAM,
     SOLAR_BLADE,
     FLY,
+    PHANTOM_FORCE,
     ROLLOUT,
     DIG,
     DIVE,
@@ -148,6 +149,7 @@ enum VolatileStatusCondition{
     GRUDGED,
     STAT_JUST_DROPPED,
     TRUANTING,
+    VANISHED,
 };
 
 enum Gender{
@@ -409,7 +411,13 @@ enum Ability{
     PIXILATE,
     POISON_HEAL,
     TRUANT,
-    WONDER_GUARD
+    WONDER_GUARD,
+    NORMALIZE,
+    STALL,
+    HEAVY_METAL,
+    PURE_POWER,
+    STRONG_JAW,
+    ROUGH_SKIN
 };
 
 enum ItemCategory{
