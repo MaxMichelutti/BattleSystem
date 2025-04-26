@@ -1550,6 +1550,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 // Eject button effect
                 active_target->consumeHeldItem();
                 forceSwitch(otherBattleActionActor(actor));
+                return {total_actual_damage,actual_damage.second};
             }
             if(active_target->hasHeldItem(RED_CARD) && user_team->hasAliveBackup() && 
                 actual_damage.first>0 && !actual_damage.second){
@@ -1559,6 +1560,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 if(!active_user->hasAbility(SUCTION_CUPS) && !active_user->hasVolatileCondition(INGRAINED)){
                     event_handler->displayMsg(opponent_mon_name+" was forced to switch!");
                     forceSwitch(otherBattleActionActor(actor));
+                    return {total_actual_damage,actual_damage.second};
                 }else{
                     event_handler->displayMsg("But it failed!");
                 }
