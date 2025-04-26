@@ -2199,7 +2199,7 @@ void Battler::changeWeight(int amount){
         weight+=amount;
     }else{
         amount = -amount;
-        if(amount >= weight)
+        if(amount >= (int)weight)
             weight = 1;
         else
             weight -= amount;
@@ -2212,7 +2212,7 @@ void Battler::changeHeight(int amount){
         height+=amount;
     }else{
         amount = -amount;
-        if(amount >= height)
+        if(amount >= (int)height)
             height = 1;
         else
             height -= amount;

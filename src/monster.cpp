@@ -289,7 +289,7 @@ void Monster::changeFriendship(int amount) {
     if(amount < 0){
         if(friendship == 0)
             return;
-        if(friendship < -amount)
+        if((int)friendship < -amount)
             friendship = 0;
         else
             friendship += amount;

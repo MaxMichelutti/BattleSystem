@@ -731,7 +731,7 @@ bool EVs::changeAtk(int amount) {
         atk += amount;
         return true;
     }else if(amount < 0){
-        if(atk < -amount)
+        if((int)atk < -amount)
             amount = -atk;
         atk += amount;
         return true;
@@ -755,7 +755,7 @@ bool EVs::changeDef(int amount) {
         def += amount;
         return true;
     }else if(amount < 0){
-        if(def < -amount)
+        if((int)def < -amount)
             amount = -def;
         def += amount;
         return true;
@@ -779,7 +779,7 @@ bool EVs::changeSpatk(int amount) {
         spatk += amount;
         return true;
     }else if(amount < 0){
-        if(spatk < -amount)
+        if((int)spatk < -amount)
             amount = -spatk;
         spatk += amount;
         return true;
@@ -803,7 +803,7 @@ bool EVs::changeSpdef(int amount) {
         spdef += amount;
         return true;
     }else if(amount < 0){
-        if(spdef < -amount)
+        if((int)spdef < -amount)
             amount = -spdef;
         spdef += amount;
         return true;
@@ -828,7 +828,7 @@ bool EVs::changeSpd(int amount) {
         spd += amount;
         return true;
     }else if(amount < 0){
-        if(spd < -amount)
+        if((int)spd < -amount)
             amount = -spd;
         spd += amount;
         return true;
@@ -853,7 +853,7 @@ bool EVs::changeHp(int amount) {
         hp += amount;
         return true;
     }else if(amount < 0){
-        if(hp < -amount)
+        if((int)hp < -amount)
             amount = -hp;
         hp += amount;
         return true;

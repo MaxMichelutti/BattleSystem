@@ -159,7 +159,7 @@ void AbilityItem::initAbilities(){
     file.close();
 }
 
-static AbilityItem* getAbilityItem(Ability ability){
+AbilityItem* AbilityItem::getAbilityItem(Ability ability){
     auto it = abilityMap.find(ability);
     if(it != abilityMap.end())
         return it->second;
