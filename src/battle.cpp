@@ -5018,6 +5018,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
 
     // target eats berries to reduce incoming damage
     if(effect!=112 && effect!=117 && // do not eat berries for fixed dmg attacks
+        !enemy_monster->hasSubstitute() && 
         enemy_monster->tryEatSuperEffectiveBerry(attack_type,effectiveness>1.1)){//lazy eval will prevent this call if attack is fixed dmg
         damage /= 2;
     }
@@ -7472,7 +7473,7 @@ void Battle::applyScheduledFutureSights(){
             if(it.stab){
                 stab_multiplier = 1.5;
             }
-            if(target_active->tryEatSuperEffectiveBerry(attack->getType(),effectiveness>1.1))
+            if(!target_active->hasSubstitute() && target_active->tryEatSuperEffectiveBerry(attack->getType(),effectiveness>1.1))
                 base_dmg /= 2;
             unsigned int final_damage = max(base_dmg * effectiveness * crit_multiplier * stab_multiplier,1);
             auto actual_damage = target_active->addDamage(final_damage, attack->getCategory(), effectiveness, false);
