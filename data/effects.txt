@@ -116,7 +116,7 @@
 116: power doubles if last move failed
 117: deals damage equal to user currentHP, user dies
 118: power increases as the user receives hits
-119: power double if opponent has killed laast turn
+119: power double if opponent has killed last turn
 120: power depends on user % of HP
 121: user halves its Hp and maximizes attack (+12 attack)
 122: -1 speed opponent
@@ -255,3 +255,5 @@
 255: creates a substitute and switches out (substitute has 1/4 of user HP)
 256: user creates a substitute for itself
 257: power doubles if user is paralyzed, poisoned or burned
+258: use def instead of att for damage calc
+259: power depends on target HP percentage

@@ -4879,16 +4879,31 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         
     if(category == PHYSICAL){
         attack_stat = physical_attack_stat;
+        if(effect==257)//body press uses defense instead of attack of user
+            attack_stat = user_monster->getModifiedDefense();
+        if(user_monster->hasHeldItem(CHOICE_BAND))
+            attack_stat*=1.5;
+        if(user_monster->hasAbility(HUGE_POWER)){
+            //HUGE POWER doubles the attack stat
+            attack_stat *= 2;
+        }
         defense_stat = physical_defense_stat;   
         if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
             burn_multiplier *= 0.5;
         }
     }else{
         attack_stat = special_attack_stat;
+        if(user_monster->hasHeldItem(CHOICE_SPECS))
+            attack_stat*=1.5;
+        if(user_monster->hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
+            attack_stat*=1.5;
+        }
         defense_stat = special_defense_stat; 
         // if(user_monster->isBurned() && !user_monster->hasAbility(GUTS)){
         //     burn_multiplier *= 0.5;
         // }
+        if(effect==128)//psystrike hits special move on physical defense
+            defense_stat = physical_defense_stat;
     }
     if(effect==100){
         //self destructing moves halve enemy defense stat
@@ -5318,6 +5333,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             if(active_user->isBurned() || active_user->isParalyzed() || active_user->isPoisoned()){
                 base_power *= 2;
             }
+            break;
+        }
+        case 259:{
+            //power depends on target HP
+            unsigned int current_hp = active_target->getCurrentHP();
+            unsigned int max_hp = active_target->getMaxHP();
+            base_power = 100.0 * current_hp / max_hp;
             break;
         }
         default: break;

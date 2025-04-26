@@ -1032,12 +1032,12 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(GUTS) && hasPermanentStatus())
         base_modified*=1.5;
-    if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
-        base_modified*=2;
+    // if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
+    //     base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
         base_modified*=2;
-    if(hasHeldItem(CHOICE_BAND))
-        base_modified*=1.5;
+    // if(hasHeldItem(CHOICE_BAND))
+    //     base_modified*=1.5;
     if(hasHeldItem(THICK_CLUB) &&
         (monster->getSpeciesId()==104 || monster->getSpeciesId()==105 ||//thick club doubles attack of cubone and marowak
         monster->getTransformedSpeciesId()==104 || monster->getTransformedSpeciesId()==105))//and of a Monster transformed into cubone or marowak
@@ -1085,13 +1085,13 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     }else if(modifier<0){
         base_modified = base_special_attack * 2 / (-modifier + 2);
     }
-    if(hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
-        base_modified = base_modified * 3 / 2;
-    }
+    // if(hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
+    //     base_modified = base_modified * 3 / 2;
+    // }
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles special attack of pikachu
         base_modified*=2;
-    if(hasHeldItem(CHOICE_SPECS))
-        base_modified*=1.5;
+    // if(hasHeldItem(CHOICE_SPECS))
+    //     base_modified*=1.5;
     return base_modified;
 }
 

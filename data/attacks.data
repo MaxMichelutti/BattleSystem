@@ -4261,3 +4261,53 @@ CATEGORY:PHYSICAL
 CONTACT
 EFFECT:257
 EFFECTTARGET:SELF
+# 467 AVALANCHE
+NAME:Avalanche
+DESCRIPTION:This move's power is doubled if the target has inflicted damage on the user in the same turn.
+CATEGORY:PHYSICAL
+PP:10
+POWER:60
+CONTACT
+TYPE:ICE
+PRIORITY:-4
+EFFECT:131
+EFFECTTARGET:SELF
+# 468 BODY PRESS
+NAME:Body Press
+DESCRIPTION:The user attacks by slamming its body into the target. The higher the user's Defense stat, the greater the damage this move deals.
+PP:10
+POWER:80
+CONTACT
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+EFFECT:258
+EFFECTTARGET:SELF
+# 469 FOCUS BLAST
+NAME:Focus Blast
+DESCRIPTION:The user heightens its mental focus and unleashes its power. This may also lower the target's Sp. Def stat.
+TYPE:FIGHTING
+CATEGORY:SPECIAL
+PP:5
+POWER:120
+ACCURACY:70
+EFFECT:31
+EFFECTCHANCE:10
+# 470 FIP TURN
+NAME:Flip Turn
+DESCRIPTION:After making its attack, the user rushes back to switch places with a party Pokémon in waiting.
+TYPE:WATER
+CATEGORY:PHYSICAL
+CONTACT
+PP:20
+POWER:60
+EFFECT:231
+EFFECTTARGET:SELF
+# 471 HARD PRESS
+NAME:Hard Press
+DESCRIPTION:The target is crushed with an arm, a claw, or the like to inflict damage. The more HP the target has left, the greater the move's power.
+TYPE:STEEL
+PP:10
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:259
+EFFECTTARGET:SELF
