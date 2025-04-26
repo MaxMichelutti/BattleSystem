@@ -1053,6 +1053,10 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(attack->isPowder() && (active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES))){
         effectiveness = 0;
     }
+    // TINTED LENS doubles effectiveness of not very effective moves
+    if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
+        effectiveness *= 2;
+    }
     
     std::pair<unsigned int, bool> actual_damage = applyDamage(attack,action.getActor(),attack_after_target,effectiveness,acts_second);
     if(active_user->isFainted())
@@ -1350,63 +1354,8 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 // display second attack msg for parental bond
                 event_handler->displayMsg(user_mon_name+" attacks again!");
             }
-            // TINTED LENS doubles effectiveness of not very effective moves
-            if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
-                effectiveness *= 2;
-            }
             //check for critical hit;
-            bool is_critical_hit = false;
-            int crit_level = 0;
-            if(active_user->hasVolatileCondition(LASER_FOCUS)){//laser focus makes crits more likely
-                crit_level+=3;
-                active_user->removeVolatileCondition(LASER_FOCUS);
-            }
-            if(active_user->hasHeldItem(RAZOR_CLAW)){//razor claw makes crits more likely for the user
-                crit_level+=1;
-            }
-            if(active_user->hasHeldItem(SCOPE_LENS)){//scope lens makes crits more likely for the user
-                crit_level+=1;
-            }
-            unsigned int species_id = active_user->getMonster()->getSpeciesId();
-            if(active_user->hasHeldItem(LEEK) && (species_id == 83)){
-                // TODO!() add sirfetchd once implemented here
-                // leek makes crits more likely for farfetchd and Sirfetchd
-                crit_level+=2;
-            }
-            if(active_user->hasHeldItem(LUCKY_PUNCH) && species_id == 113){
-                // lucky punch makes crits more likely for chansey
-                crit_level+=2;
-            }
-            if((effect_id == 17 || effect_id==197 || effect_id==232) 
-                && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
-                crit_level+=1;
-            }
-            if(active_user->hasAbility(SUPER_LUCK)){
-                crit_level+=1;
-            }
-            if(active_user->hasVolatileCondition(FOCUS_ENERGY)){//focus energy
-                crit_level+=2;
-            }
-            if(active_user->hasVolatileCondition(INCREASED_CRIT)){//crit incresed by berry
-                crit_level += 1;
-                active_user->removeVolatileCondition(INCREASED_CRIT);
-            }
-            if(crit_level == 0 && RNG::getRandomInteger(0,23)==0){
-                is_critical_hit = true;
-            }else if(crit_level == 1 && RNG::oneEight()){
-                is_critical_hit = true;
-            }else if(crit_level == 2 && RNG::coinFlip()){
-                is_critical_hit = true;
-            }else if(crit_level>=3){
-                is_critical_hit = true;
-            }
-            if(effect_id==189)//always crits unless abilities deny it
-                is_critical_hit = true;
-            // check for crit immunity
-            if(active_target->hasAbility(SHELL_ARMOR) || //shell armor blocks crits
-                active_target->hasAbility(BATTLE_ARMOR)){//battle armor blocks crits
-                is_critical_hit = false;
-            }
+            bool is_critical_hit = isCriticalHit(attack,active_user->getActor(),active_target->getActor());
             if(is_critical_hit){
                 event_handler->displayMsg("It's a critical hit!");
             }
@@ -8079,4 +8028,64 @@ void Battle::checkRoomService(){
             changeStats(active_user->getActor(),changes,false);
         }
     }
+}
+
+bool Battle::isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor){
+    Battler* active_user = getActorBattler(user_actor);
+    Battler* active_target = getActorBattler(target_actor);
+    unsigned int effect_id = attack->getEffectId();
+    
+    bool is_critical_hit = false;
+    int crit_level = 0;
+    if(active_user->hasVolatileCondition(LASER_FOCUS)){//laser focus makes crits more likely
+        crit_level+=3;
+        active_user->removeVolatileCondition(LASER_FOCUS);
+    }
+    if(active_user->hasHeldItem(RAZOR_CLAW)){//razor claw makes crits more likely for the user
+        crit_level+=1;
+    }
+    if(active_user->hasHeldItem(SCOPE_LENS)){//scope lens makes crits more likely for the user
+        crit_level+=1;
+    }
+    unsigned int species_id = active_user->getMonster()->getSpeciesId();
+    if(active_user->hasHeldItem(LEEK) && (species_id == 83)){
+        // TODO!() add sirfetchd once implemented here
+        // leek makes crits more likely for farfetchd and Sirfetchd
+        crit_level+=2;
+    }
+    if(active_user->hasHeldItem(LUCKY_PUNCH) && species_id == 113){
+        // lucky punch makes crits more likely for chansey
+        crit_level+=2;
+    }
+    if((effect_id == 17 || effect_id==197 || effect_id==232) 
+        && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
+        crit_level+=1;
+    }
+    if(active_user->hasAbility(SUPER_LUCK)){
+        crit_level+=1;
+    }
+    if(active_user->hasVolatileCondition(FOCUS_ENERGY)){//focus energy
+        crit_level+=2;
+    }
+    if(active_user->hasVolatileCondition(INCREASED_CRIT)){//crit incresed by berry
+        crit_level += 1;
+        active_user->removeVolatileCondition(INCREASED_CRIT);
+    }
+    if(crit_level == 0 && RNG::getRandomInteger(0,23)==0){
+        is_critical_hit = true;
+    }else if(crit_level == 1 && RNG::oneEight()){
+        is_critical_hit = true;
+    }else if(crit_level == 2 && RNG::coinFlip()){
+        is_critical_hit = true;
+    }else if(crit_level>=3){
+        is_critical_hit = true;
+    }
+    if(effect_id==189)//always crits unless abilities deny it
+        is_critical_hit = true;
+    // check for crit immunity
+    if(active_target->hasAbility(SHELL_ARMOR) || //shell armor blocks crits
+        active_target->hasAbility(BATTLE_ARMOR)){//battle armor blocks crits
+        is_critical_hit = false;
+    }
+    return is_critical_hit;
 }
