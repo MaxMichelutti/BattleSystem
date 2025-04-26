@@ -4235,3 +4235,11 @@ CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:255
 TARGET:SELF
+# 464 SUBSTITUTE
+NAME:Substitute
+DESCRIPTION:The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy.
+PP:10
+CATEGORY:STATUS
+TYPE:NORMAL
+EFFECT:256
+TARGET:SELF

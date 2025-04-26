@@ -4635,6 +4635,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         }
         case 255:{
             //create substitute and switch out
+            if(active_user->isFainted())
+                return;
             unsigned int substitute_hp = max(1,active_user->getMaxHP() / 4);
             unsigned int substitute_cost = max(1,active_user->getMaxHP() / 2);
             if(substitute_cost >= active_user->getCurrentHP()){
@@ -4666,6 +4668,20 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 return;
             if(!active_user->hasSubstitute())
                 active_user->setSubstituteHP(substitute_hp);
+            break;
+        }
+        case 256:{
+            if(active_user->isFainted())
+                return;
+            unsigned int substitute_hp = max(1,active_user->getMaxHP() / 4);
+            unsigned int substitute_cost = max(1,active_user->getMaxHP() / 4);
+            if(substitute_cost >= active_user->getCurrentHP() || active_user->hasSubstitute()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            active_user->setSubstituteHP(substitute_hp);
+            break;
         }
         default:break;
     }
