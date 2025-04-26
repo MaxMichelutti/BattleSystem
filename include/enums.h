@@ -69,6 +69,7 @@ enum BattleActionType{
     DIVE,
     UPROAR,
     RECHARGE_TURN,
+    TRUANT_TURN,
     SKY_ATTACK,
     USE_ITEM,
     BOUNCE,
@@ -145,7 +146,8 @@ enum VolatileStatusCondition{
     TORMENTED,
     THROAT_CHOPPED,
     GRUDGED,
-    STAT_JUST_DROPPED
+    STAT_JUST_DROPPED,
+    TRUANTING,
 };
 
 enum Gender{
@@ -246,7 +248,8 @@ enum EvolutionMethod{
     LEVEL_ATK,
     LEVEL_DEF,
     LEVEL_EQUAL_ATK_DEF,
-    CASCOON_SILCOON
+    CASCOON_SILCOON,
+    SHEDINJA
 };
 
 enum Ability{
@@ -403,7 +406,10 @@ enum Ability{
     SUCTION_CUPS,
     SAND_STREAM,
     WIND_RIDER,
-    PIXILATE
+    PIXILATE,
+    POISON_HEAL,
+    TRUANT,
+    WONDER_GUARD
 };
 
 enum ItemCategory{

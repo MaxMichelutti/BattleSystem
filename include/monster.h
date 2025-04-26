@@ -8,11 +8,13 @@
 #include "enums.h"
 #include "common.h"
 #include "events.h"
+#include "player.h"
 #include <vector>
 #include <string>
 #include <iostream>
 
 class EventHandler;
+class Player;
 
 class AttackData{
     public:
@@ -57,7 +59,8 @@ class Monster{
     void init(unsigned int species_id, unsigned int level,unsigned int form_id);
     void init_stats();
     void init_gender(GenderRule);
-    void completeEvolution(unsigned int target_species_id);
+    void completeEvolution(unsigned int target_species_id,unsigned int target_form_id);
+    void evolveIntoShedinja();
     public:
     Monster(unsigned int species_id);
     Monster(unsigned int species_id, unsigned int level);
@@ -143,6 +146,7 @@ class Monster{
     bool isPastEvoLevel()const;
     void setBall(ItemType ball);
     bool hasEvolutions()const;
+    
 };
 
 #endif

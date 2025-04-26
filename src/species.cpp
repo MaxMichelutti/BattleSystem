@@ -979,6 +979,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 260:{//swampert
             return curr_form==0 && mega_item==SWAMPERTITE;
         }
+        case 282:{//gardevoir
+            return curr_form==0 && mega_item==GARDEVOIRITE;
+        }
         default:return false;
     }
 }
@@ -1079,6 +1082,10 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 260:{//swampert
             if(curr_form==0 && mega_item==SWAMPERTITE)
                 return 101;
+        }
+        case 282:{//gardevoir
+            if(curr_form==0 && mega_item==GARDEVOIRITE)
+                return 104;
         }
         default:return 0;
     }

@@ -547,6 +547,7 @@ bool Monster::canEvolve()const{
     for(const Evolution &evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
             case LEVEL:
+            case SHEDINJA:
             case CASCOON_SILCOON:{
                 if(level >= evo.getMethodCondition())
                     return true;
@@ -612,63 +613,63 @@ void Monster::evolve(){
         switch(evo.getEvolutionMethod()){
             case LEVEL:{
                 if(level >= evo.getMethodCondition()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case LEVEL_NIGHT:{
                 if(level >= evo.getMethodCondition() && isNight()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case LEVEL_DAY:{
                 if(level >= evo.getMethodCondition() && isDay()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case LEVEL_ATK:{
                 if(level >= evo.getMethodCondition() && stats.getAtk() > stats.getDef()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case LEVEL_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() > stats.getAtk()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case LEVEL_EQUAL_ATK_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case FRIENDSHIP:{
                 if(friendship >= evo.getMethodCondition()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case FRIENDSHIP_NIGHT:{
                 if(friendship >= evo.getMethodCondition() && isNight()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
             }
             case FRIENDSHIP_DAY:{
                 if(friendship >= evo.getMethodCondition() && isDay()){
-                    completeEvolution(evo.getTargetSpeciesId());
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
                 break;
@@ -678,13 +679,34 @@ void Monster::evolve(){
                     if(!already_flipped){
                         already_flipped = true;
                         if(RNG::coinFlip()){
-                            completeEvolution(evo.getTargetSpeciesId());
+                            completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                             return;
                         }
                     }else{
-                        completeEvolution(evo.getTargetSpeciesId());
+                        completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                         return;
                     }
+                }
+                break;
+            }
+            case SHEDINJA:{
+                if(level >= evo.getMethodCondition()){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    Player* player = Player::getPlayer();
+                    MonsterTeam* team = player->getTeam();
+                    Bag* bag = player->getBag();
+                    if(!team->isFull() && bag->hasItem(POKE_BALL)){
+                        bag->removeItem(POKE_BALL);
+                        Monster* cloned_nincada = new Monster(this);
+                        cloned_nincada->setNickname("Shedinja");
+                        cloned_nincada->setHeldItem(NO_ITEM_TYPE);
+                        cloned_nincada->transformation = nullptr;
+                        cloned_nincada->mega_ability = NO_ABILITY;
+                        cloned_nincada->is_mega = false;
+                        cloned_nincada->evolveIntoShedinja();
+                        team->addMonster(cloned_nincada);
+                    }
+                    return;
                 }
                 break;
             }
@@ -693,7 +715,7 @@ void Monster::evolve(){
     }
 }
 
-void Monster::completeEvolution(unsigned int target_species_id){
+void Monster::completeEvolution(unsigned int target_species_id,unsigned int target_form_id){
     Species* old_spec = Species::getSpecies(species_id);
     Species* new_spec = Species::getSpecies(target_species_id);
     this->species_id = target_species_id;
@@ -701,15 +723,9 @@ void Monster::completeEvolution(unsigned int target_species_id){
     if(nickname == old_spec->getName()){
         nickname = new_spec->getName();
     }
-    unsigned int new_form_id;
+    unsigned int new_form_id = target_form_id;
     unsigned int old_form_id = getFormId();
-    if(old_form_id==0)
-        new_form_id = 0;
-    else{
-        AlternateForm* form = AlternateForm::getAlternateForm(getFormId());
-        FormKind kind = form->getFormKind();
-        new_form_id = new_spec->getFormIdOfKind(kind);
-    }
+
     //update stats
     updateStats();
     // update ability
@@ -720,12 +736,17 @@ void Monster::completeEvolution(unsigned int target_species_id){
         Ability new1 = new_spec->getAbility1(new_form_id);
         Ability old2 = old_spec->getAbility2(old_form_id);
         Ability new2 = new_spec->getAbility2(new_form_id);
-        if(ability==old1)
+        if(ability==old1 || new2 == NO_ABILITY)
             ability=new1;
         else if(ability==old2)
             ability=new2;
         //else
         //  ability is the same as before
+    }
+    this->form_id = new_form_id;
+    updateStats();
+    if(getNickname() == old_spec->getName()){
+        nickname = new_spec->getName();
     }
     // TODO: learn attacks
     // auto evo_attacks = new_spec->getEvolutionLearnset();
@@ -735,6 +756,13 @@ void Monster::completeEvolution(unsigned int target_species_id){
     //         learnAttack(attack_id);
     //     }
     // }
+}
+
+void Monster::evolveIntoShedinja(){
+    // Shedinja is a special case of evolution
+    // change gender to genderless
+    gender = GENDERLESS;
+    completeEvolution(292,0);
 }
 
 void Monster::heal(){

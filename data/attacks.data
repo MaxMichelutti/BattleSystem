@@ -4521,3 +4521,21 @@ POWER:70
 CATEGORY:SPECIAL
 EFFECT:231
 EFFECTTARGET:SELF
+# 486 MYSTICAL FIRE
+NAME:Mystical Fire
+DESCRIPTION:The user attacks by breathing a special, hot fire. This also lowers the target's Sp. Atk stat.
+TYPE:FIRE
+PP:10
+POWER:75
+CATEGORY:SPECIAL
+EFFECT:88
+# 487 FORCE PALM
+NAME:Force Palm
+DESCRIPTION:The target is attacked with a shock wave. This may also leave the target with paralysis.
+TYPE:FIGHTING
+PP:10
+POWER:60
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:16
+EFFECTCHANCE:30

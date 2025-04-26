@@ -66,6 +66,7 @@ bool isAbilityIgnorable(Ability ability){
         case MAGMA_ARMOR:
         case SUCTION_CUPS:
         case LIGHT_METAL:
+        case WONDER_GUARD:
             return true;
         default:return false;
     }        

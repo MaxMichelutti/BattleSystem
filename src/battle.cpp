@@ -595,11 +595,22 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
         performSwitch(action);
     }else if(atype==RECHARGE_TURN){
         performRechargeTurn(action);
+    }else if(atype==TRUANT_TURN){
+        performTruantTurn(action);
     }else if(atype == USE_ITEM){
         performUseItem(action);
     }else if(atype == ESCAPE){
         performEscape(action);
     }
+}
+
+void Battle::performTruantTurn(BattleAction action){
+    Battler* active_user = getActorBattler(action.getActor());
+    active_user->removeVolatileCondition(TRUANTING);
+    if(active_user->isFainted())
+        return;
+    std::string user_mon_name = getActorBattlerName(action.getActor());
+    event_handler->displayMsg(user_mon_name+" is loafing around!");
 }
 
 void Battle::performUseItem(BattleAction action){
@@ -719,6 +730,10 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // activate Mold Breaker on the target
     if(active_user->hasAbility(MOLD_BREAKER))
         active_target->activateMoldBreaker();
+    // activate truant to signal that next turn the user will not be able to attack
+    if(active_user->hasAbility(TRUANT)){
+        active_user->addVolatileCondition(TRUANTING,-1);
+    }
 
     // reset Destiny Bond
     if(active_user->hasVolatileCondition(DESTINY_BOND))
@@ -963,38 +978,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         return;
     }
 
-    bool can_hit_ghosts = active_user->hasAbility(SCRAPPY);
-    // Type attack_type = attack->getType(active_user,field);
-    unsigned int effect_id = attack->getEffectId();
-    double effectiveness = 1;
-    for(auto type:active_target->getTypes()){
-        double type_effectiveness = getTypeEffectiveness(
-            attack_type,
-            type,
-            active_target->isTouchingGround(),
-            can_hit_ghosts,
-            effect_id == 196
-        );
-        if(active_user->hasHeldItem(RING_TARGET) && type_effectiveness==0)
-            type_effectiveness = 1;
-        effectiveness *= type_effectiveness;
-    }
-    // check for immunity for sheer cold
-    if(effect_id == 156 && active_target->hasType(ICE)){
-        effectiveness = 0;
-    }
-    // check for immunity for soundproof
-    if(attack->isSoundBased() && active_target->hasAbility(SOUNDPROOF)){
-        effectiveness = 0;
-    }
-    // check for immunity for overcoat
-    if(attack->isPowder() && (active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES))){
-        effectiveness = 0;
-    }
-    // TINTED LENS doubles effectiveness of not very effective moves
-    if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
-        effectiveness *= 2;
-    }
+    double effectiveness = computeEffectiveness(attack,active_user->getActor(),active_target->getActor());
     
     std::pair<unsigned int, bool> actual_damage = applyDamage(attack,action.getActor(),attack_after_target,effectiveness,acts_second);
     if(active_user->isFainted())
@@ -5898,6 +5882,13 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
             break;
         }
         case POISONED:{
+            if(active_user->hasAbility(POISON_HEAL)){
+                event_handler->displayMsg(mon_name+" is healed by Poison Heal!");
+                unsigned int actual_heal = active_user->removeDamage(active_user->getMaxHP()/8);
+                if(actual_heal>0)
+                    event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_heal)+" HP!");
+                return;
+            }
             unsigned int psn_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_psn_damage = active_user->addDirectDamage(psn_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_psn_damage)+" poison damage!");
@@ -5906,6 +5897,13 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
             break;
         }
         case BAD_POISON:{
+            if(active_user->hasAbility(POISON_HEAL)){
+                event_handler->displayMsg(mon_name+" is healed by Poison Heal!");
+                unsigned int actual_heal = active_user->removeDamage(active_user->getMaxHP()/8);
+                if(actual_heal>0)
+                    event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_heal)+" HP!");
+                return;
+            }
             unsigned int badpsn_damage = max(active_user->getMaxHP() * active_user->getBadPoisonCounter() / 16,1);
             unsigned int actual_badpsn_damage = active_user->addDirectDamage(badpsn_damage);
             event_handler->displayMsg(mon_name+" took "+std::to_string(actual_badpsn_damage)+" poison damage!");
@@ -8176,4 +8174,48 @@ void Battle::applyBattleActionModifiers(BattleAction& action, BattleAction& othe
         user_active->removeVolatileCondition(MOVING_LAST);
         action.setSpeed(0);
     }
+}
+
+
+double Battle::computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor){
+    Battler* active_user = getActorBattler(user_actor);
+    Battler* active_target = getActorBattler(target_actor);
+    bool can_hit_ghosts = active_user->hasAbility(SCRAPPY);
+    // Type attack_type = attack->getType(active_user,field);
+    unsigned int effect_id = attack->getEffectId();
+    Type attack_type = attack->getType(active_user,field);
+    double effectiveness = 1;
+    for(auto type:active_target->getTypes()){
+        double type_effectiveness = getTypeEffectiveness(
+            attack_type,
+            type,
+            active_target->isTouchingGround(),
+            can_hit_ghosts,
+            effect_id == 196
+        );
+        if(active_user->hasHeldItem(RING_TARGET) && type_effectiveness==0)
+            type_effectiveness = 1;
+        effectiveness *= type_effectiveness;
+    }
+    // check for immunity for sheer cold
+    if(effect_id == 156 && active_target->hasType(ICE)){
+        effectiveness = 0;
+    }
+    // check for immunity for soundproof
+    if(attack->isSoundBased() && active_target->hasAbility(SOUNDPROOF)){
+        effectiveness = 0;
+    }
+    // check for immunity for overcoat
+    if(attack->isPowder() && (active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES))){
+        effectiveness = 0;
+    }
+    // TINTED LENS doubles effectiveness of not very effective moves
+    if(effectiveness < 0.9 && active_user->hasAbility(TINTED_LENS)){
+        effectiveness *= 2;
+    }
+    // check for wonder guard immunity
+    if(effectiveness < 1.1 && active_target->hasAbility(WONDER_GUARD)){
+        effectiveness = 0;
+    }
+    return effectiveness;
 }

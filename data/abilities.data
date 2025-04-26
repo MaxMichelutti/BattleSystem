@@ -302,3 +302,9 @@ WIND_RIDER
 Boosts the Pokémon's Attack stat if Tailwind takes effect or if the Pokémon is hit by a wind move. The Pokémon also takes no damage from wind moves.
 PIXILATE
 Normal-type moves become Fairy-type moves. The power of those moves is boosted a little.
+POISON_HEAL
+If poisoned, the Pokémon has its HP restored instead of taking damage.
+TRUANT
+Each time the Pokémon uses a move, it spends the next turn loafing around.
+WONDER_GUARD
+Its mysterious power only lets supereffective moves hit the Pokémon.

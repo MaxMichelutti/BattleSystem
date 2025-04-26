@@ -326,6 +326,9 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(UPROARING);
     removeVolatileCondition(JUST_EATEN_BERRY);
     removeVolatileCondition(THROAT_CHOPPED);
+    removeVolatileCondition(RECHARGING);
+    removeVolatileCondition(TRUANTING);
+
 }
 
 Battler::~Battler() {

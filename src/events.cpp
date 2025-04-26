@@ -151,6 +151,17 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             NO_ITEM_TYPE,
             false);
     }
+    if(active->hasVolatileCondition(TRUANTING)){
+        return BattleAction(
+            actor,
+            TRUANT_TURN,
+            0,
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false);
+    }
     //default BattleAction is ATTACK action
     return BattleAction();
 }
