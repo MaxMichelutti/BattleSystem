@@ -313,7 +313,7 @@ void Battler::setMonster(Monster* monster){
     weight = monster->getWeight();
     height = monster->getHeight();
     battle_stats = monster->getStats();
-    substituteHP = 0;//switching removes the substitute
+    // substituteHP = 0;//switching removes the substitute
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
