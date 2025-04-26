@@ -138,6 +138,7 @@ EFFECTTARGET:SELF
 NAME:Petal Blizzard
 DESCRIPTION:The user stirs up a violent petal blizzard and attacks everything around it.
 PP:15
+WIND
 CATEGORY:PHYSICAL
 TYPE:GRASS
 POWER:90
@@ -289,6 +290,7 @@ NAME:Heat Wave
 DESCRIPTION:The user attacks by exhaling hot breath on the opposing Pokémon. This may also leave those Pokémon with a burn.
 TYPE:FIRE
 CATEGORY:SPECIAL
+WIND
 PP:10
 ACCURACY:90
 POWER:95
@@ -463,6 +465,7 @@ EFFECT:23
 NAME:Gust
 DESCRIPTION:A gust of wind is whipped up by wings and launched at the target to inflict damage.
 PP:35
+WIND
 CATEGORY:SPECIAL
 TYPE:FLYING
 POWER:40
@@ -510,6 +513,7 @@ EFFECTCHANCE:10
 NAME:Whirlwind
 DESCRIPTION:The target is blown away, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.
 PP:20
+WIND
 REFLECTABLE
 ACCURACY:200
 NO_COPYCAT
@@ -542,6 +546,7 @@ SOUND
 EFFECT:34
 EFFECTTARGET:SELF
 NAME:Tailwind
+WIND
 DESCRIPTION:The user whips up a turbulent whirlwind that ups the Speed stat of the user and its allies for four turns.
 TARGET:SELF
 TYPE:FLYING
@@ -701,6 +706,7 @@ TYPE:NORMAL
 NAME:Twister
 DESCRIPTION:The user whips up a vicious tornado to tear at the opposing Pokémon. This may also make them flinch.
 TYPE:DRAGON
+WIND
 PP:20
 POWER:40
 CATEGORY:SPECIAL
@@ -744,6 +750,7 @@ POWER:60
 NAME:Hurricane
 DESCRIPTION:The user attacks by wrapping its opponent in a fierce wind that flies up into the sky. This may also confuse the target.
 TYPE:FLYING
+WIND
 CATEGORY:SPECIAL
 POWER:110
 ACCURACY:70
@@ -1232,6 +1239,7 @@ PP:5
 NAME:Sandstorm
 DESCRIPTION:A five-turn sandstorm is summoned to hurt all combatants except the Rock, Ground, and Steel types.
 CATEGORY:STATUS
+WIND
 TARGET:SELF
 EFFECT:72
 PP:10
@@ -1686,6 +1694,7 @@ DESCRIPTION:The user launches razor-like wind to slash opposing Pokémon. Critic
 TYPE:FLYING
 CATEGORY:SPECIAL
 PP:25
+WIND
 ACCURACY:95
 POWER:60
 EFFECTTARGET:SELF
@@ -2592,6 +2601,7 @@ TARGET:SELF
 NAME:Icy Wind
 DESCRIPTION:The user attacks with a gust of chilled air. This also lowers opposing Pokémon's Speed stats.
 TYPE:ICE
+WIND
 CATEGORY:SPECIAL
 PP:15
 POWER:55
@@ -3288,6 +3298,7 @@ EFFECTCHANCE:10
 NAME:Blizzard
 DESCRIPTION:A howling blizzard is summoned to strike opposing Pokémon. This may also leave the opposing Pokémon frozen.
 PP:5
+WIND
 POWER:110
 ACCURACY:70
 TYPE:ICE
@@ -3653,6 +3664,7 @@ NAME:Fairy Wind
 DESCRIPTION:The user attacks by stirring up a fairy wind to strike the target.
 TYPE:FAIRY
 CATEGORY:SPECIAL
+WIND
 PP:30
 POWER:40
 # 395 SHELL SIDE ARM
@@ -4270,6 +4282,7 @@ NAME:Aeroblast
 DESCRIPTION:A vortex of air is shot at the target to inflict damage. This move has a heightened chance of landing a critical hit.
 PP:5
 TYPE:FLYING
+WIND
 CATEGORY:SPECIAL
 POWER:100
 ACCURACY:95
@@ -4422,4 +4435,89 @@ POWER:55
 TYPE:GRASS
 CATEGORY:PHYSICAL
 EFFECT:261
+EFFECTTARGET:SELF
+# 477 DUAL WINGBEAT
+NAME:Dual Wingbeat
+DESCRIPTION:The user slams the target with its wings to inflict damage. The target is hit twice in a row.
+TYPE:FLYING
+CATEGORY:PHYSICAL
+CONTACT
+PP:10
+POWER:40
+ACCURACY:90
+EFFECT:75
+EFFECTTARGET:SELF
+# 478 BREAKING SWIPE
+NAME:Breaking Swipe
+DESCRIPTION:The user swings its tough tail wildly and attacks opposing Pokémon. This also lowers their Attack stats.
+TYPE:DRAGON
+CATEGORY:PHYSICAL
+CONTACT
+PP:15
+POWER:60
+EFFECT:1
+# 479 DRAINING KISS
+NAME:Draining Kiss
+DESCRIPTION:The user steals the target's HP with a kiss. The user's HP is restored by over half the damage taken by the target.
+TYPE:FAIRY
+CATEGORY:SPECIAL
+CONTACT
+PP:10
+POWER:50
+EFFECT:97
+EFFECTTARGET:SELF
+# 480 ELECTRO WEB
+NAME:Electro Web
+DESCRIPTION:The user captures opposing Pokémon in an electric net to inflict damage. This also lowers their Speed stats.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+PP:15
+POWER:55
+ACCURACY:95
+EFFECT:122
+# 481 HAIL
+NAME:Hail
+DESCRIPTION:The user summons a hailstorm lasting five turns. It damages all Pokémon except the Ice type.
+TYPE:ICE
+CATEGORY:STATUS
+PP:10
+TARGET:SELF
+EFFECT:262
+# 482 SCALD
+NAME:Scald
+DESCRIPTION:The user attacks by shooting boiling hot water at the target. This may also leave the target with a burn.
+TYPE:WATER
+CATEGORY:SPECIAL
+PP:15
+POWER:80
+EFFECT:14
+EFFECTCHANCE:30
+# 483 SHADOW CLAW
+NAME:Shadow Claw
+DESCRIPTION:The user attacks by slashing the target with a sharp claw made from shadows. This move has a heightened chance of landing a critical hit.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+PP:15
+POWER:70
+CONTACT
+EFFECT:17
+EFFECTTARGET:SELF
+# 484 SOLAR BLADE
+NAME:Solar Blade
+DESCRIPTION:The user gathers light on the first turn, then fills a blade with the light's energy and attacks on the next turn.
+CATEGORY:PHYSICAL
+PP:10
+POWER:125
+CONTACT
+TYPE:GRASS
+EFFECT:263
+EFFECTTARGET:SELF
+# 485 VOLT SWITCH
+NAME:Volt Switch
+DESCRIPTION:After making its attack, the user rushes back to switch places with a party Pokémon in waiting.
+PP:20
+TYPE:ELECTRIC
+POWER:70
+CATEGORY:SPECIAL
+EFFECT:231
 EFFECTTARGET:SELF

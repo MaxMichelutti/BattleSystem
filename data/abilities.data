@@ -298,3 +298,5 @@ SUCTION_CUPS
 The Pokémon uses suction cups to stay in one spot. This protects it from moves and items that would force it to switch out.
 SAND_STREAM
 The Pokémon summons a sandstorm when it enters a battle.
+WIND_RIDER
+Boosts the Pokémon's Attack stat if Tailwind takes effect or if the Pokémon is hit by a wind move. The Pokémon also takes no damage from wind moves.

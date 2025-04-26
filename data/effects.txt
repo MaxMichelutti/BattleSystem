@@ -259,3 +259,5 @@
 259: power depends on target HP percentage
 260: clear terrain
 261: gains +1 priority in grassy field if user touches ground
+262: start hail
+263: solar 

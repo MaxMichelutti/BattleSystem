@@ -49,6 +49,7 @@ class Attack{
     bool is_pulse;
     bool is_reflectable;
     bool is_sketchable;
+    bool is_wind;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
@@ -77,6 +78,7 @@ class Attack{
     bool canBeSketched()const;
     bool canBeMetronomed()const;
     bool canBeCopycat()const;
+    bool isWind()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;

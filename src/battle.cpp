@@ -19,6 +19,7 @@ bool isAttackingActionType(BattleActionType action_type){
         case OUTRAGE:
         case THRASH:
         case SOLAR_BEAM:
+        case SOLAR_BLADE:
         case FLY:
         case ROLLOUT:
         case BOUNCE:
@@ -777,7 +778,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // apply freeze
     if(active_user->isFrozen()){
         unsigned int random_number = RNG::getRandomInteger(1,100);
-        if(random_number > 20 && attack->getEffectId()!=253){//253: sacred fire immediately thaws user out
+        if(random_number > 20 && attack->getEffectId()!=253 && attack->getId()!=482){//253: sacred fire immediately thaws user out
+            // 482: SCALD id
             event_handler->displayMsg(user_mon_name+" is frozen solid!");
             forgetMoveVolatiles(active_user);
             active_user->setLastAttackFailed();
@@ -1480,7 +1482,8 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             }
             return {total_actual_damage,false};
         }else{
-            if(active_target->isFrozen() && attack_type==FIRE)
+            if(active_target->isFrozen() && (attack_type==FIRE || attack->getId()==482))//scald and fire type moves thaw frozen target
+                // 482: SCALD id
                 active_target->clearPermanentStatus();
             // unsigned int effect_id = effect_id;
             if((user_held_item==KINGS_ROCK || user_held_item==RAZOR_FANG) &&//kings rock effect
@@ -2495,6 +2498,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }else{
                 field->setFieldEffect(TAILWIND, 5, actor);
                 event_handler->displayMsg("A strong wind starts to blow on "+user_mon_name+"'s side!");
+                if(active_user->hasAbility(WIND_RIDER)){
+                    // wind rider holders get a speed boost on tailwind activation for their side
+                    StatCV changes = {{5,1}};
+                    changeStats(actor,changes,false);
+                }
             }
             break;
         }
@@ -4592,6 +4600,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             field->clearTerrain();
             break;
         }
+        case 262:{
+            //change weather to hail
+            if(field->getWeather() == HAIL || thereIsaCloudNine()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setWeather(HAIL,active_user->hasHeldItem(HEAT_ROCK)?8:5);
+            }
+            break;
+        }
         default:break;
     }
 }
@@ -4659,6 +4677,7 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(THRASHING);
     active_user->removeVolatileCondition(OUTRAGING);
     active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
+    active_user->removeVolatileCondition(CHARGING_SOLARBLADE);
     active_user->removeVolatileCondition(FLYING_HIGH);
     active_user->removeVolatileCondition(BOUNCING);
     active_user->removeVolatileCondition(UNDERGROUND);
@@ -4930,8 +4949,8 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         !user_monster->hasAbility(INFILTRATOR)){
         damage *= 2732.0 / 4096;
     }
-    // apply solar beam modifiers
-    if((effect == 9)&&
+    // apply solar beam and solar blade modifiers
+    if((effect == 9 || effect==263)&&
         !thereIsaCloudNine() &&
         (field->getWeather() == HAIL || 
         field->getWeather() == SANDSTORM || 
@@ -7052,8 +7071,24 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(active_user->hasVolatileCondition(CHARGING_SOLARBEAM)){
         active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
     }
+    //charge solar blade
+    if(attack->getEffectId() == 263 && !active_user->hasVolatileCondition(CHARGING_SOLARBLADE)){// Solar blade
+        active_user->addVolatileCondition(CHARGING_SOLARBEAM, 5);
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Solar Blade immediately!");
+            active_user->consumeHeldItem();
+        }else if(field->getWeather() != SUN || thereIsaCloudNine() || active_user->hasHeldItem(UTILITY_UMBRELLA)){
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(CHARGING_SOLARBLADE)){
+        active_user->removeVolatileCondition(CHARGING_SOLARBLADE);
+    }
     //charge sky attack
-    if(attack->getEffectId() == 9 && !active_user->hasVolatileCondition(CHARGING_SKYATTACK)){// Solar beam
+    if(attack->getEffectId() == 197 && !active_user->hasVolatileCondition(CHARGING_SKYATTACK)){// Solar beam
         active_user->addVolatileCondition(CHARGING_SKYATTACK, 5);
         if(active_user->hasHeldItem(POWER_HERB)){
             event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Sky Attack immediately!");
@@ -7103,7 +7138,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         active_user->removeVolatileCondition(BOUNCING);
     }
     //charge dig
-    if(attack->getEffectId() == 48 && !active_user->hasVolatileCondition(UNDERGROUND)){// Dig
+    if(attack->getEffectId() == 70 && !active_user->hasVolatileCondition(UNDERGROUND)){// Dig
         active_user->addVolatileCondition(UNDERGROUND, 5);
         if(active_user->hasHeldItem(POWER_HERB)){
             event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Dig immediately!");
@@ -7243,6 +7278,16 @@ bool Battle::checkIfAttackFails(Attack* attack,
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         // active_target->changeSpecialAttackModifier(1);
         StatCV changes = {{3,1}};
+        changeStats(active_target->getActor(), changes, false);
+        attack_absorbed = true;
+    }
+    // wind rider -> wind based attack does nothing and increase speed
+    if(active_target->hasAbility(LIGHTNING_ROD) && 
+        attack->isWind() &&
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
+        event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+        StatCV changes = {{5,1}};
         changeStats(active_target->getActor(), changes, false);
         attack_absorbed = true;
     }
@@ -8083,7 +8128,7 @@ bool Battle::isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleA
 
 void Battle::applyBattleActionModifiers(BattleAction& action, BattleAction& other_action){
     Battler* user_active = getActorBattler(action.getActor());
-    Battler* opponent_active = getActorBattler(other_action.getActor());
+    // Battler* opponent_active = getActorBattler(other_action.getActor());
     if(action.getActionType()==SWITCH){
         user_active->addVolatileCondition(SWITCHING_OUT,5);
         if(other_action.getAttackId()==PURSUIT_ID)

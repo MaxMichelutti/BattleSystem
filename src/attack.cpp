@@ -132,6 +132,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_pulse = (data.find("pulse") != data.end());
     is_reflectable = (data.find("reflectable") != data.end());
     is_sketchable = (data.find("no_sketch") == data.end());
+    is_wind = (data.find("wind") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -348,6 +349,8 @@ void Attack::loadAttacks(){
             parsed_data["powder"] = "true";
         }else if(line.rfind("PULSE",0)==0){
             parsed_data["pulse"] = "true";
+        }else if(line.rfind("WIND",0)==0){
+            parsed_data["wind"] = "true";
         }else if(line.rfind("REFLECTABLE",0)==0){
             parsed_data["reflectable"] = "true";
         }else{
@@ -363,6 +366,10 @@ void Attack::loadAttacks(){
 
 bool Attack::canBeCopycat()const{
     return can_be_copycat;
+}
+
+bool Attack::isWind()const{
+    return is_wind;
 }
 
 Attack* Attack::getRandomMetronomeAttack() {

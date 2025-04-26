@@ -62,6 +62,7 @@ enum BattleActionType{
     OUTRAGE,
     THRASH,
     SOLAR_BEAM,
+    SOLAR_BLADE,
     FLY,
     ROLLOUT,
     DIG,
@@ -93,6 +94,7 @@ enum VolatileStatusCondition{
     LEECH_SEED,
     PERISH_SONG,
     CHARGING_SOLARBEAM,
+    CHARGING_SOLARBLADE,
     CHARGING_SKYATTACK,
     RECHARGING,
     GROUNDED,
@@ -399,7 +401,8 @@ enum Ability{
     MAGMA_ARMOR,
     MOODY,
     SUCTION_CUPS,
-    SAND_STREAM
+    SAND_STREAM,
+    WIND_RIDER
 };
 
 enum ItemCategory{

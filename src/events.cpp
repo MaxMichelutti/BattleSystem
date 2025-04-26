@@ -14,6 +14,16 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             0,
             NO_ITEM_TYPE,
             false);
+    if(active->hasVolatileCondition(CHARGING_SOLARBLADE))
+        return BattleAction(
+            actor,
+            SOLAR_BLADE,
+            484, 
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false);
     if(active->hasVolatileCondition(CHARGING_SKYATTACK))
         return BattleAction(
             actor,
