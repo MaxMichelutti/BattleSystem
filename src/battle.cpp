@@ -861,7 +861,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // copycat changes move
     if(attack->getEffectId() == 80){
         // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        if(last_attack_used_id == 0 || active_target->hasSubstitute()){
+        Attack* attack = Attack::getAttack(last_attack_used_id);
+        if(attack==nullptr || !attack->canBeCopycat()){
             event_handler->displayMsg("But it failed!");
             decrementVolatiles(active_user);
             active_user->removeVolatileCondition(LASER_FOCUS);

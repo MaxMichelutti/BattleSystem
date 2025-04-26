@@ -42,6 +42,7 @@ class Attack{
     AttackTarget effect_target;
     bool is_contact;
     bool can_be_metronomed;
+    bool can_be_copycat;
     bool is_sound_based;
     bool is_punching;
     bool is_powder;
@@ -75,6 +76,7 @@ class Attack{
     bool isReflectable()const;
     bool canBeSketched()const;
     bool canBeMetronomed()const;
+    bool canBeCopycat()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;

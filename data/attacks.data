@@ -159,6 +159,7 @@ EFFECT:11
 EFFECTTARGET:SELF
 CATEGORY:PHYSICAL
 CONTACT
+NO_COPYCAT
 TYPE:NONE
 NO_METRONOME
 NO_SKETCH
@@ -366,6 +367,7 @@ TARGET:SELF
 PRIORITY:4
 PP:10
 TYPE:NORMAL
+NO_COPYCAT
 NO_METRONOME
 CATEGORY:STATUS
 # 41 RAIN DANCE
@@ -510,6 +512,7 @@ DESCRIPTION:The target is blown away, and a different Pokémon is dragged out. I
 PP:20
 REFLECTABLE
 ACCURACY:200
+NO_COPYCAT
 TYPE:NORMAL
 CATEGORY:STATUS
 EFFECT:32
@@ -1087,6 +1090,7 @@ TYPE:NORMAL
 NO_METRONOME
 PP:10
 POWER:30
+NO_COPYCAT
 PRIORITY:2
 EFFECT:65
 EFFECTTARGET:SELF
@@ -1379,6 +1383,7 @@ CATEGORY:STATUS
 NO_METRONOME
 TARGET:SELF
 TYPE:NORMAL
+NO_COPYCAT
 NO_METRONOME
 # 150 STORED POWER
 NAME:Stored Power
@@ -1414,6 +1419,7 @@ PP:10
 CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:84
+NO_COPYCAT
 TARGET:SELF
 NO_METRONOME
 # 154 MOONLIGHT
@@ -1543,6 +1549,7 @@ DESCRIPTION:The user copies the target's last move. The move can be used during 
 EFFECT:93
 TYPE:NORMAL
 CATEGORY:STATUS
+NO_COPYCAT
 PP:10
 TARGET:SELF
 NO_METRONOME
@@ -1562,6 +1569,7 @@ DESCRIPTION:The user endearingly approaches the target, then steals the target's
 TYPE:NORMAL
 CATEGORY:PHYSICAL
 PP:25
+NO_COPYCAT
 POWER:60
 NO_METRONOME
 CONTACT
@@ -1770,6 +1778,7 @@ DESCRIPTION:The user transforms into a copy of the target right down to having t
 TYPE:NORMAL
 CATEGORY:STATUS
 PP:10
+NO_COPYCAT
 EFFECT:102
 TARGET:SELF
 NO_METRONOME
@@ -1968,6 +1977,7 @@ NAME:Rage Fist
 DESCRIPTION:The user converts its rage into energy to attack. The more times the user has been hit by attacks, the greater the move's power.
 PP:10
 POWER:50
+NO_COPYCAT
 TYPE:GHOST
 CATEGORY:PHYSICAL
 EFFECT:118
@@ -2038,6 +2048,7 @@ DESCRIPTION:The target is scared off, and a different Pokémon is dragged out. I
 CATEGORY:STATUS
 PP:20
 PRIORITY:-6
+NO_COPYCAT
 TYPE:NORMAL
 EFFECT:32
 ACCURACY:200
@@ -2091,6 +2102,7 @@ PRIORITY:-6
 ACCURACY:90
 EFFECT:123
 EFFECTTARGET:SELF
+NO_COPYCAT
 # 227 TELEPORT
 NAME:Teleport
 DESCRIPTION:The user switches places with a party Pokémon in waiting, if any. If a wild Pokémon uses this move, it flees.
@@ -2764,6 +2776,7 @@ CATEGORY:STATUS
 PP:5
 NO_METRONOME
 EFFECT:161
+NO_COPYCAT
 TARGET:SELF
 # 303 DREAM EATER
 NAME:Dream Eater
@@ -2883,6 +2896,7 @@ NAME:Mirror Coat
 DESCRIPTION:A retaliation move that counters any special attack, inflicting double the damage taken.
 PP:20
 NO_METRONOME
+NO_COPYCAT
 TYPE:PSYCHIC
 CATEGORY:SPECIAL
 EFFECT:168
@@ -2979,6 +2993,7 @@ POWER:75
 NAME:Endure
 DESCRIPTION:The user endures any attack with at least 1 HP. Its chance of failing rises if it is used in succession.
 TYPE:NORMAL
+NO_COPYCAT
 CATEGORY:STATUS
 NO_METRONOME
 PP:10
@@ -3015,6 +3030,7 @@ POWER:120
 ACCURACY:90
 CONTACT
 EFFECT:174
+NO_COPYCAT
 EFFECTCHANCE:30
 # 328 MEGA PUNCH
 NAME:Mega Punch
@@ -3031,6 +3047,7 @@ NAME:Counter
 DESCRIPTION:A retaliatory attack that counters any physical move, inflicting double the damage taken.
 TYPE:FIGHTING
 CATEGORY:PHYSICAL
+NO_COPYCAT
 PP:20
 PRIORITY:-5
 NO_METRONOME
@@ -3041,6 +3058,7 @@ EFFECTTARGET:SELF
 NAME:Focus Punch
 DESCRIPTION:The user focuses its mind before launching a punch. This move fails if the user is hit before using the move.
 TYPE:FIGHTING
+NO_COPYCAT
 CATEGORY:PHYSICAL
 PP:20
 POWER:150
@@ -3073,6 +3091,7 @@ NAME:Detect
 DESCRIPTION:This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession.
 TYPE:FIGHTING
 NO_METRONOME
+NO_COPYCAT
 PP:5
 PRIORITY:4
 CATEGORY:STATUS
@@ -3381,6 +3400,7 @@ DESCRIPTION:The user performs a tackle like a raging bull. This move's type depe
 TYPE:NORMAL
 CATEGORY:PHYSICAL
 NO_METRONOME
+NO_COPYCAT
 CONTACT
 PP:10
 POWER:90
@@ -3463,6 +3483,7 @@ DESCRIPTION:The user randomly uses one of the moves it knows. This move can only
 TYPE:NORMAL
 CATEGORY:STATUS
 PP:10
+NO_COPYCAT
 NO_METRONOME
 TARGET:SELF
 EFFECT:194
@@ -3519,6 +3540,7 @@ DESCRIPTION:The target is knocked away, and a different Pokémon is dragged out.
 TYPE:DRAGON
 CATEGORY:PHYSICAL
 CONTACT
+NO_COPYCAT
 PP:10
 POWER:60
 ACCURACY:90
@@ -3562,6 +3584,7 @@ NO_METRONOME
 TYPE:DARK
 CATEGORY:STATUS
 EFFECT:198
+NO_COPYCAT
 # 387 FLING
 NAME:Fling
 DESCRIPTION:The user flings its held item at the target to attack. This move's power and effects depend on the item.
@@ -3985,6 +4008,7 @@ TYPE:ICE
 CATEGORY:STATUS
 NO_METRONOME
 PP:10
+NO_COPYCAT
 EFFECT:235
 TARGET:SELF
 # 434 EERIE SPELL
@@ -4016,6 +4040,7 @@ EFFECT:238
 EFFECTTARGET:SELF
 # 437 TWIN BEAM
 NAME:Twin Beam
+NO_COPYCAT
 DESCRIPTION:The user shoots mystical beams from its eyes to inflict damage. The target is hit twice in a row.
 TYPE:PSYCHIC
 PP:10
@@ -4030,6 +4055,7 @@ DESCRIPTION:The user spins the pointed part of its body at high speed to pierce 
 CATEGORY:PHYSICAL
 TYPE:NORMAL
 NO_METRONOME
+NO_COPYCAT
 POWER:100
 CONTACT
 PP:5
@@ -4165,6 +4191,7 @@ NAME:Comeuppance
 DESCRIPTION:The user retaliates with much greater force against the opponent that last inflicted damage on it.
 TYPE:DARK
 PP:10
+NO_COPYCAT
 NO_METRONOME
 CATEGORY:PHYSICAL
 CONTACT
@@ -4189,6 +4216,7 @@ TARGET:SELF
 TYPE:NORMAL
 CATEGORY:STATUS
 EFFECT:250
+NO_COPYCAT
 NO_METRONOME
 NO_SKETCH
 # 456 TRIPLE KICK
@@ -4262,6 +4290,7 @@ CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:255
 TARGET:SELF
+NO_COPYCAT
 NO_METRONOME
 # 464 SUBSTITUTE
 NAME:Substitute
@@ -4278,6 +4307,7 @@ PP:20
 POWER:50
 TYPE:WATER
 NO_METRONOME
+NO_COPYCAT
 CATEGORY:SPECIAL
 EFFECT:1
 # 466 FACADE
@@ -4349,6 +4379,7 @@ POWER:60
 CATEGORY:PHYSICAL
 TYPE:DARK
 NO_METRONOME
+NO_COPYCAT
 CONTACT
 EFFECT:202
 EFFECTTARGET:SELF
@@ -4357,6 +4388,7 @@ NAME:Trailblaze
 DESCRIPTION:The user attacks suddenly as if leaping out from tall grass. The user's nimble footwork boosts its Speed stat.
 PP:20
 POWER:50
+NO_COPYCAT
 NO_METRONOME
 TYPE:GRASS
 CATEGORY:PHYSICAL
@@ -4378,6 +4410,7 @@ TYPE:ICE
 CATEGORY:PHYSICAL
 CONTACT
 PP:15
+NO_COPYCAT
 POWER:80
 EFFECT:260
 EFFECTTARGET:SELF

@@ -125,6 +125,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_contact = (data.find("contact") != data.end());
     // cannot_be_metronomed = (data.find("no_metronome") != data.end());
     can_be_metronomed = (data.find("no_metronome") == data.end());
+    can_be_copycat = (data.find("no_copycat") == data.end());
     is_sound_based = (data.find("sound") != data.end());
     is_punching = (data.find("punching") != data.end());
     is_powder = (data.find("powder") != data.end());
@@ -339,6 +340,8 @@ void Attack::loadAttacks(){
             parsed_data["sound"] = "true";
         }else if(line.rfind("NO_METRONOME",0)==0){
             parsed_data["no_metronome"] = "true";
+        }else if(line.rfind("NO_COPYCAT",0)==0){
+            parsed_data["no_copycat"] = "true";
         }else if(line.rfind("NO_SKETCH",0)==0){
             parsed_data["no_sketch"] = "true";
         }else if(line.rfind("POWDER",0)==0){
@@ -356,6 +359,10 @@ void Attack::loadAttacks(){
         static_attacks.insert({current_attack_id,attack});
     }
     file.close();
+}
+
+bool Attack::canBeCopycat()const{
+    return can_be_copycat;
 }
 
 Attack* Attack::getRandomMetronomeAttack() {
