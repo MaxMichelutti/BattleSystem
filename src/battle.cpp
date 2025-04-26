@@ -5313,6 +5313,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
+        case 257:{
+            //power doubles if user has status ammong paralysis, burn and poison
+            if(active_user->isBurned() || active_user->isParalyzed() || active_user->isPoisoned()){
+                base_power *= 2;
+            }
+            break;
+        }
         default: break;
     }
 

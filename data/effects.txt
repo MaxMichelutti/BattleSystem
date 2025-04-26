@@ -254,3 +254,4 @@
 254: weather ball-> power doubles in non clear weather and type changes with weather
 255: creates a substitute and switches out (substitute has 1/4 of user HP)
 256: user creates a substitute for itself
+257: power doubles if user is paralyzed, poisoned or burned
