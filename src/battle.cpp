@@ -4209,7 +4209,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             ItemType user_item = active_user->getHeldItem();
             if(user_item != NO_ITEM_TYPE || 
                 target_item == NO_ITEM_TYPE || 
-                !active_target->canStealItem()){
+                !active_target->canStealItem() ||
+                active_target->hasAbility(STICKY_HOLD) ||
+                active_user->hasHeldItem()){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();

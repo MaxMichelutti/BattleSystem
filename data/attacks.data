@@ -4311,3 +4311,13 @@ CONTACT
 CATEGORY:PHYSICAL
 EFFECT:259
 EFFECTTARGET:SELF
+# 472 THIEF
+NAME:THIEF
+DESCRIPTION:The user attacks and steals the target's held item simultaneously. The user can't steal anything if it already holds an item.
+PP:25
+POWER:60
+CATEGORY:PHYSICAL
+TYPE:DARK
+CONTACT
+EFFECT:202
+EFFECTTARGET:SELF
