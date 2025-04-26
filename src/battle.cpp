@@ -4649,7 +4649,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            if(!active_user->canSwitchOut(active_target) && effect==124){
+            if(!active_user->canSwitchOut(active_target)){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
