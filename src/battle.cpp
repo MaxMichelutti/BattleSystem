@@ -927,7 +927,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // copycat changes move
     if(attack->getEffectId() == 80){
         // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        if(last_attack_used_id == 0){
+        if(last_attack_used_id == 0 || active_target->hasSubstitute()){
             event_handler->displayMsg("But it failed!");
             decrementVolatiles(active_user);
             active_user->removeVolatileCondition(LASER_FOCUS);
@@ -1057,15 +1057,13 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     std::pair<unsigned int, bool> actual_damage = applyDamage(attack,action.getActor(),attack_after_target,effectiveness,acts_second);
     if(active_user->isFainted())
         return;
-    if(actual_damage.first==0 && !(attack->getCategory()==STATUS)) // Immunity
-        return;
 
     // apply effects
-    if(attack->getCategory()==STATUS || !active_user->isFainted() || actual_damage.first>0)
-        applyAttackEffect(attack,action.getActor(),actual_damage.first,actual_damage.second);
+    // if(attack->getCategory()==STATUS || !active_user->isFainted() || actual_damage.first>0)
+    //     applyAttackEffect(attack,action.getActor(),actual_damage.first,actual_damage.second);
     if(is_wild_battle_over)//some attacks may end wild battles as a side effect
         return;
-    // these pointers may have changed due to move effects!!!
+    // these pointers may have changed due to move effects!!! (es: switching)
     active_user = getActorBattler(action.getActor());
     active_target = getActorBattler(otherBattleActionActor(action.getActor()));
     if(active_user->isFainted())
@@ -1073,7 +1071,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
 
     // apply recoil damage
     applyRecoil(attack,actual_damage.first,action.getActor());
-    if(active_user->isFainted())
+    if(active_user->isFainted() || isOver())
         return;
     
     if(active_user->hasHeldItem(THROAT_SPRAY) && attack->isSoundBased()){
@@ -1082,9 +1080,6 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         StatCV changes = {{3,1}};
         changeStats(action.getActor(),changes,true);
     }
-
-    if(active_target->isFainted())
-        return;
 
     // decrement volatile
     decrementVolatiles(active_user);
@@ -1519,6 +1514,41 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage.first)+" damage!");
         //active_user->setLastAttackUsed(attack->getId());
         last_attack_used_id = attack->getId();
+
+        bool effect_is_applied=true;
+        unsigned int effect_chance = attack->getEffectChance();
+        if (effect_chance!=ALWAYS_HITS){
+            if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up likelihood of applying effects
+                effect_chance*= 2;
+            unsigned int random = RNG::getRandomInteger(1,100);
+            if(random > effect_chance){
+                effect_is_applied = false;
+            }
+        }
+        // covert cloak prevents secondary effects
+        if(active_user->hasHeldItem(COVERT_CLOAK) && 
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            effect_is_applied = false;
+        }
+        // covert cloak prevents secondary effects
+        // SHIELD DUST PROTECTS OPPONENT FROM SECONDARY EFFECTS
+        if(active_target->hasAbility(SHIELD_DUST) && 
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            effect_is_applied = false;
+        }
+        // SHEER FORCE PREVENTS INFLICTING SECONDARY EFFECTS TO OPPONENT
+        if(active_user->hasAbility(SHEER_FORCE) &&
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            effect_is_applied = false;
+        }
+        // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
+        if((active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES)) && 
+            attack->isPowder() &&
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            effect_is_applied = false;
+        }
+        if(effect_is_applied)
+            applyAttackEffect(attack,actor,otherBattleActionActor(actor),actual_damage.second);
         
         // check if target is dead
         if(active_target->isFainted()){
@@ -1640,12 +1670,127 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             }
         }
     }else{
+        // STATUS MOVES
         //active_user->setLastAttackUsed(attack->getId());
         last_attack_used_id = attack->getId();
         active_user->removeVolatileCondition(LASER_FOCUS);
+        BattleActionActor other_actor = otherBattleActionActor(actor);
+        if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
+            event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
+            active_target = getActorBattler(actor);
+            opponent_mon_name = getActorBattlerName(actor);
+            other_actor = actor;
+        }
+        if(attack->getEffectTarget() == TARGET_OPPONENT && active_target->isFainted()){
+            // check if target is already fainted
+            return {0,false};
+        }
+        // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
+        if(active_target->hasAbility(SOUNDPROOF) && 
+            attack->isSoundBased() &&
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+            active_user->setLastAttackFailed();
+            return {0,active_target->hasSubstitute()};
+        }
+        // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
+        if((active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES)) && 
+            attack->isPowder() &&
+            attack->getEffectTarget() == TARGET_OPPONENT){
+            event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+            active_user->setLastAttackFailed();
+            return {0,active_target->hasSubstitute()};
+        }
+        //GROUND TYPES ARE IMMUNE TO THUNDER WAVE
+        if(attack->getId()==115 && 
+            active_target->hasType(GROUND) &&
+            !active_target->hasHeldItem(RING_TARGET)){
+            event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+            active_user->setLastAttackFailed();
+            return {0,active_target->hasSubstitute()};
+        }
+        bool hits_substitute = false;
+        if(active_target->hasSubstitute() && attack->getEffectTarget() == TARGET_OPPONENT){
+            // hitting substitute blocks effects
+            hits_substitute = true;
+        }
+        if(active_user->hasAbility(INFILTRATOR))
+            hits_substitute = false;
+        if(attack->isSoundBased())
+            hits_substitute = false;
+        applyAttackEffect(attack,actor,other_actor,hits_substitute);
     }
     return {total_actual_damage,actual_damage.second};
 }
+
+// void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned int actual_dmg,bool hits_substitute){
+//     // apply move effects
+//     Battler* active_user = getActorBattler(actor);
+//     BattleActionActor other_actor = otherBattleActionActor(actor);
+//     Battler* active_target = getActorBattler(other_actor);
+//     std::string opponent_mon_name = getActorBattlerName(other_actor);
+//     if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
+//         event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
+//         active_target = getActorBattler(actor);
+//         opponent_mon_name = getActorBattlerName(actor);
+//     }
+//     std::string user_mon_name = getActorBattlerName(actor);
+//     MonsterTeam* user_team = getActorTeam(actor);
+//     MonsterTeam* target_team = getActorTeam(other_actor);
+//     unsigned int effect = attack->getEffectId();
+//     unsigned int effect_chance = attack->getEffectChance();
+//     if(hits_substitute && attack->getEffectTarget() == TARGET_OPPONENT && !attack->isSoundBased()){
+//         // hitting substitute blocks effects
+//         return;
+//     }
+//     Type attack_type = attack->getType(active_user,field);
+//     bool effect_is_applied=true;
+//     if (effect_chance!=ALWAYS_HITS){
+//         if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up likelihood of applying effects
+//             effect_chance*= 2;
+//         unsigned int random = RNG::getRandomInteger(1,100);
+//         if(random > effect_chance){
+//             effect_is_applied = false;
+//         }
+//     }
+//     // covert cloak prevents secondary effects
+//     if(active_user->hasHeldItem(COVERT_CLOAK) && 
+//         attack->getCategory() != STATUS &&
+//         attack->getEffectTarget() == TARGET_OPPONENT){
+//         effect_is_applied = false;
+//     }
+//     // SHIELD DUST PROTECTS OPPONENT FROM SECONDARY EFFECTS
+//     if(active_target->hasAbility(SHIELD_DUST) && 
+//         attack->getCategory() != STATUS &&
+//         attack->getEffectTarget() == TARGET_OPPONENT){
+//         effect_is_applied = false;
+//     }
+//     // SHEER FORCE PREVENTS INFLICTING SECONDARY EFFECTS TO OPPONENT
+//     if(active_user->hasAbility(SHEER_FORCE) &&
+//         attack->getCategory() != STATUS &&
+//         attack->getEffectTarget() == TARGET_OPPONENT){
+//         effect_is_applied = false;
+//     }
+//     // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
+//     if(active_target->hasAbility(SOUNDPROOF) && 
+//         attack->isSoundBased() &&
+//         attack->getEffectTarget() == TARGET_OPPONENT){
+//         effect_is_applied = false;
+//     }
+//     // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
+//     if((active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES)) && 
+//         attack->isPowder() &&
+//         attack->getEffectTarget() == TARGET_OPPONENT){
+//         effect_is_applied = false;
+//     }
+//     //GROUND TYPES ARE IMMUNE TO THUNDER WAVE
+//     if(attack->getId()==115 && 
+//         active_target->hasType(GROUND) &&
+//         !active_target->hasHeldItem(RING_TARGET)){
+//         event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+//         active_user->setLastAttackFailed();
+//         return;
+//     }
 
 void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionActor actor){
     Battler* active_user = getActorBattler(actor);
@@ -1745,828 +1890,602 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
     }
 }
 
-void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned int actual_dmg,bool hits_substitute){
-    // apply move effects
+
+
+//     if(effect_is_applied){
+void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActionActor other_actor, bool hits_substitute){
     Battler* active_user = getActorBattler(actor);
-    BattleActionActor other_actor = otherBattleActionActor(actor);
     Battler* active_target = getActorBattler(other_actor);
-    std::string opponent_mon_name = getActorBattlerName(other_actor);
-    if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
-        event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
-        active_target = getActorBattler(actor);
-        opponent_mon_name = getActorBattlerName(actor);
-    }
+    unsigned int effect = attack->getEffectId();
     std::string user_mon_name = getActorBattlerName(actor);
+    std::string opponent_mon_name = getActorBattlerName(other_actor);
+    Type attack_type = attack->getType(active_user,field);
     MonsterTeam* user_team = getActorTeam(actor);
     MonsterTeam* target_team = getActorTeam(other_actor);
-    unsigned int effect = attack->getEffectId();
-    unsigned int effect_chance = attack->getEffectChance();
-    if(hits_substitute && attack->getEffectTarget() == TARGET_OPPONENT && !attack->isSoundBased()){
-        // hitting substitute blocks effects
-        return;
-    }
-    Type attack_type = attack->getType(active_user,field);
-    bool effect_is_applied=true;
-    if (effect_chance!=ALWAYS_HITS){
-        if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up likelihood of applying effects
-            effect_chance*= 2;
-        unsigned int random = RNG::getRandomInteger(1,100);
-        if(random > effect_chance){
-            effect_is_applied = false;
-        }
-    }
-    // covert cloak prevents secondary effects
-    if(active_user->hasHeldItem(COVERT_CLOAK) && 
-        attack->getCategory() != STATUS &&
-        attack->getEffectTarget() == TARGET_OPPONENT){
-        effect_is_applied = false;
-    }
-    // SHIELD DUST PROTECTS OPPONENT FROM SECONDARY EFFECTS
-    if(active_target->hasAbility(SHIELD_DUST) && 
-        attack->getCategory() != STATUS &&
-        attack->getEffectTarget() == TARGET_OPPONENT){
-        effect_is_applied = false;
-    }
-    // SHEER FORCE PREVENTS INFLICTING SECONDARY EFFECTS TO OPPONENT
-    if(active_user->hasAbility(SHEER_FORCE) &&
-        attack->getCategory() != STATUS &&
-        attack->getEffectTarget() == TARGET_OPPONENT){
-        effect_is_applied = false;
-    }
-    // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
-    if(active_target->hasAbility(SOUNDPROOF) && 
-        attack->isSoundBased() &&
-        attack->getEffectTarget() == TARGET_OPPONENT){
-        effect_is_applied = false;
-    }
-    // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
-    if((active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES)) && 
-        attack->isPowder() &&
-        attack->getEffectTarget() == TARGET_OPPONENT){
-        effect_is_applied = false;
-    }
-    //GROUND TYPES ARE IMMUNE TO THUNDER WAVE
-    if(attack->getId()==115 && 
-        active_target->hasType(GROUND) &&
-        !active_target->hasHeldItem(RING_TARGET)){
-        event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-        active_user->setLastAttackFailed();
-        return;
-    }
-
-    if(effect_is_applied){
-        switch(effect){
-            case 1:case 247: { // lower attack by 1 opponent
-                //in case of 247, user heals attack stat HP
-                if(active_target->isFainted())
-                    return;
-                unsigned int attack_stat = active_target->getModifiedAttack();
-                // bool res = active_target->changeAttackModifier(-1);
-                StatCV changes = {{1,-1}};
-                changeStats(other_actor,changes,false);                
-                if(effect==247){
-                    //heal attack_stat HP of user
-                    unsigned int heal_amount = max(attack_stat,1);
-                    if(active_user->hasHeldItem(BIG_ROOT))
-                        heal_amount *= 1.3;
-                    if(!active_user->hasAbility(LIQUID_OOZE)){
-                        unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
-                        if(actual_heal_amount>0)
-                            event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
-                    }else{
-                        unsigned int actual_damage_amount = active_user->addDirectDamage(heal_amount);
-                        event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
-                        if(actual_damage_amount>0)
-                            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
-                        if(active_user->isFainted())
-                            return;
-                    }
-                }
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                break;
-            }
-            case 46:{ // lower attack by 2 opponent
-                // bool res = active_target->changeAttackModifier(-2);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{1,-2}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 2:{// increase Att and SpAtk by 1 user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeSpecialAttackModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1},{3,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 3:{ // Leech Seed
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasType(GRASS)){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                    active_user->setLastAttackFailed();
-                }else if(active_target->hasVolatileCondition(LEECH_SEED)){
-                    event_handler->displayMsg(opponent_mon_name+" is already seeded!");
-                }else{
-                    active_target->addVolatileCondition(LEECH_SEED, 5);
-                }
-                break;
-            }
-            case 4:case 210:case 222:case 232:case 241:{//poison opponent
-                if(active_target->isFainted())
-                    return;
-                if(effect==222){
-                    StatCV changes = {{5,-1}};
-                    changeStats(other_actor,changes,false);
-                }   // active_target->changeSpeedModifier(-1);
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being poisoned!");
-                    if(attack->getCategory() == STATUS && effect!=222)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                bool result = active_target->setPermanentStatus(POISONED);
-                if(!result){
-                    if(attack->getCategory() == STATUS && effect!=222){
-                        event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else{
-                    if(active_target->hasAbility(SYNCHRONIZE) && 
-                        !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                        active_user->setPermanentStatus(POISONED);
-                    }
-                }
-                break;
-            }
-            case 76:{//bad poison opponent
-                if(active_target->isFainted())
-                    return;
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being badly poisoned!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                bool result = active_target->setPermanentStatus(BAD_POISON);
-                if(!result ){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else{
-                    if(active_target->hasAbility(SYNCHRONIZE) && 
-                        !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                        active_user->setPermanentStatus(BAD_POISON);
-                    }
-                }
-            
-                break;
-            }
-            case 5:{//sleep opponent
-                if(active_target->isFainted())
-                    return;
-                if(attack_type==GRASS && active_target->hasType(GRASS)){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from falling asleep!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                if(isUproar()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg(user_mon_name+"But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                bool result;
-                unsigned int random_integer = RNG::getRandomInteger(1,3);
-                if(random_integer == 1)
-                    result = active_target->setPermanentStatus(SLEEP_4);
-                else if(random_integer == 2)
-                    result = active_target->setPermanentStatus(SLEEP_3);
-                else
-                    result = active_target->setPermanentStatus(SLEEP_2);
-                if(!result && attack->getCategory() == STATUS){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 7:{//-2 evasiveness opponent
-                // bool res = active_target->changeEvasionModifier(-2);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{7,-2}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 8:{ // Synthesis
-                if(active_user->isFainted())
-                    return;
-                if(active_user->isAtFullHP()){
-                    event_handler->displayMsg(user_mon_name+" is already at full health!");
-                }else{
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int heal_amount;
-                    if(field->getWeather() == CLEAR || thereIsaCloudNine()){
-                        heal_amount = max((maxHP+1) / 2,1);
-                    }else if((field->getWeather() == RAIN || field->getWeather() == SUN) && !active_user->hasHeldItem(UTILITY_UMBRELLA)){
-                        heal_amount = max((maxHP+2) / 3 * 2,1);
-                    }else{
-                        heal_amount = max((maxHP+3) / 4,1);
-                    }
+    switch(effect){
+        case 1:case 247: { // lower attack by 1 opponent
+            //in case of 247, user heals attack stat HP
+            if(active_target->isFainted())
+                return;
+            unsigned int attack_stat = active_target->getModifiedAttack();
+            // bool res = active_target->changeAttackModifier(-1);
+            StatCV changes = {{1,-1}};
+            changeStats(other_actor,changes,false);                
+            if(effect==247){
+                //heal attack_stat HP of user
+                unsigned int heal_amount = max(attack_stat,1);
+                if(active_user->hasHeldItem(BIG_ROOT))
+                    heal_amount *= 1.3;
+                if(!active_user->hasAbility(LIQUID_OOZE)){
                     unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
                     if(actual_heal_amount>0)
                         event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+                }else{
+                    unsigned int actual_damage_amount = active_user->addDirectDamage(heal_amount);
+                    event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
+                    if(actual_damage_amount>0)
+                        event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                    if(active_user->isFainted())
+                        return;
                 }
+            }
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            break;
+        }
+        case 46:{ // lower attack by 2 opponent
+            // bool res = active_target->changeAttackModifier(-2);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{1,-2}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 2:{// increase Att and SpAtk by 1 user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeSpecialAttackModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{3,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 3:{ // Leech Seed
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasType(GRASS)){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+            }else if(active_target->hasVolatileCondition(LEECH_SEED)){
+                event_handler->displayMsg(opponent_mon_name+" is already seeded!");
+            }else{
+                active_target->addVolatileCondition(LEECH_SEED, 5);
+            }
+            break;
+        }
+        case 4:case 210:case 222:case 232:case 241:{//poison opponent
+            if(active_target->isFainted())
+                return;
+            if(effect==222){
+                StatCV changes = {{5,-1}};
+                changeStats(other_actor,changes,false);
+            }   // active_target->changeSpeedModifier(-1);
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being poisoned!");
+                if(attack->getCategory() == STATUS && effect!=222)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from being poisoned!");
+                if(attack->getCategory() == STATUS && effect!=222)
+                    active_user->setLastAttackFailed();
                 break;
             }
-            case 13:{ // Worry Seed
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasAbility(INSOMNIA) || active_target->hasHeldItem(ABILITY_SHIELD)){
+            bool result = active_target->setPermanentStatus(POISONED);
+            if(!result){
+                if(attack->getCategory() == STATUS && effect!=222){
                     event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                     active_user->setLastAttackFailed();
-                }else{
-                    active_target->setAbility(INSOMNIA);
-                    event_handler->displayMsg(opponent_mon_name+"'s ability was changed to Insomnia!");
                 }
-                // neutralizing gas ability may have been changed
-                if(thereIsNeutralizingGas()){
-                    player_active->neutralizeAbility();
-                    opponent_active->neutralizeAbility();
-                }else{
-                    player_active->cancelAbilityNeutralization();
-                    opponent_active->cancelAbilityNeutralization();
+            }else{
+                if(active_target->hasAbility(SYNCHRONIZE) && 
+                    !active_user->hasPermanentStatus()){
+                    event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                    active_user->setPermanentStatus(POISONED);
+                }
+            }
+            break;
+        }
+        case 76:{//bad poison opponent
+            if(active_target->isFainted())
+                return;
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being badly poisoned!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from being badly poisoned!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            bool result = active_target->setPermanentStatus(BAD_POISON);
+            if(!result ){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+            }else{
+                if(active_target->hasAbility(SYNCHRONIZE) && 
+                    !active_user->hasPermanentStatus()){
+                    event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                    active_user->setPermanentStatus(BAD_POISON);
+                }
+            }
+        
+            break;
+        }
+        case 5:{//sleep opponent
+            if(active_target->isFainted())
+                return;
+            if(attack_type==GRASS && active_target->hasType(GRASS)){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from falling asleep!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from falling asleep!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            if(isUproar()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg(user_mon_name+"But it failed!");
+                    active_user->setLastAttackFailed();
                 }
                 break;
             }
-            case 14:case 20:case 219:case 253:{//burn opponent
-                if(active_target->isFainted())
-                    return;
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+            bool result;
+            unsigned int random_integer = RNG::getRandomInteger(1,3);
+            if(random_integer == 1)
+                result = active_target->setPermanentStatus(SLEEP_4);
+            else if(random_integer == 2)
+                result = active_target->setPermanentStatus(SLEEP_3);
+            else
+                result = active_target->setPermanentStatus(SLEEP_2);
+            if(!result && attack->getCategory() == STATUS){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 7:{//-2 evasiveness opponent
+            // bool res = active_target->changeEvasionModifier(-2);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{7,-2}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 8:{ // Synthesis
+            if(active_user->isFainted())
+                return;
+            if(active_user->isAtFullHP()){
+                event_handler->displayMsg(user_mon_name+" is already at full health!");
+            }else{
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int heal_amount;
+                if(field->getWeather() == CLEAR || thereIsaCloudNine()){
+                    heal_amount = max((maxHP+1) / 2,1);
+                }else if((field->getWeather() == RAIN || field->getWeather() == SUN) && !active_user->hasHeldItem(UTILITY_UMBRELLA)){
+                    heal_amount = max((maxHP+2) / 3 * 2,1);
+                }else{
+                    heal_amount = max((maxHP+3) / 4,1);
+                }
+                unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+            }
+            break;
+        }
+        case 13:{ // Worry Seed
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasSubstitute() && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(active_target->hasAbility(INSOMNIA) || active_target->hasHeldItem(ABILITY_SHIELD)){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->setAbility(INSOMNIA);
+                event_handler->displayMsg(opponent_mon_name+"'s ability was changed to Insomnia!");
+            }
+            // neutralizing gas ability may have been changed
+            if(thereIsNeutralizingGas()){
+                player_active->neutralizeAbility();
+                opponent_active->neutralizeAbility();
+            }else{
+                player_active->cancelAbilityNeutralization();
+                opponent_active->cancelAbilityNeutralization();
+            }
+            break;
+        }
+        case 14:case 20:case 219:case 253:{//burn opponent
+            if(active_target->isFainted())
+                return;
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from being burned!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            if(active_target->hasType(FIRE) && attack_type == FIRE){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            bool res = active_target->setPermanentStatus(BURN);
+            if(!res){
+                if(attack->getCategory() == STATUS){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+                }
+            }else{
+                if(active_target->hasAbility(SYNCHRONIZE) && 
+                    !active_user->hasPermanentStatus()){
+                    event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                    active_user->setPermanentStatus(BURN);
+                }
+            }
+            break;
+        }
+        case 15:{ //-1 opponent accuracy
+            // bool res = active_target->changeAccuracyModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{6,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 16:case 67:case 226:{ // paralyze opponent - paralysis
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from the paralysis!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from the paralysis!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            bool res = active_target->setPermanentStatus(PARALYSIS);
+            if(!res){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+            }else{
+                if(active_target->hasAbility(SYNCHRONIZE) && 
+                    !active_user->hasPermanentStatus()){
+                    event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                    active_user->setPermanentStatus(PARALYSIS);
+                }
+            }
+            break;
+        }
+        case 18:{ //-2 opponent Speed
+            // bool res = active_target->changeSpeedModifier(-2);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{5,-2}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 19:{ // Fire Spin
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(FIRESPIN)){
+                active_target->addVolatileCondition(FIRESPIN,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            // }else{
+            //     event_handler->displayMsg(opponent_mon_name+" is already trapped in a Fire Spin!");
+            }
+            break;
+        }
+        case 220:{ // infestation
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(INFESTED)){
+                active_target->addVolatileCondition(INFESTED,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 158:{ // Whirlpool
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(WHIRLPOOL)){
+                active_target->addVolatileCondition(WHIRLPOOL,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 74:{ // Sand Tomb
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(SANDTOMB)){
+                active_target->addVolatileCondition(SANDTOMB,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 21:case 45:case 105:case 141:case 195:case 197:{//flinch
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR))
+                return;
+            active_target->addVolatileCondition(FLINCH, 2);
+            break;
+        }
+        case 22:{ //-1 opponent Def
+            // bool res = active_target->changeDefenseModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{2,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 23:{ //+1 user Def
+            // bool res = active_user->changeDefenseModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 29:{//+2 Def user
+            // bool res = active_user->changeDefenseModifier(+2);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 24:{// rapid spin
+            // bool res = active_user->changeSpeedModifier(+1);
+            field->clearFieldEffectsSuchThat(&isFieldEffectClearedByRapidSpin,PLAYER);
+            active_user->clearVolatilesSuchThat(&isVolatileConditionClearedByRapidSpin);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 25:case 77:case 113:case 174:{ // confuse target
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasVolatileCondition(CONFUSION)){
+                if(attack->getCategory()==STATUS){
+                    event_handler->displayMsg(opponent_mon_name+" is already confused!");
+                    active_user->setLastAttackFailed();
+                }
+            }else if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                     !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                if(active_target->hasType(FIRE) && attack_type == FIRE){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                bool res = active_target->setPermanentStatus(BURN);
-                if(!res){
-                    if(attack->getCategory() == STATUS){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being confused!");
+                if(attack->getCategory() == STATUS)
                     active_user->setLastAttackFailed();
-                    }
-                }else{
-                    if(active_target->hasAbility(SYNCHRONIZE) && 
-                        !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                        active_user->setPermanentStatus(BURN);
-                    }
-                }
-                break;
-            }
-            case 15:{ //-1 opponent accuracy
-                // bool res = active_target->changeAccuracyModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{6,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 16:case 67:case 226:{ // paralyze opponent - paralysis
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from being confused!");
+                if(attack->getCategory() == STATUS)
                     active_user->setLastAttackFailed();
-                    break;
+                return;
+            }else if(field->getTerrain() == MISTY_FIELD){
+                if(attack->getCategory() == STATUS && effect==25){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed(); 
                 }
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from the paralysis!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                bool res = active_target->setPermanentStatus(PARALYSIS);
-                if(!res){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else{
-                    if(active_target->hasAbility(SYNCHRONIZE) && 
-                        !active_user->hasPermanentStatus()){
-                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                        active_user->setPermanentStatus(PARALYSIS);
-                    }
-                }
-                break;
+            }else{  
+                active_target->addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
             }
-            case 18:{ //-2 opponent Speed
-                // bool res = active_target->changeSpeedModifier(-2);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{5,-2}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 19:{ // Fire Spin
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(FIRESPIN)){
-                    active_target->addVolatileCondition(FIRESPIN,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                // }else{
-                //     event_handler->displayMsg(opponent_mon_name+" is already trapped in a Fire Spin!");
-                }
-                break;
-            }
-            case 220:{ // infestation
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(INFESTED)){
-                    active_target->addVolatileCondition(INFESTED,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                }
-                break;
-            }
-            case 158:{ // Whirlpool
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(WHIRLPOOL)){
-                    active_target->addVolatileCondition(WHIRLPOOL,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                }
-                break;
-            }
-            case 74:{ // Sand Tomb
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(SANDTOMB)){
-                    active_target->addVolatileCondition(SANDTOMB,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                }
-                break;
-            }
-            case 21:case 45:case 105:case 141:case 195:case 197:{//flinch
-                if(active_target->isFainted())
-                    return;
-                active_target->addVolatileCondition(FLINCH, 2);
-                break;
-            }
-            case 22:{ //-1 opponent Def
-                // bool res = active_target->changeDefenseModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{2,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 23:{ //+1 user Def
-                // bool res = active_user->changeDefenseModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 29:{//+2 Def user
-                // bool res = active_user->changeDefenseModifier(+2);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 24:{// rapid spin
-                // bool res = active_user->changeSpeedModifier(+1);
-                field->clearFieldEffectsSuchThat(&isFieldEffectClearedByRapidSpin,PLAYER);
-                active_user->clearVolatilesSuchThat(&isVolatileConditionClearedByRapidSpin);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 25:case 77:case 113:case 174:{ // confuse target
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasVolatileCondition(CONFUSION)){
-                    if(attack->getCategory()==STATUS){
-                        event_handler->displayMsg(opponent_mon_name+" is already confused!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                        !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being confused!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                }else if(field->getTerrain() == MISTY_FIELD){
-                    if(attack->getCategory() == STATUS && effect==25){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed(); 
-                    }
-                }else{  
-                    active_target->addVolatileCondition(CONFUSION,RNG::getRandomInteger(2,5));
-                }
-                // bool res = false;
-                StatCV changes;
-                if(effect==72)//flatter
-                    changes.push_back({3,1});
-                    // res = active_target->changeSpecialAttackModifier(1);
-                if(effect==113)//swagger
-                    changes.push_back({1,2});
-                    // res = active_target->changeAttackModifier(2);
-                // if(res && active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 26:{//PROTECT
-                if(active_user->isFainted())
-                    return;
-                if(active_user->getConsecutiveProtects() == 0){
+            // bool res = false;
+            StatCV changes;
+            if(effect==72)//flatter
+                changes.push_back({3,1});
+                // res = active_target->changeSpecialAttackModifier(1);
+            if(effect==113)//swagger
+                changes.push_back({1,2});
+                // res = active_target->changeAttackModifier(2);
+            // if(res && active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 26:{//PROTECT
+            if(active_user->isFainted())
+                return;
+            if(active_user->getConsecutiveProtects() == 0){
+                active_user->incrementConsecutiveProtect();
+                active_user->addVolatileCondition(PROTECT,5);
+            }else{
+                unsigned int probability_size = 3 * active_user->getConsecutiveProtects();
+                if(0==RNG::getRandomInteger(0,probability_size-1)){
                     active_user->incrementConsecutiveProtect();
                     active_user->addVolatileCondition(PROTECT,5);
                 }else{
-                    unsigned int probability_size = 3 * active_user->getConsecutiveProtects();
-                    if(0==RNG::getRandomInteger(0,probability_size-1)){
-                        active_user->incrementConsecutiveProtect();
-                        active_user->addVolatileCondition(PROTECT,5);
-                    }else{
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                        active_user->resetConsecutiveProtect();
-                    }
-                }
-                break;
-            }
-            case 27:{ // start rain
-                if(field->getWeather()==RAIN || thereIsaCloudNine()){
                     event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();   
-                }else
-                    field->setWeather(RAIN,active_user->hasHeldItem(DAMP_ROCK)?8:5);
-                break;
-            }
-            case 28:{ // +2 ATT SPATT SPD, -1 DEF SPDEF
-                // bool res = active_user->changeAttackModifier(+2);
-                // res = res || active_user->changeSpecialAttackModifier(+2);
-                // res = res || active_user->changeSpeedModifier(+2);
-                // bool res2 = active_user->changeDefenseModifierForced(-1);
-                // res2 = res2 || active_user->changeSpecialDefenseModifierForced(-1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                // else if(res2 && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,2},{3,2},{5,2},{2,-1},{4,-1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 30:{// + 1 SPEED USER
-                // bool res = active_user->changeSpeedModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 31:{// -1 SPDEF opponent
-                // bool res = active_target->changeSpecialDefenseModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{4,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 54:{//-2 SPDEF opponent
-                // bool res = active_target->changeSpecialDefenseModifier(-2);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{4,-2}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 32:{// whirlwind/roar/dragontail
-                if(active_target->isFainted())
-                    return;
-                if(active_target->getActor()==OPPONENT  && is_wild_battle){
-                    if(!active_target->hasAbility(SUCTION_CUPS) &&
-                        !active_target->hasVolatileCondition(INGRAINED)){
-                        //ends the wild battle
-                        is_wild_battle_over = true;
-                    }else{
-                        if(attack->getCategory()==STATUS){
-                            event_handler->displayMsg("But it failed!");
-                            active_user->setLastAttackFailed();
-                        }
-                    }
-                    break;
+                    active_user->setLastAttackFailed();
+                    active_user->resetConsecutiveProtect();
                 }
-                if(! target_team->hasAliveBackup() || active_target->hasAbility(SUCTION_CUPS) || 
-                    active_target->hasVolatileCondition(INGRAINED)){
+            }
+            break;
+        }
+        case 27:{ // start rain
+            if(field->getWeather()==RAIN || thereIsaCloudNine()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();   
+            }else
+                field->setWeather(RAIN,active_user->hasHeldItem(DAMP_ROCK)?8:5);
+            break;
+        }
+        case 28:{ // +2 ATT SPATT SPD, -1 DEF SPDEF
+            // bool res = active_user->changeAttackModifier(+2);
+            // res = res || active_user->changeSpecialAttackModifier(+2);
+            // res = res || active_user->changeSpeedModifier(+2);
+            // bool res2 = active_user->changeDefenseModifierForced(-1);
+            // res2 = res2 || active_user->changeSpecialDefenseModifierForced(-1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            // else if(res2 && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,2},{3,2},{5,2},{2,-1},{4,-1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 30:{// + 1 SPEED USER
+            // bool res = active_user->changeSpeedModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 31:{// -1 SPDEF opponent
+            // bool res = active_target->changeSpecialDefenseModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{4,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 54:{//-2 SPDEF opponent
+            // bool res = active_target->changeSpecialDefenseModifier(-2);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{4,-2}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 32:{// whirlwind/roar/dragontail
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory()==STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                return;
+            }
+            if(active_target->getActor()==OPPONENT  && is_wild_battle){
+                if(!active_target->hasAbility(SUCTION_CUPS) &&
+                    !active_target->hasVolatileCondition(INGRAINED)){
+                    //ends the wild battle
+                    is_wild_battle_over = true;
+                }else{
                     if(attack->getCategory()==STATUS){
                         event_handler->displayMsg("But it failed!");
                         active_user->setLastAttackFailed();
                     }
-                }else{
-                    field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
-                    if(active_target->hasAbility(REGENERATOR)){
-                        //regenerate 1/3 of user HP
-                        unsigned int maxHP = active_target->getMaxHP();
-                        unsigned int heal_amount = max((maxHP+2) / 3,1);
-                        active_target->removeDamage(heal_amount);
-                    }
-                    if(active_target->hasAbility(NATURAL_CURE)){
-                        //remove permanent status
-                        active_target->clearPermanentStatus();
-                    }
-                    delete active_target;
-                    target_team->swapRandomMonster();
-                    active_target = new Battler(target_team->getActiveMonster(),field,other_actor,event_handler);
-                    resetOpponents();
-                    if(actor == PLAYER){
-                        opponent_active = active_target;
-                    }else{
-                        player_active = active_target;
-                    }
-                    opponent_mon_name = getActorBattlerName(other_actor);
-                    event_handler->displayMsg(opponent_mon_name+" was forced in!");
-                    if(thereIsNeutralizingGas()){
-                        player_active->neutralizeAbility();
-                        opponent_active->neutralizeAbility();
-                    }else{
-                        player_active->cancelAbilityNeutralization();
-                        opponent_active->cancelAbilityNeutralization();
-                    }
-                    player_active->addSeenOpponent(opponent_active->getMonster());
-                    removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
-                    applyImpostorSwitchIn(other_actor);
-                    if (applySwitchInAbilitiesEffects(other_actor))
-                        return;
-                    if (applySwitchInItemsEffects(other_actor))
-                        return;
-                    if (performEntryHazardCheck(other_actor))
-                        return;
-                    checkUproars();
-                    if(active_target->isFainted())
-                        return;
                 }
                 break;
             }
-            case 33:{// SAFEGUARD
-                if(active_user->isFainted())
-                    return;
-                if(field->hasFieldEffect(SAFEGUARD,actor)){
+            if(! target_team->hasAliveBackup() || active_target->hasAbility(SUCTION_CUPS) || 
+                active_target->hasVolatileCondition(INGRAINED)){
+                if(attack->getCategory()==STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
+                }
+            }else{
+                field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
+                if(active_target->hasAbility(REGENERATOR)){
+                    //regenerate 1/3 of user HP
+                    unsigned int maxHP = active_target->getMaxHP();
+                    unsigned int heal_amount = max((maxHP+2) / 3,1);
+                    active_target->removeDamage(heal_amount);
+                }
+                if(active_target->hasAbility(NATURAL_CURE)){
+                    //remove permanent status
+                    active_target->clearPermanentStatus();
+                }
+                delete active_target;
+                target_team->swapRandomMonster();
+                active_target = new Battler(target_team->getActiveMonster(),field,other_actor,event_handler);
+                resetOpponents();
+                if(actor == PLAYER){
+                    opponent_active = active_target;
                 }else{
-                    field->setFieldEffect(SAFEGUARD, 5, actor);
-                    event_handler->displayMsg(user_mon_name+"'s side is protected by Safeguard!");
+                    player_active = active_target;
                 }
-                break;
-            }
-            case 34:{//TAILWIND
-                if(active_user->isFainted())
-                    return;
-                if(field->hasFieldEffect(TAILWIND,actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(TAILWIND, 5, actor);
-                    event_handler->displayMsg("A strong wind starts to blow on "+user_mon_name+"'s side!");
-                }
-                break;
-            }
-            case 35:{ // user + 1 spatt spdef speed
-                // bool res = active_user->changeSpecialAttackModifier(+1);
-                // res = res || active_user->changeSpecialDefenseModifier(+1);
-                // res = res || active_user->changeSpeedModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{3,1},{4,1},{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 38:{// laser focus effect (crit next turn)
-                if(active_user->isFainted())
-                    return;
-                active_user->addVolatileCondition(LASER_FOCUS, 5);
-                break;
-            }
-            case 39:{//focus energy
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(FOCUS_ENERGY)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(FOCUS_ENERGY, -1);
-                }
-                break;
-            }
-            case 41:{//Toxic spikes
-                if(field->hasFieldEffect(BAD_TOXIC_SPIKES,other_actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else if(field->hasFieldEffect(TOXIC_SPIKES,other_actor)){
-                    field->setFieldEffect(BAD_TOXIC_SPIKES, -1, other_actor);
-                    field->clearFieldEffect(TOXIC_SPIKES,other_actor);
-                    event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
-                }else{
-                    field->setFieldEffect(TOXIC_SPIKES, -1, other_actor);
-                    event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
-                }
-                break;
-            }
-            case 159:{
-                //spikes
-                if(field->hasFieldEffect(SPIKES_3,other_actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else if(field->hasFieldEffect(SPIKES_2,other_actor)){
-                    field->setFieldEffect(SPIKES_3, -1, other_actor);
-                    field->clearFieldEffect(SPIKES_2,other_actor);
-                    event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
-                }else if(field->hasFieldEffect(SPIKES,other_actor)){
-                    field->setFieldEffect(SPIKES_2, -1, other_actor);
-                    field->clearFieldEffect(SPIKES,other_actor);
-                    event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
-                }else{
-                    field->setFieldEffect(SPIKES, -1, other_actor);
-                    event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
-                }
-                break;
-            }
-            case 42:case 240:{// +2 speed user
-                if(active_user->isFainted())
-                    return;
-                // bool res = active_user->changeSpeedModifier(+2);
-                if(effect==240){
-                    unsigned int old_weight = active_user->getWeight();
-                    active_user->changeWeight(-1000);
-                    if(old_weight != active_user->getWeight())
-                        event_handler->displayMsg(user_mon_name+" became nimbler!");
-                }
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                StatCV changes = {{5,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 47:{//roost
-                if(active_user->isFainted())
-                    return;
-                if(active_user->getCurrentHP() == active_user->getMaxHP()){
-                    event_handler->displayMsg(user_mon_name+" is already at full health!");
-                }else{
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int heal_amount = max((maxHP+1) / 2,1);
-                    unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
-                    if(actual_heal_amount>0)
-                        event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
-                    active_user->landOnGround();
-                }
-                break;
-            }
-            case 52:{//+2 ATT user
-                // bool res = active_user->changeAttackModifier(+2);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 53:{ // Wrap
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(WRAP)){
-                    active_target->addVolatileCondition(WRAP, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                }
-                break;
-            }
-            case 164:{ // Bind
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(BIND)){
-                    active_target->addVolatileCondition(BIND, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
-                }
-                break;
-            }
-            case 55:{ // stockpile
-                if(active_user->isFainted())
-                    return;
-                if(active_user->getStockpiles() == 3){
-                    event_handler->displayMsg(user_mon_name+" cannot stockpile anymore!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    event_handler->displayMsg(user_mon_name+" is stockpiling!");
-                    active_user->incrementStockpiles();
-                    // active_user->changeDefenseModifier(+1);
-                    // active_user->changeSpecialDefenseModifier(+1);
-                    // if(res && active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                }
-                break;
-            }
-            case 56:{//56 and 57 are moves related to stockpile,
-                if(active_user->isFainted())
-                    return;
-                unsigned int heal = 0;  
-                if(active_user->isAtFullHP()){
-                    event_handler->displayMsg(user_mon_name+" is already at full health!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                switch(active_user->getStockpiles()){
-                    case 0:
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                        break;
-                    case 1:
-                        heal = (active_user->getMaxHP() + 3 )/ 4;
-                        break;
-                    case 2:
-                        heal = (active_user->getMaxHP() + 1) / 2;
-                        break;
-                    case 3:
-                        heal = active_user->getMaxHP();
-                        break;
-                }
-                if(heal>0){
-                    unsigned int actual_heal_amount = active_user->removeDamage(heal);
-                    event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP to itself!");
-                }
-                // NOTICE THAT I DO NOT BREAK HERE!!!
-            }case 57:{// spit up
-                if(active_user->isFainted())
-                    return;
-                active_user->resetStockpiles();
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                break;
-            }
-            case 58:{ // suppress ability
-                if(active_target->isFainted())
-                    return;
-                if(active_target->isAbilitySuppressed()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    event_handler->displayMsg(opponent_mon_name+"'s ability was suppressed!");
-                    active_target->suppressAbility();
-                }
-                //neutralizing gas may have been suppressed
+                opponent_mon_name = getActorBattlerName(other_actor);
+                event_handler->displayMsg(opponent_mon_name+" was forced in!");
                 if(thereIsNeutralizingGas()){
                     player_active->neutralizeAbility();
                     opponent_active->neutralizeAbility();
@@ -2574,1181 +2493,460 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned i
                     player_active->cancelAbilityNeutralization();
                     opponent_active->cancelAbilityNeutralization();
                 }
-                break;
-            }
-            case 59:{// clear stat changes
-                active_user->resetAllStatChanges();
-                active_target->resetAllStatChanges();
-                event_handler->displayMsg(user_mon_name+"'s haze cleared all stat changes!");
-                break;
-            }
-            case 60:{// +1 ATT DEF ACC user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeDefenseModifier(+1);
-                // res = res || active_user->changeAccuracyModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
+                player_active->addSeenOpponent(opponent_active->getMonster());
+                removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
+                applyImpostorSwitchIn(other_actor);
+                if (applySwitchInAbilitiesEffects(other_actor))
                     return;
-                StatCV changes = {{1,1},{2,1},{6,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 61:{//freeze opponent
-                if(active_target->isFainted())
+                if (applySwitchInItemsEffects(other_actor))
                     return;
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being frozen!");
-                    if(attack->getCategory() == STATUS)
-                        active_user->setLastAttackFailed();
-                    break;
-                }
-                bool result = active_target->setPermanentStatus(FREEZE);
-                if(!result && attack->getCategory() == STATUS){
-                    event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 62:{// +2 spatt user
-                // bool res = active_user->changeSpecialAttackModifier(+2);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
+                if (performEntryHazardCheck(other_actor))
                     return;
-                StatCV changes = {{3,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 63:{//+1 evasiveness user
-                // bool res = active_user->changeEvasionModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{7,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 66:{//light screen
-                if(field->hasFieldEffect(LIGHT_SCREEN,actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(LIGHT_SCREEN, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
-                    event_handler->displayMsg(user_mon_name+" set up a light screen that reduces damage coming from special attacks!");
-                }
-                break;
-            }
-            case 208:{//aurora veil
-                if(field->hasFieldEffect(AURORA_VEIL,actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(AURORA_VEIL, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
-                    event_handler->displayMsg(user_mon_name+" set up an aurora screen that reduces damage coming from attacks!");
-                }
-                break;
-            }
-            case 69:{//-1 speed opponent
-                // bool res = active_target->changeSpeedModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{5,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 72:{//start sandstorm
-                if(field->getWeather()==SANDSTORM || thereIsaCloudNine()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else
-                    field->setWeather(SANDSTORM,active_user->hasHeldItem(SMOOTH_ROCK)?8:5);
-                break;
-            }
-            case 78:{// -1 ATT DEF user
-                // bool res = active_user->changeAttackModifierForced(-1);
-                // res = res || active_user->changeDefenseModifierForced(-1);
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,-1},{2,-1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 79:{//nothing happens
-                if(active_user->isFainted())
-                    return;
-                event_handler->displayMsg("But nothing happens!");
-                break;
-            }
-            case 82:{//encore
-                if(active_target->isFainted())
-                    return;
-                if(active_target->isFainted() ||
-                    active_target->hasVolatileCondition(ENCORE) || 
-                    active_target->getLastAttackUsed() == 0 || 
-                    active_target->getLastAttackUsed() == STRUGGLE_ID){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->addVolatileCondition(ENCORE, 3);
-                    Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
-                    event_handler->displayMsg(opponent_mon_name+" is locked in using "+last_attack->getName()+" for 3 turns!");
-                }
-                break;
-            }
-            case 83:{//heal 25%
-                if(active_user->isFainted())
-                    return;
-                if(active_user->isAtFullHP()){
-                    event_handler->displayMsg(user_mon_name+" is already at full health!");
-                }else{
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int heal_amount = max((maxHP+3) / 4,1);
-                    unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
-                    if(actual_heal_amount>0)
-                        event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP to itself!");
-                }
-                break;
-            }
-            case 85:{//GRAVITY
-                if(active_user->isFainted())
-                    return;
-                if(!field->setFullFieldEffect(GRAVITY,5)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 86:{// +1 ATT user
-                // bool res = active_user->changeAttackModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 87:{// +1 DEF SPDEF user
-                // bool res = active_user->changeDefenseModifier(+1);
-                // res = res || active_user->changeSpecialDefenseModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,1},{4,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 88:{// -1 SPATT user
-                // bool res = active_user->changeSpecialAttackModifierForced(-1);
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{3,-1}};
-                changeStats(actor,changes,true);
-                break;
-            }
-            case 89:{// user dies entry Monster is fully healed
-                if(active_user->isFainted())
-                    return;
-                if(!user_team->hasAliveBackup()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    // faint active user
-                    unsigned int maxHP_old = active_user->getMaxHP();
-                    unsigned int actual_damage = active_user->addDirectDamage(maxHP_old);
-                    event_handler->displayMsg(user_mon_name+" inflicted to itself "+std::to_string(actual_damage)+" damage!");
-                    delete active_user;
-                    field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
-                    if(actor == PLAYER){
-                        unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
-                        player_team->swapActiveMonster(new_active_index);
-                        player_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
-                        active_user = player_active;
-                        event_handler->displayMsg("Player switched in "+player_active->getNickname());
-                    }else{
-                        unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
-                        opponent_team->swapActiveMonster(new_active_index);
-                        opponent_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
-                        active_user = opponent_active;
-                        event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
-                    }
-                    resetOpponents();
-                    if(thereIsNeutralizingGas()){
-                        player_active->neutralizeAbility();
-                        opponent_active->neutralizeAbility();
-                    }else{
-                        player_active->cancelAbilityNeutralization();
-                        opponent_active->cancelAbilityNeutralization();
-                    }
-                    removeVolatilesFromOpponentOfMonsterLeavingField(actor);
-                    // heal active user
-                    user_mon_name = getActorBattlerName(actor);
-                    unsigned int maxHP = active_user->getMaxHP();
-                    active_user->removeDamage(maxHP);
-                    active_user->clearPermanentStatus();
-                    event_handler->displayMsg(user_mon_name+" was fully healed!");
-                    player_active->addSeenOpponent(opponent_active->getMonster());
-                    applyImpostorSwitchIn(actor);
-                    if(applySwitchInAbilitiesEffects(actor))
-                        return;
-                    if(applySwitchInItemsEffects(actor))
-                        return;
-                    if(performEntryHazardCheck(actor))
-                        return;
-                    checkUproars();
-                    if(active_user->isFainted())
-                        return;
-                }
-                break;
-            }
-            case 90:{// disable last move used by opponenet
-                if(active_target->isFainted())
-                    return;
-                Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
-                if(active_target->hasDiabledAttack() || last_attack == nullptr){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->disableAttack(last_attack->getId(),5);
-                    event_handler->displayMsg(opponent_mon_name+"'s "+last_attack->getName()+" was disabled!");
-                }
-                break;
-            }
-            case 91:case 236:{
-                // 91: remove 4 PP from opponents last move used
-                //236: remove 3 PP
-                if(active_target->isFainted())
-                    return;
-                unsigned int pp_amount;
-                if(effect == 91)
-                    pp_amount = 4;
-                else
-                    pp_amount = 3;
-                Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
-                if(last_attack == nullptr || ! active_target->hasPP(last_attack->getId())){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else{
-                    active_target->usePP(last_attack->getId(),pp_amount);
-                    event_handler->displayMsg(opponent_mon_name+"'s "+last_attack->getName()+" lost some PP!");
-                }
-                break;
-            }
-            case 92:{//imprison
-                if(active_target->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(IMPRISON)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(IMPRISON, -1);
-                }
-                break;
-            }
-            case 93:{//Mimic
-                if(active_user->isFainted())
-                    return;
-                Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
-                if(last_attack==nullptr || !last_attack->canBeSketched()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                if(!active_user->setMimickedAttack(active_target->getLastAttackUsed())){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    event_handler->displayMsg(user_mon_name+" mimicked "+opponent_mon_name+"'s "+last_attack->getName()+"!");
-                }
-                break;
-            }
-            case 95:{//rest
-                if(active_user->isFainted())
-                    return;
-                if(isUproar()){
-                    event_handler->displayMsg(user_mon_name+" But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                unsigned int maxHP = active_user->getMaxHP();
-                active_user->setPermanentStatusForced(SLEEP_3);
-                event_handler->displayMsg(user_mon_name+" was fully healed!");
-                active_user->removeDamage(maxHP);
-                break;
-            }
-            case 96:{//mean look
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasVolatileCondition(MEAN_LOOK) || active_target->hasType(GHOST)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->addVolatileCondition(MEAN_LOOK, -1);
-                }
-                break;
-            }
-            case 98:{//quick guard
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(QUICK_GUARD)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(QUICK_GUARD, 5);
-                    event_handler->displayMsg(user_mon_name+" is protecting its team from priority attacks!");
-                }
-                break;
-            }
-            case 99:{//set up grassy terrain
-                if(field->getTerrain() == GRASSY_FIELD){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setTerrain(GRASSY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                    consumeSeeds();
-                }
-                break;
-            }
-            case 102:{//transform
-                if(active_user->isFainted())
-                    return;
-                if(active_target->isFainted()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                active_user->transformInto(active_target->getMonster());
-                event_handler->displayMsg(user_mon_name+" transformed into "+opponent_mon_name+"!");
-                break;
-            }
-            case 104:{//tri attack
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasPermanentStatus()){
-                    if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                        !active_user->hasAbility(INFILTRATOR)){
-                        break;
-                    }
-                    unsigned int random_number = RNG::getRandomInteger(1,3);
-                    if(random_number == 1 && active_target->canBeBurned() 
-                        && !active_target->hasType(FIRE)){// try to burn
-                        active_target->setPermanentStatus(BURN);
-                        event_handler->displayMsg(opponent_mon_name+" was burned!");
-                        if(active_target->hasAbility(SYNCHRONIZE) && 
-                            !active_user->hasPermanentStatus()){
-                            event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                            active_user->setPermanentStatus(BURN);
-                        }
-                    }else if(random_number==2 && 
-                        active_target->canBeParalyzed()){ //try to paralyze
-                        active_target->setPermanentStatus(PARALYSIS);
-                        event_handler->displayMsg(opponent_mon_name+" was paralyzed!");
-                        if(active_target->hasAbility(SYNCHRONIZE) && 
-                            !active_user->hasPermanentStatus()){
-                            event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
-                            active_user->setPermanentStatus(PARALYSIS);
-                        }
-                    }else if(active_target->canBeFrozen() && 
-                        !active_target->hasType(ICE)){
-                        active_target->setPermanentStatus(FREEZE);
-                        event_handler->displayMsg(opponent_mon_name+" was frozen solid!");
-                    }
-                }
-                break;
-            }
-            case 106:{//taunt
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(TAUNTED))
-                    event_handler->displayMsg(opponent_mon_name+" was taunted!");
-                else{
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 234:{//torment
-                if(active_target->isFainted())
-                    return;
-                if(!active_target->hasVolatileCondition(TORMENTED))
-                    event_handler->displayMsg(opponent_mon_name+" was tormented! It wiil be unable to use the same move in twice in a row!");
-                else{
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 107:{//turn opponent into water type
-                if(active_target->isFainted())
-                    return;
-                auto types = active_target->getTypes();
-                if(types.size() == 1 && active_target->hasType(WATER)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->changeType(WATER);
-                    event_handler->displayMsg(opponent_mon_name+" was turned into a water type!");
-                }
-                break;
-            }
-            case 108:{//copy enemy stat changes
-                int attack_mod = active_target->getAttackModifier();
-                int special_attack_mod = active_target->getSpecialAttackModifier();
-                int defense_mod = active_target->getDefenseModifier();
-                int special_defense_mod = active_target->getSpecialDefenseModifier();
-                int speed_mod = active_target->getSpeedModifier();
-                int accuracy_mod = active_target->getAccuracyModifier();
-                int evasion_mod = active_target->getEvasionModifier();
-                if(!attack_mod && !special_attack_mod && !defense_mod &&
-                    !special_defense_mod && !speed_mod && !accuracy_mod && !evasion_mod){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->setAttackModifier(attack_mod);
-                    active_user->setSpecialAttackModifier(special_attack_mod);
-                    active_user->setDefenseModifier(defense_mod);
-                    active_user->setSpecialDefenseModifier(special_defense_mod);
-                    active_user->setSpeedModifier(speed_mod);
-                    active_user->setAccuracyModifier(accuracy_mod);
-                    active_user->setEvasionModifier(evasion_mod);
-                    event_handler->displayMsg(user_mon_name+" copied "+opponent_mon_name+"'s stat changes!");
-                }
-                break;
-            }
-            case 109:{//+2 spdef user
-                // bool res = active_user->changeSpecialDefenseModifier(+2);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{4,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 110:{//wonder room
-                if(active_user->isFainted())
-                    return;
-                if(field->hasFullFieldEffect(WONDER_ROOM)){
-                    field->clearFullFieldEffect(WONDER_ROOM);
-                }else{
-                    field->setFullFieldEffect(WONDER_ROOM, 5);
-                }
-                break;
-            }
-            case 115:{
-                //-1 def spdef user
-                // bool res = active_user->changeDefenseModifierForced(-1);
-                // res = res || active_user->changeSpecialDefenseModifierForced(-1);
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,-1},{4,-1}};
-                changeStats(actor,changes,true);
-                break;
-            }
-            case 121:{
-                //user halves its HP and then maximizes its attack
-                if(active_user->isFainted())
-                    return;
-                unsigned int maxHP = active_user->getMaxHP();
-                unsigned int currentHP = active_user->getCurrentHP();
-                unsigned int half_hp = max(1,maxHP/2);
-                if(currentHP <= half_hp){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addDirectDamage(half_hp);
-                    event_handler->displayMsg(user_mon_name+" halved its HP!");
-                    // bool res = active_user->changeAttackModifier(12);
-                    // if(res && active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                    StatCV changes = {{1,12}};
-                    changeStats(actor,changes,false);
-                }
-                break;
-            }
-            case 122:{
-                //-1 speed opponent
-                // bool res = active_target->changeSpeedModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{5,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 123:{
-                // target is forced to switch
-                if(active_target->isFainted())
-                    return;
-                if(is_wild_battle && active_target->getActor()==OPPONENT){
-                    if(!active_target->hasAbility(SUCTION_CUPS) && 
-                        !active_target->hasVolatileCondition(INGRAINED)){
-                        //ends the wild battle
-                        is_wild_battle_over = true;
-                    }else if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                if(!target_team->hasAliveBackup() || 
-                    active_target->hasAbility(SUCTION_CUPS) ||
-                    active_target->hasVolatileCondition(INGRAINED)){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                //force opponent to switch
-                forceSwitch(other_actor);
-                active_target = getActorBattler(other_actor);
                 checkUproars();
                 if(active_target->isFainted())
                     return;
-                break;
             }
-            case 124:case 231:case 235:{
-                // user switches out, 
-                // fails if trapped in the case of 124
-                // start snow in case of 235
-                if(active_user->isFainted())
-                    return;
-                if(effect==124 && is_wild_battle && active_user->getActor()==OPPONENT){
-                    if(active_user->canSwitchOut(active_target)){
-                        is_wild_battle_over = true;
-                    }else{
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                if(!user_team->hasAliveBackup()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                if(!active_user->canSwitchOut(active_target) && effect==124){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                if(field->getWeather()!=SNOWSTORM && effect==235){
-                    event_handler->displayMsg(user_mon_name+" started a snowstorm!");
-                    field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
-                }
-                //force user to switch
-                forceSwitch(actor);
-                active_user = getActorBattler(actor);
-                checkUproars();
-                if(active_user->isFainted())
-                    return;
-                break;
+            break;
+        }
+        case 33:{// SAFEGUARD
+            if(active_user->isFainted())
+                return;
+            if(field->hasFieldEffect(SAFEGUARD,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(SAFEGUARD, 5, actor);
+                event_handler->displayMsg(user_mon_name+"'s side is protected by Safeguard!");
             }
-            case 125:{
-                //reflect
-                if(field->hasFieldEffect(REFLECT,actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(REFLECT, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
-                    event_handler->displayMsg(user_mon_name+" sets up a barrier that reduces damage coming from physical attacks!");
-                }
-                break;
+            break;
+        }
+        case 34:{//TAILWIND
+            if(active_user->isFainted())
+                return;
+            if(field->hasFieldEffect(TAILWIND,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(TAILWIND, 5, actor);
+                event_handler->displayMsg("A strong wind starts to blow on "+user_mon_name+"'s side!");
             }
-            case 126:{
-                //heal 50% HP
-                if(active_user->isFainted())
-                    return;
-                if(active_user->isAtFullHP()){
-                    event_handler->displayMsg(user_mon_name+" is already at full health!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int heal_amount = max((maxHP+1) / 2,1);
-                    unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
-                    if(actual_heal_amount>0)
-                        event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
-                }
-                break;
+            break;
+        }
+        case 35:{ // user + 1 spatt spdef speed
+            // bool res = active_user->changeSpecialAttackModifier(+1);
+            // res = res || active_user->changeSpecialDefenseModifier(+1);
+            // res = res || active_user->changeSpeedModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,1},{4,1},{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 38:{// laser focus effect (crit next turn)
+            if(active_user->isFainted())
+                return;
+            active_user->addVolatileCondition(LASER_FOCUS, 5);
+            break;
+        }
+        case 39:{//focus energy
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(FOCUS_ENERGY)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(FOCUS_ENERGY, -1);
             }
-            case 127:{
-                // copy target ability
-                if(active_target->isFainted() || active_user->isFainted())
-                    return;
-                if(active_user->getAbility() == active_target->getAbility() ||
-                    active_target->hasAbility(NO_ABILITY) ||
-                    active_user->hasAbility(NO_ABILITY) ||
-                    !isAbilityTraceable(active_target->getAbility()) ||
-                    active_user->hasHeldItem(ABILITY_SHIELD)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    event_handler->displayMsg(user_mon_name+" copied "+opponent_mon_name+"'s ability!");
-                    active_user->setAbility(active_target->getAbility());
-                }
-                break;
+            break;
+        }
+        case 41:{//Toxic spikes
+            if(field->hasFieldEffect(BAD_TOXIC_SPIKES,other_actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else if(field->hasFieldEffect(TOXIC_SPIKES,other_actor)){
+                field->setFieldEffect(BAD_TOXIC_SPIKES, -1, other_actor);
+                field->clearFieldEffect(TOXIC_SPIKES,other_actor);
+                event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
+            }else{
+                field->setFieldEffect(TOXIC_SPIKES, -1, other_actor);
+                event_handler->displayMsg(user_mon_name+" scattered toxic spikes towards its opponent!");
             }
-            case 129:{
-                //+1 def spdef user
-                // bool res = active_user->changeDefenseModifier(+1);
-                // res = res || active_user->changeSpecialDefenseModifier(+1);
+            break;
+        }
+        case 159:{
+            //spikes
+            if(field->hasFieldEffect(SPIKES_3,other_actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else if(field->hasFieldEffect(SPIKES_2,other_actor)){
+                field->setFieldEffect(SPIKES_3, -1, other_actor);
+                field->clearFieldEffect(SPIKES_2,other_actor);
+                event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
+            }else if(field->hasFieldEffect(SPIKES,other_actor)){
+                field->setFieldEffect(SPIKES_2, -1, other_actor);
+                field->clearFieldEffect(SPIKES,other_actor);
+                event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
+            }else{
+                field->setFieldEffect(SPIKES, -1, other_actor);
+                event_handler->displayMsg(user_mon_name+" scattered spikes towards its opponent!");
+            }
+            break;
+        }
+        case 42:case 240:{// +2 speed user
+            if(active_user->isFainted())
+                return;
+            // bool res = active_user->changeSpeedModifier(+2);
+            if(effect==240){
+                unsigned int old_weight = active_user->getWeight();
+                active_user->changeWeight(-1000);
+                if(old_weight != active_user->getWeight())
+                    event_handler->displayMsg(user_mon_name+" became nimbler!");
+            }
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            StatCV changes = {{5,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 47:{//roost
+            if(active_user->isFainted())
+                return;
+            if(active_user->getCurrentHP() == active_user->getMaxHP()){
+                event_handler->displayMsg(user_mon_name+" is already at full health!");
+            }else{
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int heal_amount = max((maxHP+1) / 2,1);
+                unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+                active_user->landOnGround();
+            }
+            break;
+        }
+        case 52:{//+2 ATT user
+            // bool res = active_user->changeAttackModifier(+2);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 53:{ // Wrap
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(WRAP)){
+                active_target->addVolatileCondition(WRAP, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 164:{ // Bind
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(BIND)){
+                active_target->addVolatileCondition(BIND, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 55:{ // stockpile
+            if(active_user->isFainted())
+                return;
+            if(active_user->getStockpiles() == 3){
+                event_handler->displayMsg(user_mon_name+" cannot stockpile anymore!");
+                active_user->setLastAttackFailed();
+            }else{
+                event_handler->displayMsg(user_mon_name+" is stockpiling!");
+                active_user->incrementStockpiles();
+                // active_user->changeDefenseModifier(+1);
+                // active_user->changeSpecialDefenseModifier(+1);
                 // if(res && active_user->hasAbility(CONTRARY))
                 //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,1},{4,1}};
-                changeStats(actor,changes,false);
+            }
+            break;
+        }
+        case 56:{//56 and 57 are moves related to stockpile,
+            if(active_user->isFainted())
+                return;
+            unsigned int heal = 0;  
+            if(active_user->isAtFullHP()){
+                event_handler->displayMsg(user_mon_name+" is already at full health!");
+                active_user->setLastAttackFailed();
                 break;
             }
-            case 130:{
-                //schedule future sight
-                Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
-                unsigned int attack_stat = future_sight->getCategory()==PHYSICAL ?
-                    active_user->getModifiedAttack() : active_user->getModifiedSpecialAttack();
-                scheduled_futuresights.push_back(
-                    ScheduledFutureSight(
-                        3,
-                        attack_stat,
-                        active_user->getLevel(),
-                        other_actor,
-                        active_user->hasType(future_sight->getType())
-                    ));
-                event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
-                break;
-            }
-            case 132:{
-                //+1 att def user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeDefenseModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1},{2,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 133:{
-                // -2 SPATT user
-                // bool res = active_user->changeSpecialAttackModifierForced(-2);
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{3,-2}};
-                changeStats(actor,changes,true);
-                break;
-            }
-            case 137:{
-                //user becomes same type as target
-                if(active_user->isFainted())
-                    return;
-                auto types = active_target->getTypes();
-                if(active_target->isFainted() || types.size()==0){
+            switch(active_user->getStockpiles()){
+                case 0:
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                     break;
-                }else{
-                    active_user->clearTypes();
-                    for(auto type : types){
-                        active_user->addType(type);
-                    }
-                    event_handler->displayMsg(user_mon_name+" became the same type as "+opponent_mon_name+"!");
-                }
-                break;
-            }
-            case 138:{
-                //smacks target down
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasVolatileCondition(SMACKED_DOWN)){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                }else{
-                    active_target->addVolatileCondition(SMACKED_DOWN, 5);
-                    event_handler->displayMsg(opponent_mon_name+" was smacked down!");
-                    if(active_target->hasVolatileCondition(MAGNET_RISE))
-                        active_target->removeVolatileCondition(MAGNET_RISE);
-                }
-                break;
-            }
-            case 139:{
-                //stealth rocks
-                if(field->hasFieldEffect(STEALTH_ROCKS,other_actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(STEALTH_ROCKS, -1, other_actor);
-                    event_handler->displayMsg("Pointed rocks float in the air at "+opponent_mon_name+"'s side!");
-                }
-            }
-            case 221:{
-                //sticky web
-                if(field->hasFieldEffect(STICKY_WEB,other_actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(STICKY_WEB, -1, other_actor);
-                    event_handler->displayMsg("A sticky web slows down all Pokemon entering "+opponent_mon_name+"'s side!");
-                }
-            }
-            case 142:{
-                //+1 spd user
-                // bool res = active_user->changeSpeedModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 143:{
-                //opponent drowsy
-                if(active_target->isFainted())
-                    return;
-                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
-                    !active_user->hasAbility(INFILTRATOR)){
-                    event_handler->displayMsg("Safeguard protects "+opponent_mon_name+"!");
-                    active_user->setLastAttackFailed();
-                }else if(!active_target->canFallAsleep() ||
-                    active_target->hasVolatileCondition(DROWSY)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->addVolatileCondition(DROWSY, 2);
-                }
-                break;
-            }
-            case 144:{
-                //curse
-                if(active_user->hasType(GHOST)){
-                    if(active_target->isFainted())
-                        return;
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int actual_damage = active_user->addDirectDamage(maxHP / 2);
-                    event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage to send a curse to its opponent!");
-                    if(active_target->hasVolatileCondition(CURSED)){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }else{
-                        active_target->addVolatileCondition(CURSED, -1);
-                    }
-                }else{
-                    // bool res1 = active_user->changeSpeedModifierForced(-1);
-                    // bool res2 = active_user->changeAttackModifier(+1);
-                    // res2 = res2 || active_user->changeDefenseModifier(+1);
-                    // if(res2 && active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                    // else if(res1 && !active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                    if(active_user->isFainted())
-                        return;
-                    StatCV changes = {{1,1},{2,1},{5,-1}};
-                    changeStats(actor,changes,true);
-                }
-                break;
-            }
-            case 145:{
-                //heal 50% target
-                if(active_target->isFainted())
-                    return;
-                if(active_target->isAtFullHP()){
-                    event_handler->displayMsg(opponent_mon_name+" is already at full health!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    unsigned int maxHP = active_target->getMaxHP();
-                    unsigned int heal_amount;
-                    if(active_user->hasAbility(MEGA_LAUNCHER) && attack->isPulse())
-                        //mega launcher also powers up heal pulse
-                        heal_amount = max((maxHP*3+3) / 4,1);
-                    else
-                        heal_amount = max((maxHP+1) / 2,1);
-                    unsigned int actual_heal_amount = active_target->removeDamage(heal_amount);
-                    if(actual_heal_amount>0)
-                        event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(actual_heal_amount)+" HP!");
-                }
-                break;
-            }
-            case 146:{
-                //infatuation opponent
-                if(active_target->isFainted())
-                    return;
-                Gender user_gender = active_user->getGender();
-                Gender target_gender = active_target->getGender();
-                if(active_target->hasAbility(OBLIVIOUS) ||
-                    !areMaleAndFemale(user_gender,target_gender) ||
-                    active_target->hasVolatileCondition(INFATUATION)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->addVolatileCondition(INFATUATION, -1);
-                    if(active_target->hasHeldItem(DESTINY_KNOT))
-                        active_user->addVolatileCondition(INFATUATION, -1);
-                }
-                break;
-            }
-            case 147:{
-                //lock on target
-                if(active_target->isFainted())
-                    return;
-                if(active_user->hasLockOn(active_target->getMonster())){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addLockOn(active_target->getMonster());
-                }
-                break;
-            }
-            case 148:{
-                //electric terrain
-                if(field->getTerrain() == ELECTRIC_FIELD){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setTerrain(ELECTRIC_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                    consumeSeeds();
-                }
-                break;
-            }
-            case 149:{
-                //magnet rise
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(MAGNET_RISE) || 
-                    field->hasFullFieldEffect(GRAVITY)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(MAGNET_RISE, 5);
-                    event_handler->displayMsg(user_mon_name+" raised from the ground through magnetism!");
-                    if(active_target->hasVolatileCondition(SMACKED_DOWN))
-                        active_target->removeVolatileCondition(SMACKED_DOWN);
-                }
-            }
-            case 151:{
-                //uproar
-                if(active_user->isFainted())
-                    return;
-                event_handler->displayMsg(user_mon_name+" is making an uproar!");
-                uproaring_monsters.insert(active_user->getMonster());
-                break;
-            }
-            case 152:{
-                //raise a random stat by +2
-                if(active_user->isFainted())
-                    return;
-                std::vector<int> options;
-                if(active_user->getAttackModifier() < MAX_MODIFIER)
-                    options.push_back(1);
-                if(active_user->getSpecialAttackModifier() < MAX_MODIFIER)
-                    options.push_back(2);
-                if(active_user->getDefenseModifier() < MAX_MODIFIER)
-                    options.push_back(3);
-                if(active_user->getSpecialDefenseModifier() < MAX_MODIFIER)
-                    options.push_back(4);
-                if(active_user->getSpeedModifier() < MAX_MODIFIER)
-                    options.push_back(5);
-                if(active_user->getAccuracyModifier() < MAX_MODIFIER)
-                    options.push_back(6);
-                if(active_user->getEvasionModifier() < MAX_MODIFIER)
-                    options.push_back(7);
-                if(options.size() == 0){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                case 1:
+                    heal = (active_user->getMaxHP() + 3 )/ 4;
                     break;
-                }
-                int chosen_option = options[RNG::getRandomInteger(0,options.size()-1)];
-                StatCV changes = {{chosen_option,2}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 153:{
-                //start snowstorm
-                if(field->getWeather() == SNOWSTORM || thereIsaCloudNine()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else
-                    field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
-                break;
-            }
-            case 154:{
-                //aqua ring
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(AQUA_RING)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(AQUA_RING, -1);
-                    event_handler->displayMsg(user_mon_name+" is surrounded by a veil of water!");
-                }
-                break;
-            }
-            case 157:{
-                //memento
-                if(active_user->isFainted())
-                    return;
-                if(active_target->hasVolatileCondition(PROTECT)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                case 2:
+                    heal = (active_user->getMaxHP() + 1) / 2;
                     break;
-                }
-                //user faints
-                active_user->addDirectDamage(active_user->getMaxHP());
-                // opponent stats are lowered
-                // bool res = active_target->changeAttackModifier(-12);
-                // res = res || active_target->changeSpecialAttackModifier(-12);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                StatCV changes = {{1,-12},{3,-12}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 161:{
-                //destiny bond
-                if(active_user->isFainted())
-                    return;
-                int times_used = active_user->getSameAttackCounter();
-                if(times_used==1){
-                    active_user->addVolatileCondition(DESTINY_BOND,3);
-                }else if(times_used==2){
-                    if(RNG::getRandomInteger(0,2)==0){
-                        active_user->addVolatileCondition(DESTINY_BOND,3);
-                    }else{
-                        active_user->setLastAttackFailed();
-                        event_handler->displayMsg("But it failed!");
-                    }
-                }else{
-                    if(RNG::oneEight()){
-                        active_user->addVolatileCondition(DESTINY_BOND,3);
-                    }else{
-                        active_user->setLastAttackFailed();
-                        event_handler->displayMsg("But it failed!");
-                    }
-                }
-                break;
-            }
-            case 163:{
-                //perish song
-                if(active_user->isFainted())
-                    return;
-                event_handler->displayMsg("All Pokèmon that hear "+user_mon_name+"'s song will faint in 3 turns!");
-                if(!active_user->hasVolatileCondition(PERISH_SONG))
-                    active_user->addVolatileCondition(PERISH_SONG,4);
-                if(!active_target->hasVolatileCondition(PERISH_SONG) && 
-                    !active_target->isFainted() &&
-                    !active_target->hasAbility(SOUNDPROOF))
-                    active_target->addVolatileCondition(PERISH_SONG,4);
-                break;
-            }
-            case 166:{
-                //-1 speed user
-                // bool res = active_user->changeSpeedModifierForced(-1);
-                // if(res && !active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{5,-1}};
-                changeStats(actor,changes,true);
-                break;
-            }
-            case 167:{
-                // charge user, +1 spdef user
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(CHARGED)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(CHARGED, -1);
-                    // bool res = active_user->changeSpecialDefenseModifier(+1);
-                    // if(res && active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                    StatCV changes = {{4,1}};
-                    changeStats(actor,changes,false);
-                }
-                break;
-            }
-            case 169:{
-                // +1 SPATT user
-                // bool res = active_user->changeSpecialAttackModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{3,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 170:{
-                // +1 DEF SPDEF user iff ability is PLUS or MINUS
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasAbility(PLUS) || 
-                    active_user->hasAbility(MINUS)){
-                    // bool res = active_user->changeDefenseModifier(+1);
-                    // res = res || active_user->changeSpecialDefenseModifier(+1);
-                    // if(res && active_user->hasAbility(CONTRARY))
-                    //     tryEjectPack(actor);
-                    StatCV changes = {{2,1},{4,1}};
-                    changeStats(actor,changes,false);
-                }else{
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 173:{
-                //user endures all hits this turn
-                if(active_user->isFainted())
-                    return;
-                active_user->addVolatileCondition(ENDURE,5);
-                break;
-            }
-            case 177:{
-                //reset target stat changes
-                active_target->setAccuracyModifier(0);
-                active_target->setEvasionModifier(0);
-                active_target->setAttackModifier(0);
-                active_target->setDefenseModifier(0);
-                active_target->setSpecialAttackModifier(0);
-                active_target->setSpecialDefenseModifier(0);
-                active_target->setSpeedModifier(0);
-                break;
-            }
-            case 179:{
-                //ingrain
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(INGRAINED)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_user->addVolatileCondition(INGRAINED, -1);
-                }
-                break;
-            }
-            case 180:{
-                // +1 ATT DEF SPATT SPDEF SPEED user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeDefenseModifier(+1);
-                // res = res || active_user->changeSpecialAttackModifier(1);
-                // res = res || active_user->changeSpecialDefenseModifier(1);
-                // res = res || active_user->changeSpeedModifier(1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1},{2,1},{3,1},{4,1},{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 181:{
-                //-1 att def target
-                // bool res = active_target->changeAttackModifier(-1);
-                // res = res || active_target->changeDefenseModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{1,-1},{2,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 182:{
-                //+1 att speed user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeSpeedModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1},{5,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 183:{
-                //switch att spatt with opponent
-                if(active_target->isFainted())
-                    return;
-                int old_user_att = active_user->getAttackModifier();
-                int old_user_spatt = active_user->getSpecialAttackModifier();
-                int old_target_att = active_target->getAttackModifier();
-                int old_target_spatt = active_target->getSpecialAttackModifier();
-                active_user->setAttackModifier(old_target_att);
-                active_user->setSpecialAttackModifier(old_target_spatt);
-                active_target->setAttackModifier(old_user_att);
-                active_target->setSpecialAttackModifier(old_user_spatt);
-                event_handler->displayMsg(user_mon_name+" switched Atk and Sp. Atk stat changes with "+opponent_mon_name+"!");
-                break;
-            }
-            case 184:{
-                //switch att spatt with opponent
-                if(active_target->isFainted())
-                    return;
-                int old_user_def = active_user->getDefenseModifier();
-                int old_user_spdef = active_user->getSpecialDefenseModifier();
-                int old_target_def = active_target->getDefenseModifier();
-                int old_target_spdef = active_target->getSpecialDefenseModifier();
-                active_user->setAttackModifier(old_target_def);
-                active_user->setSpecialAttackModifier(old_target_spdef);
-                active_target->setAttackModifier(old_user_def);
-                active_target->setSpecialAttackModifier(old_user_spdef);
-                event_handler->displayMsg(user_mon_name+" switched Def and Sp. def stat changes with "+opponent_mon_name+"!");
-                break;
-            }
-            case 185:{
-                // baton pass
-                if(active_user->isFainted())
-                    return;
-                //user switches out and entering monster keeps sta changes and volatiles
-                if(!user_team->hasAliveBackup()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
+                case 3:
+                    heal = active_user->getMaxHP();
                     break;
-                }
-                if(active_user->hasAbility(REGENERATOR)){
-                    //regenerate 1/3 of user HP
-                    unsigned int maxHP = active_user->getMaxHP();
-                    unsigned int heal_amount = max((maxHP+2) / 3,1);
-                    active_user->removeDamage(heal_amount);
-                }
-                if(active_user->hasAbility(NATURAL_CURE)){
-                    //remove status
-                    active_user->clearPermanentStatus();
-                }
-                if(actor==PLAYER){
+            }
+            if(heal>0){
+                unsigned int actual_heal_amount = active_user->removeDamage(heal);
+                event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP to itself!");
+            }
+            // NOTICE THAT I DO NOT BREAK HERE!!!
+        }case 57:{// spit up
+            if(active_user->isFainted())
+                return;
+            active_user->resetStockpiles();
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            break;
+        }
+        case 58:{ // suppress ability
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            if(active_target->isAbilitySuppressed()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                event_handler->displayMsg(opponent_mon_name+"'s ability was suppressed!");
+                active_target->suppressAbility();
+            }
+            //neutralizing gas may have been suppressed
+            if(thereIsNeutralizingGas()){
+                player_active->neutralizeAbility();
+                opponent_active->neutralizeAbility();
+            }else{
+                player_active->cancelAbilityNeutralization();
+                opponent_active->cancelAbilityNeutralization();
+            }
+            break;
+        }
+        case 59:{// clear stat changes
+            active_user->resetAllStatChanges();
+            active_target->resetAllStatChanges();
+            event_handler->displayMsg(user_mon_name+"'s haze cleared all stat changes!");
+            break;
+        }
+        case 60:{// +1 ATT DEF ACC user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeDefenseModifier(+1);
+            // res = res || active_user->changeAccuracyModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{2,1},{6,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 61:{//freeze opponent
+            if(active_target->isFainted())
+                return;
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being frozen!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }else if(hits_substitute && 
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("The substitute protects "+opponent_mon_name+" from being frozen!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+                break;
+            }
+            bool result = active_target->setPermanentStatus(FREEZE);
+            if(!result && attack->getCategory() == STATUS){
+                event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 62:{// +2 spatt user
+            // bool res = active_user->changeSpecialAttackModifier(+2);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 63:{//+1 evasiveness user
+            // bool res = active_user->changeEvasionModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{7,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 66:{//light screen
+            if(field->hasFieldEffect(LIGHT_SCREEN,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(LIGHT_SCREEN, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
+                event_handler->displayMsg(user_mon_name+" set up a light screen that reduces damage coming from special attacks!");
+            }
+            break;
+        }
+        case 208:{//aurora veil
+            if(field->hasFieldEffect(AURORA_VEIL,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(AURORA_VEIL, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
+                event_handler->displayMsg(user_mon_name+" set up an aurora screen that reduces damage coming from attacks!");
+            }
+            break;
+        }
+        case 69:{//-1 speed opponent
+            // bool res = active_target->changeSpeedModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{5,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 72:{//start sandstorm
+            if(field->getWeather()==SANDSTORM || thereIsaCloudNine()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else
+                field->setWeather(SANDSTORM,active_user->hasHeldItem(SMOOTH_ROCK)?8:5);
+            break;
+        }
+        case 78:{// -1 ATT DEF user
+            // bool res = active_user->changeAttackModifierForced(-1);
+            // res = res || active_user->changeDefenseModifierForced(-1);
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,-1},{2,-1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 79:{//nothing happens
+            if(active_user->isFainted())
+                return;
+            event_handler->displayMsg("But nothing happens!");
+            break;
+        }
+        case 82:{//encore
+            if(active_target->isFainted())
+                return;
+            if(active_target->isFainted() ||
+                active_target->hasVolatileCondition(ENCORE) || 
+                active_target->getLastAttackUsed() == 0 || 
+                active_target->getLastAttackUsed() == STRUGGLE_ID){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->addVolatileCondition(ENCORE, 3);
+                Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
+                event_handler->displayMsg(opponent_mon_name+" is locked in using "+last_attack->getName()+" for 3 turns!");
+            }
+            break;
+        }
+        case 83:{//heal 25%
+            if(active_user->isFainted())
+                return;
+            if(active_user->isAtFullHP()){
+                event_handler->displayMsg(user_mon_name+" is already at full health!");
+            }else{
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int heal_amount = max((maxHP+3) / 4,1);
+                unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP to itself!");
+            }
+            break;
+        }
+        case 85:{//GRAVITY
+            if(active_user->isFainted())
+                return;
+            if(!field->setFullFieldEffect(GRAVITY,5)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 86:{// +1 ATT user
+            // bool res = active_user->changeAttackModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 87:{// +1 DEF SPDEF user
+            // bool res = active_user->changeDefenseModifier(+1);
+            // res = res || active_user->changeSpecialDefenseModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,1},{4,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 88:{// -1 SPATT user
+            // bool res = active_user->changeSpecialAttackModifierForced(-1);
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,-1}};
+            changeStats(actor,changes,true);
+            break;
+        }
+        case 89:{// user dies entry Monster is fully healed
+            if(active_user->isFainted())
+                return;
+            if(!user_team->hasAliveBackup()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                // faint active user
+                unsigned int maxHP_old = active_user->getMaxHP();
+                unsigned int actual_damage = active_user->addDirectDamage(maxHP_old);
+                event_handler->displayMsg(user_mon_name+" inflicted to itself "+std::to_string(actual_damage)+" damage!");
+                delete active_user;
+                field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
+                if(actor == PLAYER){
                     unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
                     player_team->swapActiveMonster(new_active_index);
-                    player_active->setMonster(player_team->getActiveMonster());
+                    player_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
+                    active_user = player_active;
+                    event_handler->displayMsg("Player switched in "+player_active->getNickname());
                 }else{
                     unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
                     opponent_team->swapActiveMonster(new_active_index);
-                    opponent_active->setMonster(opponent_team->getActiveMonster());
+                    opponent_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
+                    active_user = opponent_active;
+                    event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
                 }
+                resetOpponents();
                 if(thereIsNeutralizingGas()){
                     player_active->neutralizeAbility();
                     opponent_active->neutralizeAbility();
@@ -3757,6 +2955,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned i
                     opponent_active->cancelAbilityNeutralization();
                 }
                 removeVolatilesFromOpponentOfMonsterLeavingField(actor);
+                // heal active user
+                user_mon_name = getActorBattlerName(actor);
+                unsigned int maxHP = active_user->getMaxHP();
+                active_user->removeDamage(maxHP);
+                active_user->clearPermanentStatus();
+                event_handler->displayMsg(user_mon_name+" was fully healed!");
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 applyImpostorSwitchIn(actor);
                 if(applySwitchInAbilitiesEffects(actor))
@@ -3766,540 +2970,1580 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned i
                 if(performEntryHazardCheck(actor))
                     return;
                 checkUproars();
-                break;
-            }
-            case 187:{
-                //user needs to recharge next turn
                 if(active_user->isFainted())
                     return;
-                active_user->addVolatileCondition(RECHARGING, -1);
-                break;
             }
-            case 188:{
-                //set sun
-                if(field->getWeather() == SUN || thereIsaCloudNine()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setWeather(SUN,active_user->hasHeldItem(HEAT_ROCK)?8:5);
-                }
-                break;
-            }
-            case 190:{
-                //mist
-                if(field->hasFieldEffect(MIST,actor)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setFieldEffect(MIST, 5, actor);
-                    event_handler->displayMsg(user_mon_name+" is shrouded in mist!");
-                }
-                break;
-            }
-            case 191:{
-                //user change type to first attack type
-                if(active_user->isFainted())
-                    return;
-                auto attacks = active_user->getAttacks();
-                if(attacks.size() == 0){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                auto attack_id = attacks[0];
-                Attack* attack_pnt = Attack::getAttack(attack_id);
-                if(attack_pnt == nullptr){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                Type attack_type = attack_pnt->getType();
-                active_user->clearTypes();
-                active_user->addType(attack_type);
-                event_handler->displayMsg(user_mon_name+" changed type was changed to "+typeToString(attack_type)+" type!");
-                break;
-            }
-            case 192:{
-                //change type to resist opponent last move
-                if(active_user->isFainted())
-                    return;
-                if(opponent_active->getLastAttackUsed() == 0){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                Attack* opponent_last_attack = Attack::getAttack(opponent_active->getLastAttackUsed());
-                if(opponent_last_attack == nullptr){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                // Type attack_type = opponent_last_attack->getType();
-                if(attack_type==NO_TYPE){
-                    attack_type = NORMAL;
-                }
-                std::set<Type> all_types = getAllTypesSet();
-                std::vector<Type> resist_types;
-                for(auto type:all_types){
-                    if(getTypeEffectiveness(attack_type,type,true,false,false) <= 0.9){
-                        resist_types.push_back(type);
-                    }
-                }
-                unsigned int choice = RNG::getRandomInteger(0,resist_types.size()-1);
-                active_user->clearTypes();
-                active_user->addType(resist_types[choice]);
-                event_handler->displayMsg(user_mon_name+" changed type to resist "+opponent_mon_name+"'s last move!");
-                break;
-            }
-            case 193:{
-                //block
-                if(active_target->isFainted())
-                    return;
-                if(active_target->hasVolatileCondition(BLOCKED)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    active_target->addVolatileCondition(BLOCKED, 5);
-                }
-                break;
-            }
-            case 198:{
-                //switch item with target
-                if(active_target->isFainted())
-                    return;
-                ItemType user_item = active_user->getHeldItem();
-                ItemType target_item = active_target->getHeldItem();
-                if((user_item == NO_ITEM_TYPE && target_item == NO_ITEM_TYPE)||
-                    !active_target->canStealItem() || !active_user->canStealItem()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                active_user->setHeldItem(target_item);
-                active_target->setHeldItem(user_item);
-                event_handler->displayMsg(user_mon_name+" switched items with "+opponent_mon_name+"!");
-                break;
-            }
-            case 199:{
-                //steal target item if it is a berry and use it
-                ItemType target_item = active_target->getHeldItem();
-                ItemData * target_item_data = ItemData::getItemData(target_item);
-                if(target_item_data == nullptr || 
-                    target_item_data->getCategory()!=BERRY || 
-                    !active_target->canStealItem()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                active_target->removeHeldItem();
-                active_user->consumeItem(target_item);
-                event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+" and ate it!");
-                break;
-            }
-            case 201:{
-                //delete opponent item if it is a berry
-                ItemType target_item = active_target->getHeldItem();
-                ItemData * target_item_data = ItemData::getItemData(target_item);
-                if(target_item_data == nullptr || 
-                    target_item_data->getCategory()!=BERRY){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                // ItemData * target_item_data = ItemData::getItemData(target_item);
-                active_target->removeHeldItem();
-                event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was destroyed!");
-                break;
-            }
-            case 202:{
-                // steal opponent item
-                ItemType target_item = active_target->getHeldItem();
-                ItemType user_item = active_user->getHeldItem();
-                if(user_item != NO_ITEM_TYPE || 
-                    target_item == NO_ITEM_TYPE || 
-                    !active_target->canStealItem()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                ItemData * target_item_data = ItemData::getItemData(target_item);
-                active_target->removeHeldItem();
-                active_user->setHeldItem(target_item);
-                event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+"!");
-                break;
-            }
-            case 204:{
-                //fling
-                ItemType user_item = active_user->removeHeldItem();
-                if(actor==PLAYER)
-                    item_on_the_ground_player = user_item;
-                else
-                    item_on_the_ground_opponent = user_item;
-                switch(user_item){
-                    case KINGS_ROCK:
-                    case RAZOR_FANG:{
-                        //flinch
-                        active_target->addVolatileCondition(FLINCH, 1);
-                        break;
-                    }
-                    case FLAME_ORB:{
-                        if(active_target->canBeBurned())
-                            active_target->setPermanentStatus(BURN);
-                        break;
-                    }
-                    case LIGHT_BALL:{
-                        if(active_target->canBeParalyzed())
-                            active_target->setPermanentStatus(PARALYSIS);
-                        break;
-                    }
-                    case TOXIC_ORB:{
-                        if(active_target->canBeBadlyPoisoned())
-                            active_target->setPermanentStatus(BAD_POISON);
-                        break;
-                    }
-                    case POISON_BARB:{
-                        if(active_target->canBePoisoned())
-                            active_target->setPermanentStatus(POISONED);
-                        break;
-                    }
-                    case WHITE_HERB:{
-                        //reset decreased stat changes of target
-                        if(active_target->getAttackModifier()<0)
-                            active_target->setAttackModifier(0);
-                        if(active_target->getSpecialAttackModifier()<0)
-                            active_target->setSpecialAttackModifier(0);
-                        if(active_target->getDefenseModifier()<0)
-                            active_target->setDefenseModifier(0);
-                        if(active_target->getSpecialDefenseModifier()<0)
-                            active_target->setSpecialDefenseModifier(0);
-                        if(active_target->getSpeedModifier()<0)
-                            active_target->setSpeedModifier(0);
-                        if(active_target->getAccuracyModifier()<0)
-                            active_target->setAccuracyModifier(0);
-                        if(active_target->getEvasionModifier()<0)
-                            active_target->setEvasionModifier(0);
-                        break;
-                    }
-                    case MENTAL_HERB:{
-                        //reset target volatiles
-                        active_target->removeVolatileCondition(INFATUATION);
-                        active_target->removeVolatileCondition(ENCORE);
-                        active_target->removeVolatileCondition(TAUNTED);
-                        active_target->removeVolatileCondition(TORMENTED);
-                        active_target->removeDisable();
-                        break;
-                    }
-                    default:break;
-                }
-                break;
-            }
-            case 207:{
-                //+1 att acc user
-                // bool res = active_user->changeAttackModifier(+1);
-                // res = res || active_user->changeAccuracyModifier(+1);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{1,1},{6,1}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 211:{
-                //defog
-                // bool res = active_target->changeEvasionModifier(-1);
-                field->clearFieldSide(other_actor);
-                field->clearTerrain();
-                event_handler->displayMsg(user_mon_name+" cleared "+opponent_mon_name+"'s side of the field!");
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{7,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 212:{
-                //-1 speed opponent
-                // bool res = active_target->changeSpeedModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{5,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 213:{
-                //set up misty terrain
-                if(field->getTerrain() == MISTY_FIELD){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }else{
-                    field->setTerrain(MISTY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                    consumeSeeds();
-                }
-                break;
-            }
-            case 214:{
-                //restore consumed item
-                if(active_user->isFainted())
-                    return;
-                if(active_user->restoreItem()){
-                    event_handler->displayMsg(user_mon_name+" restored its item!");
-                }else{
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 216:{
-                //trick room
-                if(field->hasFullFieldEffect(TRICK_ROOM)){
-                    field->clearFullFieldEffect(TRICK_ROOM);
-                    event_handler->displayMsg("The trick room wore off!");
-                }else{
-                    field->setFullFieldEffect(TRICK_ROOM, 5);
-                    event_handler->displayMsg(user_mon_name+" set up trick room!");
-                    checkRoomService();
-                }
-                break;
-            }
-            case 217:{
-                //drop money 5 times user level
-                unsigned int money_dropped = active_user->getLevel() * 5;
-                addMoney(money_dropped);
-                event_handler->displayMsg(user_mon_name+" dropped "+std::to_string(money_dropped)+"$!");
-                break;
-            }
-            case 223:{
-                //wish
-                event_handler->displayMsg(user_mon_name+" made a wish!");
-                field->setFieldEffect(WISH,2,actor);
-                break;
-            }
-            case 224:{
-                //swap status with opponent
-                if(!active_user->hasPermanentStatus()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                //permanent status
-                PermanentStatusCondition old_status = active_user->getPermanentStatus();
-                active_user->clearPermanentStatus();
-                if(!field->hasFieldEffect(SAFEGUARD,other_actor) ||
-                    active_user->hasAbility(INFILTRATOR))
-                    active_target->setPermanentStatus(old_status);
-                event_handler->displayMsg(user_mon_name+" tried to transfer its status to "+opponent_mon_name+"!");
-                break;
-            }
-            case 225:{
-                //+3 def user
-                // bool res = active_user->changeDefenseModifier(+3);
-                // if(res && active_user->hasAbility(CONTRARY))
-                //     tryEjectPack(actor);
-                if(active_user->isFainted())
-                    return;
-                StatCV changes = {{2,3}};
-                changeStats(actor,changes,false);
-                break;
-            }
-            case 228:{
-                //-1 att spatt opponent
-                // bool res = active_target->changeAttackModifier(-1);
-                // res = res || active_target->changeSpecialAttackModifier(-1);
-                // if(res && !active_target->hasAbility(CONTRARY))
-                //     tryEjectPack(other_actor);
-                if(active_target->isFainted())
-                    return;
-                StatCV changes = {{1,-1},{3,-1}};
-                changeStats(other_actor,changes,false);
-                break;
-            }
-            case 237:{
-                //pain split
-                if(active_user->isFainted() || active_target->isFainted())
-                    return;
-                unsigned int old_hp_user = active_user->getCurrentHP();
-                unsigned int old_hp_target = active_target->getCurrentHP();
-                unsigned int new_hp_user = (old_hp_user + old_hp_target) / 2;
-                unsigned int new_hp_target = (old_hp_user + old_hp_target) - new_hp_user;
-                unsigned int user_amount = 0;
-                unsigned int target_amount = 0;
-                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" share their HP!");
-                if(old_hp_user > new_hp_user){
-                    user_amount = active_user->addDirectDamage(old_hp_user - new_hp_user);
-                    event_handler->displayMsg(user_mon_name+" took "+std::to_string(user_amount)+" damage!");
-                }else if(old_hp_user < new_hp_user){
-                    user_amount = active_user->removeDamage(new_hp_user - old_hp_user);
-                    if(user_amount > 0)
-                        event_handler->displayMsg(user_mon_name+" was healed by "+std::to_string(user_amount)+" HP!");
-                }
-                if(old_hp_target > new_hp_target){
-                    target_amount = active_target->addDirectDamage(old_hp_target - new_hp_target);
-                    event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(target_amount)+" damage!");
-                }else if(old_hp_target < new_hp_target){
-                    target_amount = active_target->removeDamage(new_hp_target - old_hp_target);
-                    if(target_amount > 0)
-                        event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(target_amount)+" HP!");
-                }
-                break;
-            }
-            case 242:{
-                //power split
-                Stats user_battle_stats = active_user->getBattleStats();
-                Stats target_battle_stats = active_target->getBattleStats();
-                unsigned int user_atk = user_battle_stats.getAtk();
-                unsigned int user_spatk = user_battle_stats.getSpatk();
-                unsigned int target_atk = target_battle_stats.getAtk();
-                unsigned int target_spatk = target_battle_stats.getSpatk();
-                unsigned int new_user_atk = (user_atk + target_atk) / 2;
-                unsigned int new_user_spatk = (user_spatk + target_spatk) / 2;
-                unsigned int new_target_atk = (user_atk + target_atk) - new_user_atk;
-                unsigned int new_target_spatk = (user_spatk + target_spatk) - new_user_spatk;
-                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their attacking stats!");
-                active_user->setBattleAttack(new_user_atk);
-                active_user->setBattleSpecialAttack(new_user_spatk);
-                active_target->setBattleAttack(new_target_atk);
-                active_target->setBattleSpecialAttack(new_target_spatk);
-                break;
-            }
-            case 243:{
-                //guard split
-                Stats user_battle_stats = active_user->getBattleStats();
-                Stats target_battle_stats = active_target->getBattleStats();
-                unsigned int user_def = user_battle_stats.getDef();
-                unsigned int user_spdef = user_battle_stats.getSpdef();
-                unsigned int target_def = target_battle_stats.getDef();
-                unsigned int target_spdef = target_battle_stats.getSpdef();
-                unsigned int new_user_def = (user_def + target_def) / 2;
-                unsigned int new_user_spdef = (user_spdef + target_spdef) / 2;
-                unsigned int new_target_def = (user_def + target_def) - new_user_def;
-                unsigned int new_target_spdef = (user_spdef + target_spdef) - new_user_spdef;
-                event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their defending stats!");
-                active_user->setBattleAttack(new_user_def);
-                active_user->setBattleSpecialAttack(new_user_spdef);
-                active_target->setBattleAttack(new_target_def);
-                active_target->setBattleSpecialAttack(new_target_spdef);
-                break;
-            }
-            case 244:{
-                //power trick
-                if(active_user->isFainted())
-                    return;
-                Stats user_battle_stats = active_user->getBattleStats();
-                unsigned int user_atk = user_battle_stats.getAtk();
-                unsigned int user_def = user_battle_stats.getDef();
-                active_user->setBattleAttack(user_def);
-                active_user->setBattleDefense(user_atk);
-                break;
-            }
-            case 245:{
-                //target cannot use sound based attacks for 2 turns
-                if(active_target->isFainted())
-                    return;
-                active_target->addVolatileCondition(THROAT_CHOPPED, 2);
-                break;
-            }
-            case 248:{
-                //grudge
-                if(active_user->isFainted())
-                    return;
-                if(active_user->hasVolatileCondition(GRUDGED)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break; 
-                }
-                active_user->addVolatileCondition(GRUDGED, -1);
-            }
-            case 250:{
-                //sketch
-                unsigned int last_attack_target_id = active_target->getLastAttackUsed();
-                Attack* last_attack_target = Attack::getAttack(last_attack_target_id);
-                if(last_attack_target == nullptr){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                if(!last_attack_target->canBeSketched()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                if(!active_user->getMonster()->replaceAttack(SKETCH_ID,last_attack_target_id)){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                break;
-            }
-            case 252:{
-                //heal all team of status conditions
-                bool has_effect=false;
-                for(unsigned int i=0;i<user_team->getSize();i++){
-                    Monster* user_mon = user_team->getMonster(i);
-                    if(user_mon->isFainted())
-                        continue;
-                    if(attack->isSoundBased() && user_mon->getAbility() == SOUNDPROOF)//heal bell does not affect soundproof holders
-                        continue;
-                    if(user_mon->getPermanentStatus()==NO_PERMANENT_CONDITION)
-                        continue;
-                    user_mon->setPermanentStatus(NO_PERMANENT_CONDITION);
-                    has_effect=true;
-                }
-                if(!has_effect){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                }
-                break;
-            }
-            case 255:{
-                //create substitute and switch out
-                unsigned int substitute_hp = max(1,active_user->getMaxHP() / 4);
-                unsigned int substitute_cost = max(1,active_user->getMaxHP() / 2);
-                if(substitute_cost >= active_user->getCurrentHP()){
-                    event_handler->displayMsg("But it failed!");
-                    active_user->setLastAttackFailed();
-                    break;
-                }
-                if(!user_team->hasAliveBackup()){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                if(!active_user->canSwitchOut(active_target) && effect==124){
-                    if(attack->getCategory() == STATUS){
-                        event_handler->displayMsg("But it failed!");
-                        active_user->setLastAttackFailed();
-                    }
-                    break;
-                }
-                unsigned int actual_cost_dmg = active_user->addDirectDamage(substitute_cost);
-                event_handler->displayMsg(user_mon_name+" lost "+std::to_string(actual_cost_dmg)+" HP in order to create a substitute!");
-                //force user to switch
-                forceSwitch(actor);
-                active_user = getActorBattler(actor);
-                checkUproars();
-                if(active_user->isFainted())
-                    return;
-                if(!active_user->hasSubstitute())
-                    active_user->setSubstituteHP(substitute_hp);
-            }
-            default:break;
+            break;
         }
+        case 90:{// disable last move used by opponenet
+            if(active_target->isFainted())
+                return;
+            Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
+            if(active_target->hasDiabledAttack() || last_attack == nullptr){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->disableAttack(last_attack->getId(),5);
+                event_handler->displayMsg(opponent_mon_name+"'s "+last_attack->getName()+" was disabled!");
+            }
+            break;
+        }
+        case 91:case 236:{
+            // 91: remove 4 PP from opponents last move used
+            //236: remove 3 PP
+            if(active_target->isFainted())
+                return;
+            unsigned int pp_amount;
+            if(effect == 91)
+                pp_amount = 4;
+            else
+                pp_amount = 3;
+            Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
+            if(last_attack == nullptr || ! active_target->hasPP(last_attack->getId())){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+            }else{
+                active_target->usePP(last_attack->getId(),pp_amount);
+                event_handler->displayMsg(opponent_mon_name+"'s "+last_attack->getName()+" lost some PP!");
+            }
+            break;
+        }
+        case 92:{//imprison
+            if(active_target->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(IMPRISON)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(IMPRISON, -1);
+            }
+            break;
+        }
+        case 93:{//Mimic
+            if(active_user->isFainted())
+                return;
+            Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
+            if(last_attack==nullptr || !last_attack->canBeSketched()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(!active_user->setMimickedAttack(active_target->getLastAttackUsed())){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                event_handler->displayMsg(user_mon_name+" mimicked "+opponent_mon_name+"'s "+last_attack->getName()+"!");
+            }
+            break;
+        }
+        case 95:{//rest
+            if(active_user->isFainted())
+                return;
+            if(isUproar()){
+                event_handler->displayMsg(user_mon_name+" But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            unsigned int maxHP = active_user->getMaxHP();
+            active_user->setPermanentStatusForced(SLEEP_3);
+            event_handler->displayMsg(user_mon_name+" was fully healed!");
+            active_user->removeDamage(maxHP);
+            break;
+        }
+        case 96:{//mean look
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasVolatileCondition(MEAN_LOOK) || active_target->hasType(GHOST)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->addVolatileCondition(MEAN_LOOK, -1);
+            }
+            break;
+        }
+        case 98:{//quick guard
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(QUICK_GUARD)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(QUICK_GUARD, 5);
+                event_handler->displayMsg(user_mon_name+" is protecting its team from priority attacks!");
+            }
+            break;
+        }
+        case 99:{//set up grassy terrain
+            if(field->getTerrain() == GRASSY_FIELD){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setTerrain(GRASSY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
+                consumeSeeds();
+            }
+            break;
+        }
+        case 102:{//transform
+            if(active_user->isFainted())
+                return;
+            if(active_target->isFainted()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(active_target->hasSubstitute()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            active_user->transformInto(active_target->getMonster());
+            event_handler->displayMsg(user_mon_name+" transformed into "+opponent_mon_name+"!");
+            break;
+        }
+        case 104:{//tri attack
+            if(active_target->isFainted())
+                return;
+            if(!active_target->hasPermanentStatus()){
+                if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                    !active_user->hasAbility(INFILTRATOR)){
+                    break;
+                }
+                unsigned int random_number = RNG::getRandomInteger(1,3);
+                if(random_number == 1 && active_target->canBeBurned() 
+                    && !active_target->hasType(FIRE)){// try to burn
+                    active_target->setPermanentStatus(BURN);
+                    event_handler->displayMsg(opponent_mon_name+" was burned!");
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
+                        !active_user->hasPermanentStatus()){
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                        active_user->setPermanentStatus(BURN);
+                    }
+                }else if(random_number==2 && 
+                    active_target->canBeParalyzed()){ //try to paralyze
+                    active_target->setPermanentStatus(PARALYSIS);
+                    event_handler->displayMsg(opponent_mon_name+" was paralyzed!");
+                    if(active_target->hasAbility(SYNCHRONIZE) && 
+                        !active_user->hasPermanentStatus()){
+                        event_handler->displayMsg(opponent_mon_name+"'s Synchronize triggers!");
+                        active_user->setPermanentStatus(PARALYSIS);
+                    }
+                }else if(active_target->canBeFrozen() && 
+                    !active_target->hasType(ICE)){
+                    active_target->setPermanentStatus(FREEZE);
+                    event_handler->displayMsg(opponent_mon_name+" was frozen solid!");
+                }
+            }
+            break;
+        }
+        case 106:{//taunt
+            if(active_target->isFainted())
+                return;
+            if(!active_target->hasVolatileCondition(TAUNTED))
+                event_handler->displayMsg(opponent_mon_name+" was taunted!");
+            else{
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 234:{//torment
+            if(active_target->isFainted())
+                return;
+            if(!active_target->hasVolatileCondition(TORMENTED))
+                event_handler->displayMsg(opponent_mon_name+" was tormented! It wiil be unable to use the same move in twice in a row!");
+            else{
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 107:{//turn opponent into water type
+            if(active_target->isFainted())
+                return;
+            auto types = active_target->getTypes();
+            if(types.size() == 1 && active_target->hasType(WATER)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->changeType(WATER);
+                event_handler->displayMsg(opponent_mon_name+" was turned into a water type!");
+            }
+            break;
+        }
+        case 108:{//copy enemy stat changes
+            int attack_mod = active_target->getAttackModifier();
+            int special_attack_mod = active_target->getSpecialAttackModifier();
+            int defense_mod = active_target->getDefenseModifier();
+            int special_defense_mod = active_target->getSpecialDefenseModifier();
+            int speed_mod = active_target->getSpeedModifier();
+            int accuracy_mod = active_target->getAccuracyModifier();
+            int evasion_mod = active_target->getEvasionModifier();
+            if(!attack_mod && !special_attack_mod && !defense_mod &&
+                !special_defense_mod && !speed_mod && !accuracy_mod && !evasion_mod){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->setAttackModifier(attack_mod);
+                active_user->setSpecialAttackModifier(special_attack_mod);
+                active_user->setDefenseModifier(defense_mod);
+                active_user->setSpecialDefenseModifier(special_defense_mod);
+                active_user->setSpeedModifier(speed_mod);
+                active_user->setAccuracyModifier(accuracy_mod);
+                active_user->setEvasionModifier(evasion_mod);
+                event_handler->displayMsg(user_mon_name+" copied "+opponent_mon_name+"'s stat changes!");
+            }
+            break;
+        }
+        case 109:{//+2 spdef user
+            // bool res = active_user->changeSpecialDefenseModifier(+2);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{4,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 110:{//wonder room
+            if(active_user->isFainted())
+                return;
+            if(field->hasFullFieldEffect(WONDER_ROOM)){
+                field->clearFullFieldEffect(WONDER_ROOM);
+            }else{
+                field->setFullFieldEffect(WONDER_ROOM, 5);
+            }
+            break;
+        }
+        case 115:{
+            //-1 def spdef user
+            // bool res = active_user->changeDefenseModifierForced(-1);
+            // res = res || active_user->changeSpecialDefenseModifierForced(-1);
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,-1},{4,-1}};
+            changeStats(actor,changes,true);
+            break;
+        }
+        case 121:{
+            //user halves its HP and then maximizes its attack
+            if(active_user->isFainted())
+                return;
+            unsigned int maxHP = active_user->getMaxHP();
+            unsigned int currentHP = active_user->getCurrentHP();
+            unsigned int half_hp = max(1,maxHP/2);
+            if(currentHP <= half_hp){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addDirectDamage(half_hp);
+                event_handler->displayMsg(user_mon_name+" halved its HP!");
+                // bool res = active_user->changeAttackModifier(12);
+                // if(res && active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                StatCV changes = {{1,12}};
+                changeStats(actor,changes,false);
+            }
+            break;
+        }
+        case 122:{
+            //-1 speed opponent
+            // bool res = active_target->changeSpeedModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{5,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 123:{
+            // target is forced to switch
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute &&
+                !active_user->hasAbility(INFILTRATOR)){
+                // event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(is_wild_battle && active_target->getActor()==OPPONENT){
+                if(!active_target->hasAbility(SUCTION_CUPS) && 
+                    !active_target->hasVolatileCondition(INGRAINED)){
+                    //ends the wild battle
+                    is_wild_battle_over = true;
+                }else if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(!target_team->hasAliveBackup() || 
+                active_target->hasAbility(SUCTION_CUPS) ||
+                active_target->hasVolatileCondition(INGRAINED)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            //force opponent to switch
+            forceSwitch(other_actor);
+            active_target = getActorBattler(other_actor);
+            checkUproars();
+            if(active_target->isFainted())
+                return;
+            break;
+        }
+        case 124:case 231:case 235:{
+            // user switches out, 
+            // fails if trapped in the case of 124
+            // start snow in case of 235
+            if(active_user->isFainted())
+                return;
+            if(effect==124 && is_wild_battle && active_user->getActor()==OPPONENT){
+                if(active_user->canSwitchOut(active_target)){
+                    is_wild_battle_over = true;
+                }else{
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(!user_team->hasAliveBackup()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(!active_user->canSwitchOut(active_target) && effect==124){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(field->getWeather()!=SNOWSTORM && effect==235){
+                event_handler->displayMsg(user_mon_name+" started a snowstorm!");
+                field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
+            }
+            //force user to switch
+            forceSwitch(actor);
+            active_user = getActorBattler(actor);
+            checkUproars();
+            if(active_user->isFainted())
+                return;
+            break;
+        }
+        case 125:{
+            //reflect
+            if(field->hasFieldEffect(REFLECT,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(REFLECT, active_user->hasHeldItem(LIGHT_CLAY)?8:5, actor);
+                event_handler->displayMsg(user_mon_name+" sets up a barrier that reduces damage coming from physical attacks!");
+            }
+            break;
+        }
+        case 126:{
+            //heal 50% HP
+            if(active_user->isFainted())
+                return;
+            if(active_user->isAtFullHP()){
+                event_handler->displayMsg(user_mon_name+" is already at full health!");
+                active_user->setLastAttackFailed();
+            }else{
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int heal_amount = max((maxHP+1) / 2,1);
+                unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
+            }
+            break;
+        }
+        case 127:{
+            // copy target ability
+            if(active_target->isFainted() || active_user->isFainted())
+                return;
+            if(active_user->getAbility() == active_target->getAbility() ||
+                active_target->hasAbility(NO_ABILITY) ||
+                active_user->hasAbility(NO_ABILITY) ||
+                !isAbilityTraceable(active_target->getAbility()) ||
+                active_user->hasHeldItem(ABILITY_SHIELD)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                event_handler->displayMsg(user_mon_name+" copied "+opponent_mon_name+"'s ability!");
+                active_user->setAbility(active_target->getAbility());
+            }
+            break;
+        }
+        case 129:{
+            //+1 def spdef user
+            // bool res = active_user->changeDefenseModifier(+1);
+            // res = res || active_user->changeSpecialDefenseModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,1},{4,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 130:{
+            //schedule future sight
+            Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
+            unsigned int attack_stat = future_sight->getCategory()==PHYSICAL ?
+                active_user->getModifiedAttack() : active_user->getModifiedSpecialAttack();
+            scheduled_futuresights.push_back(
+                ScheduledFutureSight(
+                    3,
+                    attack_stat,
+                    active_user->getLevel(),
+                    other_actor,
+                    active_user->hasType(future_sight->getType())
+                ));
+            event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
+            break;
+        }
+        case 132:{
+            //+1 att def user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeDefenseModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{2,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 133:{
+            // -2 SPATT user
+            // bool res = active_user->changeSpecialAttackModifierForced(-2);
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,-2}};
+            changeStats(actor,changes,true);
+            break;
+        }
+        case 137:{
+            //user becomes same type as target
+            if(active_user->isFainted())
+                return;
+            auto types = active_target->getTypes();
+            if(active_target->isFainted() || types.size()==0){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }else{
+                active_user->clearTypes();
+                for(auto type : types){
+                    active_user->addType(type);
+                }
+                event_handler->displayMsg(user_mon_name+" became the same type as "+opponent_mon_name+"!");
+            }
+            break;
+        }
+        case 138:{
+            //smacks target down
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute &&
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(active_target->hasVolatileCondition(SMACKED_DOWN)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+            }else{
+                active_target->addVolatileCondition(SMACKED_DOWN, 5);
+                event_handler->displayMsg(opponent_mon_name+" was smacked down!");
+                if(active_target->hasVolatileCondition(MAGNET_RISE))
+                    active_target->removeVolatileCondition(MAGNET_RISE);
+            }
+            break;
+        }
+        case 139:{
+            //stealth rocks
+            if(field->hasFieldEffect(STEALTH_ROCKS,other_actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(STEALTH_ROCKS, -1, other_actor);
+                event_handler->displayMsg("Pointed rocks float in the air at "+opponent_mon_name+"'s side!");
+            }
+        }
+        case 221:{
+            //sticky web
+            if(field->hasFieldEffect(STICKY_WEB,other_actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(STICKY_WEB, -1, other_actor);
+                event_handler->displayMsg("A sticky web slows down all Pokemon entering "+opponent_mon_name+"'s side!");
+            }
+        }
+        case 142:{
+            //+1 spd user
+            // bool res = active_user->changeSpeedModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 143:{
+            //opponent drowsy
+            if(active_target->isFainted())
+                return;
+            if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
+                !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("Safeguard protects "+opponent_mon_name+"!");
+                if(attack->getCategory() == STATUS)
+                    active_user->setLastAttackFailed();
+            }else if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                    active_user->setLastAttackFailed();
+                }
+            }else if(!active_target->canFallAsleep() ||
+                active_target->hasVolatileCondition(DROWSY)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+            }else{
+                active_target->addVolatileCondition(DROWSY, 2);
+            }
+            break;
+        }
+        case 144:{
+            //curse
+            if(active_user->hasType(GHOST)){
+                if(active_target->isFainted())
+                    return;
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int actual_damage = active_user->addDirectDamage(maxHP / 2);
+                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage to send a curse to its opponent!");
+                if(active_target->hasVolatileCondition(CURSED)){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }else{
+                    active_target->addVolatileCondition(CURSED, -1);
+                }
+            }else{
+                // bool res1 = active_user->changeSpeedModifierForced(-1);
+                // bool res2 = active_user->changeAttackModifier(+1);
+                // res2 = res2 || active_user->changeDefenseModifier(+1);
+                // if(res2 && active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                // else if(res1 && !active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                if(active_user->isFainted())
+                    return;
+                StatCV changes = {{1,1},{2,1},{5,-1}};
+                changeStats(actor,changes,true);
+            }
+            break;
+        }
+        case 145:{
+            //heal 50% target
+            if(active_target->isFainted())
+                return;
+            if(active_target->isAtFullHP()){
+                event_handler->displayMsg(opponent_mon_name+" is already at full health!");
+                active_user->setLastAttackFailed();
+            }else{
+                unsigned int maxHP = active_target->getMaxHP();
+                unsigned int heal_amount;
+                if(active_user->hasAbility(MEGA_LAUNCHER) && attack->isPulse())
+                    //mega launcher also powers up heal pulse
+                    heal_amount = max((maxHP*3+3) / 4,1);
+                else
+                    heal_amount = max((maxHP+1) / 2,1);
+                unsigned int actual_heal_amount = active_target->removeDamage(heal_amount);
+                if(actual_heal_amount>0)
+                    event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(actual_heal_amount)+" HP!");
+            }
+            break;
+        }
+        case 146:{
+            //infatuation opponent
+            if(active_target->isFainted())
+                return;
+            Gender user_gender = active_user->getGender();
+            Gender target_gender = active_target->getGender();
+            if(active_target->hasAbility(OBLIVIOUS) ||
+                !areMaleAndFemale(user_gender,target_gender) ||
+                active_target->hasVolatileCondition(INFATUATION)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->addVolatileCondition(INFATUATION, -1);
+                if(active_target->hasHeldItem(DESTINY_KNOT))
+                    active_user->addVolatileCondition(INFATUATION, -1);
+            }
+            break;
+        }
+        case 147:{
+            //lock on target
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(active_user->hasLockOn(active_target->getMonster())){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addLockOn(active_target->getMonster());
+            }
+            break;
+        }
+        case 148:{
+            //electric terrain
+            if(field->getTerrain() == ELECTRIC_FIELD){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setTerrain(ELECTRIC_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
+                consumeSeeds();
+            }
+            break;
+        }
+        case 149:{
+            //magnet rise
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(MAGNET_RISE) || 
+                field->hasFullFieldEffect(GRAVITY)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(MAGNET_RISE, 5);
+                event_handler->displayMsg(user_mon_name+" raised from the ground through magnetism!");
+                if(active_target->hasVolatileCondition(SMACKED_DOWN))
+                    active_target->removeVolatileCondition(SMACKED_DOWN);
+            }
+        }
+        case 151:{
+            //uproar
+            if(active_user->isFainted())
+                return;
+            event_handler->displayMsg(user_mon_name+" is making an uproar!");
+            uproaring_monsters.insert(active_user->getMonster());
+            break;
+        }
+        case 152:{
+            //raise a random stat by +2
+            if(active_user->isFainted())
+                return;
+            std::vector<int> options;
+            if(active_user->getAttackModifier() < MAX_MODIFIER)
+                options.push_back(1);
+            if(active_user->getSpecialAttackModifier() < MAX_MODIFIER)
+                options.push_back(2);
+            if(active_user->getDefenseModifier() < MAX_MODIFIER)
+                options.push_back(3);
+            if(active_user->getSpecialDefenseModifier() < MAX_MODIFIER)
+                options.push_back(4);
+            if(active_user->getSpeedModifier() < MAX_MODIFIER)
+                options.push_back(5);
+            if(active_user->getAccuracyModifier() < MAX_MODIFIER)
+                options.push_back(6);
+            if(active_user->getEvasionModifier() < MAX_MODIFIER)
+                options.push_back(7);
+            if(options.size() == 0){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            int chosen_option = options[RNG::getRandomInteger(0,options.size()-1)];
+            StatCV changes = {{chosen_option,2}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 153:{
+            //start snowstorm
+            if(field->getWeather() == SNOWSTORM || thereIsaCloudNine()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else
+                field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
+            break;
+        }
+        case 154:{
+            //aqua ring
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(AQUA_RING)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(AQUA_RING, -1);
+                event_handler->displayMsg(user_mon_name+" is surrounded by a veil of water!");
+            }
+            break;
+        }
+        case 157:{
+            //memento
+            if(active_user->isFainted())
+                return;
+            if(active_target->hasVolatileCondition(PROTECT)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            //user faints
+            active_user->addDirectDamage(active_user->getMaxHP());
+            // opponent stats are lowered
+            // bool res = active_target->changeAttackModifier(-12);
+            // res = res || active_target->changeSpecialAttackModifier(-12);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            StatCV changes = {{1,-12},{3,-12}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 161:{
+            //destiny bond
+            if(active_user->isFainted())
+                return;
+            int times_used = active_user->getSameAttackCounter();
+            if(times_used==1){
+                active_user->addVolatileCondition(DESTINY_BOND,3);
+            }else if(times_used==2){
+                if(RNG::getRandomInteger(0,2)==0){
+                    active_user->addVolatileCondition(DESTINY_BOND,3);
+                }else{
+                    active_user->setLastAttackFailed();
+                    event_handler->displayMsg("But it failed!");
+                }
+            }else{
+                if(RNG::oneEight()){
+                    active_user->addVolatileCondition(DESTINY_BOND,3);
+                }else{
+                    active_user->setLastAttackFailed();
+                    event_handler->displayMsg("But it failed!");
+                }
+            }
+            break;
+        }
+        case 163:{
+            //perish song
+            if(active_user->isFainted())
+                return;
+            event_handler->displayMsg("All Pokèmon that hear "+user_mon_name+"'s song will faint in 3 turns!");
+            if(!active_user->hasVolatileCondition(PERISH_SONG))
+                active_user->addVolatileCondition(PERISH_SONG,4);
+            if(!active_target->hasVolatileCondition(PERISH_SONG) && 
+                !active_target->isFainted() &&
+                !active_target->hasAbility(SOUNDPROOF))
+                active_target->addVolatileCondition(PERISH_SONG,4);
+            break;
+        }
+        case 166:{
+            //-1 speed user
+            // bool res = active_user->changeSpeedModifierForced(-1);
+            // if(res && !active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{5,-1}};
+            changeStats(actor,changes,true);
+            break;
+        }
+        case 167:{
+            // charge user, +1 spdef user
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(CHARGED)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(CHARGED, -1);
+                // bool res = active_user->changeSpecialDefenseModifier(+1);
+                // if(res && active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                StatCV changes = {{4,1}};
+                changeStats(actor,changes,false);
+            }
+            break;
+        }
+        case 169:{
+            // +1 SPATT user
+            // bool res = active_user->changeSpecialAttackModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 170:{
+            // +1 DEF SPDEF user iff ability is PLUS or MINUS
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasAbility(PLUS) || 
+                active_user->hasAbility(MINUS)){
+                // bool res = active_user->changeDefenseModifier(+1);
+                // res = res || active_user->changeSpecialDefenseModifier(+1);
+                // if(res && active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                StatCV changes = {{2,1},{4,1}};
+                changeStats(actor,changes,false);
+            }else{
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 173:{
+            //user endures all hits this turn
+            if(active_user->isFainted())
+                return;
+            active_user->addVolatileCondition(ENDURE,5);
+            break;
+        }
+        case 177:{
+            //reset target stat changes
+            if(hits_substitute &&
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    active_user->setLastAttackFailed();
+                    event_handler->displayMsg("The substitute protects "+opponent_mon_name+"!");
+                }
+                break;
+            }
+            active_target->setAccuracyModifier(0);
+            active_target->setEvasionModifier(0);
+            active_target->setAttackModifier(0);
+            active_target->setDefenseModifier(0);
+            active_target->setSpecialAttackModifier(0);
+            active_target->setSpecialDefenseModifier(0);
+            active_target->setSpeedModifier(0);
+            break;
+        }
+        case 179:{
+            //ingrain
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(INGRAINED)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_user->addVolatileCondition(INGRAINED, -1);
+            }
+            break;
+        }
+        case 180:{
+            // +1 ATT DEF SPATT SPDEF SPEED user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeDefenseModifier(+1);
+            // res = res || active_user->changeSpecialAttackModifier(1);
+            // res = res || active_user->changeSpecialDefenseModifier(1);
+            // res = res || active_user->changeSpeedModifier(1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{2,1},{3,1},{4,1},{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 181:{
+            //-1 att def target
+            // bool res = active_target->changeAttackModifier(-1);
+            // res = res || active_target->changeDefenseModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{1,-1},{2,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 182:{
+            //+1 att speed user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeSpeedModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{5,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 183:{
+            //switch att spatt with opponent
+            if(active_target->isFainted())
+                return;
+            int old_user_att = active_user->getAttackModifier();
+            int old_user_spatt = active_user->getSpecialAttackModifier();
+            int old_target_att = active_target->getAttackModifier();
+            int old_target_spatt = active_target->getSpecialAttackModifier();
+            active_user->setAttackModifier(old_target_att);
+            active_user->setSpecialAttackModifier(old_target_spatt);
+            active_target->setAttackModifier(old_user_att);
+            active_target->setSpecialAttackModifier(old_user_spatt);
+            event_handler->displayMsg(user_mon_name+" switched Atk and Sp. Atk stat changes with "+opponent_mon_name+"!");
+            break;
+        }
+        case 184:{
+            //switch att spatt with opponent
+            if(active_target->isFainted())
+                return;
+            int old_user_def = active_user->getDefenseModifier();
+            int old_user_spdef = active_user->getSpecialDefenseModifier();
+            int old_target_def = active_target->getDefenseModifier();
+            int old_target_spdef = active_target->getSpecialDefenseModifier();
+            active_user->setAttackModifier(old_target_def);
+            active_user->setSpecialAttackModifier(old_target_spdef);
+            active_target->setAttackModifier(old_user_def);
+            active_target->setSpecialAttackModifier(old_user_spdef);
+            event_handler->displayMsg(user_mon_name+" switched Def and Sp. def stat changes with "+opponent_mon_name+"!");
+            break;
+        }
+        case 185:{
+            // baton pass
+            if(active_user->isFainted())
+                return;
+            //user switches out and entering monster keeps sta changes and volatiles
+            if(!user_team->hasAliveBackup()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(active_user->hasAbility(REGENERATOR)){
+                //regenerate 1/3 of user HP
+                unsigned int maxHP = active_user->getMaxHP();
+                unsigned int heal_amount = max((maxHP+2) / 3,1);
+                active_user->removeDamage(heal_amount);
+            }
+            if(active_user->hasAbility(NATURAL_CURE)){
+                //remove status
+                active_user->clearPermanentStatus();
+            }
+            if(actor==PLAYER){
+                unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
+                player_team->swapActiveMonster(new_active_index);
+                player_active->setMonster(player_team->getActiveMonster());
+            }else{
+                unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
+                opponent_team->swapActiveMonster(new_active_index);
+                opponent_active->setMonster(opponent_team->getActiveMonster());
+            }
+            if(thereIsNeutralizingGas()){
+                player_active->neutralizeAbility();
+                opponent_active->neutralizeAbility();
+            }else{
+                player_active->cancelAbilityNeutralization();
+                opponent_active->cancelAbilityNeutralization();
+            }
+            removeVolatilesFromOpponentOfMonsterLeavingField(actor);
+            player_active->addSeenOpponent(opponent_active->getMonster());
+            applyImpostorSwitchIn(actor);
+            if(applySwitchInAbilitiesEffects(actor))
+                return;
+            if(applySwitchInItemsEffects(actor))
+                return;
+            if(performEntryHazardCheck(actor))
+                return;
+            checkUproars();
+            break;
+        }
+        case 187:{
+            //user needs to recharge next turn
+            if(active_user->isFainted())
+                return;
+            active_user->addVolatileCondition(RECHARGING, -1);
+            break;
+        }
+        case 188:{
+            //set sun
+            if(field->getWeather() == SUN || thereIsaCloudNine()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setWeather(SUN,active_user->hasHeldItem(HEAT_ROCK)?8:5);
+            }
+            break;
+        }
+        case 190:{
+            //mist
+            if(field->hasFieldEffect(MIST,actor)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setFieldEffect(MIST, 5, actor);
+                event_handler->displayMsg(user_mon_name+" is shrouded in mist!");
+            }
+            break;
+        }
+        case 191:{
+            //user change type to first attack type
+            if(active_user->isFainted())
+                return;
+            auto attacks = active_user->getAttacks();
+            if(attacks.size() == 0){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            auto attack_id = attacks[0];
+            Attack* attack_pnt = Attack::getAttack(attack_id);
+            if(attack_pnt == nullptr){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            Type attack_type = attack_pnt->getType();
+            active_user->clearTypes();
+            active_user->addType(attack_type);
+            event_handler->displayMsg(user_mon_name+" changed type was changed to "+typeToString(attack_type)+" type!");
+            break;
+        }
+        case 192:{
+            //change type to resist opponent last move
+            if(active_user->isFainted())
+                return;
+            if(opponent_active->getLastAttackUsed() == 0){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            Attack* opponent_last_attack = Attack::getAttack(opponent_active->getLastAttackUsed());
+            if(opponent_last_attack == nullptr){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            // Type attack_type = opponent_last_attack->getType();
+            if(attack_type==NO_TYPE){
+                attack_type = NORMAL;
+            }
+            std::set<Type> all_types = getAllTypesSet();
+            std::vector<Type> resist_types;
+            for(auto type:all_types){
+                if(getTypeEffectiveness(attack_type,type,true,false,false) <= 0.9){
+                    resist_types.push_back(type);
+                }
+            }
+            unsigned int choice = RNG::getRandomInteger(0,resist_types.size()-1);
+            active_user->clearTypes();
+            active_user->addType(resist_types[choice]);
+            event_handler->displayMsg(user_mon_name+" changed type to resist "+opponent_mon_name+"'s last move!");
+            break;
+        }
+        case 193:{
+            //block
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasVolatileCondition(BLOCKED)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                active_target->addVolatileCondition(BLOCKED, 5);
+            }
+            break;
+        }
+        case 198:{
+            //switch item with target
+            if(active_target->isFainted())
+                return;
+            if(active_user->isFainted())
+                return;
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            ItemType user_item = active_user->getHeldItem();
+            ItemType target_item = active_target->getHeldItem();
+            if((user_item == NO_ITEM_TYPE && target_item == NO_ITEM_TYPE)||
+                !active_target->canStealItem() || !active_user->canStealItem()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            active_user->setHeldItem(target_item);
+            active_target->setHeldItem(user_item);
+            event_handler->displayMsg(user_mon_name+" switched items with "+opponent_mon_name+"!");
+            break;
+        }
+        case 199:{
+            //steal target item if it is a berry and use it
+            if(hits_substitute)
+                return;
+            ItemType target_item = active_target->getHeldItem();
+            ItemData * target_item_data = ItemData::getItemData(target_item);
+            if(target_item_data == nullptr || 
+                target_item_data->getCategory()!=BERRY || 
+                !active_target->canStealItem()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            active_target->removeHeldItem();
+            active_user->consumeItem(target_item);
+            event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+" and ate it!");
+            break;
+        }
+        case 201:{
+            //delete opponent item if it is a berry
+            if(hits_substitute)
+                return;
+            ItemType target_item = active_target->getHeldItem();
+            ItemData * target_item_data = ItemData::getItemData(target_item);
+            if(target_item_data == nullptr || 
+                target_item_data->getCategory()!=BERRY){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            // ItemData * target_item_data = ItemData::getItemData(target_item);
+            active_target->removeHeldItem();
+            event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was destroyed!");
+            break;
+        }
+        case 202:{
+            // steal opponent item
+            if(hits_substitute)
+                return;
+            ItemType target_item = active_target->getHeldItem();
+            ItemType user_item = active_user->getHeldItem();
+            if(user_item != NO_ITEM_TYPE || 
+                target_item == NO_ITEM_TYPE || 
+                !active_target->canStealItem()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            ItemData * target_item_data = ItemData::getItemData(target_item);
+            active_target->removeHeldItem();
+            active_user->setHeldItem(target_item);
+            event_handler->displayMsg(user_mon_name+" stole "+opponent_mon_name+"'s "+target_item_data->getName()+"!");
+            break;
+        }
+        case 204:{
+            //fling
+            ItemType user_item = active_user->removeHeldItem();
+            if(actor==PLAYER)
+                item_on_the_ground_player = user_item;
+            else
+                item_on_the_ground_opponent = user_item;
+            if(active_target->hasSubstitute() && 
+                !active_user->hasAbility(INFILTRATOR)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            switch(user_item){
+                case KINGS_ROCK:
+                case RAZOR_FANG:{
+                    //flinch
+                    active_target->addVolatileCondition(FLINCH, 1);
+                    break;
+                }
+                case FLAME_ORB:{
+                    if(active_target->canBeBurned())
+                        active_target->setPermanentStatus(BURN);
+                    break;
+                }
+                case LIGHT_BALL:{
+                    if(active_target->canBeParalyzed())
+                        active_target->setPermanentStatus(PARALYSIS);
+                    break;
+                }
+                case TOXIC_ORB:{
+                    if(active_target->canBeBadlyPoisoned())
+                        active_target->setPermanentStatus(BAD_POISON);
+                    break;
+                }
+                case POISON_BARB:{
+                    if(active_target->canBePoisoned())
+                        active_target->setPermanentStatus(POISONED);
+                    break;
+                }
+                case WHITE_HERB:{
+                    //reset decreased stat changes of target
+                    if(active_target->getAttackModifier()<0)
+                        active_target->setAttackModifier(0);
+                    if(active_target->getSpecialAttackModifier()<0)
+                        active_target->setSpecialAttackModifier(0);
+                    if(active_target->getDefenseModifier()<0)
+                        active_target->setDefenseModifier(0);
+                    if(active_target->getSpecialDefenseModifier()<0)
+                        active_target->setSpecialDefenseModifier(0);
+                    if(active_target->getSpeedModifier()<0)
+                        active_target->setSpeedModifier(0);
+                    if(active_target->getAccuracyModifier()<0)
+                        active_target->setAccuracyModifier(0);
+                    if(active_target->getEvasionModifier()<0)
+                        active_target->setEvasionModifier(0);
+                    break;
+                }
+                case MENTAL_HERB:{
+                    //reset target volatiles
+                    active_target->removeVolatileCondition(INFATUATION);
+                    active_target->removeVolatileCondition(ENCORE);
+                    active_target->removeVolatileCondition(TAUNTED);
+                    active_target->removeVolatileCondition(TORMENTED);
+                    active_target->removeDisable();
+                    break;
+                }
+                default:break;
+            }
+            break;
+        }
+        case 207:{
+            //+1 att acc user
+            // bool res = active_user->changeAttackModifier(+1);
+            // res = res || active_user->changeAccuracyModifier(+1);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{6,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 211:{
+            //defog
+            // bool res = active_target->changeEvasionModifier(-1);
+            field->clearFieldSide(other_actor);
+            field->clearTerrain();
+            event_handler->displayMsg(user_mon_name+" cleared "+opponent_mon_name+"'s side of the field!");
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{7,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 212:{
+            //-1 speed opponent
+            // bool res = active_target->changeSpeedModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{5,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 213:{
+            //set up misty terrain
+            if(field->getTerrain() == MISTY_FIELD){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setTerrain(MISTY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
+                consumeSeeds();
+            }
+            break;
+        }
+        case 214:{
+            //restore consumed item
+            if(active_user->isFainted())
+                return;
+            if(active_user->restoreItem()){
+                event_handler->displayMsg(user_mon_name+" restored its item!");
+            }else{
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 216:{
+            //trick room
+            if(field->hasFullFieldEffect(TRICK_ROOM)){
+                field->clearFullFieldEffect(TRICK_ROOM);
+                event_handler->displayMsg("The trick room wore off!");
+            }else{
+                field->setFullFieldEffect(TRICK_ROOM, 5);
+                event_handler->displayMsg(user_mon_name+" set up trick room!");
+                checkRoomService();
+            }
+            break;
+        }
+        case 217:{
+            //drop money 5 times user level
+            unsigned int money_dropped = active_user->getLevel() * 5;
+            addMoney(money_dropped);
+            event_handler->displayMsg(user_mon_name+" dropped "+std::to_string(money_dropped)+"$!");
+            break;
+        }
+        case 223:{
+            //wish
+            event_handler->displayMsg(user_mon_name+" made a wish!");
+            field->setFieldEffect(WISH,2,actor);
+            break;
+        }
+        case 224:{
+            //swap status with opponent
+            if(active_user->isFainted() || active_target->isFainted())
+                return;
+            if(!active_user->hasPermanentStatus()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            //permanent status
+            PermanentStatusCondition old_status = active_user->getPermanentStatus();
+            active_user->clearPermanentStatus();
+            if(!field->hasFieldEffect(SAFEGUARD,other_actor) ||
+                active_user->hasAbility(INFILTRATOR))
+                active_target->setPermanentStatus(old_status);
+            event_handler->displayMsg(user_mon_name+" tried to transfer its status to "+opponent_mon_name+"!");
+            break;
+        }
+        case 225:{
+            //+3 def user
+            // bool res = active_user->changeDefenseModifier(+3);
+            // if(res && active_user->hasAbility(CONTRARY))
+            //     tryEjectPack(actor);
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,3}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 228:{
+            //-1 att spatt opponent
+            // bool res = active_target->changeAttackModifier(-1);
+            // res = res || active_target->changeSpecialAttackModifier(-1);
+            // if(res && !active_target->hasAbility(CONTRARY))
+            //     tryEjectPack(other_actor);
+            if(active_target->isFainted())
+                return;
+            StatCV changes = {{1,-1},{3,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
+        case 237:{
+            //pain split
+            if(active_user->isFainted() || active_target->isFainted())
+                return;
+            if(active_target->hasSubstitute() && !active_user->hasAbility(INFILTRATOR)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            unsigned int old_hp_user = active_user->getCurrentHP();
+            unsigned int old_hp_target = active_target->getCurrentHP();
+            unsigned int new_hp_user = (old_hp_user + old_hp_target) / 2;
+            unsigned int new_hp_target = (old_hp_user + old_hp_target) - new_hp_user;
+            unsigned int user_amount = 0;
+            unsigned int target_amount = 0;
+            event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" share their HP!");
+            if(old_hp_user > new_hp_user){
+                user_amount = active_user->addDirectDamage(old_hp_user - new_hp_user);
+                event_handler->displayMsg(user_mon_name+" took "+std::to_string(user_amount)+" damage!");
+            }else if(old_hp_user < new_hp_user){
+                user_amount = active_user->removeDamage(new_hp_user - old_hp_user);
+                if(user_amount > 0)
+                    event_handler->displayMsg(user_mon_name+" was healed by "+std::to_string(user_amount)+" HP!");
+            }
+            if(old_hp_target > new_hp_target){
+                target_amount = active_target->addDirectDamage(old_hp_target - new_hp_target);
+                event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(target_amount)+" damage!");
+            }else if(old_hp_target < new_hp_target){
+                target_amount = active_target->removeDamage(new_hp_target - old_hp_target);
+                if(target_amount > 0)
+                    event_handler->displayMsg(opponent_mon_name+" was healed by "+std::to_string(target_amount)+" HP!");
+            }
+            break;
+        }
+        case 242:{
+            //power split
+            Stats user_battle_stats = active_user->getBattleStats();
+            Stats target_battle_stats = active_target->getBattleStats();
+            unsigned int user_atk = user_battle_stats.getAtk();
+            unsigned int user_spatk = user_battle_stats.getSpatk();
+            unsigned int target_atk = target_battle_stats.getAtk();
+            unsigned int target_spatk = target_battle_stats.getSpatk();
+            unsigned int new_user_atk = (user_atk + target_atk) / 2;
+            unsigned int new_user_spatk = (user_spatk + target_spatk) / 2;
+            unsigned int new_target_atk = (user_atk + target_atk) - new_user_atk;
+            unsigned int new_target_spatk = (user_spatk + target_spatk) - new_user_spatk;
+            event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their attacking stats!");
+            active_user->setBattleAttack(new_user_atk);
+            active_user->setBattleSpecialAttack(new_user_spatk);
+            active_target->setBattleAttack(new_target_atk);
+            active_target->setBattleSpecialAttack(new_target_spatk);
+            break;
+        }
+        case 243:{
+            //guard split
+            Stats user_battle_stats = active_user->getBattleStats();
+            Stats target_battle_stats = active_target->getBattleStats();
+            unsigned int user_def = user_battle_stats.getDef();
+            unsigned int user_spdef = user_battle_stats.getSpdef();
+            unsigned int target_def = target_battle_stats.getDef();
+            unsigned int target_spdef = target_battle_stats.getSpdef();
+            unsigned int new_user_def = (user_def + target_def) / 2;
+            unsigned int new_user_spdef = (user_spdef + target_spdef) / 2;
+            unsigned int new_target_def = (user_def + target_def) - new_user_def;
+            unsigned int new_target_spdef = (user_spdef + target_spdef) - new_user_spdef;
+            event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" split their defending stats!");
+            active_user->setBattleAttack(new_user_def);
+            active_user->setBattleSpecialAttack(new_user_spdef);
+            active_target->setBattleAttack(new_target_def);
+            active_target->setBattleSpecialAttack(new_target_spdef);
+            break;
+        }
+        case 244:{
+            //power trick
+            if(active_user->isFainted())
+                return;
+            Stats user_battle_stats = active_user->getBattleStats();
+            unsigned int user_atk = user_battle_stats.getAtk();
+            unsigned int user_def = user_battle_stats.getDef();
+            active_user->setBattleAttack(user_def);
+            active_user->setBattleDefense(user_atk);
+            break;
+        }
+        case 245:{
+            //target cannot use sound based attacks for 2 turns
+            if(active_target->isFainted())
+                return;
+            active_target->addVolatileCondition(THROAT_CHOPPED, 2);
+            break;
+        }
+        case 248:{
+            //grudge
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasVolatileCondition(GRUDGED)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break; 
+            }
+            active_user->addVolatileCondition(GRUDGED, -1);
+        }
+        case 250:{
+            //sketch
+            unsigned int last_attack_target_id = active_target->getLastAttackUsed();
+            Attack* last_attack_target = Attack::getAttack(last_attack_target_id);
+            if(last_attack_target == nullptr){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(!last_attack_target->canBeSketched()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(!active_user->getMonster()->replaceAttack(SKETCH_ID,last_attack_target_id)){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            break;
+        }
+        case 252:{
+            //heal all team of status conditions
+            bool has_effect=false;
+            for(unsigned int i=0;i<user_team->getSize();i++){
+                Monster* user_mon = user_team->getMonster(i);
+                if(user_mon->isFainted())
+                    continue;
+                if(attack->isSoundBased() && user_mon->getAbility() == SOUNDPROOF)//heal bell does not affect soundproof holders
+                    continue;
+                if(user_mon->getPermanentStatus()==NO_PERMANENT_CONDITION)
+                    continue;
+                user_mon->setPermanentStatus(NO_PERMANENT_CONDITION);
+                has_effect=true;
+            }
+            if(!has_effect){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 255:{
+            //create substitute and switch out
+            unsigned int substitute_hp = max(1,active_user->getMaxHP() / 4);
+            unsigned int substitute_cost = max(1,active_user->getMaxHP() / 2);
+            if(substitute_cost >= active_user->getCurrentHP()){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;
+            }
+            if(!user_team->hasAliveBackup()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(!active_user->canSwitchOut(active_target) && effect==124){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            unsigned int actual_cost_dmg = active_user->addDirectDamage(substitute_cost);
+            event_handler->displayMsg(user_mon_name+" lost "+std::to_string(actual_cost_dmg)+" HP in order to create a substitute!");
+            //force user to switch
+            forceSwitch(actor);
+            active_user = getActorBattler(actor);
+            checkUproars();
+            if(active_user->isFainted())
+                return;
+            if(!active_user->hasSubstitute())
+                active_user->setSubstituteHP(substitute_hp);
+        }
+        default:break;
     }
 }
+
 
 void Battle::decrementVolatiles(Battler* active_user){
     if(active_user->hasVolatileCondition(PETAL_DANCING)){
@@ -4904,13 +5148,15 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case 203:{
             ItemType target_item = active_target->getHeldItem();
             if(target_item != NO_ITEM_TYPE && canBeStolen(target_item)){
-                ItemData * target_item_data = ItemData::getItemData(target_item);
-                active_target->removeHeldItem();
-                if(actor==PLAYER)
-                    item_on_the_ground_opponent = target_item;
-                else
-                    item_on_the_ground_player = target_item;
-                event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was knocked off!");
+                if(!active_target->hasSubstitute()){
+                    ItemData * target_item_data = ItemData::getItemData(target_item);
+                    active_target->removeHeldItem();
+                    if(actor==PLAYER)
+                        item_on_the_ground_opponent = target_item;
+                    else
+                        item_on_the_ground_player = target_item;
+                    event_handler->displayMsg(opponent_mon_name+"'s "+target_item_data->getName()+" was knocked off!");
+                }
                 base_power *= 2;
             }
             break;
@@ -6035,7 +6281,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
     user_ability = user_active->getAbility();
     switch(user_ability){
         case INTIMIDATE:{
-            if(!target_active->isFainted() && 
+            if(!target_active->isFainted() && !target_active->hasSubstitute() &&
                 !doesAbilityIgnoreIntimidate(target_active->getAbility())){//inner focus, oblivious and scrappy give immunity to intimidate
                 event_handler->displayMsg(user_name+" intimidates its opponent!");
                 // bool res = target_active->changeAttackModifier(-1);
@@ -7493,7 +7739,7 @@ void Battle::applyItemPostDamage(BattleActionActor actor){
         }
         case STICKY_BARB:{
             // user takes 1/8 max HP damage
-            if(active_user->hasAbility(MAGIC_GUARD))
+            if(active_user->hasAbility(MAGIC_GUARD) || active_user->hasSubstitute())
                 break;
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max(max_hp / 8,1);

@@ -130,7 +130,7 @@ class Battle{
     bool applySwitchInAbilitiesEffects(BattleActionActor actor);
     bool applySwitchInItemsEffects(BattleActionActor actor);
     void applyImpostorSwitchIn(BattleActionActor actor);
-    void applyAttackEffect(Attack* attack,BattleActionActor actor, unsigned int actual_dmg, bool hits_substitute);
+    void applyAttackEffect(Attack* attack,BattleActionActor actor, BattleActionActor other_actor, bool hits_substitute);
     bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
     bool thereIsNeutralizingGas();

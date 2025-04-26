@@ -313,6 +313,7 @@ void Battler::setMonster(Monster* monster){
     weight = monster->getWeight();
     height = monster->getHeight();
     battle_stats = monster->getStats();
+    substituteHP = 0;//switching removes the substitute
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
@@ -577,6 +578,10 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
 }
 
 bool Battler::changeAttackModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -598,17 +603,17 @@ bool Battler::changeAttackModifier(int amount) {
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -633,6 +638,10 @@ bool Battler::changeAttackModifierForced(int amount) {
 }
 
 bool Battler::changeDefenseModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     std::string name = getNickname();
@@ -655,17 +664,17 @@ bool Battler::changeDefenseModifier(int amount) {
     bool res= stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -690,6 +699,10 @@ bool Battler::changeDefenseModifierForced(int amount) {
 }
 
 bool Battler::changeSpecialAttackModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -707,17 +720,17 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -743,6 +756,10 @@ bool Battler::changeSpecialAttackModifierForced(int amount) {
 }
 
 bool Battler::changeSpecialDefenseModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -760,17 +777,17 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -795,6 +812,10 @@ bool Battler::changeSpecialDefenseModifierForced(int amount) {
 }
 
 bool Battler::changeSpeedModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -812,17 +833,17 @@ bool Battler::changeSpeedModifier(int amount) {
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -847,6 +868,10 @@ bool Battler::changeSpeedModifierForced(int amount) {
 }
 
 bool Battler::changeAccuracyModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -873,17 +898,17 @@ bool Battler::changeAccuracyModifier(int amount) {
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -908,6 +933,10 @@ bool Battler::changeAccuracyModifierForced(int amount) {
 }
 
 bool Battler::changeEvasionModifier(int amount) {
+    if(hasSubstitute() && !opponent->hasAbility(INFILTRATOR)){
+        handler->displayMsg(getNickname()+"'s substitute prevents stat changes!");
+        return false;
+    }
     if(hasAbility(CONTRARY))
         amount = -amount;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
@@ -925,17 +954,17 @@ bool Battler::changeEvasionModifier(int amount) {
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
     if(res && amount < 0 && hasAbility(COMPETITIVE)){
-        changeSpecialAttackModifier(2);
+        changeSpecialAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpecialAttackModifier(2);
+            opponent->changeSpecialAttackModifierForced(2);
         }
     }
     if(res && amount < 0 && hasAbility(DEFIANT)){
-        changeAttackModifier(2);
+        changeAttackModifierForced(2);
         if(opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeAttackModifier(2);
+            opponent->changeAttackModifierForced(2);
         }
     }
     if(res && amount<0){
@@ -1492,8 +1521,8 @@ unsigned int Battler::getStockpiles()const{
 
 bool Battler::incrementStockpiles(){
     if(stockpiles < 3){
-        bool res = changeDefenseModifier(+1);
-        res = res || changeSpecialDefenseModifier(+1);
+        bool res = changeDefenseModifierForced(+1);
+        res = res || changeSpecialDefenseModifierForced(+1);
         stockpiles++;
         return res;
     }
@@ -1502,8 +1531,8 @@ bool Battler::incrementStockpiles(){
 
 bool Battler::resetStockpiles(){
     if(stockpiles>0){
-        bool res = changeDefenseModifier(-stockpiles);
-        res = res || changeSpecialDefenseModifier(-stockpiles);
+        bool res = changeDefenseModifierForced(-stockpiles);
+        res = res || changeSpecialDefenseModifierForced(-stockpiles);
         stockpiles = 0;
         return res;
     }
@@ -1673,7 +1702,7 @@ void Battler::transformInto(Monster* other){
 
 std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType category, float effectiveness, bool is_sound){
     //try damage the substitute
-    if(hasSubstitute() && !is_sound){
+    if(hasSubstitute() && !is_sound &&!opponent->hasAbility(INFILTRATOR)){
         handler->displayMsg("The substitute took the hit!");
         if(amount >= substituteHP){
             amount = substituteHP;
@@ -2204,10 +2233,10 @@ void Battler::hitOnceMore(Type attack_type){
     if((attack_type == BUG || attack_type == DARK || attack_type == GHOST) &&
         hasAbility(RATTLED)){
         handler->displayMsg(getNickname()+"'s Rattled boosts its Speed!");
-        bool res = changeSpeedModifier(1);
+        bool res = changeSpeedModifierForced(1);
         if(res && opponent->hasHeldItem(MIRROR_HERB)){
             opponent->consumeHeldItem();
-            opponent->changeSpeedModifier(1);
+            opponent->changeSpeedModifierForced(1);
         }
     }
 }
@@ -2353,47 +2382,47 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
         }
         case APICOT_BERRY:
         case MARANGA_BERRY:{
-            bool item_res = changeSpecialDefenseModifier(1);
+            bool item_res = changeSpecialDefenseModifierForced(1);
             if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
-                opponent->changeSpecialDefenseModifier(1);
+                opponent->changeSpecialDefenseModifierForced(1);
             }
             res = true;
             break;
         }
         case GANION_BERRY:
         case KEE_BERRY:{
-                bool item_res = changeDefenseModifier(1);
+                bool item_res = changeDefenseModifierForced(1);
                 if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                     opponent->consumeHeldItem();
-                    opponent->changeDefenseModifier(1);
+                    opponent->changeDefenseModifierForced(1);
                 }
                 res = true;
                 break;
             }
         case LIECHI_BERRY:{
-            bool item_res = changeAttackModifier(1);
+            bool item_res = changeAttackModifierForced(1);
             if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
-                opponent->changeAttackModifier(1);
+                opponent->changeAttackModifierForced(1);
             }
             res = true;
             break;
         }
         case SALAC_BERRY:{
-            bool item_res = changeSpeedModifier(1);
+            bool item_res = changeSpeedModifierForced(1);
             if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
-                opponent->changeSpeedModifier(1);
+                opponent->changeSpeedModifierForced(1);
             }
             res = true;
             break;
         }
         case PETAYA_BERRY:{
-            bool item_res = changeSpecialAttackModifier(1);
+            bool item_res = changeSpecialAttackModifierForced(1);
             if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
-                opponent->changeSpecialAttackModifier(1);
+                opponent->changeSpecialAttackModifierForced(1);
             }
             res = true;
             break;
@@ -2403,42 +2432,42 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             int random_integer = RNG::getRandomInteger(0,4);
             switch(random_integer){
                 case 0:{
-                    bool item_res = changeAttackModifier(2);
+                    bool item_res = changeAttackModifierForced(2);
                     if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
-                        opponent->changeAttackModifier(2);
+                        opponent->changeAttackModifierForced(2);
                     }
                     break;
                 }
                 case 1: {
-                    bool item_res = changeSpecialAttackModifier(2);
+                    bool item_res = changeSpecialAttackModifierForced(2);
                     if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
-                        opponent->changeSpecialAttackModifier(2);
+                        opponent->changeSpecialAttackModifierForced(2);
                     }
                     break;
                 }
                 case 2:{
-                    bool item_res = changeDefenseModifier(2);
+                    bool item_res = changeDefenseModifierForced(2);
                     if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
-                        opponent->changeDefenseModifier(2);
+                        opponent->changeDefenseModifierForced(2);
                     }
                     break;
                 }
                 case 3:{
-                    bool item_res = changeSpecialDefenseModifier(2);
+                    bool item_res = changeSpecialDefenseModifierForced(2);
                     if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
-                        opponent->changeSpecialDefenseModifier(2);
+                        opponent->changeSpecialDefenseModifierForced(2);
                     }
                     break;
                 }
                 case 4:{
-                    bool item_res = changeSpeedModifier(2);
+                    bool item_res = changeSpeedModifierForced(2);
                     if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                         opponent->consumeHeldItem();
-                        opponent->changeSpeedModifier(2);
+                        opponent->changeSpeedModifierForced(2);
                     }
                     break;
                 }
@@ -2548,10 +2577,10 @@ bool Battler::useItem(ItemType item_type,unsigned int data){
             break;
         }
         case BLUNDER_POLICY:{
-            bool item_res = changeSpeedModifier(2);
+            bool item_res = changeSpeedModifierForced(2);
             if(item_res && opponent->hasHeldItem(MIRROR_HERB)){
                 opponent->consumeHeldItem();
-                opponent->changeSpeedModifier(2);
+                opponent->changeSpeedModifierForced(2);
             }
             res = true;
             break;
@@ -2882,6 +2911,12 @@ bool Battler::hasSubstitute()const{
 
 void Battler::setSubstituteHP(unsigned int amount){
     substituteHP = amount;
+    removeVolatileCondition(FIRESPIN);
+    removeVolatileCondition(WRAP);
+    removeVolatileCondition(BIND);
+    removeVolatileCondition(SANDTOMB);
+    removeVolatileCondition(WHIRLPOOL);
+    removeVolatileCondition(INFESTED);
 }
 
 void Battler::removeSubstitute(){
