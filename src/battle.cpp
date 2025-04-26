@@ -2999,7 +2999,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_user->isFainted())
                 return;
             Attack* last_attack = Attack::getAttack(active_target->getLastAttackUsed());
-            if(last_attack==nullptr || !last_attack->canBeSketched()){
+            if(last_attack==nullptr || !last_attack->canBeSketched() || last_attack->getId()==TRANSFORM_ID){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
                 break;

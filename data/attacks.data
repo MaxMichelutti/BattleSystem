@@ -1548,10 +1548,10 @@ NAME:Mimic
 DESCRIPTION:The user copies the target's last move. The move can be used during battle until the Pokémon is switched out.
 EFFECT:93
 TYPE:NORMAL
+ACCURACY:200
 CATEGORY:STATUS
 NO_COPYCAT
 PP:10
-TARGET:SELF
 NO_METRONOME
 # 169 ECHOED VOICE
 NAME:Echoed Voice
