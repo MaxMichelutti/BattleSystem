@@ -858,30 +858,6 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
             PP_amount = 2;
         active_user->usePP(attack_id, PP_amount);
     }
-    // copycat changes move
-    if(attack->getEffectId() == 80){
-        // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        Attack* attack = Attack::getAttack(last_attack_used_id);
-        if(attack==nullptr || !attack->canBeCopycat()){
-            event_handler->displayMsg("But it failed!");
-            decrementVolatiles(active_user);
-            active_user->removeVolatileCondition(LASER_FOCUS);
-            return;
-        }else{
-            attack_id = last_attack_used_id;
-            attack = Attack::getAttack(last_attack_used_id);
-            event_handler->displayMsg(user_mon_name+" copies "+attack->getName()+"!");
-        }
-    }
-    // metronome changes move
-    if(attack->getEffectId() == 84){
-        // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        event_handler->displayMsg(user_mon_name+" shakes its finger in the air!");
-        attack = Attack::getRandomMetronomeAttack();
-        attack_id = attack->getId();
-        event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        last_attack_used_id = attack_id;
-    }
     // sleep talk changes attack
     if(attack->getEffectId()==194){
         if(!active_user->isAsleep()){
@@ -915,6 +891,31 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
         last_attack_used_id = attack_id;
     }
+    // copycat changes move
+    if(attack->getEffectId() == 80){
+        // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
+        Attack* attack = Attack::getAttack(last_attack_used_id);
+        if(attack==nullptr || !attack->canBeCopycat()){
+            event_handler->displayMsg("But it failed!");
+            decrementVolatiles(active_user);
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return;
+        }else{
+            attack_id = last_attack_used_id;
+            attack = Attack::getAttack(last_attack_used_id);
+            event_handler->displayMsg(user_mon_name+" copies "+attack->getName()+"!");
+        }
+    }
+    // metronome changes move
+    if(attack->getEffectId() == 84){
+        // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
+        event_handler->displayMsg(user_mon_name+" shakes its finger in the air!");
+        attack = Attack::getRandomMetronomeAttack();
+        attack_id = attack->getId();
+        event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
+        last_attack_used_id = attack_id;
+    }
+    
     //increment rounds counter
     if(attack->getEffectId() == 94){
         rounds_used_this_turn++;
