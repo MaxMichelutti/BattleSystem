@@ -5421,6 +5421,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case GALVANIZE:
+        case PIXILATE:
         case AERILATE:{
             //boost power of moves that changed type
             if(attack->getType() == NORMAL){

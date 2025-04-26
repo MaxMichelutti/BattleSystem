@@ -402,7 +402,8 @@ enum Ability{
     MOODY,
     SUCTION_CUPS,
     SAND_STREAM,
-    WIND_RIDER
+    WIND_RIDER,
+    PIXILATE
 };
 
 enum ItemCategory{
