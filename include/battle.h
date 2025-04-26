@@ -162,6 +162,7 @@ class Battle{
     void changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
     void checkRoomService();
     bool isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
+    void applyBattleActionModifiers(BattleAction& action, BattleAction& other_action);
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);

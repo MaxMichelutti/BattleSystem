@@ -366,6 +366,7 @@ TARGET:SELF
 PRIORITY:4
 PP:10
 TYPE:NORMAL
+NO_METRONOME
 CATEGORY:STATUS
 # 41 RAIN DANCE
 NAME:Rain Dance
@@ -949,6 +950,7 @@ ACCURACY:90
 PP:10
 EFFECT:200
 EFFECTTARGET:SELF
+NO_METRONOME
 # 104 HAZE
 NAME:Haze
 DESCRIPTION:The user creates a haze that eliminates every stat change among all the Pokémon engaged in battle.
@@ -1082,6 +1084,7 @@ NAME:Feint
 DESCRIPTION:This attack hits a target using a move such as Protect or Detect. This also lifts the effects of those moves.
 CATEGORY:PHYSICAL
 TYPE:NORMAL
+NO_METRONOME
 PP:10
 POWER:30
 PRIORITY:2
@@ -1373,6 +1376,7 @@ DESCRIPTION:The user mimics the move used immediately before it. The move fails 
 PP:20
 EFFECT:80
 CATEGORY:STATUS
+NO_METRONOME
 TARGET:SELF
 TYPE:NORMAL
 NO_METRONOME
@@ -1398,6 +1402,7 @@ REFLECTABLE
 NAME:Life Dew
 DESCRIPTION:The user scatters mysterious water around and restores the HP of itself and its ally Pokémon in the battle.
 EFFECT:83
+NO_METRONOME
 TYPE:WATER
 TARGET:SELF
 CATEGORY:STATUS
@@ -1558,6 +1563,7 @@ TYPE:NORMAL
 CATEGORY:PHYSICAL
 PP:25
 POWER:60
+NO_METRONOME
 CONTACT
 EFFECT:202
 EFFECTTARGET:SELF
@@ -1652,6 +1658,7 @@ DESCRIPTION:The user protects itself and its allies from priority moves.
 EFFECT:98
 TARGET:SELF
 TYPE:FIGHTING
+NO_METRONOME
 CATEGORY:STATUS
 PP:15
 PRIORITY:3
@@ -1966,6 +1973,7 @@ CATEGORY:PHYSICAL
 EFFECT:118
 EFFECTTARGET:SELF
 PUNCHING
+NO_METRONOME
 CONTACT
 # 215 RETALIATE
 NAME:Retaliate
@@ -2754,6 +2762,7 @@ DESCRIPTION:If the user is knocked out after using this move, the Pokèmon that 
 TYPE:GHOST
 CATEGORY:STATUS
 PP:5
+NO_METRONOME
 EFFECT:161
 TARGET:SELF
 # 303 DREAM EATER
@@ -2873,6 +2882,7 @@ TARGET:SELF
 NAME:Mirror Coat
 DESCRIPTION:A retaliation move that counters any special attack, inflicting double the damage taken.
 PP:20
+NO_METRONOME
 TYPE:PSYCHIC
 CATEGORY:SPECIAL
 EFFECT:168
@@ -2970,6 +2980,7 @@ NAME:Endure
 DESCRIPTION:The user endures any attack with at least 1 HP. Its chance of failing rises if it is used in succession.
 TYPE:NORMAL
 CATEGORY:STATUS
+NO_METRONOME
 PP:10
 PRIORITY:4
 EFFECT:173
@@ -3022,6 +3033,7 @@ TYPE:FIGHTING
 CATEGORY:PHYSICAL
 PP:20
 PRIORITY:-5
+NO_METRONOME
 CONTACT
 EFFECT:175
 EFFECTTARGET:SELF
@@ -3034,6 +3046,7 @@ PP:20
 POWER:150
 PRIORITY:-3
 CONTACT
+NO_METRONOME
 PUNCHING
 EFFECT:176
 EFFECTTARGET:SELF
@@ -3059,6 +3072,7 @@ PRIORITY:1
 NAME:Detect
 DESCRIPTION:This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession.
 TYPE:FIGHTING
+NO_METRONOME
 PP:5
 PRIORITY:4
 CATEGORY:STATUS
@@ -3366,6 +3380,7 @@ NAME:Raging Bull
 DESCRIPTION:The user performs a tackle like a raging bull. This move's type depends on the user's form. It can also break barriers, such as Light Screen and Reflect.
 TYPE:NORMAL
 CATEGORY:PHYSICAL
+NO_METRONOME
 CONTACT
 PP:10
 POWER:90
@@ -3448,12 +3463,14 @@ DESCRIPTION:The user randomly uses one of the moves it knows. This move can only
 TYPE:NORMAL
 CATEGORY:STATUS
 PP:10
+NO_METRONOME
 TARGET:SELF
 EFFECT:194
 # 377 SNORE
 NAME:Snore
 DESCRIPTION:This attack can be used only if the user is asleep. The harsh noise may also make the target flinch.
 TYPE:NORMAL
+NO_METRONOME
 CATEGORY:SPECIAL
 PP:15
 POWER:50
@@ -3541,6 +3558,7 @@ EFFECTTARGET:SELF
 NAME:Switcheroo
 DESCRIPTION:The user trades held items with the target faster than the eye can follow.
 PP:10
+NO_METRONOME
 TYPE:DARK
 CATEGORY:STATUS
 EFFECT:198
@@ -3604,6 +3622,7 @@ TYPE:FIRE
 PP:10
 POWER:120
 CATEGORY:PHYSICAL
+NO_METRONOME
 EFFECT:209
 EFFECTTARGET:SELF
 # 394 FAIRY WIND
@@ -3691,6 +3710,7 @@ DESCRIPTION:The user attacks the target by emitting steam. This may also confuse
 POWER:90
 ACCURACY:95
 PP:10
+NO_METRONOME
 TYPE:FAIRY
 CATEGORY:SPECIAL
 EFFECT:25
@@ -3717,6 +3737,7 @@ NAME:Freezing Glare
 DESCRIPTION:The user shoots its psychic power from its eyes to attack. This may also leave the target frozen.
 PP:10
 POWER:90
+NO_METRONOME
 TYPE:PSYCHIC
 CATEGORY:SPECIAL
 EFFECT:61
@@ -3736,6 +3757,7 @@ DESCRIPTION:The user overwhelms the target with lightning-like movement before d
 TYPE:FIGHTING
 PP:10
 POWER:90
+NO_METRONOME
 CATEGORY:PHYSICAL
 CONTACT
 EFFECT:22
@@ -3746,6 +3768,7 @@ TYPE:DARK
 PP:10
 POWER:90
 CATEGORY:SPECIAL
+NO_METRONOME
 EFFECT:21
 EFFECTCHANCE:20
 # 410 MAGICAL LEAF
@@ -3960,6 +3983,7 @@ NAME:Chilly Reception
 DESCRIPTION:The user tells a chillingly bad joke before switching places with a party Pokémon in waiting. This summons a snowstorm lasting five turns.
 TYPE:ICE
 CATEGORY:STATUS
+NO_METRONOME
 PP:10
 EFFECT:235
 TARGET:SELF
@@ -3996,6 +4020,7 @@ DESCRIPTION:The user shoots mystical beams from its eyes to inflict damage. The 
 TYPE:PSYCHIC
 PP:10
 POWER:40
+NO_METRONOME
 CATEGORY:SPECIAL
 EFFECT:75
 EFFECTTARGET:SELF
@@ -4004,6 +4029,7 @@ NAME:Hyper Drill
 DESCRIPTION:The user spins the pointed part of its body at high speed to pierce the target. This attack can hit a target using a move such as Protect or Detect.
 CATEGORY:PHYSICAL
 TYPE:NORMAL
+NO_METRONOME
 POWER:100
 CONTACT
 PP:5
@@ -4139,6 +4165,7 @@ NAME:Comeuppance
 DESCRIPTION:The user retaliates with much greater force against the opponent that last inflicted damage on it.
 TYPE:DARK
 PP:10
+NO_METRONOME
 CATEGORY:PHYSICAL
 CONTACT
 EFFECTTARGET:SELF
@@ -4235,6 +4262,7 @@ CATEGORY:STATUS
 TYPE:NORMAL
 EFFECT:255
 TARGET:SELF
+NO_METRONOME
 # 464 SUBSTITUTE
 NAME:Substitute
 DESCRIPTION:The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy.
@@ -4249,6 +4277,7 @@ DESCRIPTION:The user attacks the target by showering it with water that's so col
 PP:20
 POWER:50
 TYPE:WATER
+NO_METRONOME
 CATEGORY:SPECIAL
 EFFECT:1
 # 466 FACADE
@@ -4279,6 +4308,7 @@ PP:10
 POWER:80
 CONTACT
 TYPE:FIGHTING
+NO_METRONOME
 CATEGORY:PHYSICAL
 EFFECT:258
 EFFECTTARGET:SELF
@@ -4318,6 +4348,45 @@ PP:25
 POWER:60
 CATEGORY:PHYSICAL
 TYPE:DARK
+NO_METRONOME
 CONTACT
 EFFECT:202
+EFFECTTARGET:SELF
+# 473 TRAILBLAZE
+NAME:Trailblaze
+DESCRIPTION:The user attacks suddenly as if leaping out from tall grass. The user's nimble footwork boosts its Speed stat.
+PP:20
+POWER:50
+NO_METRONOME
+TYPE:GRASS
+CATEGORY:PHYSICAL
+EFFECT:142
+EFFECTTARGET:SELF
+# 474 GRASS KNOT
+NAME:Grass Knot
+DESCRIPTION:The user snares the target with grass and trips it. The heavier the target, the greater the move's power.
+TYPE:GRASS
+CATEGORY:SPECIAL
+PP:20
+CONTACT
+EFFECT:111
+EFFECTTARGET:SELF
+# 475 ICE SPINNER
+NAME:Ice Spinner
+DESCRIPTION:The user covers its feet in thin ice and twirls around, slamming into the target. This move's spinning motion also destroys the terrain.
+TYPE:ICE
+CATEGORY:PHYSICAL
+CONTACT
+PP:15
+POWER:80
+EFFECT:260
+EFFECTTARGET:SELF
+# 476 GRASSY GLIDE
+NAME:Grassy Glide
+DESCRIPTION:Gliding on the ground, the user attacks the target. This move always goes first on Grassy Terrain.
+PP:20
+POWER:55
+TYPE:GRASS
+CATEGORY:PHYSICAL
+EFFECT:261
 EFFECTTARGET:SELF

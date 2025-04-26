@@ -123,7 +123,8 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     else
         max_pp = stringToInteger(data["max_pp"]);
     is_contact = (data.find("contact") != data.end());
-    cannot_be_metronomed = (data.find("no_metronome") != data.end());
+    // cannot_be_metronomed = (data.find("no_metronome") != data.end());
+    can_be_metronomed = (data.find("no_metronome") == data.end());
     is_sound_based = (data.find("sound") != data.end());
     is_punching = (data.find("punching") != data.end());
     is_powder = (data.find("powder") != data.end());
@@ -358,13 +359,20 @@ void Attack::loadAttacks(){
 }
 
 Attack* Attack::getRandomMetronomeAttack() {
+    int count = 0;
     while(true){
+        if(count++ > 100)
+            return static_attacks[1];//tackle is chosen if after 100 tries no attack is found
         unsigned int random_index = RNG::getRandomInteger(1, static_attacks.size() - 1);
         auto iter = static_attacks.find(random_index);
-        if (iter->second->cannot_be_metronomed)
+        if(!iter->second->canBeMetronomed())
             continue;
         return iter->second;
     }
+}
+
+bool Attack::canBeMetronomed()const{
+    return can_be_metronomed;
 }
 
 Attack* Attack::getAttack(unsigned int attack_id) {
@@ -388,8 +396,8 @@ void Attack::printSummary()const{
     }
     if(is_contact)
         std::cout<<"CONTACT   ";
-    if(cannot_be_metronomed)
-        std::cout<<"NO-METRONOME   ";
+    if(can_be_metronomed)
+        std::cout<<"METRONOME   ";
     if(is_pulse)
         std::cout<<"PULSE   ";
     if(is_punching)
