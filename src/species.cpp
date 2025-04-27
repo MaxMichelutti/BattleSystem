@@ -1006,6 +1006,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 334:{//altaria
             return curr_form==0 && mega_item==ALTARIANITE;
         }
+        case 354:{//banette
+            return curr_form==0 && mega_item==BANETTETITE;
+        }
         default:return false;
     }
 }
@@ -1172,6 +1175,11 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 334:{//altaria
             if(curr_form==0 && mega_item==ALTARIANITE)
                 return 112;
+            break;
+        }
+        case 354:{//banette
+            if(curr_form==0 && mega_item==BANETTETITE)
+                return 116;
             break;
         }
         default:return 0;

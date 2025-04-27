@@ -4736,7 +4736,7 @@ DESCRIPTION:The user catches the target off guard and swaps the target's held it
 EFFECT:198
 PP:10
 TYPE:PSYCHIC
-ACCURACY.200
+ACCURACY:200
 CATEGORY:STATUS
 NO_METRONOME
 NO_COPYCAT
