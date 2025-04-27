@@ -4859,6 +4859,7 @@ EFFECTCHANCE:30
 NAME:Meteor Beam
 DESCRIPTION:The user gathers energy from space and boosts its Sp. Atk stat on the first turn, then attacks on the next turn.
 TYPE:ROCK
+CATEGORY:SPECIAL
 PP:10
 POWER:120
 ACCURACY:90
@@ -4921,4 +4922,4 @@ POWER:110
 ACCURACY:90
 CATEGORY:PHYSICAL
 EFFECT:280
-EFFECTTARGET:SEF
+EFFECTTARGET:SELF

@@ -1498,8 +1498,10 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             return {total_actual_damage,false};
         }else{
             if(active_target->hasAbility(COLOR_CHANGE) &&
+            // color change changes the type of the target to the type of the attack that hits it
                 !active_target->hasType(attack_type) &&
-                attack_type!=NO_TYPE){
+                attack_type!=NO_TYPE &&
+                !actual_damage.second){//does not activate if a substitute is hit
                 active_target->clearTypes();
                 active_target->addType(attack_type);
                 event_handler->displayMsg(opponent_mon_name+"'s became "+typeToString(attack_type)+" type thanks to its Color Change ability!");
