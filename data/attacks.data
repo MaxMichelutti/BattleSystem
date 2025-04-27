@@ -4704,3 +4704,11 @@ SOUND
 PP:10
 CATEGORY:SPECIAL
 POWER:80
+# 506 MAGIC ROOM
+NAME:Magic Room
+DESCRIPTION:The user creates a bizarre area in which Pokémon's held items lose their effects for five turns.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:10
+EFFECT:271
+TARGET:SELF

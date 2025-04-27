@@ -326,3 +326,5 @@ SOLID_ROCK
 Reduces the power of supereffective attacks that hit the Pokémon. 
 WHITE_SMOKE
 The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats.
+TOXIC_BOOST
+Powers up physical moves when the Pokémon is poisoned.

@@ -326,7 +326,7 @@ void Battle::incrementTurn(){
     // collect items on the ground
     if(player_active->hasAbility(PICKUP) && item_on_the_ground_player != NO_ITEM_TYPE && 
         !player_active->isFainted()){
-        if(player_active->getHeldItem() == NO_ITEM_TYPE){
+        if(!player_active->hasHeldItem()){
             player_active->setHeldItem(item_on_the_ground_player);
             item_on_the_ground_player = NO_ITEM_TYPE;
         }
@@ -334,7 +334,7 @@ void Battle::incrementTurn(){
     item_on_the_ground_player = NO_ITEM_TYPE;
     if(opponent_active->hasAbility(PICKUP) && item_on_the_ground_opponent != NO_ITEM_TYPE && 
         !opponent_active->isFainted()){
-        if(opponent_active->getHeldItem() == NO_ITEM_TYPE){
+        if(!opponent_active->hasHeldItem()){
             opponent_active->setHeldItem(item_on_the_ground_opponent);
             item_on_the_ground_opponent = NO_ITEM_TYPE;
         }
@@ -4110,16 +4110,30 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            ItemType user_item = active_user->getHeldItem();
-            ItemType target_item = active_target->getHeldItem();
-            if((user_item == NO_ITEM_TYPE && target_item == NO_ITEM_TYPE)||
-                !active_target->canStealItem() || !active_user->canStealItem()){
+            
+            if((!active_target->hasHeldItem() && !active_target->hasHeldItem())){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }
                 break;
             }
+            if(active_user->hasHeldItem() && !active_user->canStealItem()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            if(active_target->hasHeldItem() && !active_target->canStealItem()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            ItemType user_item = active_user->removeHeldItem();
+            ItemType target_item = active_target->removeHeldItem();
             active_user->setHeldItem(target_item);
             active_target->setHeldItem(user_item);
             event_handler->displayMsg(user_mon_name+" switched items with "+opponent_mon_name+"!");
@@ -4129,9 +4143,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //steal target item if it is a berry and use it
             if(hits_substitute)
                 return;
-            ItemType target_item = active_target->getHeldItem();
+            if(!active_user->hasHeldItem())
+                return;
+            //retrieve item directly from monster to avoid magic room item negation
+            ItemType target_item = active_target->getMonster()->getHeldItem();
             ItemData * target_item_data = ItemData::getItemData(target_item);
-            if(target_item_data == nullptr || 
+            if(!active_target->hasHeldItem() || 
                 target_item_data->getCategory()!=BERRY || 
                 !active_target->canStealItem()){
                 if(attack->getCategory() == STATUS){
@@ -4149,9 +4166,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //delete opponent item if it is a berry
             if(hits_substitute)
                 return;
-            ItemType target_item = active_target->getHeldItem();
+            ItemType target_item = active_target->getMonster()->getHeldItem();
             ItemData * target_item_data = ItemData::getItemData(target_item);
-            if(target_item_data == nullptr || 
+            if(!active_target->hasHeldItem() || 
                 target_item_data->getCategory()!=BERRY){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
@@ -4168,13 +4185,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             // steal opponent item
             if(hits_substitute)
                 return;
-            ItemType target_item = active_target->getHeldItem();
-            ItemType user_item = active_user->getHeldItem();
-            if(user_item != NO_ITEM_TYPE || 
-                target_item == NO_ITEM_TYPE || 
-                !active_target->canStealItem() ||
-                active_target->hasAbility(STICKY_HOLD) ||
-                active_user->hasHeldItem()){
+            ItemType target_item = active_target->getMonster()->getHeldItem();
+            if(active_user->hasHeldItem() || 
+                active_target->hasHeldItem() || 
+                !active_target->canStealItem()){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
@@ -4189,6 +4203,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         }
         case 204:{
             //fling
+            // check if user has held item that would have some effect (it would not have some effect under magic room)
+            bool has_held_item_effect = (active_user->getHeldItem() != NO_ITEM_TYPE);
             ItemType user_item = active_user->removeHeldItem();
             if(actor==PLAYER)
                 item_on_the_ground_player = user_item;
@@ -4200,6 +4216,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }
+                break;
+            }
+            if(!has_held_item_effect){
                 break;
             }
             switch(user_item){
@@ -4657,6 +4676,20 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             active_target->addVolatileCondition(HEAL_BLOCKED, 2);
             event_handler->displayMsg(opponent_mon_name+" will not be able to heal for 2 turns!");
+            break;
+        }
+        case 271:{
+            //set up magic room
+            if(field->hasFullFieldEffect(MAGIC_ROOM)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }else{
+                field->setFullFieldEffect(MAGIC_ROOM, 5);
+                event_handler->displayMsg(user_mon_name+" set up a dimension where Items don't have any effects!");
+            }
             break;
         }
         default:break;
@@ -5284,9 +5317,9 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         }
         // remove target item if any and double power if target had an item
         case 203:{
-            ItemType target_item = active_target->getHeldItem();
-            if(target_item != NO_ITEM_TYPE && canBeStolen(target_item)){
+            if(active_user->hasHeldItem() && active_target->canStealItem()){
                 if(!active_target->hasSubstitute()){
+                    ItemType target_item = active_target->getMonster()->getHeldItem();
                     ItemData * target_item_data = ItemData::getItemData(target_item);
                     active_target->removeHeldItem();
                     if(actor==PLAYER)
@@ -5301,7 +5334,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         }
         case 204:{
             // fling
-            ItemType target_item = active_user->getHeldItem();
+            ItemType target_item = active_user->getMonster()->getHeldItem();
             base_power = flingPower(target_item);
             break;
         }
@@ -5490,7 +5523,14 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case STRONG_JAW:{
             //boost power of biting moves
             if(attack->isBiting())
-                base_power*=1.5;
+                base_power *= 1.5;
+            break;
+        }
+        case TOXIC_BOOST:{
+            //boost power of moves if poisoned
+            if(active_user->isPoisoned()){
+                base_power *= 1.5;
+            }
             break;
         }
         default: break;
@@ -6583,10 +6623,8 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             break;
         }
         case FRISK:{
-            if(!target_active->isFainted()){
-                ItemType item_type = target_active->getHeldItem();
-                if(item_type == NO_ITEM_TYPE)
-                    break;
+            if(!target_active->isFainted() && target_active->hasHeldItem()){
+                ItemType item_type = target_active->getMonster()->getHeldItem();
                 ItemData * item = ItemData::getItemData(item_type);
                 event_handler->displayMsg(user_name+"'s Frisk reveals "+other_name+"'s "+item->getName()+"!"); 
             }
@@ -6888,9 +6926,8 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
         case PICKPOCKET:{
             if(!active_target->isFainted() &&
                 active_user->hasHeldItem() && 
-                canBeStolen(active_user->getHeldItem()) && 
-                !active_target->hasHeldItem() &&
-                !active_user->hasAbility(STICKY_HOLD)){
+                active_user->canStealItem() &&
+                !active_target->hasHeldItem()){
                 ItemType stolen_item = active_user->removeHeldItem();
                 active_target->setHeldItem(stolen_item);
                 event_handler->displayMsg(opponent_mon_name+" steals "+user_mon_name+"'s "+ItemData::getItemData(stolen_item)->getName()+"!");
@@ -7148,7 +7185,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         case 204:{
             //fling fails if the user has no held item
-            if(!active_user->canStealItem() || active_user->getHeldItem()==NO_ITEM_TYPE){
+            if(!active_user->canStealItem() || !active_user->hasHeldItem()){
                 active_user->setLastAttackFailed();
                 attack_failed = true;
             }

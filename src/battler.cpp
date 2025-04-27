@@ -2426,6 +2426,8 @@ bool Battler::hasHeldItem()const{
     return monster->hasHeldItem();
 }
 ItemType Battler::getHeldItem()const{
+    if(field->hasFullFieldEffect(MAGIC_ROOM))
+        return NO_ITEM_TYPE;
     return monster->getHeldItem();
 }
 ItemType Battler::getConsumedItem()const{
@@ -2433,6 +2435,8 @@ ItemType Battler::getConsumedItem()const{
 }
 bool Battler::hasHeldItem(ItemType item)const{
     if(item == NO_ITEM_TYPE)
+        return false;
+    if(field->hasFullFieldEffect(MAGIC_ROOM))
         return false;
     if(!hasHeldItem())
         return false;
@@ -2756,7 +2760,7 @@ bool Battler::hasConsumedItem()const{
 }
 
 bool Battler::canStealItem()const{
-    ItemType item = getHeldItem();
+    ItemType item = monster->getHeldItem();
     if(!canBeStolen(item))
         return false;
     if(hasAbility(STICKY_HOLD))
@@ -2777,8 +2781,10 @@ bool Battler::consumeHeldItem(){
             handler->displayMsg(getNickname()+" consumed its "+item_data->getName()+"!");
         monster->setConsumedItem(item);
         removeHeldItem();
-        useItem(item,0);
         had_held_item = true;
+        if(field->hasFullFieldEffect(MAGIC_ROOM))
+            return true;
+        useItem(item,0);
         return true;
     }
     return false;
@@ -2789,6 +2795,10 @@ void Battler::consumeItem(ItemType item){
         return;
     if(!canItemBeConsumed(item))
         return;
+    if(field->hasFullFieldEffect(MAGIC_ROOM)){
+        monster->removeHeldItem();
+        return;
+    }
     useItem(item,0);
     monster->setConsumedItem(item);
     had_held_item = true;

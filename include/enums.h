@@ -40,6 +40,7 @@ enum FieldEffect{
     // SAND_TOMB,
     GRAVITY,
     WONDER_ROOM,
+    MAGIC_ROOM,
     STEALTH_ROCKS,
     SPIKES,
     SPIKES_2,
@@ -423,7 +424,8 @@ enum Ability{
     ROUGH_SKIN,
     SIMPLE,
     SOLID_ROCK,
-    WHITE_SMOKE
+    WHITE_SMOKE,
+    TOXIC_BOOST
 };
 
 enum ItemCategory{
