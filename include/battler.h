@@ -286,6 +286,7 @@ class Battler{
     void removeSubstitute();
     void onWeatherChange(Weather new_weather);
     void resetTypes();
+    void resetStats();
 };
 
 #endif

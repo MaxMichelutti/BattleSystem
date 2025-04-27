@@ -266,8 +266,8 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     this->battler_ability = monster->getAbility();
     this->actor = actor;
     this->field = field;
-    this->types.insert(monster->getType1());
     resetTypes();
+    resetStats();
     this->handler = handler;
     consecutive_protects_counter=0;
     bad_poison_counter=0;
@@ -289,7 +289,6 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     is_mold_breaker_active = false;
     weight = monster->getWeight();
     height = monster->getHeight();
-    battle_stats = monster->getStats();
 }
 
 void Battler::resetTypes(){
@@ -309,7 +308,7 @@ void Battler::setMonster(Monster* monster){
     attacks_used.clear();
     stockpiles = 0;
     bad_poison_counter = 0;
-    has_ability_neutralized = false;
+    has_ability_suppressed = false;
     disabled_attack_id = 0;
     disabled_turns_left = 0;
     turns_in_battle = 0;
@@ -318,7 +317,6 @@ void Battler::setMonster(Monster* monster){
     had_held_item = false;
     weight = monster->getWeight();
     height = monster->getHeight();
-    battle_stats = monster->getStats();
     // substituteHP = 0;//switching removes the substitute
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
@@ -336,6 +334,8 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(RECHARGING);
     removeVolatileCondition(TRUANTING);
     resetTypes();
+    resetStats();
+    battler_ability = monster->getAbility();
 }
 
 Battler::~Battler() {
@@ -3058,8 +3058,12 @@ void Battler::removeSubstitute(){
 }
 
 void Battler::onWeatherChange(Weather new_weather){
-    if(monster->changeWeatherForm(handler, new_weather)){
+    if(hasAbility(FORECAST) && monster->changeWeatherForm(handler, new_weather)){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();
     }   
+}
+
+void Battler::resetStats(){
+    battle_stats = monster->getStats();
 }
