@@ -36,11 +36,13 @@ bool isAttackingActionType(BattleActionType action_type){
 }
 
 // ScheduledFutureSight ------------------------------------------------------------------------------------------------------------
-ScheduledFutureSight::ScheduledFutureSight(unsigned int turns_left, 
+ScheduledFutureSight::ScheduledFutureSight(unsigned int attack_id,
+        unsigned int turns_left, 
         unsigned int user_special_attack, 
         unsigned int level,
         BattleActionActor target,
         bool stab) {
+    this->attack_id = attack_id;
     this->turns_left = turns_left;
     this->user_level = level;
     this->user_special_attack = user_special_attack;
@@ -505,13 +507,8 @@ void Battle::performTurn(){
         if(isOver()){
             return;
         }
-        if(thereIsNeutralizingGas()){
-            player_active->neutralizeAbility();
-            opponent_active->neutralizeAbility();
-        }else{
-            player_active->cancelAbilityNeutralization();
-            opponent_active->cancelAbilityNeutralization();
-        }
+        checkMonsterLeavingAbilities();
+        
         if(player_active->isFainted()){
             removeVolatilesFromOpponentOfMonsterLeavingField(PLAYER);
         }
@@ -532,13 +529,7 @@ void Battle::performTurn(){
     checkForExp();
     if(isOver()){return;}
     // 4.5 check if something is dead and in case remove some volatiles
-    if(thereIsNeutralizingGas()){
-        player_active->neutralizeAbility();
-        opponent_active->neutralizeAbility();
-    }else{
-        player_active->cancelAbilityNeutralization();
-        opponent_active->cancelAbilityNeutralization();
-    }
+    checkMonsterLeavingAbilities();
     if(player_active->isFainted()){
         removeVolatilesFromOpponentOfMonsterLeavingField(PLAYER);
     }
@@ -1149,9 +1140,9 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
 
         // THUNDER ignore accuracy under RAIN and has worse accuracy under SUN
         if(attack->getEffectId() == 67 && !thereIsaCloudNine()){
-            if(field->getWeather() == RAIN)
+            if(field->getWeather() == RAIN || field->getWeather() == HEAVY_RAIN)
                 modified_evasion = 0;
-            else if(field->getWeather() == SUN && !thereIsaCloudNine())
+            else if(field->getWeather() == SUN || field->getWeather() == EXTREME_SUN)
                 modified_accuracy = active_user->getModifiedAccuracy() * 0.5;
         }
         // BLIZZARD ignores accuracy checks under HAIL and SNOW
@@ -2064,7 +2055,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 unsigned int heal_amount;
                 if(field->getWeather() == CLEAR || thereIsaCloudNine()){
                     heal_amount = max((maxHP+1) / 2,1);
-                }else if((field->getWeather() == RAIN || field->getWeather() == SUN) && !active_user->hasHeldItem(UTILITY_UMBRELLA)){
+                }else if((field->getWeather() == SUN || field->getWeather() == EXTREME_SUN) &&
+                    !active_user->hasHeldItem(UTILITY_UMBRELLA)){
                     heal_amount = max((maxHP+2) / 3 * 2,1);
                 }else{
                     heal_amount = max((maxHP+3) / 4,1);
@@ -2075,9 +2067,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
-        case 13:{ // Worry Seed
+        case 13:case 281:{ // Worry Seed/Simple Beam
             if(active_target->isFainted())
                 return;
+            Ability new_ability;
+            if(effect==13)
+                new_ability = INSOMNIA;
+            else if(effect==281)
+                new_ability = SIMPLE;
+            else
+                break;
             if(active_target->hasSubstitute() && 
                 !active_user->hasAbility(INFILTRATOR)){
                 if(attack->getCategory() == STATUS){
@@ -2086,23 +2085,18 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            if(active_target->hasAbility(INSOMNIA) || 
+            if(active_target->hasAbility(new_ability) || 
                 active_target->hasHeldItem(ABILITY_SHIELD) || 
                 abilityCannotBeChanged(active_target->getAbility())){
                 event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
                 active_user->setLastAttackFailed();
             }else{
-                active_target->setAbility(INSOMNIA);
-                event_handler->displayMsg(opponent_mon_name+"'s ability was changed to Insomnia!");
+                active_target->setAbility(new_ability);
+                AbilityItem* ability_data = AbilityItem::getAbilityItem(new_ability);
+                event_handler->displayMsg(opponent_mon_name+"'s ability was changed to "+ability_data->getIGName()+"!");
             }
             // neutralizing gas ability may have been changed
-            if(thereIsNeutralizingGas()){
-                player_active->neutralizeAbility();
-                opponent_active->neutralizeAbility();
-            }else{
-                player_active->cancelAbilityNeutralization();
-                opponent_active->cancelAbilityNeutralization();
-            }
+            checkMonsterLeavingAbilities();
             break;
         }
         case 14:case 20:case 219:case 253:case 274:{//burn opponent
@@ -2402,7 +2396,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             break;
         }
         case 27:{ // start rain
-            if(field->getWeather()==RAIN || thereIsaCloudNine()){
+            if(field->getWeather()==RAIN || thereIsaCloudNine() || field->weatherCannotChange()){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();   
             }else
@@ -2523,13 +2517,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 opponent_mon_name = getActorBattlerName(other_actor);
                 event_handler->displayMsg(opponent_mon_name+" was forced in!");
-                if(thereIsNeutralizingGas()){
-                    player_active->neutralizeAbility();
-                    opponent_active->neutralizeAbility();
-                }else{
-                    player_active->cancelAbilityNeutralization();
-                    opponent_active->cancelAbilityNeutralization();
-                }
+                checkMonsterLeavingAbilities();
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
                 applySwitchInFormChange(other_actor);
@@ -2767,13 +2755,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_target->suppressAbility();
             }
             //neutralizing gas may have been suppressed
-            if(thereIsNeutralizingGas()){
-                player_active->neutralizeAbility();
-                opponent_active->neutralizeAbility();
-            }else{
-                player_active->cancelAbilityNeutralization();
-                opponent_active->cancelAbilityNeutralization();
-            }
+            checkMonsterLeavingAbilities();
             break;
         }
         case 59:{// clear stat changes
@@ -2876,7 +2858,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             break;
         }
         case 72:{//start sandstorm
-            if(field->getWeather()==SANDSTORM || thereIsaCloudNine()){
+            if(field->getWeather()==SANDSTORM || thereIsaCloudNine() || field->weatherCannotChange()){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
             }else
@@ -3002,13 +2984,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                     event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
                 }
                 resetOpponents();
-                if(thereIsNeutralizingGas()){
-                    player_active->neutralizeAbility();
-                    opponent_active->neutralizeAbility();
-                }else{
-                    player_active->cancelAbilityNeutralization();
-                    opponent_active->cancelAbilityNeutralization();
-                }
+                checkMonsterLeavingAbilities();
                 removeVolatilesFromOpponentOfMonsterLeavingField(actor);
                 // heal active user
                 user_mon_name = getActorBattlerName(actor);
@@ -3398,7 +3374,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            if(field->getWeather()!=SNOWSTORM && effect==235){
+            if(effect==235 && field->getWeather()!=SNOWSTORM  && 
+                !thereIsaCloudNine() && !field->weatherCannotChange()){
                 event_handler->displayMsg(user_mon_name+" started a snowstorm!");
                 field->setWeather(SNOWSTORM,active_user->hasHeldItem(ICY_ROCK)?8:5);
             }
@@ -3752,7 +3729,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         }
         case 153:{
             //start snowstorm
-            if(field->getWeather() == SNOWSTORM || thereIsaCloudNine()){
+            if(field->getWeather() == SNOWSTORM || thereIsaCloudNine() || field->weatherCannotChange()){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
             }else
@@ -4039,13 +4016,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 opponent_team->swapActiveMonster(new_active_index);
                 opponent_active->setMonster(opponent_team->getActiveMonster());
             }
-            if(thereIsNeutralizingGas()){
-                player_active->neutralizeAbility();
-                opponent_active->neutralizeAbility();
-            }else{
-                player_active->cancelAbilityNeutralization();
-                opponent_active->cancelAbilityNeutralization();
-            }
+            checkMonsterLeavingAbilities();
             removeVolatilesFromOpponentOfMonsterLeavingField(actor);
             player_active->addSeenOpponent(opponent_active->getMonster());
             applySwitchInFormChange(actor);
@@ -4067,7 +4038,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         }
         case 188:{
             //set sun
-            if(field->getWeather() == SUN || thereIsaCloudNine()){
+            if(field->getWeather() == SUN || field->weatherCannotChange() || thereIsaCloudNine()){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
             }else{
@@ -4696,7 +4667,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         }
         case 262:{
             //change weather to hail
-            if(field->getWeather() == HAIL || thereIsaCloudNine()){
+            if(field->getWeather() == HAIL || thereIsaCloudNine() || field->weatherCannotChange()){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
             }else{
@@ -4901,13 +4872,7 @@ void Battle::performSwitch(BattleAction action){
         new_active_monster_name = opponent_active->getNickname();
         event_handler->displayMsg("Opponent switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }
-    if(thereIsNeutralizingGas()){
-        player_active->neutralizeAbility();
-        opponent_active->neutralizeAbility();
-    }else{
-        player_active->cancelAbilityNeutralization();
-        opponent_active->cancelAbilityNeutralization();
-    }
+    checkMonsterLeavingAbilities();
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
@@ -5019,7 +4984,8 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         physical_attack_stat = enemy_monster->getModifiedAttack();
     }
 
-    if(field->getWeather() == SNOWSTORM && enemy_monster->hasType(ICE)){
+    if((field->getWeather() == SNOWSTORM || field->getWeather()==HAIL) && 
+        !thereIsaCloudNine() && enemy_monster->hasType(ICE)){
         //ice types increase their defense stat under snowstorm
         physical_defense_stat *= 1.5;
     }
@@ -5043,7 +5009,9 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         attack_stat = special_attack_stat;
         if(user_monster->hasHeldItem(CHOICE_SPECS))
             attack_stat*=1.5;
-        if(user_monster->hasAbility(SOLAR_POWER) && field->getWeather() == SUN){// SOLAR POWER
+        if(user_monster->hasAbility(SOLAR_POWER) && !thereIsaCloudNine() && 
+            !user_monster->hasHeldItem(UTILITY_UMBRELLA) &&
+            (field->getWeather() == SUN || field->getWeather()==EXTREME_SUN)){// SOLAR POWER
             attack_stat*=1.5;
         }
         defense_stat = special_defense_stat; 
@@ -5074,12 +5042,14 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
             stab_multiplier = 1.5;
     }
     float weather_multiplier = 1;
-    if(field->getWeather() == RAIN && !thereIsaCloudNine() && !enemy_monster->hasHeldItem(UTILITY_UMBRELLA)){
+    if((field->getWeather() == RAIN || field->getWeather()==HEAVY_RAIN) && 
+        !thereIsaCloudNine() && !enemy_monster->hasHeldItem(UTILITY_UMBRELLA)){
         if(attack_type == WATER)
             weather_multiplier = 1.5;
         else if(attack_type == FIRE)
             weather_multiplier = 0.5;
-    }else if(field->getWeather() == SUN && !thereIsaCloudNine() && !enemy_monster->hasHeldItem(UTILITY_UMBRELLA)){
+    }else if((field->getWeather() == SUN || field->getWeather()==EXTREME_SUN) && 
+        !thereIsaCloudNine() && !enemy_monster->hasHeldItem(UTILITY_UMBRELLA)){
         if(attack_type == FIRE)
             weather_multiplier = 1.5;
         else if(attack_type == WATER)
@@ -5124,8 +5094,11 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     if((effect == 9 || effect==263)&&
         !thereIsaCloudNine() &&
         (field->getWeather() == HAIL || 
+        field->getWeather() == SNOWSTORM || 
         field->getWeather() == SANDSTORM || 
-        (field->getWeather()==RAIN && !user_monster->hasHeldItem(UTILITY_UMBRELLA)))){
+        field->getWeather()==RAIN  || 
+        field->getWeather()==HEAVY_RAIN)
+        && !user_monster->hasHeldItem(UTILITY_UMBRELLA)){
             damage *= 0.5;
     }
     // some moves have damage halved under Grassy Terrain
@@ -6369,6 +6342,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
     // apply weather
     switch(field->getWeather()){
         case SANDSTORM:{
+            if(thereIsaCloudNine())
+                break;
             if(!(active_user->hasType(ROCK) || active_user->hasType(GROUND) || 
             active_user->hasType(STEEL) || 
             active_user->hasAbility(SAND_RUSH) ||
@@ -6387,6 +6362,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case HAIL:{
+            if(thereIsaCloudNine())
+                break;
             if(!(active_user->hasType(ICE)||
                 active_user->hasAbility(OVERCOAT) ||
                 active_user->hasHeldItem(SAFETY_GOGGLES) ||
@@ -6411,6 +6388,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case SNOWSTORM:{
+            if(thereIsaCloudNine())
+                break;
             if(active_user->hasAbility(ICE_BODY) && 
                 !active_user->isAtFullHP()){
                 event_handler->displayMsg(mon_name+" is healed by the snow!");
@@ -6422,7 +6401,7 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             break;
         }
         case SUN:{
-            if(active_user->hasHeldItem(UTILITY_UMBRELLA))
+            if(active_user->hasHeldItem(UTILITY_UMBRELLA) || thereIsaCloudNine())
                 break;
             if (active_user->hasAbility(SOLAR_POWER) || active_user->hasAbility(DRY_SKIN)){ // SOLAR POWER DAMAGE
                 std::string ability_name = abilityToString(active_user->getAbility());
@@ -6435,8 +6414,9 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
             }
             break;
         }
-        case RAIN:{
-            if(active_user->hasHeldItem(UTILITY_UMBRELLA))
+        case RAIN:
+        case HEAVY_RAIN:{
+            if(active_user->hasHeldItem(UTILITY_UMBRELLA) || thereIsaCloudNine())
                 break;
             if((active_user->hasAbility(RAIN_DISH) || 
                 active_user->hasAbility(DRY_SKIN)) &&
@@ -6629,28 +6609,50 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             break;
         }
         case DROUGHT:{
-            if(field->getWeather() != SUN && !thereIsaCloudNine()){
+            if(field->getWeather() != SUN && !field->weatherCannotChange() && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drought made the sun shine harshly!");
                 field->setWeather(SUN,user_active->hasHeldItem(HEAT_ROCK)?8:5);
             }
             break;
         }
+        case DESOLATE_LAND:{
+            if(field->getWeather() != EXTREME_SUN){
+                event_handler->displayMsg(user_name+"'s Desolate Land made the sun shine harshly!");
+                field->setWeather(EXTREME_SUN,-1);
+            }
+            break;
+        }
+        case PRIMORDIAL_SEA:{
+            if(field->getWeather() != HEAVY_RAIN){
+                event_handler->displayMsg(user_name+"'s Primordial Sea made it rain heavily!");
+                field->setWeather(HEAVY_RAIN,-1);
+            }
+            break;
+        }
+        case DELTA_STREAM:{
+            if(field->getWeather() != STRONG_WINDS){
+                event_handler->displayMsg(user_name+"'s Delta Stream made the weather change!");
+                field->setWeather(STRONG_WINDS,-1);
+            }
+            break;
+        }
+        
         case SAND_STREAM:{
-            if(field->getWeather()!= SANDSTORM && !thereIsaCloudNine()){
+            if(field->getWeather()!= SANDSTORM && !field->weatherCannotChange() && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Sand Stream started a sandstorm!");
                 field->setWeather(SANDSTORM,user_active->hasHeldItem(SMOOTH_ROCK)?8:5);
             }
             break;
         }
         case DRIZZLE:{
-            if(field->getWeather() != RAIN && !thereIsaCloudNine()){
+            if(field->getWeather() != RAIN && !field->weatherCannotChange() && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Drizzle changed the weather to rain!");
                 field->setWeather(RAIN,user_active->hasHeldItem(DAMP_ROCK)?8:5);
             }
             break;
         }
         case SNOW_WARNING:{
-            if(field->getWeather() != SNOWSTORM && !thereIsaCloudNine()){
+            if(field->getWeather() != SNOWSTORM && !field->weatherCannotChange() && !thereIsaCloudNine()){
                 event_handler->displayMsg(user_name+"'s Snow Warning started a Snow storm!");
                 field->setWeather(SNOWSTORM,user_active->hasHeldItem(ICY_ROCK)?8:5);
             }
@@ -6853,6 +6855,9 @@ void Battle::applySwitchInFormChange(BattleActionActor actor){
         // applyImpostorSwitchIn(actor);
         // applySwitchInAbilitiesEffects(actor);
         return;
+    }
+    if(user_active->changeFormSwitchIn()){
+        event_handler->displayMsg(user_name+"'s form changed!");
     }
 }
 
@@ -7238,18 +7243,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         case 130:{
             //schedule future sight
-            Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
-            unsigned int attack_stat = future_sight->getCategory()==PHYSICAL ?
+            // Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
+            unsigned int attack_stat = attack->getCategory()==PHYSICAL ?
                 active_user->getModifiedAttack() : active_user->getModifiedSpecialAttack();
             scheduled_futuresights.push_back(
                 ScheduledFutureSight(
+                    attack->getId(),
                     3,
                     attack_stat,
                     active_user->getLevel(),
                     otherBattleActionActor(actor),
-                    active_user->hasType(future_sight->getType())
+                    active_user->hasType(attack->getType())
                 ));
-            event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
+            if(attack->getId()==FUTURE_SIGHT_ID)
+                event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
+            else if(attack->getId()==DOOM_DESIRE_ID)
+                event_handler->displayMsg(user_mon_name+" has chosen Doom Desire as its destiny!");
             return true;
         }
         case 162:{//dream eater
@@ -7306,7 +7315,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         case 208:{
             //fails if there is no hail or snow
-            if(field->getWeather() != HAIL && field->getWeather() != SNOWSTORM){
+            if((field->getWeather() != HAIL && field->getWeather() != SNOWSTORM) || thereIsaCloudNine()){
                 attack_failed = true;
             }
             break;
@@ -7319,6 +7328,18 @@ bool Battle::checkIfAttackFails(Attack* attack,
             break;
         }
         default:break;
+    }
+    if(field->getWeather()==HEAVY_RAIN && 
+        attack->getType() == FIRE &&
+        attack->getCategory() != STATUS &&
+        !thereIsaCloudNine()){
+        attack_failed = true;
+    }
+    if(field->getWeather()==EXTREME_SUN && 
+        attack->getType() == WATER &&
+        attack->getCategory() != STATUS &&
+        !thereIsaCloudNine()){
+        attack_failed = true;
     }
     if(attack_failed){
         event_handler->displayMsg("But it failed!");
@@ -7337,7 +7358,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
         if(active_user->hasHeldItem(POWER_HERB)){
             event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Solar Beam immediately!");
             active_user->consumeHeldItem();
-        }else if(field->getWeather() != SUN || thereIsaCloudNine() || active_user->hasHeldItem(UTILITY_UMBRELLA)){
+        }else if((field->getWeather() != SUN && field->getWeather()!=EXTREME_SUN) 
+            || thereIsaCloudNine() || active_user->hasHeldItem(UTILITY_UMBRELLA)){
             active_user->setLastAttackUsed(action.getAttackId());
             last_attack_used_id = attack_id;
             active_user->removeVolatileCondition(LASER_FOCUS);
@@ -7374,7 +7396,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         if(active_user->hasHeldItem(POWER_HERB)){
             event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Solar Blade immediately!");
             active_user->consumeHeldItem();
-        }else if(field->getWeather() != SUN || thereIsaCloudNine() || active_user->hasHeldItem(UTILITY_UMBRELLA)){
+        }else if((field->getWeather() != SUN && field->getWeather()!=EXTREME_SUN) || thereIsaCloudNine() || active_user->hasHeldItem(UTILITY_UMBRELLA)){
             active_user->setLastAttackUsed(action.getAttackId());
             last_attack_used_id = attack_id;
             active_user->removeVolatileCondition(LASER_FOCUS);
@@ -7699,6 +7721,12 @@ bool Battle::thereIsaCloudNine(){
     if(opponent_active->hasAbility(CLOUD_NINE) && !opponent_active->isFainted()){
         return true;
     }
+    if(player_active->hasAbility(AIR_LOCK) && !player_active->isFainted()){
+        return true;
+    }
+    if(opponent_active->hasAbility(AIR_LOCK) && !opponent_active->isFainted()){
+        return true;
+    }
     return false;
 }
 
@@ -7736,13 +7764,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
         opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
         event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
     }
-    if(thereIsNeutralizingGas()){
-        player_active->neutralizeAbility();
-        opponent_active->neutralizeAbility();
-    }else{
-        player_active->cancelAbilityNeutralization();
-        opponent_active->cancelAbilityNeutralization();
-    }
+    checkMonsterLeavingAbilities();
     resetOpponents();
     player_active->addSeenOpponent(opponent_active->getMonster());
     removeVolatilesFromOpponentOfMonsterLeavingField(actor_switching_out);
@@ -7764,16 +7786,21 @@ void Battle::applyScheduledFutureSights(){
         it.turns_left--;
         if(it.turns_left == 0){
             to_remove.push_back(i);
+            unsigned int attack_id = it.attack_id;
             Battler* target_active = getActorBattler(it.target);
             std::string target_name = getActorBattlerName(it.target);
-            event_handler->displayMsg("Future Sight tries to hit "+target_name+"!");
+            if(attack_id==FUTURE_SIGHT_ID)
+                event_handler->displayMsg("The foreseen attack hits "+target_name+"!");
+            else if(attack_id==DOOM_DESIRE_ID)
+                event_handler->displayMsg("The chosen Doom Desire fulfills on "+target_name+"!");
             if(target_active->isFainted()){
                 event_handler->displayMsg("But it failed!");
                 continue;
             }
+            Attack* attack = Attack::getAttack(attack_id);
             float effectiveness = 1;
             for(auto type:target_active->getTypes()){
-                float curr_effectiveness = getTypeEffectiveness(PSYCHIC, 
+                float curr_effectiveness = getTypeEffectiveness(attack->getType(), 
                     type, 
                     target_active->isTouchingGround(),
                     false,
@@ -7786,7 +7813,7 @@ void Battle::applyScheduledFutureSights(){
                 event_handler->displayMsg("But it failed!");
                 continue;
             }
-            Attack* attack = Attack::getAttack(FUTURE_SIGHT_ID);
+            
             unsigned int base_dmg = baseDamage(it.user_level,
                 attack->getPower(),
                 it.user_special_attack,
@@ -7810,6 +7837,12 @@ void Battle::applyScheduledFutureSights(){
                 base_dmg /= 2;
             unsigned int final_damage = max(base_dmg * effectiveness * crit_multiplier * stab_multiplier,1);
             auto actual_damage = target_active->addDamage(final_damage, attack->getCategory(), effectiveness, false);
+            if(actual_damage.first > 0 && effectiveness > 1.1){
+                event_handler->displayMsg(target_name+" was hit super effectively!");
+            }
+            if(actual_damage.first > 0 && effectiveness < 0.9){
+                event_handler->displayMsg(target_name+" was hit not very effectively!");
+            }
             if(!actual_damage.second)
                 event_handler->displayMsg(target_name+" took "+std::to_string(actual_damage.first)+" damage!");
         }
@@ -7857,9 +7890,9 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
     tryEjectPack(actor);
 }
 
-bool Battle::thereIsNeutralizingGas(){
-    return (player_active->hasAbility(NEUTRALIZING_GAS) && !player_active->isFainted()) || 
-        (opponent_active->hasAbility(NEUTRALIZING_GAS) && !opponent_active->isFainted());
+bool Battle::thereIsAbility(Ability ability){
+    return (player_active->hasAbility(ability) && !player_active->isFainted()) || 
+        (opponent_active->hasAbility(ability) && !opponent_active->isFainted());
 }
 
 unsigned int Battle::getMoney()const{
@@ -7932,6 +7965,7 @@ void Battle::givePlayerExperience(Monster* defeated_mon){
 }
 
 void Battle::checkForExp(){
+    checkMonsterLeavingAbilities();
     if(opponent_active->isFainted() && 
         battle_gives_exp && 
         monsters_defeated_by_player.find(opponent_active->getMonster()) == monsters_defeated_by_player.end()){
@@ -8552,10 +8586,40 @@ double Battle::computeEffectiveness(Attack* attack, BattleActionActor user_actor
     if(effectiveness < 1.1 && active_target->hasAbility(WONDER_GUARD)){
         effectiveness = 0;
     }
+    // check for strong winds 
+    if(field->getWeather() == STRONG_WINDS && !thereIsaCloudNine() &&
+        active_target->hasType(FLYING) && effectiveness > 1.1){
+        effectiveness = 1;
+    }
     return effectiveness;
 }
 
 void Battle::onWeatherChange(Weather new_weather){
     player_active->onWeatherChange(new_weather);
     opponent_active->onWeatherChange(new_weather);
+}
+
+void Battle::checkMonsterLeavingAbilities(){
+    if(thereIsAbility(NEUTRALIZING_GAS)){
+        player_active->neutralizeAbility();
+        opponent_active->neutralizeAbility();
+    }else{
+        player_active->cancelAbilityNeutralization();
+        opponent_active->cancelAbilityNeutralization();
+    }
+    if(field->getWeather() == EXTREME_SUN && !thereIsAbility(DESOLATE_LAND)){
+        if(!(thereIsAbility(PRIMORDIAL_SEA) || thereIsAbility(DELTA_STREAM))){
+            field->clearWeather();
+        }
+    }
+    if(field->getWeather() == HEAVY_RAIN && !thereIsAbility(PRIMORDIAL_SEA)){
+        if(!(thereIsAbility(DESOLATE_LAND) || thereIsAbility(DELTA_STREAM))){
+            field->clearWeather();
+        }
+    }
+    if(field->getWeather() == STRONG_WINDS && !thereIsAbility(DELTA_STREAM)){
+        if(!(thereIsAbility(DESOLATE_LAND) || thereIsAbility(PRIMORDIAL_SEA))){
+            field->clearWeather();
+        }
+    }
 }

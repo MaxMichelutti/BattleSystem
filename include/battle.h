@@ -26,12 +26,13 @@ class Monster;
 using StatCV = std::vector<std::pair<unsigned int,int>>;
 
 struct ScheduledFutureSight{
+    unsigned int attack_id;
     unsigned int turns_left;
     unsigned int user_special_attack;
     unsigned int user_level;
     bool stab;
     BattleActionActor target;   
-    ScheduledFutureSight(unsigned int turns_left, unsigned int user_special_attack, unsigned int level, BattleActionActor target, bool stab);
+    ScheduledFutureSight(unsigned int attack_id,unsigned int turns_left, unsigned int user_special_attack, unsigned int level, BattleActionActor target, bool stab);
     ~ScheduledFutureSight();
 };
 
@@ -133,7 +134,8 @@ class Battle{
     void applyAttackEffect(Attack* attack,BattleActionActor actor, BattleActionActor other_actor, bool hits_substitute);
     bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
-    bool thereIsNeutralizingGas();
+    bool thereIsAbility(Ability ability);
+    void checkMonsterLeavingAbilities();
     void resetOpponents();
     std::string getActorBattlerName(BattleActionActor actor);
     Battler* getActorBattler(BattleActionActor actor);

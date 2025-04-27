@@ -338,3 +338,11 @@ PROTEAN
 Changes the Pokémon's type to the type of the move it's about to use. This works only once each time the Pokémon enters battle.
 REFRIGERATE
 Normal-type moves become Ice-type moves. The power of those moves is boosted a little.
+PRIMORDIAL_SEA
+The Pokémon changes the weather to nullify Fire-type attacks.
+DESOLATE_LAND
+The Pokémon changes the weather to nullify Water-type attacks.
+DELTA_STREAM
+The Pokémon changes the weather so that no moves are super effective against the Flying type.
+AIR_LOCK
+Eliminates the effects of weather. 

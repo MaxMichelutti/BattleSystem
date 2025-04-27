@@ -1432,7 +1432,7 @@ bool Monster::canMegaEvolve()const{
     if(is_mega)
         return false;
     Species* spec = Species::getSpecies(species_id);
-    return spec->canMegaEvolve(getFormId(),getHeldItem());
+    return spec->canMegaEvolve(getFormId(),getHeldItem(),hasAttack(DRAGON_ASCENT_ID));
 }
 
 bool Monster::megaEvolve(){
@@ -1441,7 +1441,7 @@ bool Monster::megaEvolve(){
     Species* spec = Species::getSpecies(species_id);
     // if(!spec->canMegaEvolve(getFormId(),getHeldItem()))
     //     return false;
-    unsigned int new_form_id = spec->getMegaForm(getFormId(),getHeldItem());
+    unsigned int new_form_id = spec->getMegaForm(getFormId(),getHeldItem(),hasAttack(DRAGON_ASCENT_ID));
     if(new_form_id == getFormId() || new_form_id == 0)
         return false;
     form_id = new_form_id;
@@ -1498,17 +1498,43 @@ void Monster::setBall(ItemType ball){
     ball_containing_monster = ball;
 }
 
-bool Monster::changeWeatherForm(EventHandler* handler,Weather weather){
+bool Monster::changeFormSwitchIn(){
+    if(species_id==382 && getHeldItem() == BLUE_ORB){
+        //Kyogre
+        if(form_id == 0){
+            form_id = 123;
+            updateStats();
+            Species* spec = Species::getSpecies(species_id);
+            mega_ability = spec->getAbility1(form_id); 
+            return true;
+        }
+    }
+    if(species_id==383 && getHeldItem() == RED_ORB){
+        //Groudon
+        if(form_id == 0){
+            form_id = 124;
+            updateStats();
+            Species* spec = Species::getSpecies(species_id);
+            mega_ability = spec->getAbility1(form_id); 
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Monster::changeWeatherForm(Weather weather){
     //returns true if the form was actually changed
     if(getAbility()==FORECAST){//castform
         switch(weather){
-            case RAIN:{
+            case RAIN:
+            case HEAVY_RAIN:{
                 if(form_id == 114)
                     return false;
                 form_id = 114;
                 return true;
             }
-            case SUN:{
+            case SUN:
+            case EXTREME_SUN:{
                 if(form_id == 113)
                     return false;
                 form_id = 114;

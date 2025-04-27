@@ -83,6 +83,8 @@ bool isAbilityTraceable(Ability ability){
         case POWER_OF_ALCHEMY:
         case PARENTAL_BOND:
         case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
             return false;
         default: return true;
     }
@@ -110,6 +112,9 @@ bool abilityCannotBeCopied(Ability ability){
         case POWER_OF_ALCHEMY:
         case PARENTAL_BOND:
         case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
             return true;
         default: return false;
     }
@@ -120,6 +125,9 @@ bool abilityCannotBeChanged(Ability ability){
     switch(ability){
         case TRUANT:
         case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
             return true;
         default: return false;
     }
@@ -129,6 +137,10 @@ bool abilityCannotBeChanged(Ability ability){
 bool abilityCannotBeSuppressed(Ability ability){
     switch(ability){
         case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
+            return true;
         default: return false;
     }
     return false;

@@ -63,7 +63,7 @@ class Field{
     bool hasFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor)const;
     void decrementFieldEffect(FieldEffect field_effect, BattleActionActor actor);
     void setDefaultWeather(Weather weather);
-    
+    bool weatherCannotChange()const;
 };
 
 #endif

@@ -911,7 +911,7 @@ void AlternateForm::parseEvolutions(std::string data){
 }
 
 
-bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
+bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item, bool knows_dragon_ascent)const{
     switch(id){
         case 3:{//venusaur
             return curr_form==0 && mega_item==VENUSAURITE;
@@ -1012,12 +1012,30 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 359:{//absol
             return curr_form==0 && mega_item==ABSOLITE;
         }
+        case 362:{//glalie
+            return curr_form==0 && mega_item==GLALITITE;
+        }
+        case 373:{//salamence
+            return curr_form==0 && mega_item==SALAMENCITE;
+        }
+        case 376:{//metagross
+            return curr_form==0 && mega_item==METAGROSSITE;
+        }
+        case 380:{//latias
+            return curr_form==0 && mega_item==LATIASITE;
+        }
+        case 381:{//latios
+            return curr_form==0 && mega_item==LATIOSITE;
+        }
+        case 384:{//rayquaza
+            return curr_form==0 && knows_dragon_ascent;
+        }
         default:return false;
     }
 }
 
-unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)const{
-    if(!canMegaEvolve(curr_form,mega_item)){
+unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item, bool knows_dragon_ascent)const{
+    if(!canMegaEvolve(curr_form,mega_item,knows_dragon_ascent)){
         return 0;//not actual mega
     }
     switch(id){
@@ -1188,6 +1206,36 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 359:{//absol
             if(curr_form==0 && mega_item==ABSOLITE)
                 return 117;
+            break;
+        }
+        case 362:{//glalie
+            if(curr_form==0 && mega_item==GLALITITE)
+                return 118;
+            break;
+        }
+        case 373:{//salamence
+            if(curr_form==0 && mega_item==SALAMENCITE)
+                return 119;
+            break;
+        }
+        case 376:{//metagross
+            if(curr_form==0 && mega_item==METAGROSSITE)
+                return 120;
+            break;
+        }
+        case 381:{//latios
+            if(curr_form==0 && mega_item==LATIOSITE)
+                return 121;
+            break;
+        }
+        case 380:{//latias
+            if(curr_form==0 && mega_item==LATIASITE)
+                return 122;
+            break;
+        }
+        case 384:{//rayquaza
+            if(curr_form==0 && knows_dragon_ascent)
+                return 125;
             break;
         }
         default:return 0;

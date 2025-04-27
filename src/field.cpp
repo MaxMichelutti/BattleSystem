@@ -110,26 +110,48 @@ void Field::setWeather(Weather new_weather){
 
 void Field::displayWeatherChange(){
     switch(weather){
-        case RAIN:
+        case RAIN:{
             event_handler->displayMsg("It started to rain!");
             break;
-        case SUN:
+        }
+        case HEAVY_RAIN:{
+            event_handler->displayMsg("It's pouring with rain!");
+            break;
+        }
+        case SUN:{
             event_handler->displayMsg("The sun is shining harshly!");
             break;
-        case HAIL:
+        }
+        case EXTREME_SUN:{
+            event_handler->displayMsg("The sun is blazing!");
+            break;
+        }
+        case HAIL:{
             event_handler->displayMsg("Hail started to fall!");
             break;
-        case SANDSTORM:
+        }
+        case SANDSTORM:{
             event_handler->displayMsg("A sandstorm started!");
             break;
-        case SNOWSTORM:
+        }
+        case SNOWSTORM:{
             event_handler->displayMsg("Snow started to fall!");
             break;
-        case CLEAR:
+        }
+        case CLEAR:{
             event_handler->displayMsg("The weather cleared!");
             break;
+        }
+        case STRONG_WINDS:{
+            event_handler->displayMsg("Strong winds started to blow!");
+            break;
+        }
         default:break;
     }
+}
+
+bool Field::weatherCannotChange()const{
+    return weather==HEAVY_RAIN || weather==EXTREME_SUN || weather == STRONG_WINDS;
 }
 
 void Field::setWeather(Weather new_weather, unsigned int length) {
@@ -245,9 +267,11 @@ void Field::nextTurnWeather() {
         else{
             switch(weather){
                 case RAIN:
+                case HEAVY_RAIN:
                     event_handler->displayMsg("Rain continues to fall!");
                     break;
                 case SUN:
+                case EXTREME_SUN:
                     event_handler->displayMsg("The sun continues to shine harshly!");
                     break;
                 case HAIL:
@@ -258,6 +282,9 @@ void Field::nextTurnWeather() {
                     break;
                 case SNOWSTORM:
                     event_handler->displayMsg("Snow continues to fall!");
+                    break;
+                case STRONG_WINDS:
+                    event_handler->displayMsg("Strong winds continue to blow!");
                     break;
                 default:break;
             }

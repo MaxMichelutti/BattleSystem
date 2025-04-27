@@ -7,7 +7,10 @@ enum Weather{
     SUN,
     SANDSTORM,
     HAIL,
-    SNOWSTORM
+    SNOWSTORM,
+    HEAVY_RAIN,
+    EXTREME_SUN,
+    STRONG_WINDS
 };
 
 enum Terrain{
@@ -432,7 +435,11 @@ enum Ability{
     FORECAST,
     COLOR_CHANGE,
     PROTEAN,
-    REFRIGERATE
+    REFRIGERATE,
+    PRIMORDIAL_SEA,
+    DESOLATE_LAND,
+    DELTA_STREAM,
+    AIR_LOCK
 };
 
 enum ItemCategory{
@@ -794,7 +801,9 @@ enum ItemType{
     ADAMANT_ORB,
     LUSTROUS_ORB,
     GRISEOUS_ORB,
-    SHELL_BELL
+    SHELL_BELL,
+    BLUE_ORB,
+    RED_ORB
 };
 
 #endif

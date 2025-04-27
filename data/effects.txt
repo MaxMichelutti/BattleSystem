@@ -127,7 +127,7 @@
 127: user copies target ability
 128: use defense instead of spdef for damage calc
 129: +1 DEF SPDEF user
-130: future sight
+130: future sight/doom desire
 131: power doubles if user has been hit this turn
 132: +1 ATT DEF user
 133: -2 SPATT user
@@ -278,3 +278,4 @@
 278: meteor beam
 279: fails if the target is not performing an action with priority between +1 and +3, if it hits it causes the target to flinch
 280: fails if user does not hold an item, displays custom message when attacking
+281: change target ability in simple

@@ -2119,6 +2119,9 @@ unsigned int Battler::getLevel()const{
 std::string Battler::getNickname()const{
     if(monster->isMegaEvolved())
         return "M-"+monster->getNickname();
+    if(monster->getFormId() == 123 || monster->getFormId() == 124)
+    //Archeo groudon and Archoe Kyogre
+        return "A-"+monster->getNickname();
     return monster->getNickname();
 }
 
@@ -2971,11 +2974,8 @@ bool Battler::megaEvolve(){
         battler_ability = monster->getAbility();
         weight = monster->getWeight();
         height = monster->getHeight();
-        types.clear();
-        types.insert(monster->getType1());
-        if(monster->getType2()!=NO_TYPE){
-            types.insert(monster->getType2());
-        }
+        resetTypes();
+        resetStats();
         return true;
     }
     return false;
@@ -3060,10 +3060,28 @@ void Battler::removeSubstitute(){
 }
 
 void Battler::onWeatherChange(Weather new_weather){
-    if(hasAbility(FORECAST) && monster->changeWeatherForm(handler, new_weather)){
+    if(hasAbility(FORECAST) && monster->changeWeatherForm(new_weather)){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();
     }   
+}
+
+bool Battler::changeFormSwitchIn(){
+    if(hasAbility(FORECAST) && monster->changeWeatherForm(field->getWeather())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        return true;
+    }
+    if(monster->changeFormSwitchIn()){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        battler_ability = monster->getAbility();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+        resetStats();
+        return true;
+    }
+    return false;
 }
 
 void Battler::resetStats(){

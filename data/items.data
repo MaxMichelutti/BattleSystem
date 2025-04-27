@@ -1763,3 +1763,13 @@ NAME:Shell Bell
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. The holder restores a little HP to itself every time it inflicts damage with an attack.
 PRICE:20000
+# 342 BLUE ORB
+NAME:Blue Orb
+CATEGORY:MEGA_STONE
+DESCRIPTION:A shiny blue orb that is said to have a legend tied to it. It's known to have a deep connection with the Hoenn region.
+PRICE:10000
+# 343 RED ORB
+NAME:Red Orb
+CATEGORY:MEGA_STONE
+DESCRIPTION:A shiny red orb that is said to have a legend tied to it. It's known to have a deep connection with the Hoenn region.
+PRICE:10000

@@ -4933,3 +4933,77 @@ CATEGORY:SPECIAL
 POWER:60
 EFFECT:189
 EFFECTTARGET:SELF
+# 529 MIST BALL
+NAME:Mist Ball
+DESCRIPTION:A mist-like flurry of down envelops and damages the target. This may also lower the target's Sp. Atk stat.
+TYPE:PSYCHIC
+PP:5
+POWER:95
+CATEGORY:SPECIAL
+EFFECT:88
+EFFECTCHANCE:50
+# 530 SIMPLE BEAM
+NAME:Simple Beam
+DESCRIPTION:The user emits a mysterious psychic wave that changes the target's Ability to Simple.
+PP:15
+TYPE:NORMAL
+CATEGORY:STATUS
+REFLECTABLE
+EFFECT:281
+# 531 LUSTER PURGE
+NAME:Luster Purge
+DESCRIPTION:The user lets loose a damaging burst of light. This may also lower the target's Sp. Def stat.
+TYPE:PSYCHIC
+PP:5
+POWER:95
+CATEGORY:SPECIAL
+EFFECT:31
+EFFECTCHANCE:50
+# 532 DRAGON ASCENT
+NAME:Dragon Ascent
+DESCRIPTION:After soaring upward, the user attacks its target by dropping out of the sky at high speeds. But it lowers its own Defense and Sp. Def stats in the process.
+PP:5
+POWER:120
+CATEGORY:PHYSICAL
+CONTACT
+TYPE:FLYING
+EFFECT:115
+EFFECTTARGET:SELF
+# 533 ORIGIN PULSE
+NAME:Origin Pulse
+DESCRIPTION:The user attacks opposing Pokémon with countless beams of light that glow a deep and brilliant blue.
+PP:10
+POWER:110
+CATEGORY:SPECIAL
+TYPE:WATER
+ACCURACY:85
+PULSE
+# 534 PRECIPICE BLADES
+NAME:Precipice Blades
+DESCRIPTION:The user attacks opposing Pokémon by manifesting the power of the land in fearsome blades of stone.
+CATEGORY:PHYSICAL
+TYPE:GROUDON
+PP:10
+POWER:120
+ACCURACY:85
+# 535 DOOM DESIRE
+NAME:Doom Desire
+DESCRIPTION:Two turns after this move is used, a concentrated bundle of light blasts the target.
+TYPE:STEEL
+POWER:140
+PP:5
+CATEGORY:SPECIAL
+EFFECT:130
+EFFECTTARGET:SELF
+NO_METRONOME
+NO_COPYCAT
+# 536 PSYCHO BOOST
+NAME:Psycho Boost
+DESCRIPTION:The user attacks the target with all its might. The recoil from this move harshly lowers the user's Sp. Atk stat.
+TYPE:PSYCHIC
+PP:5
+POWER:140
+ACCURACY:90
+CATEGORY:SPECIAL
+EFFECT:133
+EFFECTTARGET:SELF

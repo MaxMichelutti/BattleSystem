@@ -9,6 +9,7 @@
 #include "common.h"
 #include "events.h"
 #include "player.h"
+#include "constants.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -146,7 +147,8 @@ class Monster{
     bool isPastEvoLevel()const;
     void setBall(ItemType ball);
     bool hasEvolutions()const;
-    bool changeWeatherForm(EventHandler* handler,Weather weather);
+    bool changeWeatherForm(Weather weather);
+    bool changeFormSwitchIn();
 };
 
 #endif

@@ -287,6 +287,7 @@ class Battler{
     void onWeatherChange(Weather new_weather);
     void resetTypes();
     void resetStats();
+    bool changeFormSwitchIn();
 };
 
 #endif
