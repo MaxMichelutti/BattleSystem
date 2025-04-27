@@ -24,6 +24,7 @@ bool isAttackingActionType(BattleActionType action_type){
         case ROLLOUT:
         case BOUNCE:
         case PHANTOM_FORCE:
+        case METEOR_BEAM:
         case DIG:
         case DIVE:
         case UPROAR:
@@ -804,8 +805,9 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // apply freeze
     if(active_user->isFrozen()){
         unsigned int random_number = RNG::getRandomInteger(1,100);
-        if(random_number > 20 && attack->getEffectId()!=253 && attack->getId()!=482){//253: sacred fire immediately thaws user out
+        if(random_number > 20 && attack->getEffectId()!=253 && attack->getId()!=482 && attack->getId()!=520){//253: sacred fire immediately thaws user out
             // 482: SCALD id
+            // 520: Scorching sands id
             event_handler->displayMsg(user_mon_name+" is frozen solid!");
             forgetMoveVolatiles(active_user);
             active_user->setLastAttackFailed();
@@ -848,6 +850,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
             event_handler->displayMsg(user_mon_name+" is confused...");
             if(0==RNG::getRandomInteger(0,2)){
                 event_handler->displayMsg(user_mon_name+" hurt itself in confusion!");
+                active_user->removeVolatileCondition(CHARGING_METEORBEAM);
                 forgetMoveVolatiles(active_user);
                 unsigned int level = active_user->getLevel();
                 unsigned int attack_stat = active_user->getModifiedAttack();
@@ -874,6 +877,17 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         attack_id = STRUGGLE_ID;
         attack = Attack::getAttack(attack_id);
     }
+
+    // activate protean
+    if(active_user->hasAbility(PROTEAN) &&//check protean
+        attack_type != NO_TYPE &&// cannot turn to type NO_TYPE
+        !active_user->hasType(attack_type)){//cannot turn to a type I already have
+        event_handler->displayMsg(user_mon_name+" changed its type to "+typeToString(attack_type)+"!");
+        active_user->clearTypes();
+        active_user->addType(attack_type);
+    }
+
+
     event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
     active_user->setLastAttackUsed(attack_id);
     if(attack->getEffectId() != 80){// I need to preserve this value if copycat is being ised
@@ -890,6 +904,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(attack->getEffectId()==194){
         if(!active_user->isAsleep()){
             event_handler->displayMsg(user_mon_name+"But it failed!");
+            active_user->removeVolatileCondition(CHARGING_METEORBEAM);
             forgetMoveVolatiles(active_user);
             active_user->setLastAttackFailed();
             active_user->removeVolatileCondition(LASER_FOCUS);
@@ -971,7 +986,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
         if(attack->getEffectId()==187){
             active_user->addVolatileCondition(RECHARGING,-1);
         }
-        if(attack->getEffectId() == 171 || attack->getEffectId() == 174){
+        if((attack->getEffectId() == 171 || attack->getEffectId() == 174 || attack->getEffectId() == 277)&&!active_user->hasAbility(MAGIC_GUARD)){
             // user takes 50% maxHP recoil damage
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max_hp / 2;
@@ -1060,7 +1075,7 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
             return true;
     }
     //stomp always hits minimize users
-    if(attack->getEffectId()==141 && active_target->hasUsedAttack(MINIMIZE_ID)){
+    if((attack->getEffectId()==141 || attack->getEffectId()==277) && active_target->hasUsedAttack(MINIMIZE_ID)){
         return false;
     }
 
@@ -1198,6 +1213,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             event_handler->displayMsg(user_mon_name+"'s present healed "+opponent_mon_name+" for "+std::to_string(actual_heal)+" HP!");
         return {0,active_target->hasSubstitute()};
     }
+    ItemData* old_held_item = ItemData::getItemData(active_user->getMonster()->getHeldItem());
     // check if move is multi hit
     unsigned int number_of_hits = 1;
     bool parental_bond_has_effect = false;
@@ -1247,7 +1263,7 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
         if(effectiveness == 0){
             event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
             decrementVolatiles(active_user);
-            if(effect_id == 171 || effect_id == 174){
+            if((effect_id == 171 || effect_id == 174 || effect_id == 277)&&!active_user->hasAbility(MAGIC_GUARD)){
                 // user takes 50% maxHP recoil damage
                 unsigned int max_hp = active_user->getMaxHP();
                 unsigned int damage = max_hp / 2;
@@ -1318,6 +1334,10 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             if(effect_id == 103 || effect_id==156){//one hit KO
                 event_handler->displayMsg("It's a one hit KO!");//notice that this may only OHKO the substitute!
                 damage = active_target->getMaxHP() * 1000;
+            }
+            if(effect_id == 280 && old_held_item!=nullptr){
+                //custom message for poltergeist
+                event_handler->displayMsg(opponent_mon_name+" is about to be attacked by its "+old_held_item->getName());
             }
             actual_damage = active_target->addDamage(damage,category, effectiveness, attack->isSoundBased());
             active_target->hitOnceMore(attack_type);
@@ -1477,13 +1497,23 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             }
             return {total_actual_damage,false};
         }else{
-            if(active_target->isFrozen() && (attack_type==FIRE || attack->getId()==482))//scald and fire type moves thaw frozen target
+            if(active_target->hasAbility(COLOR_CHANGE) &&
+                !active_target->hasType(attack_type) &&
+                attack_type!=NO_TYPE){
+                active_target->clearTypes();
+                active_target->addType(attack_type);
+                event_handler->displayMsg(opponent_mon_name+"'s became "+typeToString(attack_type)+" type thanks to its Color Change ability!");
+            }
+            if(active_target->isFrozen() && (attack_type==FIRE || attack->getId()==482 || attack->getId()==520))//scald/scorching sands and fire type moves thaw frozen target
                 // 482: SCALD id
+                // 520: SCORCHING_SANDS id
                 active_target->clearPermanentStatus();
             // unsigned int effect_id = effect_id;
             if((user_held_item==KINGS_ROCK || user_held_item==RAZOR_FANG) &&//kings rock effect
                 actual_damage.first>0 && !actual_damage.second &&
-                effect_id!=21 && effect_id!=45 && effect_id!=105 && effect_id!=141 && effect_id!=195 && effect_id!=197 &&// attacks that cause flinch
+                effect_id!=21 && effect_id!=45 && effect_id!=105 && 
+                effect_id!=141 && effect_id!=195 && effect_id!=197 &&
+                effect_id!=279 &&// attacks that cause flinch
                 RNG::getRandomInteger(1,10)==1){//10% chance
                 active_target->addVolatileCondition(FLINCH,-1);
             }
@@ -1700,6 +1730,7 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
         effect != 97 && // heal
         effect != 162 && // heal
         effect != 100 && // death after use
+        effect != 275 && //death after use
         effect != 117) // death after use
         return;
     if(actual_damage>0){
@@ -1749,13 +1780,22 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                 }
                 break;
             }
-            case 100:case 117:{//user faints
+            case 100:case 117:case 275:{//user faints
                 unsigned int max_hp = active_user->getMaxHP();
                 active_user->addDirectDamage(max_hp);
                 return;
             }
             case 212:{
                 // 1/2 user HP recoil
+                unsigned int recoil_damage = max(active_user->getMaxHP() / 2,1);
+                unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
+                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                if(active_user->isFainted())
+                    return;
+                break;
+            }
+            case 276:{
+                //recoil 50% user health
                 unsigned int recoil_damage = max(active_user->getMaxHP() / 2,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
                 event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
@@ -2063,9 +2103,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
-        case 14:case 20:case 219:case 253:{//burn opponent
+        case 14:case 20:case 219:case 253:case 274:{//burn opponent
             if(active_target->isFainted())
                 return;
+            if(effect==274 && !active_target->hasVolatileCondition(STAT_JUST_RAISED)){
+                break;
+            }
             if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
                 !active_user->hasAbility(INFILTRATOR)){
                 event_handler->displayMsg("Safeguard protects "+opponent_mon_name+" from being burned!");
@@ -2214,7 +2257,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
-        case 21:case 45:case 105:case 141:case 195:case 197:{//flinch
+        case 21:case 45:case 105:case 141:case 195:case 197:case 279:{//flinch
             if(active_target->isFainted())
                 return;
             if(hits_substitute && !active_user->hasAbility(INFILTRATOR))
@@ -3642,6 +3685,17 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
+        case 273:{
+            //psychic terrain
+            if(field->getTerrain() == PSYCHIC_FIELD){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }else{
+                field->setTerrain(PSYCHIC_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
+                consumeSeeds();
+            }
+            break;
+        }
         case 149:{
             //magnet rise
             if(active_user->isFainted())
@@ -4692,6 +4746,34 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
+        case 272:{
+            // switch ability with target
+            if(active_target->isFainted())
+                return;
+            if(active_user->hasAbility(NO_ABILITY) ||
+                active_target->hasAbility(NO_ABILITY) ||
+                abilityCannotBeChanged(active_user->getAbility()) ||
+                abilityCannotBeCopied(active_target->getAbility())){
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+                break;   
+            }
+            Ability old_user_ability = active_user->getAbility();
+            Ability old_target_ability = active_target->getAbility();
+            active_user->setAbility(old_target_ability);
+            active_target->setAbility(old_user_ability);
+            event_handler->displayMsg(user_mon_name+" switched abilities with "+opponent_mon_name+"!");
+            // apply new ability effects of user
+            applyImpostorSwitchIn(actor);
+            bool res1 = applySwitchInAbilitiesEffects(actor);
+            // apply new ability effects of target
+            applyImpostorSwitchIn(other_actor);
+            bool res2 = applySwitchInAbilitiesEffects(other_actor);
+            if(res1 || res2){
+                return;
+            }
+            break;
+        }
         default:break;
     }
 }
@@ -4760,6 +4842,9 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(OUTRAGING);
     active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
     active_user->removeVolatileCondition(CHARGING_SOLARBLADE);
+    active_user->removeVolatileCondition(CHARGING_SKYATTACK);
+    // METEOR BEAM is still charged until it completes
+    // active_user->removeVolatileCondition(CHARGING_METEORBEAM);
     active_user->removeVolatileCondition(VANISHED);
     active_user->removeVolatileCondition(FLYING_HIGH);
     active_user->removeVolatileCondition(BOUNCING);
@@ -5410,6 +5495,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
+        case 277:{
+            //power is doubled if opponent has used minimize
+            if(active_target->hasUsedAttack(MINIMIZE_ID)){
+                base_power *= 2;
+            }
+            break;
+        }
         default: break;
     }
 
@@ -5489,7 +5581,8 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case RECKLESS:{
             //boost power of recoil moves
             if(effect==171 || effect==20 || effect==30 ||
-                effect==51 || effect==6 || effect==174)
+                effect==51 || effect==6 || effect==174 ||
+                effect==276 || effect==277)
                 base_power *= 1.2;
             break;
         }
@@ -5547,6 +5640,9 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case MISTY_FIELD:{
             if(attack_type == DRAGON){
                 base_power *= 0.5;
+            }else if(effect==275){
+                // misty explosion
+                base_power *= 1.5;
             }
             break;
         }
@@ -7035,7 +7131,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
             decrementVolatiles(active_user);
             active_user->setLastAttackFailed();
             active_user->removeVolatileCondition(LASER_FOCUS);
-            if(attack->getEffectId()==100){
+            if(attack->getEffectId()==100 || attack->getEffectId()==275){
                 //user dies
                 active_user->addDirectDamage(active_user->getMaxHP());
             }
@@ -7113,6 +7209,17 @@ bool Battle::checkIfAttackFails(Attack* attack,
             }
             break;
         }
+        case 279:{
+            // upper hand fails if the target has not chosen a non status attack with priority between 1 and 3
+            // or the opponent act faster
+            if(!isAttackingActionType(other_action.getActionType()) || // opponent is not attacking
+                action.getOrder() > other_action.getOrder() || // opponent action comes before
+                Attack::getAttack(other_action.getAttackId())->getCategory()==STATUS ||// opponent is using status move
+                other_action.getPriority() > 3 ||// opponent is using attack with too high priority
+                other_action.getPriority() < 1){ //opponent is using attack with too low priority
+                attack_failed = true;
+            }
+        }
         case 105:{//fake out
             if(!active_user->isFirstTurn()){
                 active_user->setLastAttackUsed(action.getAttackId());
@@ -7178,7 +7285,6 @@ bool Battle::checkIfAttackFails(Attack* attack,
         case 200:{
             //fails if user has not eaten a berry before
             if(!active_user->hasConsumedBerry()){
-                active_user->setLastAttackFailed();
                 attack_failed = true;
             }
             break;
@@ -7186,7 +7292,6 @@ bool Battle::checkIfAttackFails(Attack* attack,
         case 204:{
             //fling fails if the user has no held item
             if(!active_user->canStealItem() || !active_user->hasHeldItem()){
-                active_user->setLastAttackFailed();
                 attack_failed = true;
             }
             break;
@@ -7194,7 +7299,13 @@ bool Battle::checkIfAttackFails(Attack* attack,
         case 208:{
             //fails if there is no hail or snow
             if(field->getWeather() != HAIL && field->getWeather() != SNOWSTORM){
-                active_user->setLastAttackFailed();
+                attack_failed = true;
+            }
+            break;
+        }
+        case 280:{
+            //fails if the target does not hold any item
+            if(!active_target->hasHeldItem()){
                 attack_failed = true;
             }
             break;
@@ -7227,6 +7338,27 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     if(active_user->hasVolatileCondition(CHARGING_SOLARBEAM)){
         active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
+    }
+    //charge meteor mash
+    if(attack->getEffectId() == 9 && !active_user->hasVolatileCondition(CHARGING_METEORBEAM)){// Solar beam
+        active_user->addVolatileCondition(CHARGING_METEORBEAM, 5);
+        // boost user Sp. Atk
+        StatCV changes = {{3,1}};
+        changeStats(actor, changes, false);
+        if(tryEjectPack(actor))
+            return true;
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Meteor Beam immediately!");
+            active_user->consumeHeldItem();
+        }else{
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(CHARGING_METEORBEAM)){
+        active_user->removeVolatileCondition(CHARGING_METEORBEAM);
     }
     //charge solar blade
     if(attack->getEffectId() == 263 && !active_user->hasVolatileCondition(CHARGING_SOLARBLADE)){// Solar blade
@@ -7394,7 +7526,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         decrementVolatiles(active_user);
         active_user->setLastAttackHit();
-        if(attack->getEffectId()==100){
+        if(attack->getEffectId()==100 || attack->getEffectId()==275){
             //user dies
             active_user->addDirectDamage(active_user->getMaxHP());
         }
@@ -7402,7 +7534,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
             //user dies
             active_user->addVolatileCondition(RECHARGING,-1);
         }
-        if(attack->getEffectId() == 171 || attack->getEffectId() == 174){
+        if((attack->getEffectId() == 171 || attack->getEffectId() == 174 || attack->getEffectId() == 277)&&!active_user->hasAbility(MAGIC_GUARD)){
             // user takes 50% maxHP recoil damage
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max_hp / 2;
@@ -7420,7 +7552,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         decrementVolatiles(active_user);
         active_user->removeVolatileCondition(ROLLINGOUT);
         active_user->setLastAttackHit();
-        if(attack->getEffectId()==100){
+        if(attack->getEffectId()==100 || attack->getEffectId()==275){
             //user dies
             active_user->addDirectDamage(active_user->getMaxHP());
         }
@@ -7443,7 +7575,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
 
     // damp prevents explosion and self-destruct
     if(active_target->hasAbility(DAMP) && 
-        attack->getEffectId() == 100 &&
+        (attack->getEffectId() == 100 || attack->getEffectId()==275)&&
         attack->getTarget()==TARGET_OPPONENT){
         event_handler->displayMsg(opponent_mon_name+" prevented "+user_mon_name+"'s self-destructing move!");
         decrementVolatiles(active_user);
@@ -7460,6 +7592,17 @@ bool Battle::checkIfAttackFails(Attack* attack,
         !active_target->hasSubstitute()){
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         // active_target->changeSpecialAttackModifier(1);
+        StatCV changes = {{3,1}};
+        changeStats(active_target->getActor(), changes, false);
+        attack_absorbed = true;
+    }
+    // storm drain -> drew in water type attack and increase SPATT
+    if(active_target->hasAbility(STORM_DRAIN) && 
+        attack_type==WATER &&
+        attack->getCategory()!=STATUS && 
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
+        event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         StatCV changes = {{3,1}};
         changeStats(active_target->getActor(), changes, false);
         attack_absorbed = true;
@@ -7527,7 +7670,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         decrementVolatiles(active_user);
         active_user->removeVolatileCondition(LASER_FOCUS);
         active_user->setLastAttackHit();
-        if(attack->getEffectId()==100){
+        if(attack->getEffectId()==100 || attack->getEffectId()==275){
             //user dies
             active_user->addDirectDamage(active_user->getMaxHP());
         }
@@ -8402,4 +8545,9 @@ double Battle::computeEffectiveness(Attack* attack, BattleActionActor user_actor
         effectiveness = 0;
     }
     return effectiveness;
+}
+
+void Battle::onWeatherChange(Weather new_weather){
+    player_active->onWeatherChange(new_weather);
+    opponent_active->onWeatherChange(new_weather);
 }

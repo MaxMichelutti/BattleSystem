@@ -267,9 +267,7 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     this->actor = actor;
     this->field = field;
     this->types.insert(monster->getType1());
-    if(monster->getType2()!=NO_TYPE){
-        this->types.insert(monster->getType2());
-    }
+    resetTypes();
     this->handler = handler;
     consecutive_protects_counter=0;
     bad_poison_counter=0;
@@ -292,6 +290,14 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     weight = monster->getWeight();
     height = monster->getHeight();
     battle_stats = monster->getStats();
+}
+
+void Battler::resetTypes(){
+    types.clear();
+    types.insert(monster->getType1());
+    if(monster->getType2()!=NO_TYPE){
+        this->types.insert(monster->getType2());
+    }
 }
 
 void Battler::setMonster(Monster* monster){
@@ -329,7 +335,7 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(THROAT_CHOPPED);
     removeVolatileCondition(RECHARGING);
     removeVolatileCondition(TRUANTING);
-
+    resetTypes();
 }
 
 Battler::~Battler() {
@@ -473,6 +479,10 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
         }
         case INGRAINED:{
             handler->displayMsg(getNickname()+" plants its roots on the ground!");
+            break;
+        }
+        case CHARGING_METEORBEAM:{
+            handler->displayMsg(getNickname()+" is overflowing with space power!");
             break;
         }
         default:
@@ -1317,9 +1327,9 @@ void Battler::resetAllStatChanges(){
 Ability Battler::getAbility()const {
     if(hasHeldItem(ABILITY_SHIELD))
         return battler_ability;
-    if(has_ability_neutralized)
+    if(has_ability_neutralized && !abilityCannotBeSuppressed(battler_ability))
         return NO_ABILITY;
-    if(has_ability_suppressed)
+    if(has_ability_suppressed && !abilityCannotBeSuppressed(battler_ability))
         return NO_ABILITY;
     if(is_mold_breaker_active && isAbilityIgnorable(battler_ability))
         return NO_ABILITY;
@@ -3047,6 +3057,9 @@ void Battler::removeSubstitute(){
     }
 }
 
-void Battle::onWeatherChange(Weather new_weather){
-    return;
+void Battler::onWeatherChange(Weather new_weather){
+    if(monster->changeWeatherForm(handler, new_weather)){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+    }   
 }

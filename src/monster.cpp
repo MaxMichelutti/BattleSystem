@@ -703,6 +703,9 @@ void Monster::evolve(){
                         cloned_nincada->setHeldItem(NO_ITEM_TYPE);
                         cloned_nincada->transformation = nullptr;
                         cloned_nincada->mega_ability = NO_ABILITY;
+                        cloned_nincada->form_id = 0;
+                        cloned_nincada->damage = 0;
+                        cloned_nincada->setPermanentStatus(NO_PERMANENT_CONDITION);
                         cloned_nincada->is_mega = false;
                         cloned_nincada->evolveIntoShedinja();
                         team->addMonster(cloned_nincada);
@@ -1488,4 +1491,38 @@ void Monster::setBall(ItemType ball){
     if(item_data->getCategory() != BALL)
         return;
     ball_containing_monster = ball;
+}
+
+bool Monster::changeWeatherForm(EventHandler* handler,Weather weather){
+    //returns true if the form was actually changed
+    if(species_id == 351){//castform
+        switch(weather){
+            case RAIN:{
+                if(form_id == 114)
+                    return false;
+                form_id = 114;
+                return true;
+            }
+            case SUN:{
+                if(form_id == 113)
+                    return false;
+                form_id = 114;
+                return true;
+            }
+            case SNOWSTORM:
+            case HAIL:{
+                if(form_id == 115)
+                    return false;
+                form_id = 115;
+                return true;
+            }
+            default:{
+                if(form_id == 0)
+                    return false;
+                form_id = 0;
+                return true;
+            }
+        }
+    }
+    return false;
 }

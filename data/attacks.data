@@ -214,6 +214,7 @@ NAME:Fire Fang
 DESCRIPTION:The user bites with flame-cloaked fangs. This may also leave the target with a burn.
 TYPE:FIRE
 CONTACT
+BITING
 PP:15
 POWER:65
 ACCURACY:95
@@ -347,6 +348,7 @@ PP:25
 POWER:60
 CONTACT
 TYPE:DARK
+BITING
 CATEGORY:PHYSICAL
 EFFECT:21
 EFFECTCHANCE:10
@@ -774,6 +776,7 @@ DESCRIPTION:The user crunches up the target with sharp fangs. This may also lowe
 TYPE:DARK
 POWER:80
 PP:15
+BITING
 CONTACT
 CATEGORY:PHYSICAL
 EFFECT:22
@@ -993,6 +996,7 @@ NAME:Ice Fang
 %DESCRIPTION:The user bites with cold-infused fangs. This may also make the target flinch or leave it frozen.
 DESCRIPTION:The user bites with cold-infused fangs. This may also leave the target frozen.
 TYPE:ICE
+BITING
 PP:15
 CONTACT
 POWER:65
@@ -1005,6 +1009,7 @@ NAME:Thunder Fang
 %DESCRIPTION:The user bites with electrified fangs. This may also make the target flinch or leave it with paralysis. 
 DESCRIPTION:The user bites with electrified fangs. This may also leave the target with paralysis.
 TYPE:ELECTRIC
+BITING
 PP:15
 POWER:65
 ACCURACY:95
@@ -1663,6 +1668,7 @@ NAME:Poison Fang
 DESCRIPTION:The user bites the target with toxic fangs. It may also leave the target badly poisoned.
 CATEGORY:PHYSICAL
 TYPE:POISON
+BITING
 PP:15
 POWER:50
 EFFECT:76
@@ -3595,6 +3601,7 @@ NO_METRONOME
 TYPE:DARK
 CATEGORY:STATUS
 EFFECT:198
+ACCURACY:200
 NO_COPYCAT
 # 387 FLING
 NAME:Fling
@@ -3618,6 +3625,7 @@ CONTACT
 NAME:Hyper Fang
 DESCRIPTION:The user bites hard on the target with its sharp front fangs. This may also make the target flinch.
 TYPE:NORMAL
+BITING
 CATEGORY:PHYSICAL
 PP:15
 ACCURACY:90
@@ -4712,3 +4720,205 @@ CATEGORY:STATUS
 PP:10
 EFFECT:271
 TARGET:SELF
+# 507 SCALE SHOT
+NAME:Scale Shot
+DESCRIPTION:The user attacks by shooting scales two to five times in a row. This move boosts the user's Speed stat but lowers its Defense stat.
+TYPE:DRAGON
+PP:20
+POWER:25
+CATEGORY:PHYSICAL
+ACCURACY:90
+EFFECT:36
+EFFECTTARGET:SELF
+# 508 TRICK
+NAME:Trick
+DESCRIPTION:The user catches the target off guard and swaps the target's held item with its own.
+EFFECT:198
+PP:10
+TYPE:PSYCHIC
+ACCURACY.200
+CATEGORY:STATUS
+NO_METRONOME
+NO_COPYCAT
+# 509 SKILL SWAP
+NAME:Skill Swap
+DESCRIPTION:The user employs its psychic power to exchange Abilities with the target.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:10
+ACCURACY:200
+EFFECT:272
+NO_METRONOME
+NO_COPYCAT
+# 510 PSYCHIC FANGS
+NAME:Psychic Fangs
+DESCRIPTION:The user attacks by biting the target with its psychic capabilities. This move can also break barriers, such as Light Screen and Reflect.
+TYPE:PSYCHIC
+PP:10
+POWER:85
+BITING
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:172
+EFFECTTARGET:SELF
+# 511 POLLEN PUFF
+NAME:Pollen Puff
+DESCRIPTION:The user attacks the enemy with a pollen puff that explodes.
+% ... If the target is an ally, it gives the ally a pollen puff that restores its HP instead.
+% has effects only in doubles
+PP:15
+POWER:90
+CATEGORY:SPECIAL
+TYPE:BUG
+# 512 PSYCHIC TERRAIN
+NAME:Psychic terrain
+DESCRIPTION:This protects Pokémon on the ground from priority moves and powers up Psychic-type moves for five turns.
+PP:10
+TARGET:SELF
+TYPE:PSYCHIC
+CATEGORY:STATUS
+EFFECT:273
+# 513 STEEL BEAM
+NAME:Steel Beam
+DESCRIPTION:The user fires a beam of steel that it collected from its entire body. This also damages the user.
+TYPE:STEEL
+CATEGORY:SPECIAL
+PP:5
+POWER:140
+ACCURACY:95
+EFFECT:276
+EFFECTTARGET:SELF
+# 514 HEAT CRASH
+NAME:Heat Crash
+DESCRIPTION:The user slams into the target with its flame-covered body. The more the user outweighs the target, the greater the move's power.
+TYPE:FIRE
+CONTACT
+PP:10
+CATEGORY:PHYSICAL
+EFFECT:140
+EFFECTTARGET:SELF
+# 515 BURNING JEALOUSY
+NAME:Burning Jealousy
+DESCRIPTION:The user attacks with energy from jealousy. This leaves all opposing Pokémon that have had their stats boosted during the turn with a burn.
+CATEGORY:SPECIAL
+TYPE:FIRE
+PP:5
+POWER:70
+EFFECT:274
+# 516 MISTY EXPLOSION
+NAME:Misty Explosion
+DESCRIPTION:The user attacks everything around it and faints upon using this move. This move's power is boosted on Misty Terrain.
+PP:5
+POWER:100
+CATEGORY:SPECIAL
+TYPE:FAIRY
+EFFECT:275
+EFFECTTARGET:SELF
+# 517 TEMPER FLARE
+NAME:Temper Flare
+DESCRIPTION:Spurred by desperation, the user attacks the target. This move's power is doubled if the user's previous move failed.
+TYPE:FIRE
+PP:10
+CATEGORY:PHYSICAL
+CONTACT
+POWER:75
+EFFECT:116
+EFFECTTARGET:SELF
+# 518 SUPERCELL POWER
+NAME:Supercell Power
+DESCRIPTION:The user electrifies its body and drops onto the target to inflict damage. If this move misses, the user takes damage instead.
+PP:15
+POWER:100
+ACCURACY:95
+TYPE:ELECTRIC
+CONTACT
+CATEGORY:PHYSICAL
+EFFECT:277
+EFFECTTARGET:SELF
+# 519 TRIPLE AXEL
+NAME:Triple Axel
+DESCRIPTION:A consecutive three-kick attack that becomes more powerful with each successful hit.
+TYPE:ICE
+CATEGORY:PHYSICAL
+PP:10
+POWER:20
+ACCURACY:90
+CONTACT
+EFFECT:251
+EFFECTTARGET:SELF
+# 520 SCORCHING SANDS
+NAME:Scorching Sands
+DESCRIPTION:The user throws scorching sand at the target to attack. This may also leave the target with a burn.
+TYPE:GROUND
+CATEGORY:SPECIAL
+PP:10
+POWER:70
+EFFECT:14
+EFFECTCHANCE:30
+# 521 METEOR BEAM
+NAME:Meteor Beam
+DESCRIPTION:The user gathers energy from space and boosts its Sp. Atk stat on the first turn, then attacks on the next turn.
+TYPE:ROCK
+PP:10
+POWER:120
+ACCURACY:90
+EFFECT:278
+EFFECTTARGET:SELF
+# 522 UPPER HAND
+NAME:Upper Hand
+DESCRIPTION:The user reacts to the target's movement and strikes with the heel of its palm, making the target flinch. This move fails if the target is not readying a priority move.
+PRIORITY:3
+EFFECT:279
+CONTACT
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+PP:15
+POWER:65
+# 523 POUNCE
+NAME:Pounce
+DESCRIPTION:The user attacks by pouncing on the target. This also lowers the target's Speed stat.
+TYPE:BUG
+PP:20
+CATEGORY:PHYSICAL
+CONTACT
+POWER:50
+EFFECT:122
+# 524 BLAST BURN
+NAME:Blast Burn
+DESCRIPTION:The target is razed by a fiery explosion. The user can't move on the next turn.
+TYPE:FIRE
+PP:5
+POWER:150
+CATEGORY:SPECIAL
+ACCURACY:90
+EFFECT:187
+EFFECTTARGET:SELF
+# 525 HYDRO CANNON
+NAME:Hydro Cannon
+DESCRIPTION:The target is hit with a watery blast. The user can't move on the next turn. 
+TYPE:WATER
+PP:5
+POWER:150
+CATEGORY:SPECIAL
+ACCURACY:90
+EFFECT:187
+EFFECTTARGET:SELF
+# 526 FRENZY PLANT
+NAME:Frenzy Plant
+DESCRIPTION:The user slams the target with the roots of an enormous tree. The user can't move on the next turn.
+TYPE:GRASS
+PP:5
+POWER:150
+CATEGORY:SPECIAL
+ACCURACY:90
+EFFECT:187
+# 527 POLTERGEIST
+NAME:Poltergeist
+DESCRIPTION:The user attacks by controlling the target's item. This move fails if the target isn't holding an item.
+TYPE:GHOST
+PP:5
+POWER:110
+ACCURACY:90
+CATEGORY:PHYSICAL
+EFFECT:280
+EFFECTTARGET:SEF

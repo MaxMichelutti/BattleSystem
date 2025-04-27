@@ -179,7 +179,11 @@ static std::unordered_map<std::string,Ability> strToAbility = {
     {"SOLID_ROCK",SOLID_ROCK},
     {"WHITE_SMOKE",WHITE_SMOKE},
     {"HEAVY_METAL",HEAVY_METAL},
-    {"TOXIC_BOOST",TOXIC_BOOST}
+    {"TOXIC_BOOST",TOXIC_BOOST},
+    {"STORM_DRAIN",STORM_DRAIN},
+    {"FORECAST",FORECAST},
+    {"COLOR_CHANGE",COLOR_CHANGE},
+    {"PROTEAN",PROTEAN}
 };
 
 std::string abilityToString(Ability);
@@ -189,6 +193,7 @@ bool isAbilityTraceable(Ability ability);
 bool doesAbilityIgnoreIntimidate(Ability ability);
 bool abilityCannotBeCopied(Ability ability);
 bool abilityCannotBeChanged(Ability ability);
+bool abilityCannotBeSuppressed(Ability ability);
 
 class AbilityItem{
     private:

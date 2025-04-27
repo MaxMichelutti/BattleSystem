@@ -146,7 +146,7 @@ class Monster{
     bool isPastEvoLevel()const;
     void setBall(ItemType ball);
     bool hasEvolutions()const;
-    
+    bool changeWeatherForm(EventHandler* handler,Weather weather);
 };
 
 #endif

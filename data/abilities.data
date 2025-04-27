@@ -328,3 +328,11 @@ WHITE_SMOKE
 The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats.
 TOXIC_BOOST
 Powers up physical moves when the Pokémon is poisoned.
+STORM_DRAIN
+The Pokémon draws in all Water-type moves. Instead of taking damage from them, its Sp. Atk stat is boosted.
+FORECAST
+The Pokémon transforms with the weather to change its type to Water, Fire, or Ice.
+COLOR_CHANGE
+The Pokémon's type becomes the type of the move used on it.
+PROTEAN
+Changes the Pokémon's type to the type of the move it's about to use. This works only once each time the Pokémon enters battle.

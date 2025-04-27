@@ -269,3 +269,12 @@
 269: if stats were dropped power is doubled
 270: confuse target if its stats were raised this turn
 271: magic room
+272: user and target swap abilities
+273: set up psychic terrain
+274: burn the target if it had stat boosted this turn
+275: user faints, under misty terrain move is boosted 1.5x
+276: usr takes 50% of its own health in recoil
+277: if attack misses, user takes 50% maxHP recoil + minimize bonus
+278: meteor beam
+279: fails if the target is not performing an action with priority between +1 and +3, if it hits it causes the target to flinch
+280: fails if user does not hold an item, displays custom message when attacking

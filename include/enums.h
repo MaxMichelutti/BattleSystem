@@ -72,6 +72,7 @@ enum BattleActionType{
     UPROAR,
     RECHARGE_TURN,
     TRUANT_TURN,
+    METEOR_BEAM,
     SKY_ATTACK,
     USE_ITEM,
     BOUNCE,
@@ -99,6 +100,7 @@ enum VolatileStatusCondition{
     CHARGING_SOLARBEAM,
     CHARGING_SOLARBLADE,
     CHARGING_SKYATTACK,
+    CHARGING_METEORBEAM,
     RECHARGING,
     GROUNDED,
     PETAL_DANCING,
@@ -425,7 +427,11 @@ enum Ability{
     SIMPLE,
     SOLID_ROCK,
     WHITE_SMOKE,
-    TOXIC_BOOST
+    TOXIC_BOOST,
+    STORM_DRAIN,
+    FORECAST,
+    COLOR_CHANGE,
+    PROTEAN
 };
 
 enum ItemCategory{

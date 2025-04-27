@@ -284,6 +284,8 @@ class Battler{
     bool hasSubstitute()const;
     void setSubstituteHP(unsigned int amount);
     void removeSubstitute();
+    void onWeatherChange(Weather new_weather);
+    void resetTypes();
 };
 
 #endif
