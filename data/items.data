@@ -533,13 +533,11 @@ CATEGORY:EVOLUTION
 PRICE:3000
 # 97 DEEP SEA SCALE
 NAME:Deep Sea Scale
-% boosts Clamperl
 DESCRIPTION:An item to be held by Clamperl. This scale shines with a faint pink and boosts Clamperl's Sp. Def stat.
 CATEGORY:EVOLUTION
 PRICE:2000
 # 98 DEEP SEA TOOTH
 NAME:Deep Se Tooth
-% boosts Clamperl
 DESCRIPTION:An item to be held by Clamperl. This fang gleams a sharp silver and boosts Clamperl's Sp. Atk stat.
 CATEGORY:EVOLUTION
 PRICE:2000

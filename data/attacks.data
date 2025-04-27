@@ -2212,7 +2212,7 @@ CONTACT
 TYPE:FIGHTING
 EFFECT:122
 # 238 KNOCK OFF
-NAME: Knocf Off
+NAME:Knocf Off
 DESCRIPTION:The user slaps down the target's held item, and that item can't be used in that battle. The move does more damage if the target has a held item.
 PP:20
 POWER:65
@@ -4922,4 +4922,14 @@ POWER:110
 ACCURACY:90
 CATEGORY:PHYSICAL
 EFFECT:280
+EFFECTTARGET:SELF
+# 528 FROST BREATH
+NAME:Frost Breath
+DESCRIPTION:The user attacks by blowing its cold breath on the target. This move always lands a critical hit.
+TYPE:ICE
+PP:10
+ACCURACY:90
+CATEGORY:SPECIAL
+POWER:60
+EFFECT:189
 EFFECTTARGET:SELF

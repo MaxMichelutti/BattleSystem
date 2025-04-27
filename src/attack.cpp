@@ -213,6 +213,8 @@ Type Attack::getType(Battler* user, Field* field)const{
     }
     if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
         attack_type = ELECTRIC;
+    if(user->hasAbility(REFRIGERATE) && attack_type==NORMAL)
+        attack_type = ICE;
     if(user->hasAbility(AERILATE) && attack_type==NORMAL)
         attack_type = FLYING;
     if(user->hasAbility(PIXILATE) && attack_type==NORMAL)

@@ -336,3 +336,5 @@ COLOR_CHANGE
 The Pokémon's type becomes the type of the move used on it.
 PROTEAN
 Changes the Pokémon's type to the type of the move it's about to use. This works only once each time the Pokémon enters battle.
+REFRIGERATE
+Normal-type moves become Ice-type moves. The power of those moves is boosted a little.

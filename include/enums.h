@@ -431,7 +431,8 @@ enum Ability{
     STORM_DRAIN,
     FORECAST,
     COLOR_CHANGE,
-    PROTEAN
+    PROTEAN,
+    REFRIGERATE
 };
 
 enum ItemCategory{

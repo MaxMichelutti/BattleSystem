@@ -5607,9 +5607,10 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case GALVANIZE:
+        case REFRIGERATE:
         case PIXILATE:
         case AERILATE:{
-            //boost power of moves that changed type
+            //boost power of moves that changed type from NORMAL to the type of the ability
             if(attack->getType() == NORMAL){
                 base_power *= 1.2;
             }

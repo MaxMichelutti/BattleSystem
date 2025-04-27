@@ -1230,6 +1230,8 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
         base_modified = base_modified * 1.5;
     if(hasHeldItem(METAL_POWDER)&& monster->getSpeciesId()==132 && !monster->isTransformed())//metal powder oncreases defense of ditto
         base_modified*=1.5;
+    if((hasHeldItem(DEEP_SEA_TOOTH) || hasHeldItem(DEEP_SEA_SCALE)) && monster->getSpeciesId()==366)//deep sea tooth doubles special defense of clamperl
+        base_modified*=2;
     return base_modified;
 }
 
