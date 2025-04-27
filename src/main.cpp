@@ -52,15 +52,8 @@ int main(int argc, char** argv) {
     opponent_bag->addItem(HYPER_POTION,1);
     Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);
     battle->setBattleGivesExp();
-    // battle->startBattle();
+    battle->startBattle();
     // Species::printAllSummaries();
     // Attack::printAllSummaries();
-    for(int i=1;i<528;i++){
-        Attack* a = Attack::getAttack(i);
-        std::string s = a->getName();
-        for (int j = 0; j < s.length(); j++)
-            s[j] = toupper(s[j]);
-        std::cout << i << " " << s << std::endl;
-    }
     return 0;
 }
