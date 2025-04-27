@@ -417,7 +417,10 @@ enum Ability{
     HEAVY_METAL,
     PURE_POWER,
     STRONG_JAW,
-    ROUGH_SKIN
+    ROUGH_SKIN,
+    SIMPLE,
+    SOLID_ROCK,
+    WHITE_SMOKE
 };
 
 enum ItemCategory{

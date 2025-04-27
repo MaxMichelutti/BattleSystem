@@ -320,3 +320,9 @@ STRONG_JAW
 The Pokémon's strong jaw boosts the power of its biting moves.
 ROUGH_SKIN
 The Pokémon's rough skin damages attackers that make direct contact with it.
+SIMPLE
+Doubles the effects of the Pokémon's stat changes.
+SOLID_ROCK
+Reduces the power of supereffective attacks that hit the Pokémon. 
+WHITE_SMOKE
+The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats.

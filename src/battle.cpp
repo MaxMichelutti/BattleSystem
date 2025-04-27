@@ -3376,22 +3376,6 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(actor,changes,false);
             break;
         }
-        case 130:{
-            //schedule future sight
-            Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
-            unsigned int attack_stat = future_sight->getCategory()==PHYSICAL ?
-                active_user->getModifiedAttack() : active_user->getModifiedSpecialAttack();
-            scheduled_futuresights.push_back(
-                ScheduledFutureSight(
-                    3,
-                    attack_stat,
-                    active_user->getLevel(),
-                    other_actor,
-                    active_user->hasType(future_sight->getType())
-                ));
-            event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
-            break;
-        }
         case 132:{
             //+1 att def user
             // bool res = active_user->changeAttackModifier(+1);
@@ -4970,8 +4954,8 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     if(enemy_monster->hasAbility(DRY_SKIN) && attack_type == FIRE){
         damage *= 1.25;
     }
-    // filter reduces damage from supereffective attacks
-    if(effectiveness>1.1 && enemy_monster->hasAbility(FILTER)){
+    // filter (and solid rock) reduces damage from supereffective attacks
+    if(effectiveness>1.1 && (enemy_monster->hasAbility(FILTER) || enemy_monster->hasAbility(SOLID_ROCK))){
         damage *= 3.0 / 4.0;
     }
     // fur coat halves physical damage
@@ -7023,6 +7007,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
                 attack_failed = true;
             }
             break;
+        }
+        case 130:{
+            //schedule future sight
+            Attack* future_sight = Attack::getAttack(FUTURE_SIGHT_ID);
+            unsigned int attack_stat = future_sight->getCategory()==PHYSICAL ?
+                active_user->getModifiedAttack() : active_user->getModifiedSpecialAttack();
+            scheduled_futuresights.push_back(
+                ScheduledFutureSight(
+                    3,
+                    attack_stat,
+                    active_user->getLevel(),
+                    otherBattleActionActor(actor),
+                    active_user->hasType(future_sight->getType())
+                ));
+            event_handler->displayMsg(user_mon_name+" has foreseen an attack!");
+            return true;
         }
         case 162:{//dream eater
             if(!active_target->isAsleep()){

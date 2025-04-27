@@ -997,6 +997,12 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item)const{
         case 310:{//manectric
             return curr_form==0 && mega_item==MANECTITE;
         }
+        case 319:{//sharpedo
+            return curr_form==0 && mega_item==SHARPEDONITE;
+        }
+        case 323:{//camerupt
+            return curr_form==0 && mega_item==CAMERUPTITE;
+        }
         default:return false;
     }
 }
@@ -1009,118 +1015,156 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item)cons
         case 3:{//venusaur
             if(curr_form==0 && mega_item==VENUSAURITE)
                 return 3;
+            break;
         }
         case 6:{//charizard
             if(curr_form==0 && mega_item==CHARIZARDITE_X)
                 return 1;
             if(curr_form==0 && mega_item==CHARIZARDITE_Y)
                 return 2;
+            break;
         }
         case 9:{//blastoise
             if(curr_form==0 && mega_item==BLASTOISINITE)
                 return 4;
+            break;
         }
         case 15:{//beedrill
             if(curr_form==0 && mega_item==BEEDRILLITE)
                 return 5;
+            break;
         }
         case 18:{//pidgeot
             if(curr_form==0 && mega_item==PIDGEOTITE)
                 return 6;
+            break;
         }
         case 65:{//alakazam
             if(curr_form==0 && mega_item==ALAKAZITE)
                 return 22;
+            break;
         }
         case 80:{//slowbro
             if(curr_form==0 && mega_item==SLOWBRONITE)
                 return 30;
+            break;
         }
         case 94:{//gengar
             if(curr_form==0 && mega_item==GENGARITE)
                 return 34;
+            break;
         }
         case 115:{//kangaskhan
             if(curr_form==0 && mega_item==KANGASKHANTITE)
                 return 43;
+            break;
         }
         case 127:{//pinsir
             if(curr_form==0 && mega_item==PINSIRITE)
                 return 45;
+            break;
         }
         case 130:{//gyarados
             if(curr_form==0 && mega_item==GYARADOSITE)
                 return 49;
+            break;
         }
         case 142:{//aerodactyl
             if(curr_form==0 && mega_item==AERODACTYLITE)
                 return 50;
+            break;
         }
         case 150:{//mewtwo
             if(curr_form==0 && mega_item==MEWTWONITE_X)
                 return 54;
             if(curr_form==0 && mega_item==MEWTWONITE_Y)
                 return 55;
+            break;
         }
         case 181:{//ampharos
             if(curr_form==0 && mega_item==AMPHAROSITE)
                 return 61;
+            break;
         }
         case 208:{//steelix
             if(curr_form==0 && mega_item==STEELIXITE)
                 return 91;
+            break;
         }
         case 212:{//scizor
             if(curr_form==0 && mega_item==SCIZORITE)
                 return 93;
+            break;
         }
         case 214:{//heracross
             if(curr_form==0 && mega_item==HERACRONITE)
                 return 94;
+            break;
         }
         case 229:{//houndoom
             if(curr_form==0 && mega_item==HOUNDOOMINITE)
                 return 97;
+            break;
         }
         case 248:{//tyranitar
             if(curr_form==0 && mega_item==TYRANITARITE)
                 return 98;
+            break;
         }
         case 254:{//sceptile
             if(curr_form==0 && mega_item==SCEPTILITE)
                 return 99;
+            break;
         }
         case 257:{//blaziken
             if(curr_form==0 && mega_item==BLAZIKENITE)
                 return 100;
+            break;
         }
         case 260:{//swampert
             if(curr_form==0 && mega_item==SWAMPERTITE)
                 return 101;
+            break;
         }
         case 282:{//gardevoir
             if(curr_form==0 && mega_item==GARDEVOIRITE)
                 return 104;
+            break;
         }
         case 302:{//sableye
             if(curr_form==0 && mega_item==SABLENITE)
                 return 105;
+            break;
         }
         case 303:{//mawile
             if(curr_form==0 && mega_item==MAWILITE)
                 return 106;
+            break;
         }
         case 306:{//aggron
             if(curr_form==0 && mega_item==AGGRONITE)
                 return 107;
+            break;
         }
         case 308:{//medicham
             if(curr_form==0 && mega_item==MEDICHAMITE)
                 return 108;
+            break;
         }
         case 310:{//manectric
             if(curr_form==0 && mega_item==MANECTITE)
                 return 109;
+            break;
+        }
+        case 319:{//sharpedo
+            if(curr_form==0 && mega_item==SHARPEDONITE)
+                return 110;
+            break;
+        }
+        case 323:{//camerupt
+            if(curr_form==0 && mega_item==CAMERUPTITE)
+                return 111;
+            break;
         }
         default:return 0;
     }

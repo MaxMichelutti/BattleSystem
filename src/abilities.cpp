@@ -27,9 +27,11 @@ bool isAbilityIgnorable(Ability ability){
     switch(ability){
         case BATTLE_ARMOR:
         case CLEAR_BODY:
+        case WHITE_SMOKE:
         case DRY_SKIN:
         case DAMP:
         case FILTER:
+        case SOLID_ROCK:
         case FLASH_FIRE:
         case HYPER_CUTTER:
         case INNER_FOCUS:

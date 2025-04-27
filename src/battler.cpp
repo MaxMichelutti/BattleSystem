@@ -619,11 +619,13 @@ bool Battler::changeAttackModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -662,6 +664,8 @@ bool Battler::changeAttackModifier(int amount) {
 bool Battler::changeAttackModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
     if(res && amount<0){
@@ -679,12 +683,14 @@ bool Battler::changeDefenseModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     std::string name = getNickname();
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(name+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -723,6 +729,8 @@ bool Battler::changeDefenseModifier(int amount) {
 bool Battler::changeDefenseModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
     if(res && amount<0){
@@ -740,11 +748,13 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -780,6 +790,8 @@ bool Battler::changeSpecialAttackModifier(int amount) {
 bool Battler::changeSpecialAttackModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
     if(res && amount<0){
@@ -797,11 +809,13 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -836,6 +850,8 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
 bool Battler::changeSpecialDefenseModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
     if(res && amount<0){
@@ -853,11 +869,13 @@ bool Battler::changeSpeedModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -892,6 +910,8 @@ bool Battler::changeSpeedModifier(int amount) {
 bool Battler::changeSpeedModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
     if(res && amount<0){
@@ -909,11 +929,13 @@ bool Battler::changeAccuracyModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -957,6 +979,8 @@ bool Battler::changeAccuracyModifier(int amount) {
 bool Battler::changeAccuracyModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
     if(res && amount<0){
@@ -974,11 +998,13 @@ bool Battler::changeEvasionModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -1013,6 +1039,8 @@ bool Battler::changeEvasionModifier(int amount) {
 bool Battler::changeEvasionModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
     if(res && amount<0){
