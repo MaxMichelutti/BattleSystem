@@ -174,7 +174,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     this->cpu_ai = new CPUAI(cpu_skill);
     this->player_team = new MonsterTeam(*player_team);
     this->opponent_team = new MonsterTeam(*opponent_team);
-    field = new Field(handler);
+    field = new Field(this,handler);
     player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,event_handler);
     opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
     player_active->setOpponent(opponent_active);
@@ -203,7 +203,7 @@ Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
     this->cpu_ai = new CPUAI(cpu_skill);
     this->player_team = new MonsterTeam(*player_team);
     this->opponent_team = new MonsterTeam(*opponent_team);
-    field = new Field(handler);
+    field = new Field(this,handler);
     player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,handler);
     opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,handler);
     field->setDefaultWeather(weather);
@@ -317,6 +317,9 @@ void Battle::incrementTurn(){
     // remove stat just dropped
     player_active->removeVolatileCondition(STAT_JUST_DROPPED);
     opponent_active->removeVolatileCondition(STAT_JUST_DROPPED);
+    // remove stat just raised
+    player_active->removeVolatileCondition(STAT_JUST_RAISED);
+    opponent_active->removeVolatileCondition(STAT_JUST_RAISED);
     // remove focus
     player_active->removeVolatileCondition(FOCUSED);
     opponent_active->removeVolatileCondition(FOCUSED);
@@ -364,6 +367,13 @@ void Battle::incrementTurn(){
             opponent_active->hasAbility(CUD_CHEW)){
             opponent_active->useItem(opponent_active->getConsumedItem(),0);
         }
+    }
+    // decrement heal block
+    if(player_active->hasVolatileCondition(HEAL_BLOCKED)){
+        player_active->decrementVolatileCondition(HEAL_BLOCKED);
+    }
+    if(opponent_active->hasVolatileCondition(HEAL_BLOCKED)){
+        opponent_active->decrementVolatileCondition(HEAL_BLOCKED);
     }
     //check uproars
     checkUproars();
@@ -2000,6 +2010,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         case 8:{ // Synthesis
             if(active_user->isFainted())
                 return;
+            if(active_user->hasVolatileCondition(HEAL_BLOCKED)){
+                event_handler->displayMsg(user_mon_name+" is prevented from healing!");
+                active_user->setLastAttackFailed();
+                break;
+            }
             if(active_user->isAtFullHP()){
                 event_handler->displayMsg(user_mon_name+" is already at full health!");
             }else{
@@ -2257,9 +2272,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(actor,changes,false);
             break;
         }
-        case 25:case 77:case 113:case 174:{ // confuse target
+        case 25:case 77:case 113:case 174:case 270:{ // confuse target
             if(active_target->isFainted())
                 return;
+            if(effect==270 && !active_target->hasVolatileCondition(STAT_JUST_RAISED))
+                break;
             if(active_target->hasVolatileCondition(CONFUSION)){
                 if(attack->getCategory()==STATUS){
                     event_handler->displayMsg(opponent_mon_name+" is already confused!");
@@ -2312,6 +2329,25 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 if(0==RNG::getRandomInteger(0,probability_size-1)){
                     active_user->incrementConsecutiveProtect();
                     active_user->addVolatileCondition(PROTECT,5);
+                }else{
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                    active_user->resetConsecutiveProtect();
+                }
+            }
+            break;
+        }
+        case 268:{//SPIKY PROTECT
+            if(active_user->isFainted())
+                return;
+            if(active_user->getConsecutiveProtects() == 0){
+                active_user->incrementConsecutiveProtect();
+                active_user->addVolatileCondition(SPIKY_PROTECT,5);
+            }else{
+                unsigned int probability_size = 3 * active_user->getConsecutiveProtects();
+                if(0==RNG::getRandomInteger(0,probability_size-1)){
+                    active_user->incrementConsecutiveProtect();
+                    active_user->addVolatileCondition(SPIKY_PROTECT,5);
                 }else{
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
@@ -2838,6 +2874,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         case 83:{//heal 25%
             if(active_user->isFainted())
                 return;
+            if(active_user->hasVolatileCondition(HEAL_BLOCKED)){
+                event_handler->displayMsg(user_mon_name+" is prevented from healing!");
+                active_user->setLastAttackFailed();
+                break;
+            }
             if(active_user->isAtFullHP()){
                 event_handler->displayMsg(user_mon_name+" is already at full health!");
             }else{
@@ -3010,6 +3051,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
         case 95:{//rest
             if(active_user->isFainted())
                 return;
+            if(active_user->hasVolatileCondition(HEAL_BLOCKED)){
+                event_handler->displayMsg(user_mon_name+" is prevented from healing!");
+                active_user->setLastAttackFailed();
+                break;
+            }
             if(isUproar() && !active_user->hasAbility(SOUNDPROOF)){
                 event_handler->displayMsg(user_mon_name+" But it failed!");
                 active_user->setLastAttackFailed();
@@ -3674,7 +3720,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //memento
             if(active_user->isFainted())
                 return;
-            if(active_target->hasVolatileCondition(PROTECT)){
+            if(active_target->hasVolatileCondition(PROTECT) || 
+                active_target->hasVolatileCondition(SPIKY_PROTECT)){
                 event_handler->displayMsg("But it failed!");
                 active_user->setLastAttackFailed();
                 break;
@@ -4597,6 +4644,21 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             event_handler->displayMsg(opponent_mon_name+"gained "+user_mon_name+"'s ability!");
             break;
         }
+        case 267:{
+            //target gets 2 turns of heal block
+            if(active_target->isFainted())
+                return;
+            if(active_target->hasVolatileCondition(HEAL_BLOCKED)){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            active_target->addVolatileCondition(HEAL_BLOCKED, 2);
+            event_handler->displayMsg(opponent_mon_name+" will not be able to heal for 2 turns!");
+            break;
+        }
         default:break;
     }
 }
@@ -5308,6 +5370,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             base_power = 100.0 * current_hp / max_hp;
             break;
         }
+        case 269:{
+            //if stats were lowered this turn, power is doubled
+            if(active_user->hasVolatileCondition(STAT_JUST_DROPPED)){
+                base_power *= 2;
+            }
+            break;
+        }
         default: break;
     }
 
@@ -5431,7 +5500,7 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
     switch(field->getTerrain()){
         case GRASSY_FIELD:{
             if(attack_type == GRASS && active_user->isTouchingGround()){
-                base_power *= 3.0 / 2;
+                base_power *= 1.3;
             }
             break;
         }
@@ -5443,13 +5512,16 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         }
         case ELECTRIC_FIELD:{
             if(attack_type == ELECTRIC && active_user->isTouchingGround()){
-                base_power *= 3.0 / 2;
+                base_power *= 1.3;
             }
             break;
         }
         case PSYCHIC_FIELD:{
             if(attack_type == PSYCHIC && active_user->isTouchingGround()){
-                base_power *= 3.0 / 2;
+                if(effect == 266)
+                    base_power *= 1.5;
+                else
+                    base_power *= 1.3;
             }
             break;
         }
@@ -6112,6 +6184,10 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
     // remove protect
     if(active_user->hasVolatileCondition(PROTECT)){
         active_user->removeVolatileCondition(PROTECT);
+    }
+    // remove spiky protect
+    if(active_user->hasVolatileCondition(SPIKY_PROTECT)){
+        active_user->removeVolatileCondition(SPIKY_PROTECT);
     }
     // remove quick guard
     if(active_user->hasVolatileCondition(QUICK_GUARD)){
@@ -7263,12 +7339,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
     // protect
     if(attack->getEffectId()==65 || attack->getEffectId()==264){
         active_target->removeVolatileCondition(PROTECT);
+        active_target->removeVolatileCondition(SPIKY_PROTECT);
     }
-    if(active_target->hasVolatileCondition(PROTECT) && 
+    if((active_target->hasVolatileCondition(PROTECT) || 
+        active_target->hasVolatileCondition(SPIKY_PROTECT))&& 
         attack->getTarget()==TARGET_OPPONENT &&
         attack->getEffectId()!=239){// SOME ATTACKS GO THROUGH PROTECT
         event_handler->displayMsg(opponent_mon_name+" protected itself!");
         // active_target->removeVolatileCondition(PROTECT);
+        if(active_target->hasVolatileCondition(SPIKY_PROTECT) && 
+            !active_user->hasAbility(WONDER_GUARD) &&
+            attack->makesContact()){
+            event_handler->displayMsg(opponent_mon_name+"'s Spiky Shield hurt "+user_mon_name+"!");
+            unsigned int spiky_protect_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_spiky_protect_damage = active_user->addDirectDamage(spiky_protect_damage);
+            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_spiky_protect_damage)+" damage from "+opponent_mon_name+"'s Spiky Shield!");
+        }
         decrementVolatiles(active_user);
         active_user->setLastAttackHit();
         if(attack->getEffectId()==100){
@@ -7984,7 +8070,7 @@ bool Battle::tryEjectPack(BattleActionActor actor){
         forceSwitch(actor);
         return true;
     }
-    active_user->removeVolatileCondition(STAT_JUST_DROPPED);
+    // active_user->removeVolatileCondition(STAT_JUST_DROPPED);
     return false;
 }
 

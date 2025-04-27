@@ -105,6 +105,7 @@ enum VolatileStatusCondition{
     OUTRAGING,
     THRASHING,
     PROTECT,
+    SPIKY_PROTECT,
     LASER_FOCUS,
     FOCUS_ENERGY,
     FLYING_HIGH,
@@ -148,8 +149,10 @@ enum VolatileStatusCondition{
     THROAT_CHOPPED,
     GRUDGED,
     STAT_JUST_DROPPED,
+    STAT_JUST_RAISED,
     TRUANTING,
     VANISHED,
+    HEAL_BLOCKED,
 };
 
 enum Gender{

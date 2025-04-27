@@ -178,6 +178,7 @@ class Battle{
     unsigned int getMoney()const;
     void setWild();
     void setBattleGivesExp();
+    void onWeatherChange(Weather weather);
     void forceSwitch(BattleActionActor actor);
 };
 

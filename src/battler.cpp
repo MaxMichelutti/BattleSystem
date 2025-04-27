@@ -317,6 +317,7 @@ void Battler::setMonster(Monster* monster){
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
+    removeVolatileCondition(SPIKY_PROTECT);
     removeVolatileCondition(CHARGED);
     removeVolatileCondition(CHARGED_2);
     removeVolatileCondition(ENCORE);
@@ -432,6 +433,7 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" is taunted!");
             break;
         }
+        case SPIKY_PROTECT:
         case PROTECT:{
             handler->displayMsg(getNickname()+" protects itself!");
             break;
@@ -656,6 +658,9 @@ bool Battler::changeAttackModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -670,6 +675,9 @@ bool Battler::changeAttackModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Attack");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -721,6 +729,9 @@ bool Battler::changeDefenseModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -735,6 +746,9 @@ bool Battler::changeDefenseModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Defense");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -781,6 +795,9 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -796,6 +813,9 @@ bool Battler::changeSpecialAttackModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Special Attack");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -842,6 +862,9 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -856,6 +879,9 @@ bool Battler::changeSpecialDefenseModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Special Defense");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -902,6 +928,9 @@ bool Battler::changeSpeedModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -916,6 +945,9 @@ bool Battler::changeSpeedModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Speed");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -971,6 +1003,9 @@ bool Battler::changeAccuracyModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -985,6 +1020,9 @@ bool Battler::changeAccuracyModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Accuracy");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -1031,6 +1069,9 @@ bool Battler::changeEvasionModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -1045,6 +1086,9 @@ bool Battler::changeEvasionModifierForced(int amount) {
     displayStatModifyResult(res,amount,"Evasion");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -2050,6 +2094,8 @@ unsigned int Battler::getMaxHP()const{
 }
 
 unsigned int Battler::removeDamage(unsigned int amount){
+    if(hasVolatileCondition(HEAL_BLOCKED))
+        return 0;
     unsigned int dmg = monster->removeDamage(amount);
     return dmg;
 }
@@ -2989,4 +3035,8 @@ void Battler::removeSubstitute(){
         handler->displayMsg(getNickname()+"'s substitute faded!");
         substituteHP = 0;
     }
+}
+
+void Battle::onWeatherChange(Weather new_weather){
+    return;
 }

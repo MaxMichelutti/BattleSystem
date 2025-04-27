@@ -263,3 +263,8 @@
 263: solar blade
 264: phantom force
 265: user gives its ability to target
+266: gains bigger boost then usual under Psychic Terrain
+267: target gets heal blocked for 2 turns
+268: user protects itself, if attcker makes contact with protection, attacker takes 1/8 of its maxHP damage
+269: if stats were dropped power is doubled
+270: confuse target if its stats were raised this turn

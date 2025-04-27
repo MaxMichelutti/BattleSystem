@@ -53,9 +53,10 @@ Field::Field() {
     turns_to_clear_terrain = 0;
 }
 
-Field::Field(EventHandler* event_handler) {
+Field::Field(Battle * battle,EventHandler* event_handler) {
     weather = CLEAR;
     default_weather = CLEAR;
+    this->battle = battle;
     terrain = NO_TERRAIN;
     turns_to_clear_weather = 0;
     turns_to_clear_terrain = 0;
@@ -65,12 +66,12 @@ Field::~Field() {
     
 }
 
-Field::Field(Weather weather, Terrain terrain) {
-    this->weather = weather;
-    this->terrain = terrain;
-    turns_to_clear_weather = 0;
-    turns_to_clear_terrain = 0;
-}
+// Field::Field(Weather weather, Terrain terrain) {
+//     this->weather = weather;
+//     this->terrain = terrain;
+//     turns_to_clear_weather = 0;
+//     turns_to_clear_terrain = 0;
+// }
 
 Weather Field::getWeather()const {
     return weather;
@@ -132,11 +133,12 @@ void Field::displayWeatherChange(){
 }
 
 void Field::setWeather(Weather new_weather, unsigned int length) {
-    if(new_weather == weather)
+    if(new_weather == this->weather)
         return;
     this->weather = new_weather;
     turns_to_clear_weather = length;
     displayWeatherChange();
+    battle->onWeatherChange(new_weather);
 }
 
 void Field::setTerrain(Terrain terrain) {

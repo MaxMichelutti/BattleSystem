@@ -4619,3 +4619,88 @@ CATEGORY:SPECIAL
 TYPE:WATER
 EFFECT:218
 EFFECTTARGET:SELF
+# 497 EXPANDING FORCE
+NAME:Expanding Force
+DESCRIPTION:The user attacks the target with its psychic power. When the ground is Psychic Terrain, this move's power is boosted and it damages all opposing Pokémon.
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+PP:10
+POWER:80
+EFFECT:266
+EFFECTTARGET:SELF
+# 498 PSYCHIC NOISE
+NAME:Psychic Noise
+DESCRIPTION:The user attacks the target with unpleasant sound waves. For two turns, the target is prevented from recovering HP through moves, Abilities, or held items.
+TYPE:PSYCHIC
+CATEGORY:SPECIAL
+PP:10
+POWER:75
+EFFECT:267
+SOUND
+# 499 POWER TRIP
+NAME:Power Trip
+DESCRIPTION:The user boasts its strength and attacks the target. The more the user's stats are boosted, the greater the move's power.
+PP:10
+POWER:20
+CONTACT
+TYPE:DARK
+CATEGORY:PHYSICAL
+EFFECT:81
+EFFECTTARGET:SELF
+# 500 SPIKY SHIELD
+NAME:Spiky Shield
+DESCRIPTION:In addition to protecting the user from attacks, this move also damages any attacker who makes direct contact.
+TYPE:GRASS
+CATEGORY:STATUS
+PP:10
+PRIORITY:4
+EFFECT:268
+TARGET:SELF
+# 501 LASH OUT
+NAME:Lash Out
+DESCRIPTION:The user lashes out to vent its frustration toward the target. This move's power is doubled if the user's stats were lowered during this turn.
+TYPE:DARK
+CATEGORY:PHYSICAL
+PP:5
+CONTACT
+POWER:75
+EFFECT:269
+EFFECTTARGET:SELF
+# 502 SKITTER SNACk
+NAME:Skitter Snack
+DESCRIPTION:The user skitters behind the target to attack. This also lowers the target's Sp. Atk stat.
+PP:10
+POWER:70
+ACCURACY:90
+CONTACT
+TYPE:BUG
+CATEGORY:PHYSICAL
+EFFECT:88
+# 503 LUNGE
+NAME:Lunge
+DESCRIPTION:The user makes a lunge at the target, attacking with full force. This also lowers the target's Attack stat.
+PP:15
+POWER:80
+CONTACT
+TYPE:BUG
+CATEGORY:PHYSICAL
+EFFECT:1
+# 504 DRAGO METEOR
+NAME:Draco Meteor
+DESCRIPTION:Comets are summoned down from the sky onto the target. The recoil from this move harshly lowers the user’s Sp. Atk stat.
+TYPE:DRAGON
+PP:5
+POWER:130
+ACCURACY:90
+CATEGORY:SPECIAL
+EFFECTTARGET:SELF
+EFFECT:133
+# 505 ALLURING VOICE
+NAME:Alluring Voice
+DESCRIPTION:The user attacks the target using its angelic voice. This also confuses the target if its stats have been boosted during the turn.
+TYPE:FAIRY
+EFFECT:270
+SOUND
+PP:10
+CATEGORY:SPECIAL
+POWER:80
