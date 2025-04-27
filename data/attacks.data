@@ -4968,6 +4968,7 @@ CATEGORY:PHYSICAL
 CONTACT
 TYPE:FLYING
 EFFECT:115
+NO_METRONOME
 EFFECTTARGET:SELF
 # 533 ORIGIN PULSE
 NAME:Origin Pulse
@@ -4977,6 +4978,7 @@ POWER:110
 CATEGORY:SPECIAL
 TYPE:WATER
 ACCURACY:85
+NO_METRONOME
 PULSE
 # 534 PRECIPICE BLADES
 NAME:Precipice Blades
@@ -4986,6 +4988,7 @@ TYPE:GROUDON
 PP:10
 POWER:120
 ACCURACY:85
+NO_METRONOME
 # 535 DOOM DESIRE
 NAME:Doom Desire
 DESCRIPTION:Two turns after this move is used, a concentrated bundle of light blasts the target.
@@ -4995,8 +4998,6 @@ PP:5
 CATEGORY:SPECIAL
 EFFECT:130
 EFFECTTARGET:SELF
-NO_METRONOME
-NO_COPYCAT
 # 536 PSYCHO BOOST
 NAME:Psycho Boost
 DESCRIPTION:The user attacks the target with all its might. The recoil from this move harshly lowers the user's Sp. Atk stat.
