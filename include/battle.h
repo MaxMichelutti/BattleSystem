@@ -129,7 +129,7 @@ class Battle{
     void applyItemPostDamage(BattleActionActor actor);
     bool applySwitchInAbilitiesEffects(BattleActionActor actor);
     bool applySwitchInItemsEffects(BattleActionActor actor);
-    void applyImpostorSwitchIn(BattleActionActor actor);
+    void applySwitchInFormChange(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor, BattleActionActor other_actor, bool hits_substitute);
     bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);

@@ -898,6 +898,11 @@ void Monster::clearBattleData(){
     if(isMegaEvolved()){
         cancelMega();
     }
+    if(getAbility()==FORECAST && form_id != 0){
+        //castform returns to its normal form
+        form_id = 0;
+        updateStats();
+    }
     seen_opponents.clear();
 }
 
@@ -1495,7 +1500,7 @@ void Monster::setBall(ItemType ball){
 
 bool Monster::changeWeatherForm(EventHandler* handler,Weather weather){
     //returns true if the form was actually changed
-    if(species_id == 351){//castform
+    if(getAbility()==FORECAST){//castform
         switch(weather){
             case RAIN:{
                 if(form_id == 114)

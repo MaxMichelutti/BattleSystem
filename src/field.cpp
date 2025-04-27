@@ -333,6 +333,7 @@ void Field::clearWeather() {
     if(weather != default_weather){
         weather = default_weather;
         displayWeatherChange();
+        battle->onWeatherChange(weather);
     }
 }
 

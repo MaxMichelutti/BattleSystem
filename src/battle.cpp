@@ -244,30 +244,30 @@ void Battle::startBattle(){
     resetOpponents();
     if(speed_player == speed_opponent){
         if(RNG::coinFlip()){
-            applyImpostorSwitchIn(PLAYER);
-            applyImpostorSwitchIn(OPPONENT);
+            applySwitchInFormChange(PLAYER);
+            applySwitchInFormChange(OPPONENT);
             applySwitchInAbilitiesEffects(PLAYER);
             applySwitchInAbilitiesEffects(OPPONENT);
             applySwitchInItemsEffects(PLAYER);
             applySwitchInItemsEffects(OPPONENT);
         }else{
-            applyImpostorSwitchIn(OPPONENT);
-            applyImpostorSwitchIn(PLAYER);
+            applySwitchInFormChange(OPPONENT);
+            applySwitchInFormChange(PLAYER);
             applySwitchInAbilitiesEffects(OPPONENT);
             applySwitchInAbilitiesEffects(PLAYER);
             applySwitchInItemsEffects(PLAYER);
             applySwitchInItemsEffects(OPPONENT);
         }
     }else if(speed_player > speed_opponent){
-        applyImpostorSwitchIn(PLAYER);
-        applyImpostorSwitchIn(OPPONENT);
+        applySwitchInFormChange(PLAYER);
+        applySwitchInFormChange(OPPONENT);
         applySwitchInAbilitiesEffects(PLAYER);
         applySwitchInAbilitiesEffects(OPPONENT);
         applySwitchInItemsEffects(PLAYER);
         applySwitchInItemsEffects(OPPONENT);
     }else{
-        applyImpostorSwitchIn(OPPONENT);
-        applyImpostorSwitchIn(PLAYER);
+        applySwitchInFormChange(OPPONENT);
+        applySwitchInFormChange(PLAYER);
         applySwitchInAbilitiesEffects(OPPONENT);
         applySwitchInAbilitiesEffects(PLAYER);
         applySwitchInItemsEffects(PLAYER);
@@ -2532,7 +2532,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
-                applyImpostorSwitchIn(other_actor);
+                applySwitchInFormChange(other_actor);
                 if (applySwitchInAbilitiesEffects(other_actor))
                     return;
                 if (applySwitchInItemsEffects(other_actor))
@@ -3017,7 +3017,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_user->clearPermanentStatus();
                 event_handler->displayMsg(user_mon_name+" was fully healed!");
                 player_active->addSeenOpponent(opponent_active->getMonster());
-                applyImpostorSwitchIn(actor);
+                applySwitchInFormChange(actor);
                 if(applySwitchInAbilitiesEffects(actor))
                     return;
                 if(applySwitchInItemsEffects(actor))
@@ -4048,7 +4048,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             removeVolatilesFromOpponentOfMonsterLeavingField(actor);
             player_active->addSeenOpponent(opponent_active->getMonster());
-            applyImpostorSwitchIn(actor);
+            applySwitchInFormChange(actor);
             if(applySwitchInAbilitiesEffects(actor))
                 return;
             if(applySwitchInItemsEffects(actor))
@@ -4766,10 +4766,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             active_target->setAbility(old_user_ability);
             event_handler->displayMsg(user_mon_name+" switched abilities with "+opponent_mon_name+"!");
             // apply new ability effects of user
-            applyImpostorSwitchIn(actor);
+            applySwitchInFormChange(actor);
             bool res1 = applySwitchInAbilitiesEffects(actor);
             // apply new ability effects of target
-            applyImpostorSwitchIn(other_actor);
+            applySwitchInFormChange(other_actor);
             bool res2 = applySwitchInAbilitiesEffects(other_actor);
             if(res1 || res2){
                 return;
@@ -4911,7 +4911,7 @@ void Battle::performSwitch(BattleAction action){
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
-    applyImpostorSwitchIn(action.getActor());
+    applySwitchInFormChange(action.getActor());
     if(applySwitchInAbilitiesEffects(action.getActor()))
         return;
     if(applySwitchInItemsEffects(action.getActor()))
@@ -6753,6 +6753,11 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             field->clearFieldEffect(MIST,OPPONENT);
             break;
         }
+        case FORECAST:{
+            //castform transforms
+            user_active->onWeatherChange(field->getWeather());
+            break;
+        }
         default:break;
     }
     // unnerve
@@ -6833,7 +6838,7 @@ void Battle::consumeSeeds(){
     }
 }
 
-void Battle::applyImpostorSwitchIn(BattleActionActor actor){
+void Battle::applySwitchInFormChange(BattleActionActor actor){
     Battler * user_active = getActorBattler(actor);
     std::string user_name = getActorBattlerName(actor);
     Battler * target_active = getActorBattler(otherBattleActionActor(actor));
@@ -7740,7 +7745,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     resetOpponents();
     player_active->addSeenOpponent(opponent_active->getMonster());
     removeVolatilesFromOpponentOfMonsterLeavingField(actor_switching_out);
-    applyImpostorSwitchIn(actor_switching_out);
+    applySwitchInFormChange(actor_switching_out);
     if(applySwitchInAbilitiesEffects(actor_switching_out))
         return;
     if(applySwitchInItemsEffects(actor_switching_out))
