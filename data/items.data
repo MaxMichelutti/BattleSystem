@@ -1773,3 +1773,78 @@ NAME:Red Orb
 CATEGORY:MEGA_STONE
 DESCRIPTION:A shiny red orb that is said to have a legend tied to it. It's known to have a deep connection with the Hoenn region.
 PRICE:10000
+# 344 HELIX FOSSIL
+NAME:Helix Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It might be a piece of a seashell.
+PRICE:7000
+# 345 DOME FOSSIL
+NAME:Dome Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It could be a shell or carapace.
+PRICE:7000
+# 346 OLD AMBER
+NAME:Old Amber
+CATEGORY:FOSSIL
+DESCRIPTION:A piece of amber that still contains the genetic material of a prehistoric Pokémon. It's clear with a tawny, reddish tint.
+PRICE:10000
+# 347 ROOT FOSSIL
+NAME:Root Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It looks as if it could be part of a plant's root.
+PRICE:7000
+# 348 CLAW FOSSIL
+NAME:Claw Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It appears to be a fragment of a claw.
+PRICE:7000
+# 349 SKULL FOSSIL
+NAME:Skull Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It appears as though it's part of a head.
+PRICE:7000
+# 350 ARMOR FOSSIL
+NAME:Armor Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It looks to be from some kind of protective collar.
+PRICE:7000
+# 351 COVER FOSSIL
+NAME:Cover Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It appears as though it could be part of a creature's back.
+PRICE:7000
+# 352 PLUME FOSSIL
+NAME:Plume Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon said to be an ancestor to modern bird Pokémon. It looks as if it could have come from part of some creature's wing.
+PRICE:7000
+# 353 JAW FOSSIL
+NAME:Jaw Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It looks as if it could be a piece of a large jaw.
+PRICE:7000
+# 354 SAIL FOSSIL
+NAME:Sail Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on land. It looks like the impression from a skin sail.
+PRICE:7000
+# 355 FOSSILIZED BIRD
+NAME:Fossilized Bird
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once soared through the sky. What it looked like is a mystery.
+PRICE:7000
+# 356 FOSSILIZED FISH
+NAME:Fossilized Fish
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once lived in the sea. What it looked like is a mystery.
+PRICE:7000
+# 357 FOSSILIZED DRAKE
+NAME:Fossilized Drake
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once roamed the land. What it looked like is a mystery.
+PRICE:7000
+# 358 FOSSILIZED DINO
+NAME:Fossilized Dino
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once lived in the sea. What it looked like is a mystery.
+PRICE:7000

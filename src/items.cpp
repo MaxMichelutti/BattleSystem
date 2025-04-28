@@ -338,6 +338,9 @@ bool canItemBeConsumed(ItemType item_type){
     if(item_data->getCategory() == BERRY){
         return true;
     }
+    if(item_data->getCategory() == GEM){
+        return true;
+    }
     switch(item_type){
         case ELECTRIC_SEED:
         case GRASSY_SEED:
@@ -361,24 +364,6 @@ bool canItemBeConsumed(ItemType item_type){
         case SNOWBALL:
         case WEAKNESS_POLICY:
         case ADRENALINE_ORB:
-        case FIRE_GEM:
-        case WATER_GEM:
-        case ELECTRIC_GEM:
-        case GRASS_GEM:
-        case ICE_GEM:
-        case FIGHTING_GEM:
-        case POISON_GEM:
-        case GROUND_GEM:
-        case FLYING_GEM:
-        case PSYCHIC_GEM:
-        case BUG_GEM:
-        case ROCK_GEM:
-        case GHOST_GEM:
-        case DRAGON_GEM:
-        case DARK_GEM:
-        case FAIRY_GEM:
-        case NORMAL_GEM:
-        case STEEL_GEM:
             return true;
         default:
             return false;

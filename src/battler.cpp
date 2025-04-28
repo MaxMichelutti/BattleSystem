@@ -2778,6 +2778,10 @@ bool Battler::hasConsumedItem()const{
 
 bool Battler::canStealItem()const{
     ItemType item = monster->getHeldItem();
+    //if monster is arceus cannot steal plates
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data != nullptr && item_data->getCategory() == PLATE)
+        return monster->getSpeciesId() != 493;
     if(!canBeStolen(item))
         return false;
     if(hasAbility(STICKY_HOLD))

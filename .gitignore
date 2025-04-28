@@ -5,3 +5,4 @@ main
 out.txt
 species.txt
 *.txt
+*.py
