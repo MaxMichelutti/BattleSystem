@@ -6770,7 +6770,41 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
     }
     // check for EJECT PACK
-    return tryEjectPack(actor);
+    if(tryEjectPack(actor)){
+        return true;
+    }
+    // check if user has no weather ability
+    if(!user_active->hasAbility(DELTA_STREAM) && 
+        !user_active->hasAbility(PRIMORDIAL_SEA) &&
+        !user_active->hasAbility(DESOLATE_LAND)){
+        // opponent's ability may trigger
+        Ability target_ability = target_active->getAbility();
+        switch(target_ability){
+            case DESOLATE_LAND:{
+                if(field->getWeather() != EXTREME_SUN){
+                    event_handler->displayMsg(other_name+"'s Desolate Land made the sun shine harshly!");
+                    field->setWeather(EXTREME_SUN,-1);
+                }
+                break;
+            }
+            case PRIMORDIAL_SEA:{
+                if(field->getWeather() != HEAVY_RAIN){
+                    event_handler->displayMsg(other_name+"'s Primordial Sea made it rain heavily!");
+                    field->setWeather(HEAVY_RAIN,-1);
+                }
+                break;
+            }
+            case DELTA_STREAM:{
+                if(field->getWeather() != STRONG_WINDS){
+                    event_handler->displayMsg(other_name+"'s Delta Stream made the weather change!");
+                    field->setWeather(STRONG_WINDS,-1);
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+    return false;
 }
 
 void Battle::consumeSeeds(){
