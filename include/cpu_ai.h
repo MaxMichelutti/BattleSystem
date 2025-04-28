@@ -24,7 +24,7 @@ struct Choice{
 class CPUAI{
     private:
     unsigned int skill;
-    int computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Battler* enemy_active, Field*field)const;
+    int computeAttackUtility(unsigned int attack_id, Battler* cpu_active,MonsterTeam * cpu_team,Battler* enemy_active, Field*field)const;
     int computeItemUtility(ItemType item_id, Battler* cpu_active)const;
     unsigned int chooseRandomAttack(Battler* active_monster)const;
     public:
@@ -33,7 +33,7 @@ class CPUAI{
     ~CPUAI();
     unsigned int getSkill()const;
     BattleAction chooseAction(Battler*,MonsterTeam*,Battler*,Field*,Bag*)const;
-    Choice* getBestAttackChoice(Battler*,Battler*,Field*)const;
+    Choice* getBestAttackChoice(Battler*,MonsterTeam*,Battler*,Field*)const;
     Choice* getBestSwitchChoice(Battler*,MonsterTeam*,Battler*,Field*)const;
     Choice* getBestItemChoice(Battler*,Bag*)const;
     unsigned int chooseSwitch(Battler*,MonsterTeam*,Battler*,Field*)const;
