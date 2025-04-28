@@ -71,6 +71,7 @@ bool isAbilityIgnorable(Ability ability){
         case WONDER_GUARD:
         case FLOWER_GIFT:
         case STICKY_HOLD:
+        case MOTOR_DRIVE:
             return true;
         default:return false;
     }        

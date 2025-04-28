@@ -1099,6 +1099,10 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
             base_modified_accuracy = active_user->getModifiedAccuracy();
             base_modified_evasion = active_target->getModifiedEvasion();
         }
+        if(effect_id==286){
+            //sacred sword ignores evasion modifiers
+            base_modified_evasion = 100;
+        }
         if(active_user->hasHeldItem(ZOOM_LENS) && acts_second){
             // ZOOM LENS increases accuracy by 20% if the user acts second
             base_modified_accuracy *= 1.2;
@@ -4791,6 +4795,21 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             event_handler->displayMsg(user_mon_name+" is ready to reflect some status moves back to the user!");
             break;
         }
+        case 285:{
+            //-1 att spatt spd target only if it is poisoned
+            if(active_target->isFainted())
+                return;
+            if(!active_target->isPoisoned()){
+                if(attack->getCategory() == STATUS){
+                    event_handler->displayMsg("But it failed!");
+                    active_user->setLastAttackFailed();
+                }
+                break;
+            }
+            StatCV changes = {{1,-1},{3,-1},{5,-1}};
+            changeStats(other_actor,changes,false);
+            break;
+        }
         default:break;
     }
 }
@@ -5014,7 +5033,9 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         special_attack_stat = user_monster->getModifiedSpecialAttack();
     }
     //defense stats
-    if(user_monster->hasAbility(UNAWARE)){//UNAWARE uses base stats instead of modified
+    if(user_monster->hasAbility(UNAWARE) || effect==286){
+        //UNAWARE uses base stats instead of modified
+        //sacred sword ignores defensive modifiers
         physical_defense_stat = enemy_monster->getStats().getDef();
         special_defense_stat = enemy_monster->getStats().getSpdef();
     }else{
@@ -5641,6 +5662,12 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case STRONG_JAW:{
             //boost power of biting moves
             if(attack->isBiting())
+                base_power *= 1.5;
+            break;
+        }
+        case SHARPNESS:{
+            //boost power of slicing moves
+            if(attack->isSlicing())
                 base_power *= 1.5;
             break;
         }
@@ -7681,6 +7708,18 @@ bool Battle::checkIfAttackFails(Attack* attack,
         event_handler->displayMsg(opponent_mon_name+" drew in the attack!");
         // active_target->changeSpecialAttackModifier(1);
         StatCV changes = {{3,1}};
+        changeStats(active_target->getActor(), changes, false);
+        attack_absorbed = true;
+    }
+    // motor drive -> drew in electric type attack and increase SPEED
+    if(active_target->hasAbility(MOTOR_DRIVE) && 
+        attack_type==ELECTRIC &&
+        attack->getCategory()!=STATUS && 
+        attack->getTarget()==TARGET_OPPONENT &&
+        !active_target->hasSubstitute()){
+        event_handler->displayMsg(opponent_mon_name+" absorbed the attack!");
+        // active_target->changeSpecialAttackModifier(1);
+        StatCV changes = {{5,1}};
         changeStats(active_target->getActor(), changes, false);
         attack_absorbed = true;
     }

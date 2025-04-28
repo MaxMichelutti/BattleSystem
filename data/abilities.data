@@ -353,4 +353,8 @@ Powers up special moves when the Pokémon is burned.
 KLUTZ
 The Pokémon can't use any held items.
 HEATPROOF
-The Pokémon's heatproof body halves the damage taken from Fire-type moves. 
+The Pokémon's heatproof body halves the damage taken from Fire-type moves.
+MOTOR_DRIVE
+The Pokémon takes no damage when hit by Electric-type moves. Instead, its Speed stat is boosted.
+SHARPNESS
+Powers up slicing moves.

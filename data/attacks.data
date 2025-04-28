@@ -227,6 +227,7 @@ DESCRIPTION:The target is attacked with a slash of claws or blades. Critical hit
 PP:20
 CONTACT
 POWER:70
+SLICING
 CATEGORY:PHYSICAL
 TYPE:NORMAL
 EFFECT:17
@@ -301,6 +302,7 @@ EFFECTCHANCE:10
 NAME:Air Slash
 DESCRIPTION:The user attacks with a blade of air that slices even the sky. This may also make the target flinch.
 TYPE:FLYING
+SLICING
 PP:15
 ACCURACY:95
 POWER:75
@@ -587,6 +589,7 @@ CATEGORY:PHYSICAL
 NAME:Fury Cutter
 DESCRIPTION:The target is slashed with scythes or claws. This attack becomes more powerful if it hits in succession.
 PP:20
+SLICING
 CONTACT
 POWER:40
 ACCURACY:95
@@ -744,6 +747,7 @@ NAME:Aerial Ace
 DESCRIPTION:The user confounds the target with speed, then slashes. This attack never misses.
 TYPE:FLYING
 CATEGORY:PHYSICAL
+SLICING
 PP:20
 CONTACT
 ACCURACY:200
@@ -1701,6 +1705,7 @@ TYPE:FLYING
 CATEGORY:SPECIAL
 PP:25
 WIND
+SLICING
 ACCURACY:95
 POWER:60
 EFFECTTARGET:SELF
@@ -1755,6 +1760,7 @@ DESCRIPTION:The user slashes at the target by crossing its scythes or claws as i
 PP:15
 POWER:80
 CATEGORY:PHYSICAL
+SLICING
 CONTACT
 TYPE:BUG
 # 189 CROSS POISON
@@ -1805,6 +1811,7 @@ CATEGORY:PHYSICAL
 CONTACT
 PP:15
 POWER:70
+SLICING
 EFFECT:17
 EFFECTTARGET:SELF
 # 194 TRI ATTACK
@@ -2149,6 +2156,7 @@ NAME:Psycho Cut
 DESCRIPTION:The user tears at the target with blades formed by psychic power. Critical hits land more easily.
 PP:20
 POWER:70
+SLICING
 CATEGORY:PHYSICAL
 TYPE:PSYCHIC
 EFFECT:17
@@ -2273,6 +2281,7 @@ PP:15
 POWER:90
 CONTACT
 EFFECT:17
+SLICING
 CATEGORY:PHYSICAL
 TYPE:GRASS
 # 245 LEAF STORM 
@@ -2704,6 +2713,7 @@ NAME:Razor Shell
 DESCRIPTION:The user cuts its target with sharp shells. This may also lower the target's Defense stat.
 PP:10
 POWER:75
+SLICING
 ACCURACY:95
 TYPE:WATER
 CATEGORY:PHYSICAL
@@ -3523,7 +3533,7 @@ PP:10
 POWER:95
 ACCURACY:95
 # 379 FREEZE DRY
-NAME:Freeze Dry
+NAME:Freeze-Dry
 DESCRIPTION:The user rapidly cools the target. This may also leave the target frozen. This move is super effective on Water types.
 TYPE:ICE
 CATEGORY:SPECIAL
@@ -4516,6 +4526,7 @@ DESCRIPTION:The user gathers light on the first turn, then fills a blade with th
 CATEGORY:PHYSICAL
 PP:10
 POWER:125
+SLICING
 CONTACT
 TYPE:GRASS
 EFFECT:263
@@ -5067,3 +5078,42 @@ TYPE:NORMAL
 ACCURACY:200
 CATEGORY:STATUS
 EFFECT:88
+# 544 ROCK WRECKER
+NAME:Rock Wrecker
+DESCRIPTION:The user launches a huge boulder at the target to attack. The user can't move on the next turn.
+TYPE:ROCK
+PP:5
+CATEGORY:PHYSICAL
+ACCURACY:90
+POWER:150
+EFFECT:187
+EFFECTTARGET:SELF
+# 545 VENOM DRENCH
+NAME:Venom Drench
+DESCRIPTION:Opposing Pokémon are drenched in an odd poisonous liquid. This lowers the Attack, Sp. Atk, and Speed stats of a poisoned target.
+TYPE:POISON
+REFLECTABLE
+EFFECT:285
+PP:20
+CATEGORY:STATUS
+# 546 SACRED SWORD
+NAME:Sacred Sword
+DESCRIPTION:SV 	The user attacks by slicing with a sword. The target's stat changes don't affect the damage inflicted by this move.
+PP:15
+POWER:90
+SLICING
+TYPE:FIGHTING
+CATEGORY:PHYSICAL
+CONTACT
+EFFECT:286
+EFFECTTARGET:SELF
+# 547 AQUA CUTTER
+NAME:Aqua Cutter
+DESCRIPTION:The user expels pressurized water to cut at the target like a blade. This move has a heightened chance of landing a critical hit.
+TYPE:WATER
+CATEGORY:PHYSICAL
+PP:20
+SLICING
+POWER:70
+EFFECT:17
+EFFECTTARGET:SELF

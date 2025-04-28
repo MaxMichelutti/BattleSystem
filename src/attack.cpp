@@ -134,6 +134,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_sketchable = (data.find("no_sketch") == data.end());
     is_wind = (data.find("wind") != data.end());
     is_biting = (data.find("biting") != data.end());
+    is_slicing = (data.find("slicing") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -142,6 +143,10 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
 
 unsigned int Attack::getId()const {
     return id;
+}
+
+bool Attack::isSlicing()const {
+    return is_slicing;
 }
 
 Type Attack::getType()const {
@@ -362,6 +367,8 @@ void Attack::loadAttacks(){
             parsed_data["pulse"] = "true";
         }else if(line.rfind("WIND",0)==0){
             parsed_data["wind"] = "true";
+        }else if(line.rfind("SLICING",0)==0){
+            parsed_data["slicing"] = "true";
         }else if(line.rfind("REFLECTABLE",0)==0){
             parsed_data["reflectable"] = "true";
         }else if(line.rfind("BITING",0)==0){

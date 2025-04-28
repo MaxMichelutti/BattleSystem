@@ -452,7 +452,9 @@ enum Ability{
     FLOWER_GIFT,
     FLARE_BOOST,
     KLUTZ,
-    HEATPROOF
+    HEATPROOF,
+    MOTOR_DRIVE,
+    SHARPNESS
 };
 
 enum ItemCategory{

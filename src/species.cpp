@@ -1078,6 +1078,9 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item, bool kno
         case 460:{//abomasnow
             return curr_form==0 && mega_item==ABOMASITE;
         }
+        case 475:{//gallade
+            return curr_form==0 && mega_item==GALLADITE;
+        }
         default:return false;
     }
 }
@@ -1304,6 +1307,11 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item, boo
         case 460:{//abomasnow
             if(curr_form==0 && mega_item==ABOMASITE)
                 return 140;
+            break;
+        }
+        case 475:{//gallade
+            if(curr_form==0 && mega_item==GALLADITE)
+                return 141;
             break;
         }
         default:return 0;
