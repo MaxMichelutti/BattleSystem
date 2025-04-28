@@ -5008,3 +5008,20 @@ ACCURACY:90
 CATEGORY:SPECIAL
 EFFECT:133
 EFFECTTARGET:SELF
+# 537 ATTACK ORDER
+NAME:Attack Order
+DESCRIPTION:The user calls out its underlings to pummel the target. This move has a heightened chance of landing a critical hit.
+TYPE:BUG
+CATEGORY:PHYSICAL
+PP:15
+POWER:90
+EFFECT:17
+EFFECTTARGET:SELF
+# 538 DEFEND ORDER
+NAME:Defend Order
+DESCRIPTION:The user calls out its underlings to shield its body, boosting its Defense and Sp. Def stats.
+TYPE:BUG
+CATEGORY:STATUS
+PP:10
+TARGET:SELF
+EFFECT:87

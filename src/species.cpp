@@ -33,6 +33,16 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return LEVEL_EQUAL_ATK_DEF;
     if(evo_method=="CASCOON_SILCOON" || evo_method=="SILCOON_CASCOON")
         return CASCOON_SILCOON;
+    if(evo_method=="SHEDINJA")
+        return SHEDINJA;
+    if(evo_method=="LEVEL_MALE")
+        return LEVEL_MALE;
+    if(evo_method=="LEVEL_FEMALE")
+        return LEVEL_FEMALE;
+    if(evo_method=="USE_ITEM_MALE")
+        return LEVEL_MALE;
+    if(evo_method=="USE_ITEM_FEMALE")
+        return LEVEL_FEMALE;
     // return LEVEL as default
     return LEVEL;
 }
@@ -69,6 +79,16 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "LEVEL_EQUAL_ATK_DEF";
         case CASCOON_SILCOON:
             return "CASCOON_SILCOON";
+        case SHEDINJA:
+            return "SHEDINJA";
+        case LEVEL_MALE:
+            return "LEVEL_MALE";
+        case USE_EVO_ITEM_MALE:
+            return "USE_ITEM_MALE";
+        case LEVEL_FEMALE:
+            return "LEVEL_FEMALE";
+        case USE_EVO_ITEM_FEMALE:
+            return "USE_ITEM_FEMALE";
         default:
             return "LEVEL";
     }

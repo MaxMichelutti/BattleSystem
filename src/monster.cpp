@@ -573,6 +573,16 @@ bool Monster::canEvolve()const{
                     return true;
                 break;
             }
+            case LEVEL_MALE:{
+                if(level >= evo.getMethodCondition() && gender==MALE)
+                    return true;
+                break;
+            }
+            case LEVEL_FEMALE:{
+                if(level >= evo.getMethodCondition() && gender==FEMALE)
+                    return true;
+                break;
+            }
             case LEVEL_EQUAL_ATK_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk())
                     return true;
@@ -613,6 +623,20 @@ void Monster::evolve(){
         switch(evo.getEvolutionMethod()){
             case LEVEL:{
                 if(level >= evo.getMethodCondition()){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_MALE:{
+                if(level >= evo.getMethodCondition() && gender==MALE){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_FEMALE:{
+                if(level >= evo.getMethodCondition() && gender==FEMALE){
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }

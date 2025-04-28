@@ -260,7 +260,11 @@ enum EvolutionMethod{
     LEVEL_DEF,
     LEVEL_EQUAL_ATK_DEF,
     CASCOON_SILCOON,
-    SHEDINJA
+    SHEDINJA,
+    LEVEL_MALE,
+    LEVEL_FEMALE,
+    USE_EVO_ITEM_MALE,
+    USE_EVO_ITEM_FEMALE
 };
 
 enum Ability{
