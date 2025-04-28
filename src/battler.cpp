@@ -1327,6 +1327,8 @@ void Battler::resetAllStatChanges(){
 }
 
 Ability Battler::getAbility()const {
+    if(isFainted())
+        return NO_ABILITY;
     if(hasHeldItem(ABILITY_SHIELD))
         return battler_ability;
     if(has_ability_neutralized && !abilityCannotBeSuppressed(battler_ability))

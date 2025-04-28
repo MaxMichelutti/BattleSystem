@@ -135,7 +135,7 @@ class Battle{
     bool applyContactEffects(Attack* attack,BattleActionActor actor,bool makes_contact);
     bool checkIfAttackFails(Attack* attack, BattleAction action, BattleAction other_action);
     bool thereIsAbility(Ability ability);
-    void checkMonsterLeavingAbilities();
+    void checkMonsterLeavingAbilities(BattleActionActor actor);
     void resetOpponents();
     std::string getActorBattlerName(BattleActionActor actor);
     Battler* getActorBattler(BattleActionActor actor);

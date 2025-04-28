@@ -507,13 +507,15 @@ void Battle::performTurn(){
         if(isOver()){
             return;
         }
-        checkMonsterLeavingAbilities();
+        
         
         if(player_active->isFainted()){
             removeVolatilesFromOpponentOfMonsterLeavingField(PLAYER);
+            checkMonsterLeavingAbilities(PLAYER);
         }
         if(opponent_active->isFainted()){
             removeVolatilesFromOpponentOfMonsterLeavingField(OPPONENT);
+            checkMonsterLeavingAbilities(OPPONENT);
         }
         if(tryEjectPack(PLAYER))
             player_was_changed = true;
@@ -529,11 +531,12 @@ void Battle::performTurn(){
     checkForExp();
     if(isOver()){return;}
     // 4.5 check if something is dead and in case remove some volatiles
-    checkMonsterLeavingAbilities();
     if(player_active->isFainted()){
+        checkMonsterLeavingAbilities(PLAYER);
         removeVolatilesFromOpponentOfMonsterLeavingField(PLAYER);
     }
     if(opponent_active->isFainted()){
+        checkMonsterLeavingAbilities(OPPONENT);
         removeVolatilesFromOpponentOfMonsterLeavingField(OPPONENT);
     }
     // 5: apply after turn effects
@@ -2096,7 +2099,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 event_handler->displayMsg(opponent_mon_name+"'s ability was changed to "+ability_data->getIGName()+"!");
             }
             // neutralizing gas ability may have been changed
-            checkMonsterLeavingAbilities();
+            checkMonsterLeavingAbilities(other_actor);
             break;
         }
         case 14:case 20:case 219:case 253:case 274:{//burn opponent
@@ -2517,7 +2520,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 opponent_mon_name = getActorBattlerName(other_actor);
                 event_handler->displayMsg(opponent_mon_name+" was forced in!");
-                checkMonsterLeavingAbilities();
+                checkMonsterLeavingAbilities(other_actor);
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
                 applySwitchInFormChange(other_actor);
@@ -2755,7 +2758,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_target->suppressAbility();
             }
             //neutralizing gas may have been suppressed
-            checkMonsterLeavingAbilities();
+            checkMonsterLeavingAbilities(other_actor);
             break;
         }
         case 59:{// clear stat changes
@@ -2984,7 +2987,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                     event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
                 }
                 resetOpponents();
-                checkMonsterLeavingAbilities();
+                checkMonsterLeavingAbilities(actor);
                 removeVolatilesFromOpponentOfMonsterLeavingField(actor);
                 // heal active user
                 user_mon_name = getActorBattlerName(actor);
@@ -4016,7 +4019,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 opponent_team->swapActiveMonster(new_active_index);
                 opponent_active->setMonster(opponent_team->getActiveMonster());
             }
-            checkMonsterLeavingAbilities();
+            checkMonsterLeavingAbilities(actor);
             removeVolatilesFromOpponentOfMonsterLeavingField(actor);
             player_active->addSeenOpponent(opponent_active->getMonster());
             applySwitchInFormChange(actor);
@@ -4872,7 +4875,7 @@ void Battle::performSwitch(BattleAction action){
         new_active_monster_name = opponent_active->getNickname();
         event_handler->displayMsg("Opponent switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }
-    checkMonsterLeavingAbilities();
+    checkMonsterLeavingAbilities(action.getActor());
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
@@ -6773,37 +6776,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
     if(tryEjectPack(actor)){
         return true;
     }
-    // check if user has no weather ability
-    if(!user_active->hasAbility(DELTA_STREAM) && 
-        !user_active->hasAbility(PRIMORDIAL_SEA) &&
-        !user_active->hasAbility(DESOLATE_LAND)){
-        // opponent's ability may trigger
-        Ability target_ability = target_active->getAbility();
-        switch(target_ability){
-            case DESOLATE_LAND:{
-                if(field->getWeather() != EXTREME_SUN){
-                    event_handler->displayMsg(other_name+"'s Desolate Land made the sun shine harshly!");
-                    field->setWeather(EXTREME_SUN,-1);
-                }
-                break;
-            }
-            case PRIMORDIAL_SEA:{
-                if(field->getWeather() != HEAVY_RAIN){
-                    event_handler->displayMsg(other_name+"'s Primordial Sea made it rain heavily!");
-                    field->setWeather(HEAVY_RAIN,-1);
-                }
-                break;
-            }
-            case DELTA_STREAM:{
-                if(field->getWeather() != STRONG_WINDS){
-                    event_handler->displayMsg(other_name+"'s Delta Stream made the weather change!");
-                    field->setWeather(STRONG_WINDS,-1);
-                }
-                break;
-            }
-            default: break;
-        }
-    }
+    
     return false;
 }
 
@@ -7798,7 +7771,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
         opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
         event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
     }
-    checkMonsterLeavingAbilities();
+    checkMonsterLeavingAbilities(actor_switching_out);
     resetOpponents();
     player_active->addSeenOpponent(opponent_active->getMonster());
     removeVolatilesFromOpponentOfMonsterLeavingField(actor_switching_out);
@@ -7999,7 +7972,10 @@ void Battle::givePlayerExperience(Monster* defeated_mon){
 }
 
 void Battle::checkForExp(){
-    checkMonsterLeavingAbilities();
+    if(player_active->isFainted())
+        checkMonsterLeavingAbilities(PLAYER);
+    if(opponent_active->isFainted())
+        checkMonsterLeavingAbilities(OPPONENT);
     if(opponent_active->isFainted() && 
         battle_gives_exp && 
         monsters_defeated_by_player.find(opponent_active->getMonster()) == monsters_defeated_by_player.end()){
@@ -8633,7 +8609,11 @@ void Battle::onWeatherChange(Weather new_weather){
     opponent_active->onWeatherChange(new_weather);
 }
 
-void Battle::checkMonsterLeavingAbilities(){
+void Battle::checkMonsterLeavingAbilities(BattleActionActor actor){
+    Battler* user_active = getActorBattler(actor);
+    Battler* target_active = getActorBattler(otherBattleActionActor(actor));
+    std::string user_name = getActorBattlerName(actor);
+    std::string target_name = getActorBattlerName(otherBattleActionActor(actor));
     if(thereIsAbility(NEUTRALIZING_GAS)){
         player_active->neutralizeAbility();
         opponent_active->neutralizeAbility();
@@ -8654,6 +8634,38 @@ void Battle::checkMonsterLeavingAbilities(){
     if(field->getWeather() == STRONG_WINDS && !thereIsAbility(DELTA_STREAM)){
         if(!(thereIsAbility(DESOLATE_LAND) || thereIsAbility(PRIMORDIAL_SEA))){
             field->clearWeather();
+        }
+    }
+    // check if user has no weather ability
+    if(!user_active->hasAbility(DELTA_STREAM) && 
+        !user_active->hasAbility(PRIMORDIAL_SEA) &&
+        !user_active->hasAbility(DESOLATE_LAND) &&
+        !target_active->isFainted()){
+        // opponent's ability may trigger
+        Ability target_ability = target_active->getAbility();
+        switch(target_ability){
+            case DESOLATE_LAND:{
+                if(field->getWeather() != EXTREME_SUN){
+                    event_handler->displayMsg(target_name+"'s Desolate Land made the sun shine harshly!");
+                    field->setWeather(EXTREME_SUN,-1);
+                }
+                break;
+            }
+            case PRIMORDIAL_SEA:{
+                if(field->getWeather() != HEAVY_RAIN){
+                    event_handler->displayMsg(target_name+"'s Primordial Sea made it rain heavily!");
+                    field->setWeather(HEAVY_RAIN,-1);
+                }
+                break;
+            }
+            case DELTA_STREAM:{
+                if(field->getWeather() != STRONG_WINDS){
+                    event_handler->displayMsg(target_name+"'s Delta Stream made the weather change!");
+                    field->setWeather(STRONG_WINDS,-1);
+                }
+                break;
+            }
+            default: break;
         }
     }
 }
