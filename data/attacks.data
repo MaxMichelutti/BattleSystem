@@ -5025,3 +5025,45 @@ CATEGORY:STATUS
 PP:10
 TARGET:SELF
 EFFECT:87
+# 539 FLOWER SHIELD
+NAME:Flower Shield
+DESCRIPTION:The user raises the Defense stat of all Grass-type Pokémon in battle with a mysterious power.
+PP:10
+TARGET:SELF
+CATEGORY:STATUS
+TYPE:FAIRY
+EFFECT:282
+# 540 MAGIC COAT
+NAME:Magic Coat
+DESCRIPTION:Moves like Leech Seed and moves that inflict status conditions are blocked by a barrier and reflected back to the user of those moves.
+TYPE:PSYCHIC
+PP:15
+CATEGORY:STATUS
+PRIORITY:4
+TARGET:SELF
+EFFECT:283
+NO_METRONOME
+# 541 CHATTER
+NAME:Chatter
+DESCRIPTION:The user attacks the target with sound waves of deafening chatter. This also confuses the target.
+TYPE:FLYING
+EFFECT:25
+CATEGORY:SPECIAL
+PP:20
+POWER:65
+# 542 PARTING SHOT
+NAME:Parting Shot
+DESCRIPTION:With a parting threat, the user lowers the target's Attack and Sp. Atk stats. Then it switches places with a party Pokémon in waiting.
+PP:20
+REFLECTABLE
+CATEGORY:STATUS
+TYPE:DARK
+EFFECT:284
+# 543 CONFIDE
+NAME:Confide
+DESCRIPTION:The user tells the target a secret, and the target loses its ability to concentrate. This lowers the target's Sp. Atk stat.
+PP:20
+TYPE:NORMAL
+ACCURACY:200
+CATEGORY:STATUS
+EFFECT:88

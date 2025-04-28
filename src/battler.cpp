@@ -1149,6 +1149,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(GUTS) && hasPermanentStatus())
         base_modified*=1.5;
+    if(hasAbility(FLOWER_GIFT) && (field->getWeather() == SUN || field->getWeather() == EXTREME_SUN))
+        base_modified*=1.5;
     // if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
     //     base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
@@ -1175,6 +1177,10 @@ unsigned int Battler::getModifiedSpecialDefense()const{
 }
 
 unsigned int Battler::getModifiedDefenseInternal()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedDefenseInternal() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_defense = battle_stats.getDef();
     unsigned int base_modified = base_defense;
     int modifier = getDefenseModifier();
@@ -1194,6 +1200,10 @@ unsigned int Battler::getModifiedDefenseInternal()const {
 }
 
 unsigned int Battler::getModifiedSpecialAttack()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedSpecialAttack() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_special_attack = battle_stats.getSpatk();
     unsigned int base_modified = base_special_attack;
     int modifier = getSpecialAttackModifier();
@@ -1224,6 +1234,8 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
     if(field->getWeather() == SANDSTORM && hasType(ROCK)){
         base_modified = base_modified * 1.5;
     }
+    if(hasAbility(FLOWER_GIFT) && (field->getWeather() == SUN || field->getWeather() == EXTREME_SUN))
+        base_modified*=1.5;
     if(hasHeldItem(ASSULT_VEST))
         base_modified = base_modified * 1.5;
     if(hasHeldItem(EVIOLITE) && monster->hasEvolutions())
@@ -1236,6 +1248,10 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
 }
 
 unsigned int Battler::getModifiedSpeed()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedSpeed() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_speed = battle_stats.getSpdef();
     unsigned int base_modified = base_speed;
     int modifier = getSpeedModifier();
@@ -1327,9 +1343,13 @@ void Battler::resetAllStatChanges(){
 }
 
 Ability Battler::getAbility()const {
+    #ifdef DEBUG
+    std::cout<<"getAbility() called"<<std::endl;
+    std::cout.flush();
+    #endif
     if(isFainted())
         return NO_ABILITY;
-    if(hasHeldItem(ABILITY_SHIELD))
+    if(monster->getHeldItem() == ABILITY_SHIELD && battler_ability != KLUTZ)
         return battler_ability;
     if(has_ability_neutralized && !abilityCannotBeSuppressed(battler_ability))
         return NO_ABILITY;
@@ -1341,6 +1361,10 @@ Ability Battler::getAbility()const {
 }
 
 bool Battler::hasAbility(Ability ability)const{
+    #ifdef DEBUG
+    std::cout<<"hasAbility() called"<<std::endl;
+    std::cout.flush();
+    #endif
     return getAbility() == ability;
 }
 
@@ -2443,6 +2467,8 @@ bool Battler::hasHeldItem()const{
     return monster->hasHeldItem();
 }
 ItemType Battler::getHeldItem()const{
+    if(hasAbility(KLUTZ))
+        return NO_ITEM_TYPE;
     if(field->hasFullFieldEffect(MAGIC_ROOM))
         return NO_ITEM_TYPE;
     return monster->getHeldItem();
@@ -2451,7 +2477,13 @@ ItemType Battler::getConsumedItem()const{
     return monster->getConsumedItem();
 }
 bool Battler::hasHeldItem(ItemType item)const{
+    #ifdef DEBUG
+    std::cout<<"hasHeldItem() called"<<std::endl;
+    std::cout.flush();
+    #endif
     if(item == NO_ITEM_TYPE)
+        return false;
+    if(hasAbility(KLUTZ))
         return false;
     if(field->hasFullFieldEffect(MAGIC_ROOM))
         return false;
@@ -3066,18 +3098,27 @@ void Battler::removeSubstitute(){
 }
 
 void Battler::onWeatherChange(Weather new_weather){
-    if(hasAbility(FORECAST) && monster->changeWeatherForm(new_weather)){
+    if(monster->getSpeciesId()==351 && monster->changeWeatherForm(new_weather)){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+    }   
+    if(monster->getSpeciesId()==421 && monster->changeWeatherForm(new_weather)){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();
     }   
 }
 
 bool Battler::changeFormSwitchIn(){
-    if(hasAbility(FORECAST) && monster->changeWeatherForm(field->getWeather())){
+    if(monster->getSpeciesId()==351 && monster->changeWeatherForm(field->getWeather())){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();
         return true;
     }
+    if(monster->getSpeciesId()==421 && monster->changeWeatherForm(field->getWeather())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        return true;
+    } 
     if(monster->changeFormSwitchIn()){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();

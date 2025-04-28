@@ -279,3 +279,6 @@
 279: fails if the target is not performing an action with priority between +1 and +3, if it hits it causes the target to flinch
 280: fails if target does not hold an item, displays custom message when attacking
 281: change target ability in simple
+282: raises def of all GRASS types on the field, except the ones in semi invulnerable states
+283: gives user effect of reflecting status moves for the rest of the turn
+284: -1 att spatt opponent, user switches out always

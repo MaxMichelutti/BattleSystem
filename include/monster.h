@@ -10,12 +10,14 @@
 #include "events.h"
 #include "player.h"
 #include "constants.h"
+#include "team.h"
 #include <vector>
 #include <string>
 #include <iostream>
 
 class EventHandler;
 class Player;
+class MonsterTeam;
 
 class AttackData{
     public:
@@ -106,8 +108,8 @@ class Monster{
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level,unsigned int form_id);
     void printSummary()const;
-    bool canEvolve()const;
-    void evolve();
+    bool canEvolve(MonsterTeam* monster_team)const;
+    void evolve(MonsterTeam* monster_team);
     void heal();
     bool isFainted()const;
     bool hasPP(unsigned int attack_id)const;

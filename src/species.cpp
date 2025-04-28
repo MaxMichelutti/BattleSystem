@@ -43,6 +43,14 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return LEVEL_MALE;
     if(evo_method=="USE_ITEM_FEMALE")
         return LEVEL_FEMALE;
+    if(evo_method=="KNOW_ATTACK")
+        return KNOW_ATTACK;
+    if(evo_method=="HELD_ITEM_DAY")
+        return HELD_ITEM_DAY;
+    if(evo_method=="HELD_ITEM_NIGHT")
+        return HELD_ITEM_NIGHT;
+    if(evo_method=="HAS_IN_TEAM")
+        return HAS_IN_TEAM;
     // return LEVEL as default
     return LEVEL;
 }
@@ -89,6 +97,14 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "LEVEL_FEMALE";
         case USE_EVO_ITEM_FEMALE:
             return "USE_ITEM_FEMALE";
+        case KNOW_ATTACK:
+            return "KNOW_ATTACK";
+        case HELD_ITEM_DAY:
+            return "HELD_ITEM_DAY";
+        case HELD_ITEM_NIGHT:
+            return "HELD_ITEM_NIGHT";
+        case HAS_IN_TEAM:
+            return "HAS_IN_TEAM";
         default:
             return "LEVEL";
     }
@@ -1050,6 +1066,18 @@ bool Species::canMegaEvolve(unsigned int curr_form, ItemType mega_item, bool kno
         case 384:{//rayquaza
             return curr_form==0 && knows_dragon_ascent;
         }
+        case 428:{//lopunny
+            return curr_form==0 && mega_item==LOPUNNITE;
+        }
+        case 445:{//garchomp
+            return curr_form==0 && mega_item==GARCHOMPITE;
+        }
+        case 448:{//lucario
+            return curr_form==0 && mega_item==LUCARIONITE;
+        }
+        case 460:{//abomasnow
+            return curr_form==0 && mega_item==ABOMASITE;
+        }
         default:return false;
     }
 }
@@ -1256,6 +1284,26 @@ unsigned int Species::getMegaForm(unsigned int curr_form,ItemType mega_item, boo
         case 384:{//rayquaza
             if(curr_form==0 && knows_dragon_ascent)
                 return 125;
+            break;
+        }
+        case 428:{//lopunny
+            if(curr_form==0 && mega_item==LOPUNNITE)
+                return 136;
+            break;
+        }
+        case 445:{//garchomp
+            if(curr_form==0 && mega_item==GARCHOMPITE)
+                return 138;
+            break;
+        }
+        case 448:{//lucario
+            if(curr_form==0 && mega_item==LUCARIONITE)
+                return 139;
+            break;
+        }
+        case 460:{//abomasnow
+            if(curr_form==0 && mega_item==ABOMASITE)
+                return 140;
             break;
         }
         default:return 0;

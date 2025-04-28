@@ -345,4 +345,12 @@ The Pokémon changes the weather to nullify Water-type attacks.
 DELTA_STREAM
 The Pokémon changes the weather so that no moves are super effective against the Flying type.
 AIR_LOCK
-Eliminates the effects of weather. 
+Eliminates the effects of weather.
+FLOWER_GIFT
+Boosts the Attack and Sp. Def stats of the Pokémon and its allies in harsh sunlight.
+FLARE_BOOST
+Powers up special moves when the Pokémon is burned.
+KLUTZ
+The Pokémon can't use any held items.
+HEATPROOF
+The Pokémon's heatproof body halves the damage taken from Fire-type moves. 

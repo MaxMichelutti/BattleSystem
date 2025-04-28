@@ -240,10 +240,18 @@ Battle::~Battle() {
 
 void Battle::startBattle(){
     event_handler->displayMsg("Turn "+std::to_string(turn+1));
+    #ifdef DEBUG
+    std::cout<<"Starting battle"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int speed_player = player_active->getModifiedSpeed();
     unsigned int speed_opponent = opponent_active->getModifiedSpeed();
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
+    #ifdef DEBUG
+    std::cout<<"Applying enter battle effects"<<std::endl;
+    std::cout.flush();
+    #endif
     if(speed_player == speed_opponent){
         if(RNG::coinFlip()){
             applySwitchInFormChange(PLAYER);
@@ -326,6 +334,9 @@ void Battle::incrementTurn(){
     // remove focus
     player_active->removeVolatileCondition(FOCUSED);
     opponent_active->removeVolatileCondition(FOCUSED);
+    // remove magic coat
+    player_active->removeVolatileCondition(MAGIC_COATED);
+    opponent_active->removeVolatileCondition(MAGIC_COATED);
     // collect items on the ground
     if(player_active->hasAbility(PICKUP) && item_on_the_ground_player != NO_ITEM_TYPE && 
         !player_active->isFainted()){
@@ -1061,6 +1072,10 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
         if(attack->getEffectId()!=73)//earthquake also hits monsters that are underground
             return true;   
     }
+    // phantom force (target has vanished and cannot be hit)
+    if(active_target->hasVolatileCondition(VANISHED) && target == TARGET_OPPONENT){
+        return true;
+    }
     // dive (target is underwater and cannot be hit)
     if(active_target->hasVolatileCondition(UNDERWATER) && target == TARGET_OPPONENT){
         if(attack->getEffectId()!=135)//surf also hits monsters that are underwater
@@ -1594,11 +1609,13 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
         last_attack_used_id = attack->getId();
         active_user->removeVolatileCondition(LASER_FOCUS);
         BattleActionActor other_actor = otherBattleActionActor(actor);
-        if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
+        if((active_target->hasAbility(MAGIC_BOUNCE)||active_target->hasVolatileCondition(MAGIC_COATED)) && attack->isReflectable()){
             event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
             active_target = getActorBattler(actor);
             opponent_mon_name = getActorBattlerName(actor);
             other_actor = actor;
+            actor = otherBattleActionActor(actor);
+            active_user = getActorBattler(actor);
         }
         if(attack->getEffectTarget() == TARGET_OPPONENT && active_target->isFainted()){
             // check if target is already fainted
@@ -3348,7 +3365,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 return;
             break;
         }
-        case 124:case 231:case 235:{
+        case 124:case 231:case 235:case 284:{
             // user switches out, 
             // fails if trapped in the case of 124
             // start snow in case of 235
@@ -3357,14 +3374,19 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(effect==124 && is_wild_battle && active_user->getActor()==OPPONENT){
                 if(active_user->canSwitchOut(active_target)){
                     is_wild_battle_over = true;
+                    return;
                 }else{
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }
                 break;
             }
+            if(effect==284){
+                StatCV changes = {{1,-1},{3,-1}};
+                changeStats(other_actor,changes,true);
+            }
             if(!user_team->hasAliveBackup()){
-                if(attack->getCategory() == STATUS){
+                if(attack->getCategory() == STATUS && effect!=284){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }
@@ -4750,6 +4772,25 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
+        case 282:{
+            //boost defence of all GRASS types on the field
+            StatCV changes = {{2,1}};
+            if(!active_user->isFainted() && active_user->hasType(GRASS)){
+                changeStats(actor,changes,false);
+            }
+            if(!active_target->isFainted() && active_target->hasType(GRASS)){
+                changeStats(other_actor,changes,false);
+            }
+            break;
+        }
+        case 283:{
+            //magic caot
+            if(active_user->isFainted())
+                return;
+            active_user->addVolatileCondition(MAGIC_COATED, 1);
+            event_handler->displayMsg(user_mon_name+" is ready to reflect some status moves back to the user!");
+            break;
+        }
         default:break;
     }
 }
@@ -5119,6 +5160,11 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
     // fur coat halves physical damage
     if(category == PHYSICAL && 
         enemy_monster->hasAbility(FUR_COAT)){
+        damage *= 0.5;
+    }
+    // heatproof halves damage from fire type moves
+    if(attack_type == FIRE && 
+        enemy_monster->hasAbility(HEATPROOF)){
         damage *= 0.5;
     }
 
@@ -5599,8 +5645,15 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             break;
         }
         case TOXIC_BOOST:{
-            //boost power of moves if poisoned
-            if(active_user->isPoisoned()){
+            //boost power of physical moves if poisoned
+            if(active_user->isPoisoned() && attack->getCategory() == PHYSICAL){
+                base_power *= 1.5;
+            }
+            break;
+        }
+        case FLARE_BOOST:{
+            //boost power of special moves if burned
+            if(active_user->isBurned() && attack->getCategory() == SPECIAL){
                 base_power *= 1.5;
             }
             break;
@@ -6759,11 +6812,11 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             field->clearFieldEffect(MIST,OPPONENT);
             break;
         }
-        case FORECAST:{
-            //castform transforms
-            user_active->onWeatherChange(field->getWeather());
-            break;
-        }
+        // case FORECAST:{
+        //     //castform transforms
+        //     user_active->onWeatherChange(field->getWeather());
+        //     break;
+        // }
         default:break;
     }
     // unnerve
@@ -6863,9 +6916,7 @@ void Battle::applySwitchInFormChange(BattleActionActor actor){
         // applySwitchInAbilitiesEffects(actor);
         return;
     }
-    if(user_active->changeFormSwitchIn()){
-        event_handler->displayMsg(user_name+"'s form changed!");
-    }
+    user_active->changeFormSwitchIn();
 }
 
 Battler* Battle::getActorBattler(BattleActionActor actor){

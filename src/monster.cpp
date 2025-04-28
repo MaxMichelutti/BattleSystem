@@ -473,6 +473,8 @@ Monster* Monster::generateRandomMonster(unsigned int species_id,unsigned int lev
 }
 
 unsigned int Monster::getFormId()const{
+    if(transformation != nullptr)
+        return transformation->getFormId();
     return form_id;
 }
 
@@ -542,7 +544,7 @@ Type Monster::getHiddenPowerType()const{
     return hidden_power_type;
 }
 
-bool Monster::canEvolve()const{
+bool Monster::canEvolve(MonsterTeam* monster_team)const{
     Species* spec = Species::getSpecies(species_id);
     for(const Evolution &evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
@@ -603,6 +605,29 @@ bool Monster::canEvolve()const{
                     return true;
                 break;
             }
+            case KNOW_ATTACK:{
+                if(hasAttack(evo.getMethodCondition()))
+                    return true;
+                break;
+            }
+            case HELD_ITEM_DAY:{
+                if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isDay())
+                    return true;
+                break;
+            }
+            case HELD_ITEM_NIGHT:{
+                if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isNight())
+                    return true;
+                break;
+            }
+            case HAS_IN_TEAM:{
+                for(unsigned int i=0;i<monster_team->getSize();i++){
+                    Monster* monster = monster_team->getMonster(i);
+                    if(monster->getSpeciesId() == evo.getMethodCondition())
+                        return true;
+                }
+                break;
+            }
             default: break;
         }
     }
@@ -614,8 +639,8 @@ bool Monster::hasEvolutions()const{
     return spec->getEvolutions(getFormId()).size() > 0;
 }
 
-void Monster::evolve(){
-    if(!canEvolve())
+void Monster::evolve(MonsterTeam* monster_team){
+    if(!canEvolve(monster_team))
         return;
     Species* spec = Species::getSpecies(species_id);
     bool already_flipped = false;
@@ -672,6 +697,13 @@ void Monster::evolve(){
             }
             case LEVEL_EQUAL_ATK_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk()){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case KNOW_ATTACK:{
+                if(hasAttack(evo.getMethodCondition())){
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
@@ -737,6 +769,32 @@ void Monster::evolve(){
                     // then evolve into Ninjask
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
+                }
+                case HELD_ITEM_DAY:{
+                    if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isDay()){
+                        removeHeldItem();
+                        completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                        return;
+                    }
+                    break;
+                }
+                case HELD_ITEM_NIGHT:{
+                    if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isNight()){
+                        removeHeldItem();
+                        completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                        return;
+                    }
+                    break;
+                }
+                case HAS_IN_TEAM:{
+                    for(unsigned int i=0;i<monster_team->getSize();i++){
+                        Monster* monster = monster_team->getMonster(i);
+                        if(monster->getSpeciesId() == evo.getMethodCondition()){
+                            completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                            return;
+                        }
+                    }
+                    break;
                 }
                 break;
             }
@@ -922,10 +980,14 @@ void Monster::clearBattleData(){
     if(isMegaEvolved()){
         cancelMega();
     }
-    if(getAbility()==FORECAST && form_id != 0){
+    if(species_id==351 && form_id != 0){
         //castform returns to its normal form
         form_id = 0;
         updateStats();
+    }
+    if(species_id==421 && form_id != 0){
+        //cherrim returns to its normal form
+        form_id = 0;
     }
     seen_opponents.clear();
 }
@@ -1548,7 +1610,7 @@ bool Monster::changeFormSwitchIn(){
 
 bool Monster::changeWeatherForm(Weather weather){
     //returns true if the form was actually changed
-    if(getAbility()==FORECAST){//castform
+    if(species_id==351){//castform
         switch(weather){
             case RAIN:
             case HEAVY_RAIN:{
@@ -1569,6 +1631,22 @@ bool Monster::changeWeatherForm(Weather weather){
                 if(form_id == 115)
                     return false;
                 form_id = 115;
+                return true;
+            }
+            default:{
+                if(form_id == 0)
+                    return false;
+                form_id = 0;
+                return true;
+            }
+        }
+    }else if(species_id==421){//cherrim
+        switch(weather){
+            case SUN:
+            case EXTREME_SUN:{
+                if(form_id == 133)
+                    return false;
+                form_id = 133;
                 return true;
             }
             default:{

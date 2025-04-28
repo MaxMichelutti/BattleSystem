@@ -159,6 +159,7 @@ enum VolatileStatusCondition{
     TRUANTING,
     VANISHED,
     HEAL_BLOCKED,
+    MAGIC_COATED
 };
 
 enum Gender{
@@ -264,7 +265,11 @@ enum EvolutionMethod{
     LEVEL_MALE,
     LEVEL_FEMALE,
     USE_EVO_ITEM_MALE,
-    USE_EVO_ITEM_FEMALE
+    USE_EVO_ITEM_FEMALE,
+    KNOW_ATTACK,
+    HELD_ITEM_DAY,
+    HELD_ITEM_NIGHT,
+    HAS_IN_TEAM
 };
 
 enum Ability{
@@ -443,7 +448,11 @@ enum Ability{
     PRIMORDIAL_SEA,
     DESOLATE_LAND,
     DELTA_STREAM,
-    AIR_LOCK
+    AIR_LOCK,
+    FLOWER_GIFT,
+    FLARE_BOOST,
+    KLUTZ,
+    HEATPROOF
 };
 
 enum ItemCategory{

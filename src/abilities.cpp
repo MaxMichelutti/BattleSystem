@@ -69,6 +69,8 @@ bool isAbilityIgnorable(Ability ability){
         case SUCTION_CUPS:
         case LIGHT_METAL:
         case WONDER_GUARD:
+        case FLOWER_GIFT:
+        case STICKY_HOLD:
             return true;
         default:return false;
     }        
