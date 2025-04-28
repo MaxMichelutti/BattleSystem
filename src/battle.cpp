@@ -24,6 +24,7 @@ bool isAttackingActionType(BattleActionType action_type){
         case ROLLOUT:
         case BOUNCE:
         case PHANTOM_FORCE:
+        case SHADOW_FORCE:
         case METEOR_BEAM:
         case DIG:
         case DIVE:
@@ -1074,6 +1075,10 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
     }
     // phantom force (target has vanished and cannot be hit)
     if(active_target->hasVolatileCondition(VANISHED) && target == TARGET_OPPONENT){
+        return true;
+    }
+    // shadow force (target has vanished and cannot be hit)
+    if(active_target->hasVolatileCondition(VANISHED_2) && target == TARGET_OPPONENT){
         return true;
     }
     // dive (target is underwater and cannot be hit)
@@ -2247,6 +2252,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
+        case 287:{ // magma storm
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(MAGMA_STORM)){
+                active_target->addVolatileCondition(MAGMA_STORM,  active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
         case 220:{ // infestation
             if(active_target->isFainted())
                 return;
@@ -2922,7 +2937,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
-        case 83:{//heal 25%
+        case 83:
+        case 291:{//heal 25%
+            //in the case of 291 also heal status
             if(active_user->isFainted())
                 return;
             if(active_user->hasVolatileCondition(HEAL_BLOCKED)){
@@ -2938,6 +2955,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 unsigned int actual_heal_amount = active_user->removeDamage(heal_amount);
                 if(actual_heal_amount>0)
                     event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP to itself!");
+            }
+            if(effect == 291){
+                // heal all status
+                active_user->clearPermanentStatus();
             }
             break;
         }
@@ -2981,7 +3002,9 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(actor,changes,true);
             break;
         }
-        case 89:{// user dies entry Monster is fully healed
+        case 89:case 290:{
+            // user dies entry Monster is fully healed
+            // only in the case of 290, all PP of attacks are restored
             if(active_user->isFainted())
                 return;
             if(!user_team->hasAliveBackup()){
@@ -3015,6 +3038,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 unsigned int maxHP = active_user->getMaxHP();
                 active_user->removeDamage(maxHP);
                 active_user->clearPermanentStatus();
+                if(effect==290){
+                    auto attacks = active_user->getAttacks();
+                    for(auto attack_data : attacks){
+                        active_user->recoverPP(attack_data.first,1000);
+                    }
+                }
                 event_handler->displayMsg(user_mon_name+" was fully healed!");
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 applySwitchInFormChange(actor);
@@ -4166,14 +4195,15 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 break;
             }
-            
-            if((!active_target->hasHeldItem() && !active_target->hasHeldItem())){
+            //nobody has items
+            if((!active_target->hasHeldItem() && !active_user->hasHeldItem())){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
                 }
                 break;
             }
+            //some of the items involved cannot be passed around
             if(active_user->hasHeldItem() && !active_user->canStealItem()){
                 if(attack->getCategory() == STATUS){
                     event_handler->displayMsg("But it failed!");
@@ -4810,6 +4840,50 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(other_actor,changes,false);
             break;
         }
+        case 292:{
+            //boost spatt spdef and heal status of user
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{3,1},{2,1}};
+            changeStats(actor,changes,false);
+            active_user->clearPermanentStatus();
+            break;
+        }
+        case 293:{
+            //switch stat changes with target
+            if(active_user->isFainted() || active_target->isFainted())
+                return;
+            int attack_mod_user = active_user->getAttackModifier();
+            int special_attack_mod_user = active_user->getSpecialAttackModifier();
+            int defense_mod_user = active_user->getDefenseModifier();
+            int special_defense_mod_user = active_user->getSpecialDefenseModifier();
+            int speed_mod_user = active_user->getSpeedModifier();
+            int accuracy_mod_user = active_user->getAccuracyModifier();
+            int evasion_mod_user = active_user->getEvasionModifier();
+            int attack_mod_target = active_target->getAttackModifier();
+            int special_attack_mod_target = active_target->getSpecialAttackModifier();
+            int defense_mod_target = active_target->getDefenseModifier();
+            int special_defense_mod_target = active_target->getSpecialDefenseModifier();
+            int speed_mod_target = active_target->getSpeedModifier();
+            int accuracy_mod_target = active_target->getAccuracyModifier();
+            int evasion_mod_target = active_target->getEvasionModifier();
+            active_user->setAttackModifier(attack_mod_target);
+            active_user->setSpecialAttackModifier(special_attack_mod_target);
+            active_user->setDefenseModifier(defense_mod_target);
+            active_user->setSpecialDefenseModifier(special_defense_mod_target);
+            active_user->setSpeedModifier(speed_mod_target);
+            active_user->setAccuracyModifier(accuracy_mod_target);
+            active_user->setEvasionModifier(evasion_mod_target);
+            active_target->setAttackModifier(attack_mod_user);
+            active_target->setSpecialAttackModifier(special_attack_mod_user);
+            active_target->setDefenseModifier(defense_mod_user);
+            active_target->setSpecialDefenseModifier(special_defense_mod_user);
+            active_target->setSpeedModifier(speed_mod_user);
+            active_target->setAccuracyModifier(accuracy_mod_user);
+            active_target->setEvasionModifier(evasion_mod_user);
+            event_handler->displayMsg(user_mon_name+" switched all changes in their stats with "+opponent_mon_name+"!");
+            break;
+        }
         default:break;
     }
 }
@@ -4882,6 +4956,7 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     // METEOR BEAM is still charged until it completes
     // active_user->removeVolatileCondition(CHARGING_METEORBEAM);
     active_user->removeVolatileCondition(VANISHED);
+    active_user->removeVolatileCondition(VANISHED_2);
     active_user->removeVolatileCondition(FLYING_HIGH);
     active_user->removeVolatileCondition(BOUNCING);
     active_user->removeVolatileCondition(UNDERGROUND);
@@ -5533,6 +5608,13 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             base_power = 100.0 * current_hp / max_hp;
             break;
         }
+        case 289:{
+            //power depends on target HP
+            double current_hp = active_target->getCurrentHP();
+            double max_hp = active_target->getMaxHP();
+            base_power = 120.0 * current_hp / max_hp;
+            break;
+        }
         case 269:{
             //if stats were lowered this turn, power is doubled
             if(active_user->hasVolatileCondition(STAT_JUST_DROPPED)){
@@ -6016,6 +6098,39 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
             }
             break;
         }
+        case GRISEOUS_CORE:
+        case GRISEOUS_ORB:{
+            //boost power of dragon and ghost moves of giratina (487)
+            if(active_user->getMonster()->getSpeciesId() != 487){
+                break;
+            }
+            if(attack_type == GHOST || attack_type == DRAGON){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case ADAMANT_ORB:
+        case ADAMANT_CRYSTAL:{
+            //boost power of dragon and steel moves of dialga (483)
+            if(active_user->getMonster()->getSpeciesId() != 483){
+                break;
+            }
+            if(attack_type == STEEL || attack_type == DRAGON){
+                base_power *= 1.2;
+            }
+            break;
+        }
+        case LUSTROUS_ORB:
+        case LUSTROUS_GLOBE:{
+            //boost power of dragon and water moves of palkia (484)
+            if(active_user->getMonster()->getSpeciesId() != 484){
+                break;
+            }
+            if(attack_type == WATER || attack_type == DRAGON){
+                base_power *= 1.2;
+            }
+            break;
+        }
         default:break;
     }
 
@@ -6294,6 +6409,21 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(FIRESPIN);
+        }
+        if(active_user->isFainted()){return;}
+        //magma storm
+        if(active_user->hasVolatileCondition(MAGMA_STORM)){
+            event_handler->displayMsg(mon_name+" is trapped in a mealstorm of fire!");
+            unsigned int fire_spin_damage;
+            if(active_opponent->hasHeldItem(BINDING_BAND))
+                fire_spin_damage = max(active_user->getMaxHP() / 6,1);
+            else
+                fire_spin_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
+            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" damage from the fire!");
+            if(active_user->isFainted())
+                return;
+            active_user->decrementVolatileCondition(MAGMA_STORM);
         }
         if(active_user->isFainted()){return;}
         //infested
@@ -7561,7 +7691,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(attack->getEffectId() == 264 && !active_user->hasVolatileCondition(VANISHED)){// Phantom force
         active_user->addVolatileCondition(VANISHED, 5);
         if(active_user->hasHeldItem(POWER_HERB)){
-            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Phantom force immediately!");
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Phantom Force immediately!");
             active_user->consumeHeldItem();
         }else{
             active_user->setLastAttackUsed(action.getAttackId());
@@ -7572,6 +7702,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     if(active_user->hasVolatileCondition(VANISHED)){
         active_user->removeVolatileCondition(VANISHED);
+    }
+    //charge shadow force
+    if(attack->getEffectId() == 288 && !active_user->hasVolatileCondition(VANISHED_2)){// Shadow force
+        active_user->addVolatileCondition(VANISHED_2, 5);
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Shadow Force immediately!");
+            active_user->consumeHeldItem();
+        }else{
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(VANISHED_2)){
+        active_user->removeVolatileCondition(VANISHED_2);
     }
     //charge dive
     if(attack->getEffectId() == 136 && !active_user->hasVolatileCondition(UNDERWATER)){// Dive
@@ -7621,7 +7767,7 @@ bool Battle::checkIfAttackFails(Attack* attack,
         return true;
     }
     // protect
-    if(attack->getEffectId()==65 || attack->getEffectId()==264){
+    if(attack->getEffectId()==65 || attack->getEffectId()==264 || attack->getEffectId()==288){
         active_target->removeVolatileCondition(PROTECT);
         active_target->removeVolatileCondition(SPIKY_PROTECT);
     }
@@ -7980,6 +8126,17 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
             }
             StatCV changes = {{random_stat_high,2},{random_stat_low,-1}};
             changeStats(actor,changes,true);
+            break;
+        }
+        case BAD_DREAMS:{
+            Battler* active_target = getActorBattler(otherBattleActionActor(actor));
+            if(active_target->isFainted())
+                break;
+            if(active_target->isAsleep()){
+                unsigned int bad_dreams_dmg = max(1,active_target->getMaxHP()/8);
+                unsigned int actual_bad_dreams_dmg = active_target->addDirectDamage(bad_dreams_dmg);
+                event_handler->displayMsg(active_target->getNickname()+" took "+std::to_string(actual_bad_dreams_dmg)+" damage from Bad Dreams!");
+            }
             break;
         }
         default:break;

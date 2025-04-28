@@ -358,3 +358,9 @@ MOTOR_DRIVE
 The Pokémon takes no damage when hit by Electric-type moves. Instead, its Speed stat is boosted.
 SHARPNESS
 Powers up slicing moves.
+SLOW_START
+For five turns, the Pokémon's Attack and Speed stats are halved.
+BAD_DREAMS
+Damages opposing Pokémon that are asleep.
+MULTITYPE
+Changes the Pokémon's type to match the plate it holds.

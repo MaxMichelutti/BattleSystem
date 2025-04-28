@@ -1487,7 +1487,7 @@ EFFECT:88
 # 159 HEALING WISH
 NAME:Healing Wish
 DESCRIPTION:The user faints. In return, the Pokémon taking its place will have its HP restored and status conditions cured.
-EFFECT:89
+EFFECT:290
 PP:10
 TARGET:SELF
 TYPE:PSYCHIC
@@ -5116,4 +5116,135 @@ PP:20
 SLICING
 POWER:70
 EFFECT:17
+EFFECTTARGET:SELF
+# 548 MYSTICAL POWER
+NAME:Mystical Power
+DESCRIPTION:The user attacks by emitting a mysterious power. This also boosts the user’s Sp. Atk stat.
+TYPE:PSYCHIC
+PP:10
+POWER:70
+ACCURACY:90
+CATEGORY:SPECIAL
+EFFECT:169
+EFFECTTARGET:SELF
+# 549 ROAR OF TIME
+NAME:Roar of Time
+DESCRIPTION:The user blasts the target with power that distorts even time. The user can't move on the next turn.
+TYPE:DRAGON
+PP:5
+ACCURACY:90
+POWER:150
+CATEGORY:SPECIAL
+EFFECT:187
+EFFECTTARGET:SELF
+# 550 SPACIAL REND
+NAME:Spacial Rend
+DESCRIPTION:The user tears the target along with the space around it. This move has a heightened chance of landing a critical hit.
+TYPE:DRAGON
+PP:5
+POWER:110
+CATEGORY:SPECIAL
+ACCURACY:95
+EFFECT:17
+EFFECTTARGET:SELF
+# 551 MAGMA STORM
+NAME:Magma Storm
+DESCRIPTION:The user traps the target inside a maelstrom of fire that inflicts damage for four to five turns.
+TYPE:FIRE
+PP:5
+ACCURACY:75
+POWER:100
+CATEGORY:SPECIAL
+EFFECT:287
+EFFECTTARGET:SELF
+# 552 SHADOW FORCE
+NAME:Shadow Force
+DESCRIPTION:The user disappears on the first turn, then attacks on the next turn. This move hits even if the target protects itself.
+TYPE:GHOST
+CATEGORY:PHYSICAL
+EFFECT:288
+NO_METRONOME
+PP:5
+POWER:120
+EFFECTTARGET:SELF
+# 553 CRUSH GRIP
+NAME:Crush Grip
+DESCRIPTION:The target is crushed with great force. The more HP the target has left, the greater the move's power.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+PP:5
+CONTACT
+NO_METRONOME
+EFFECT:289
+EFFECTTARGET:SELF
+# 554 LUNAR DANCE
+NAME:Lunar Dance
+DESCRIPTION:The user faints. In return, the Pokémon taking its place will have its HP and PP restored and its status conditions cured.
+TYPE:PSYCHIC
+PP:10
+CATEGORY:STATUS
+NO_METRONOME
+EFFECT:89
+TARGET:SELF
+NO_COPYCAT
+# 555 LUNAR BLESSING
+NAME:Lunar Blessing
+DESCRIPTION:The user receives a blessing from the crescent moon, restoring HP and curing status conditions for itself and its ally Pokémon currently in the battle.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:5
+NO_METRONOME
+NO_COPYCAT
+EFFECT:291
+TARGET:SELF
+# 556 TAKE HEART
+NAME:Take Heart
+DESCRIPTION:The user lifts its spirits, curing its own status conditions and boosting its Sp. Atk and Sp. Def stats.
+TYPE:PSYCHIC
+CATEGORY:STATUS
+PP:15
+EFFECT:292
+TARGET:SELF
+NO_METRONOME
+NO_COPYCAT
+# 557 HEART SWAP
+NAME:Heart Swap
+DESCRIPTION:The user employs its psychic power to switch stat changes with the target.
+CATEGORY:STATUS
+TYPE:PSYCHIC
+PP:10
+ACCURACY:200
+EFFECT:293
+NO_METRONOME
+NO_COPYCAT
+# 558 DARK VOID
+NAME:Dark Void
+DESCRIPTION:Opposing Pokémon are dragged into a world of total darkness that puts them to sleep.
+TYPE:DARK
+CATEGORY:STATUS
+PP:10
+REFLECTABLE
+EFFECT:5
+ACCURACY:50
+NO_SKETCH
+NO_COPYCAT
+NO_METRONOME
+# 559 SEED FLARE
+NAME:Seed Flare
+DESCRIPTION:The user emits a shock wave from its body to attack its target. This may also harshly lower the target's Sp. Def stat.
+TYPE:GRASS
+PP:5
+POWER:120
+ACCURACY:85
+CATEGORY:SPECIAL
+EFFECTCHANCE:40
+EFFECT:54
+# 560 JUDGMENT
+NAME:Judgment
+DESCRIPTION:The user releases countless shots of light at the target. This move's type changes depending on the kind of plate held by the user.
+TYPE:NORMAL
+EFFECT:294
+PP:10
+CATEGORY:SPECIAL
+POWER:100
 EFFECTTARGET:SELF

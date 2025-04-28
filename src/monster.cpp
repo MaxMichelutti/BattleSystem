@@ -1386,15 +1386,19 @@ bool Monster::hasHeldItem()const{
 ItemType Monster::getHeldItem()const{
     return held_item;
 }
-ItemType Monster::setHeldItem(ItemType item){
+std::pair<ItemType,bool> Monster::setHeldItem(ItemType item){
     ItemType old_held_item = getHeldItem();
     held_item = item;
-    return old_held_item;
+    bool res = changeFormOnNewItem();
+    return {old_held_item,res};
 }
-ItemType Monster::removeHeldItem(){
+std::pair<ItemType,bool> Monster::removeHeldItem(){
+    if(!hasHeldItem())
+        return {NO_ITEM_TYPE,false};
     ItemType old_held_item = getHeldItem();
     held_item = NO_ITEM_TYPE;
-    return old_held_item;
+    bool res = changeFormOnNewItem();
+    return {old_held_item,res};
 }
 
 bool Monster::dislikesBerry(ItemType item)const{
@@ -1655,6 +1659,213 @@ bool Monster::changeWeatherForm(Weather weather){
                 form_id = 0;
                 return true;
             }
+        }
+    }
+    return false;
+}
+
+bool Monster::changeFormOnNewItem(){
+    switch(species_id){
+        case 483:{//dialga
+            if(form_id==0 && getHeldItem()==ADAMANT_CRYSTAL){
+                form_id = 147;
+                updateStats();
+                return true;
+            }else if(form_id==147 && getHeldItem()!=ADAMANT_CRYSTAL){
+                form_id = 0;
+                updateStats();
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 484:{//palkia
+            if(form_id==0 && getHeldItem()==LUSTROUS_GLOBE){
+                form_id = 148;
+                updateStats();
+                return true;
+            }else if(form_id==148 && getHeldItem()!=LUSTROUS_GLOBE){
+                form_id = 0;
+                updateStats();
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 487:{//giratina
+            if(form_id==0 && getHeldItem()==GRISEOUS_CORE){
+                form_id = 149;
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return true;
+            }else if(form_id==149 && getHeldItem()!=GRISEOUS_CORE){
+                form_id = 0;
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 493:{//arceus
+            switch(getHeldItem()){
+                case FIST_PLATE:{
+                    if(form_id != 151){
+                        form_id = 151;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SKY_PLATE:{
+                    if(form_id != 152){
+                        form_id = 152;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case TOXIC_PLATE:{
+                    if(form_id != 153){
+                        form_id = 153;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case EARTH_PLATE:{
+                    if(form_id != 154){
+                        form_id = 154;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case STONE_PLATE:{
+                    if(form_id != 155){
+                        form_id = 155;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case INSECT_PLATE:{
+                    if(form_id != 156){
+                        form_id = 156;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SPOOKY_PLATE:{
+                    if(form_id != 157){
+                        form_id = 157;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case IRON_PLATE:{
+                    if(form_id != 158){
+                        form_id = 158;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case FLAME_PLATE:{
+                    if(form_id != 159){
+                        form_id = 159;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SPLASH_PLATE:{
+                    if(form_id != 160){
+                        form_id = 160;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case MEADOW_PLATE:{
+                    if(form_id != 161){
+                        form_id = 161;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case ZAP_PLATE:{
+                    if(form_id != 162){
+                        form_id = 162;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case MIND_PLATE:{
+                    if(form_id != 163){
+                        form_id = 163;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case ICICLE_PLATE:{
+                    if(form_id != 164){
+                        form_id = 164;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DRACO_PLATE:{
+                    if(form_id != 165){
+                        form_id = 165;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DREAD_PLATE:{
+                    if(form_id != 166){
+                        form_id = 166;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case PIXIE_PLATE:{
+                    if(form_id != 167){
+                        form_id = 167;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                default:{
+                    if(form_id != 0){
+                        form_id = 0;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+            break;
         }
     }
     return false;

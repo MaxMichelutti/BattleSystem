@@ -1848,3 +1848,18 @@ NAME:Fossilized Dino
 CATEGORY:FOSSIL
 DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once lived in the sea. What it looked like is a mystery.
 PRICE:7000
+# 360 GRISEOUS CORE
+NAME:Griseous Core
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Giratina. This large, glowing gem wells with power and allows the Pokémon to change form.
+PRICE:10000
+# 362 ADAMANT CRYSTAL
+NAME:Adamant Crystal
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Dialga. This large, glowing gem wells with power and allows the Pokémon to change form.
+PRICE:10000
+# 364 LUSTROUS GLOBE
+NAME:Lustrous Globe
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Palkia. This large, glowing orb wells with power and allows the Pokémon to change form.
+PRICE:10000

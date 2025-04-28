@@ -1,11 +1,11 @@
 1: -1 ATK Opponent
 2: +1 ATK +1 SPATK User
-3: Seed Opponent
-4: Poison Opponent
-5: Sleep Opponent
+3: seed Opponent
+4: poison Opponent
+5: sleep Opponent
 6: recoil 1/4 Damage User
 7: -2 Evasiveness Opponent
-8: Heal 50% User, 66% under sun, 25% under rain/sandstorm/snow
+8: heal 50% User, 66% under sun, 25% under rain/sandstorm/snow
 9: locks the user into SOLAR_BEAM charging
 10: locks the user into Petal Dancing
 11: User loses 1/4 of its HP (STRUGGLE)
@@ -284,3 +284,11 @@
 284: -1 att spatt opponent, user switches out always
 285: -1 att spatt spd of target only if target is poisoned
 286: ignore defense and evasion stat changes from opponent
+287: magma storm
+288: shadow force
+289: power depnds on target HP percent times 120
+290: user dies, pokemon switching in is fully healed AND recovers all PPs of all its attacks
+291: heals 25% damage and restore status
+292: +1 spatt spdef user, heal special conditions user
+293: switch stat changes of user with target
+294: judgement -> type depends on user form

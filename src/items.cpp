@@ -251,6 +251,7 @@ unsigned int flingPower(ItemType item_type){
         case SPELL_TAG:
         case TWISTED_SPOON:
         case SHELL_BELL:
+        case LIFE_ORB:
             return 30;
         case LUCKY_PUNCH:
         case ICY_ROCK:
@@ -270,6 +271,9 @@ unsigned int flingPower(ItemType item_type){
         case ADAMANT_ORB:
         case LUSTROUS_ORB:
         case GRISEOUS_ORB:
+        case ADAMANT_CRYSTAL:
+        case LUSTROUS_GLOBE:
+        case GRISEOUS_CORE:
             return 60;
         case POWER_ANKLET:
         case POWER_BELT:

@@ -70,6 +70,7 @@ class Monster{
     Monster(unsigned int species_id, unsigned int level,unsigned int form_id);
     Monster(Monster* other);
     ~Monster();
+    bool changeFormOnNewItem();
     unsigned int getSpeciesId()const;
     Stats getStats()const;
     EVs getEffort()const;
@@ -132,8 +133,8 @@ class Monster{
     bool itemWouldHaveEffect(ItemType item)const;
     bool hasHeldItem()const;
     ItemType getHeldItem()const;
-    ItemType setHeldItem(ItemType item);
-    ItemType removeHeldItem();
+    std::pair<ItemType,bool> setHeldItem(ItemType item);
+    std::pair<ItemType,bool> removeHeldItem();
     bool dislikesBerry(ItemType item)const;
     bool likesBerry(ItemType item)const;
     // bool hasMaxedEVs()const;

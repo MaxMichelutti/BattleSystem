@@ -35,6 +35,7 @@ bool isVolatileConditionClearedByRapidSpin(VolatileStatusCondition status) {
         case WRAP:
         case BIND:
         case FIRESPIN:
+        case MAGMA_STORM:
         case INFESTED:
         case SANDTOMB:
         case WHIRLPOOL:
@@ -335,7 +336,7 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(TRUANTING);
     resetTypes();
     resetStats();
-    battler_ability = monster->getAbility();
+    resetAbility();
 }
 
 Battler::~Battler() {
@@ -398,6 +399,10 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" is trapped in a vortex of fire!");
             break;
         }
+        case MAGMA_STORM:{
+            handler->displayMsg(getNickname()+" is trapped in a mealstorm of fire!");
+            break;
+        }
         case INFESTED:{
             handler->displayMsg(getNickname()+" is infested!");
             break;
@@ -453,7 +458,8 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" collects power from the sun!");
             break;
         }
-        case VANISHED:{
+        case VANISHED:
+        case VANISHED_2:{
             handler->displayMsg(getNickname()+" vanished!");
             break;
         }
@@ -504,41 +510,56 @@ void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
         return;
     volatile_conditions.erase(condition);
     switch(condition){
-        case GROUNDED:
+        case GROUNDED:{
             if(monster->hasType(FLYING)){
                 handler->displayMsg(getNickname()+" tries to take flight!");
             }
             break;
-        case INFATUATION:
+        }
+        case INFATUATION:{
             handler->displayMsg(getNickname()+" is no longer infatuated!");
             break;
-        case FIRESPIN:
+        }
+        case FIRESPIN:{
             handler->displayMsg(getNickname()+" is no longer trapped in a vortex of fire!");
             break;
-        case INFESTED:
+        }
+        case MAGMA_STORM:{
+            handler->displayMsg(getNickname()+" is no longer trapped in a mealstorm of fire!");
+            break;
+        }
+        case INFESTED:{
             handler->displayMsg(getNickname()+" is no longer infested!");
             break;
-        case WHIRLPOOL:
+        }
+        case WHIRLPOOL:{
             handler->displayMsg(getNickname()+" is no longer trapped in a whirlpool of water!");
             break;
-        case SANDTOMB:
+        }
+        case SANDTOMB:{
             handler->displayMsg(getNickname()+" is no longer trapped in a vortex of sand!");
             break;
-        case WRAP:
+        }
+        case WRAP:{
             handler->displayMsg(getNickname()+" is no longer trapped in a wrap!");
             break;
-        case BIND:
+        }
+        case BIND:{
             handler->displayMsg(getNickname()+" is no longer binded!");
             break;
-        case LEECH_SEED:
+        }
+        case LEECH_SEED:{
             handler->displayMsg(getNickname()+" is no longer seeded!");
             break;
-        case TAUNTED:
+        }
+        case TAUNTED:{
             handler->displayMsg(getNickname()+" is no longer taunted!");
             break;
-        case CONFUSION:
+        }
+        case CONFUSION:{
             handler->displayMsg(getNickname()+" snapped out of confusion!");
             break;
+        }
         default:
             break;
     }
@@ -1151,6 +1172,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(FLOWER_GIFT) && (field->getWeather() == SUN || field->getWeather() == EXTREME_SUN))
         base_modified*=1.5;
+    if(hasAbility(SLOW_START) && turns_in_battle<5)
+        base_modified*=0.5;
     // if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
     //     base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
@@ -1284,6 +1307,9 @@ unsigned int Battler::getModifiedSpeed()const {
     if(hasAbility(SURGE_SURFER) && field->getTerrain()==ELECTRIC_FIELD){// SURGE SURFER
         base_modified = base_modified * 2;
     }
+    if(hasAbility(SLOW_START) && turns_in_battle<5){
+        base_modified*=0.5;
+    }
     if(field->getWeather()==SANDSTORM && hasAbility(SAND_RUSH)){//Sand rush doubles speed under sandstorm
         base_modified = base_modified * 2;
     }
@@ -1414,6 +1440,8 @@ bool Battler::canSwitchOut(Battler* enemy)const {
     if(hasVolatileCondition(BIND))
         return false;
     if(hasVolatileCondition(FIRESPIN))
+        return false;
+    if(hasVolatileCondition(MAGMA_STORM))
         return false;
     if(hasVolatileCondition(INFESTED))
         return false;
@@ -2494,10 +2522,24 @@ bool Battler::hasHeldItem(ItemType item)const{
         return true;
     return false;
 }
+
+void Battler::resetAbility(){
+    battler_ability = monster->getAbility();
+}
+
 ItemType Battler::setHeldItem(ItemType item){
     if(item != NO_ITEM_TYPE)
         had_held_item = false;
-    ItemType old_item = monster->setHeldItem(item);
+    auto res = monster->setHeldItem(item);
+    ItemType old_item = res.first;
+    if(res.second){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
+        resetAbility();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     if((hasDiabledAttack() || hasVolatileCondition(INFATUATION) ||
@@ -2508,11 +2550,20 @@ ItemType Battler::setHeldItem(ItemType item){
     return old_item;
 }
 ItemType Battler::removeHeldItem(){
-    ItemType res = monster->removeHeldItem();
-    if(res != NO_ITEM_TYPE){
+    auto res = monster->removeHeldItem();
+    ItemType old_item = res.first;
+    if(res.second){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
+        resetAbility();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+    }
+    if(old_item != NO_ITEM_TYPE){
         had_held_item = true;
     }
-    return res;
+    return old_item;
 }
 
 bool Battler::useItem(ItemType item_type,unsigned int data){
@@ -2812,8 +2863,15 @@ bool Battler::canStealItem()const{
     ItemType item = monster->getHeldItem();
     //if monster is arceus cannot steal plates
     ItemData* item_data = ItemData::getItemData(item);
-    if(item_data != nullptr && item_data->getCategory() == PLATE)
-        return monster->getSpeciesId() != 493;
+    if(item_data != nullptr && item_data->getCategory() == PLATE && 
+        monster->getSpeciesId() == 493)
+        return false;//arceus cannot lose plates
+    if(item == GRISEOUS_CORE && monster->getSpeciesId() == 487)
+        return false;//giratina cannot lose griseous core
+    if(item == ADAMANT_CRYSTAL && monster->getSpeciesId() == 483)
+        return false;//dialga cannot lose adamant crystal
+    if(item == LUSTROUS_GLOBE && monster->getSpeciesId() == 484)
+        return false;//palkia cannot lose lustrous globe
     if(!canBeStolen(item))
         return false;
     if(hasAbility(STICKY_HOLD))
@@ -3083,6 +3141,7 @@ bool Battler::hasSubstitute()const{
 void Battler::setSubstituteHP(unsigned int amount){
     substituteHP = amount;
     removeVolatileCondition(FIRESPIN);
+    removeVolatileCondition(MAGMA_STORM);
     removeVolatileCondition(WRAP);
     removeVolatileCondition(BIND);
     removeVolatileCondition(SANDTOMB);
@@ -3122,10 +3181,10 @@ bool Battler::changeFormSwitchIn(){
     if(monster->changeFormSwitchIn()){
         handler->displayMsg(getNickname()+" changed its form!");
         resetTypes();
-        battler_ability = monster->getAbility();
         weight = monster->getWeight();
         height = monster->getHeight();
         resetStats();
+        resetAbility();
         return true;
     }
     return false;

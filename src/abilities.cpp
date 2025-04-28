@@ -45,6 +45,7 @@ bool isAbilityIgnorable(Ability ability){
         case OWN_TEMPO:
         case SAND_VEIL:
         case SHELL_ARMOR:
+        case SIMPLE:
         case SHIELD_DUST:
         case SOUNDPROOF:
         case STURDY:
@@ -52,6 +53,7 @@ bool isAbilityIgnorable(Ability ability){
         case THICK_FAT:
         case UNAWARE:
         case VITAL_SPIRIT:
+        case VOLT_ABSORB:
         case WATER_ABSORB:
         case WATER_VEIL:
         case BIG_PECKS:
@@ -72,6 +74,14 @@ bool isAbilityIgnorable(Ability ability){
         case FLOWER_GIFT:
         case STICKY_HOLD:
         case MOTOR_DRIVE:
+        case STORM_DRAIN:
+        case HEAVY_METAL:
+        case TELEPATHY:
+        case FUR_COAT:
+        case PASTEL_VEIL:
+        case WIND_RIDER:
+        case CONTRARY:
+        case HEATPROOF:
             return true;
         default:return false;
     }        
@@ -88,6 +98,7 @@ bool isAbilityTraceable(Ability ability){
         case FORECAST:
         case PRIMORDIAL_SEA:
         case DESOLATE_LAND:
+        case MULTITYPE:
             return false;
         default: return true;
     }
@@ -118,6 +129,7 @@ bool abilityCannotBeCopied(Ability ability){
         case PRIMORDIAL_SEA:
         case DESOLATE_LAND:
         case DELTA_STREAM:
+        case MULTITYPE:
             return true;
         default: return false;
     }
@@ -131,6 +143,7 @@ bool abilityCannotBeChanged(Ability ability){
         case PRIMORDIAL_SEA:
         case DESOLATE_LAND:
         case DELTA_STREAM:
+        case MULTITYPE:
             return true;
         default: return false;
     }
@@ -143,6 +156,7 @@ bool abilityCannotBeSuppressed(Ability ability){
         case PRIMORDIAL_SEA:
         case DESOLATE_LAND:
         case DELTA_STREAM:
+        case MULTITYPE:
             return true;
         default: return false;
     }

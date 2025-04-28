@@ -69,6 +69,7 @@ enum BattleActionType{
     SOLAR_BLADE,
     FLY,
     PHANTOM_FORCE,
+    SHADOW_FORCE,
     ROLLOUT,
     DIG,
     DIVE,
@@ -158,8 +159,10 @@ enum VolatileStatusCondition{
     STAT_JUST_RAISED,
     TRUANTING,
     VANISHED,
+    VANISHED_2,
     HEAL_BLOCKED,
-    MAGIC_COATED
+    MAGIC_COATED,
+    MAGMA_STORM
 };
 
 enum Gender{
@@ -454,7 +457,10 @@ enum Ability{
     KLUTZ,
     HEATPROOF,
     MOTOR_DRIVE,
-    SHARPNESS
+    SHARPNESS,
+    SLOW_START,
+    BAD_DREAMS,
+    MULTITYPE,
 };
 
 enum ItemCategory{
@@ -830,10 +836,13 @@ enum ItemType{
     PLUME_FOSSIL,
     JAW_FOSSIL,
     SAIL_FOSSIL,
-    BIRD_FOSSIL,
-    FISH_FOSSIL,
-    DRAKE_FOSSIL,
-    DINO_FOSSIL
+    FOSSILIZED_BIRD,
+    FOSSILIZED_FISH,
+    FOSSILIZED_DRAKE,
+    FOSSILIZED_DINO,
+    GRISEOUS_CORE,
+    ADAMANT_CRYSTAL,
+    LUSTROUS_GLOBE,
 };
 
 #endif
