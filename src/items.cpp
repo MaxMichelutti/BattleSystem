@@ -154,6 +154,8 @@ bool canBeStolen(ItemType item_type){
         return false;
     if(item_data->getCategory() == BALL)
         return false;
+    if(item_data->getCategory() == KEY_ITEM)
+        return false;
     switch (item_type){
         default:
             return true;

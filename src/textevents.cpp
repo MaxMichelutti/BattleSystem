@@ -607,3 +607,24 @@ bool TextEventHandler::chooseWetherToMegaEvolve(Battler* active,MonsterTeam*team
         }
     }
 }
+
+unsigned int TextEventHandler::chooseRotomForm(){
+    unsigned int choice = 0;
+    while (true){
+        displayMsg("Choose the appliance where Rotom should enter:");
+        displayMsg("1. Light Bulb");
+        displayMsg("2. Microwave Oven");
+        displayMsg("3. Washing Machine");
+        displayMsg("4. Refrigerator");
+        displayMsg("5. Electric Fan");
+        displayMsg("6. Lawn Mower");
+        displayMsgNoEndl("Enter your choice: ");
+        choice = getNumberFromCin();
+        if (choice < 1 || choice > 6){
+            displayMsg("Invalid choice. Please try again.");
+            continue;
+        }else{
+            return choice;
+        }
+    }
+}

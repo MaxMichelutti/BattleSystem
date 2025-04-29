@@ -843,6 +843,9 @@ enum ItemType{
     GRISEOUS_CORE,
     ADAMANT_CRYSTAL,
     LUSTROUS_GLOBE,
+    GRACIDEA,
+    METEORITE,
+    ROTOM_CATALOG
 };
 
 #endif

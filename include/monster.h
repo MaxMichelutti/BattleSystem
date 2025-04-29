@@ -153,6 +153,7 @@ class Monster{
     bool hasEvolutions()const;
     bool changeWeatherForm(Weather weather);
     bool changeFormSwitchIn();
+    void interactWithKeyItem(ItemType item, EventHandler* handler);
 };
 
 #endif

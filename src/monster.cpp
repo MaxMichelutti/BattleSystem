@@ -1895,3 +1895,91 @@ bool Monster::changeFormOnNewItem(){
     }
     return false;
 }
+
+void Monster::interactWithKeyItem(ItemType item, EventHandler* handler){
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data == nullptr)
+        return;
+    if(item_data->getCategory() != KEY_ITEM)
+        return;
+    switch(item){
+        case GRACIDEA:{
+            if(species_id==492){//shaymin
+                if(form_id==0){
+                    handler->displayMsg(getNickname()+" transformed into its Sky Forme!");
+                    form_id = 150;
+                }else{
+                    handler->displayMsg(getNickname()+" transformed into its Land Forme!");
+                    form_id = 0;
+                }
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return;
+            }
+            break;
+        }
+        case METEORITE:{
+            if(species_id==386){//deoxys
+                if(form_id==0){
+                    handler->displayMsg(getNickname()+" transformed into its Attack Forme!");
+                    form_id = 126;
+                }else if(form_id==126){
+                    handler->displayMsg(getNickname()+" transformed into its Defense Forme!");
+                    form_id = 127;
+                }else if(form_id==127){
+                    handler->displayMsg(getNickname()+" transformed into its Speed Forme!");
+                    form_id = 128;
+                }else{
+                    handler->displayMsg(getNickname()+" transformed into its Normal Forme!");
+                    form_id = 0;
+                }
+                updateStats();
+                return;
+            }
+            break;
+        }
+        case ROTOM_CATALOG:{
+            if(species_id==479){//rotom
+                unsigned int rotom_form_choice = handler->chooseRotomForm();
+                if(rotom_form_choice == 1 && form_id != 0){
+                    handler->displayMsg(getNickname()+" possessed the Light Bulb!");
+                    form_id = 0;
+                    updateStats();
+                    return;
+                }else if(rotom_form_choice == 2 && form_id != 142){
+                    handler->displayMsg(getNickname()+" possessed the Washing Machine!");
+                    form_id = 142;
+                    updateStats();
+                    return;
+                }else if(rotom_form_choice == 3 && form_id != 143){
+                    handler->displayMsg(getNickname()+" possessed the Microwave Oven!");
+                    form_id = 143;
+                    updateStats();
+                    return;
+                }else if(rotom_form_choice == 4 && form_id != 144){
+                    handler->displayMsg(getNickname()+" possessed the Refrigerator!");
+                    form_id = 144;
+                    updateStats();
+                    return;
+                }else if(rotom_form_choice == 5 && form_id != 145){
+                    handler->displayMsg(getNickname()+" possessed the Electric Fan!");
+                    form_id = 145;
+                    updateStats();
+                    return;
+                }else if(rotom_form_choice == 6 && form_id != 146){
+                    handler->displayMsg(getNickname()+" possessed the Lawn Mower!");
+                    form_id = 146;
+                    updateStats();
+                    return;
+                }
+            }
+            break;
+        }
+        default:break;
+    }
+    handler->displayMsg("Nothing happened.");
+}
