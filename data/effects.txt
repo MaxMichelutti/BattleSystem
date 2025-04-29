@@ -286,7 +286,7 @@
 286: ignore defense and evasion stat changes from opponent
 287: magma storm
 288: shadow force
-289: power depnds on target HP percent times 120
+289: power depends on target HP percent times 120
 290: user dies, pokemon switching in is fully healed AND recovers all PPs of all its attacks
 291: heals 25% damage and restore status
 292: +1 spatt spdef user, heal special conditions user

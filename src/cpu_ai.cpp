@@ -216,6 +216,16 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 power = 20;
             break;
         }
+        case 259:{
+            // power depends on target hp percent
+            power = 100 * enemy_active->getCurrentHP() / (double)enemy_active->getMaxHP();
+            break;
+        }
+        case 289:{
+            // power depends on target hp percent
+            power = 120 * enemy_active->getCurrentHP() / (double)enemy_active->getMaxHP();
+            break;
+        }
     }
     if(power != 0){
         bool can_hit_ghosts = cpu_active->hasAbility(SCRAPPY);
@@ -389,6 +399,15 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             }
             break;
         }
+        case 287:{
+            // magma storm
+            if(enemy_active->hasVolatileCondition(MAGMA_STORM)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
         case 220:{
             // infestation
             if(enemy_active->hasVolatileCondition(INFESTED)){
@@ -404,6 +423,16 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
                 field->getTerrain()!=MISTY_FIELD){
                 total_utility += 60 * effect_prob_mult;
+            }
+            total_utility *= 0.9;
+            break;
+        }
+        case 296:{
+            // recoil and paralyze opp
+            if(enemy_active->canBeParalyzed() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                field->getTerrain()!=MISTY_FIELD){
+                total_utility += 50 * effect_prob_mult;
             }
             total_utility *= 0.9;
             break;
@@ -441,7 +470,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
             break;
         }
-        case 25:case 174:{
+        case 25:case 174:case 299:{
             // confusion
             if(!enemy_active->hasVolatileCondition(CONFUSION) &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -498,7 +527,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
             break;
         }
-        case 32:case 123:case 124:case 185:case 231:case 235:{
+        case 32:case 123:case 124:case 185:
+        case 231:case 235:case 284:case 300:{
             // involves switching
             auto enemy_types = enemy_active->getTypes();
             float effectiveness = 1;
@@ -802,8 +832,10 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility += 25;
             break;
         }
-        case 76:{
+        case 76:case 298:{
             //bad poison
+            if(effect==298 && cpu_active->hasType(POISON))
+                effect_prob_mult = 1.1;
             // poison opp
             if(enemy_active->canBeBadlyPoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -846,7 +878,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility += 50;
             break;
         }
-        case 83:{
+        case 83:case 291:{
             // heal 25% user
             unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
             if(HP_percent >= 50)
@@ -1392,8 +1424,9 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility = 30;
             break;
         }
-        case 177:{
-            //reset stat changes
+        case 177: case 293:{
+            //177: reset stat changes
+            //293: switch changes with opponent
             unsigned int enemy_boosts = 0;
             if(enemy_active->getAttackModifier() > 0)
                 enemy_boosts++;
@@ -1952,11 +1985,6 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility *= 2;
             break;
         }
-        case 259:{
-            // power depends on target hp percent
-            total_utility *= enemy_active->getCurrentHP() / (double)enemy_active->getMaxHP();
-            break;
-        }
         case 260:{
             //clear terrain
             if(field->getTerrain() != NO_TERRAIN)
@@ -2045,6 +2073,74 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility = -10; //attack is going to fail
             break;
         }
+        case 282:{
+            //raise def of all grass types
+            if(cpu_active->hasType(GRASS)){
+                //+1 def user
+                unsigned int defense_mod = cpu_active->getDefenseModifier();
+                total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            }
+            if(enemy_active->hasType(GRASS)){
+                //+1 def enemy
+                unsigned int defense_mod = enemy_active->getDefenseModifier();
+                total_utility -= 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            }
+            break;
+        }
+        case 283:{
+            //reflect enemy attack
+            // 25% for a +30 utility
+            if(RNG::oneFourth())
+                total_utility += 30;
+            break;
+        }
+        case 285:{
+            //-1 att spatt spd opponent
+            if(!enemy_active->isPoisoned())
+                break;
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            break;
+        }
+        case 290:{
+            //user dies -> avoid at all costs
+            total_utility = -187;
+            break;
+        }
+        case 292:{
+            //+1 spatt spdef user
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            //heal status
+            if(cpu_active->hasPermanentStatus())
+                total_utility += 20;
+            break;
+        }
+        case 295:{
+            //-1 def spdef speed user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            break;
+        }
+        case 297:{
+            //+2 spd +1 att user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+
         default: break;
     }
     // add field utility
