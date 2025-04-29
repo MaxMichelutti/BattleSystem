@@ -523,7 +523,7 @@ ACCURACY:200
 NO_COPYCAT
 TYPE:NORMAL
 CATEGORY:STATUS
-EFFECT:32
+EFFECT:300
 PRIORITY:-6
 TARGET:SELF
 # 57 SAFEGUARD
@@ -761,7 +761,7 @@ CATEGORY:SPECIAL
 POWER:110
 ACCURACY:70
 PP:10
-EFFECT:25
+EFFECT:299
 EFFECTCHANCE:30
 # 82 FLY
 NAME:Fly
@@ -1296,7 +1296,7 @@ CONTACT
 # 138 TOXIC
 NAME:Toxic
 DESCRIPTION:A move that leaves the target badly poisoned. Its poison damage worsens every turn.
-EFFECT:76
+EFFECT:298
 TYPE:POISON
 PP:10
 REFLECTABLE
@@ -5328,3 +5328,22 @@ TYPE:GRASS
 CATEGORY:SPECIAL
 PP:10
 POWER:80
+# 570 HORN LEECH
+NAME:Horn Leech
+DESCRIPTION:The user drains the target's energy with its horns. The user's HP is restored by up to half the damage taken by the target.
+TYPE:GRASS
+CATEGORY:PHYSICAL
+PP:10
+POWER:75
+EFFECT:97
+CONTACT
+EFFECTTARGET:SELF
+# 571 MALIGNANT CHAIN
+NAME:Malignant Chain
+DESCRIPTION:The user pours toxins into the target by wrapping them in a toxic, corrosive chain. This may also leave the target badly poisoned.
+TYPE:POISON
+PP:5
+POWER:100
+CATEGORY:SPECIAL
+EFFECT:76
+EFFECTCHANCE:50

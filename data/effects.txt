@@ -295,3 +295,6 @@
 295: -1 def spdef speed user
 296: 1/3 recoil + paralyze opponent
 297: +2 speed +1 att user
+298: bad poison opponent, never miss if used buìy a poison type
+299: confusion opponent, can hit monsters that are flying, accuracy of 50 under sun
+300: force target to switch out to a random monster, also hits flying monsters

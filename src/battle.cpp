@@ -1059,6 +1059,10 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
     //no guard bypasses accuracy check and moves never miss
     if(active_user->hasAbility(NO_GUARD))
         return false;
+    // toxic bypasses accuracy checks if used by a poison type
+    if(attack->getEffectId() == 298 && active_user->hasType(POISON)){
+        return false;
+    }
     // if the user is locked onto thew target, it cannot miss
     // (even in case of semi-invulnerable moves)
     if(active_user->hasLockOn(active_target->getMonster())){
@@ -1067,12 +1071,16 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
     unsigned int effect_id = attack->getEffectId();
     // fly (target is flying high and cannot be hit)
     if(active_target->hasVolatileCondition(FLYING_HIGH) && target == TARGET_OPPONENT){
-        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67))//thunder also hits monsters that are flying
+        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67)&&(effect_id!=299)&&(effect_id!=138)&&(effect_id!=300))//thunder, twister, hurricane, smack down, whirlwind and gust also hits monsters that are flying
             return true;   
+        if(effect_id==138){
+            event_handler->displayMsg(opponent_mon_name+" was smacked to the ground!");
+            active_target->removeVolatileCondition(FLYING_HIGH);
+        }
     }
     // bounce (target is flying high and cannot be hit)
     if(active_target->hasVolatileCondition(BOUNCING) && target == TARGET_OPPONENT){
-        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67))//gust also hits monsters that are bouncing
+        if((effect_id!=45)&&(effect_id!=227)&&(effect_id!=67)&&(effect_id!=299))//thunder, twister, hurricane and gust also hits monsters that are bouncing
             return true; 
     }
     // dig (target is underground and cannot be hit)
@@ -1177,6 +1185,11 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
             if(field->getWeather() == RAIN || field->getWeather() == HEAVY_RAIN)
                 modified_evasion = 0;
             else if(field->getWeather() == SUN || field->getWeather() == EXTREME_SUN)
+                modified_accuracy = active_user->getModifiedAccuracy() * 0.5;
+        }
+        // HURRICANE: halve accuracy under SUN
+        if(attack->getEffectId() == 299 && !thereIsaCloudNine()){
+            if(field->getWeather() == SUN || field->getWeather() == EXTREME_SUN)
                 modified_accuracy = active_user->getModifiedAccuracy() * 0.5;
         }
         // BLIZZARD ignores accuracy checks under HAIL and SNOW
@@ -1983,7 +1996,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             break;
         }
-        case 76:{//bad poison opponent
+        case 76:case 298:{//bad poison opponent
             if(active_target->isFainted())
                 return;
             if(field->hasFieldEffect(SAFEGUARD,other_actor) &&
@@ -2357,7 +2370,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(actor,changes,false);
             break;
         }
-        case 25:case 77:case 113:case 174:case 270:{ // confuse target
+        case 25:case 77:case 113:case 174:case 270:case 299:{ // confuse target
             if(active_target->isFainted())
                 return;
             if(effect==270 && !active_target->hasVolatileCondition(STAT_JUST_RAISED))
@@ -2511,7 +2524,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(other_actor,changes,false);
             break;
         }
-        case 32:{// whirlwind/roar/dragontail
+        case 32:case 300:{// whirlwind/roar/dragontail
             if(active_target->isFainted())
                 return;
             if(hits_substitute && !active_user->hasAbility(INFILTRATOR)){
@@ -7448,6 +7461,13 @@ bool Battle::checkIfAttackFails(Attack* attack,
         }
         case 195:{//snore
             if(!active_user->isAsleep()){
+                attack_failed = true;
+            }
+            break;
+        }
+        case 48:{//fly
+            //fails if user is smacked down
+            if(active_user->hasVolatileCondition(SMACKED_DOWN)){
                 attack_failed = true;
             }
             break;
