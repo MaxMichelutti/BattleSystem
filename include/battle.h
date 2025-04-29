@@ -51,6 +51,7 @@ class BattleAction{
     unsigned int order;
     ItemType item_to_use;
     bool mega_evolution;
+    Monster* monster_to_act;
     public:
     BattleAction();
     BattleAction(BattleActionActor actor,
@@ -60,7 +61,8 @@ class BattleAction{
         unsigned int speed, 
         unsigned int switch_id,
         ItemType item_to_use,
-        bool mega_evolution);
+        bool mega_evolution,
+        Monster* monster_to_act);
     ~BattleAction();
 
     BattleActionActor getActor()const;
@@ -72,6 +74,7 @@ class BattleAction{
     void setSpeed(unsigned int speed);
     void setPriority(int priority);
     bool isMega()const;
+    Monster* getMonsterToAct()const;
 
     bool operator<=(const BattleAction& other) const;
     bool operator>=(const BattleAction& other) const;
@@ -167,6 +170,7 @@ class Battle{
     bool isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
     void applyBattleActionModifiers(BattleAction& action, BattleAction& other_action);
     double computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
+    void performMegaEvolutions(BattleAction& user_action, BattleAction& opponent_action);
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);

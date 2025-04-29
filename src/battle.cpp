@@ -60,11 +60,12 @@ BattleAction::BattleAction() {
     priority = 0;
     speed = 0;
     actor = PLAYER;
+    monster_to_act = nullptr;
 }
 
 BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsigned int attack_id, 
     int priority, unsigned int speed, unsigned int switch_id, ItemType item_to_use,
-    bool mega_evolution) {
+    bool mega_evolution, Monster* monster_to_act) {
     this->item_to_use = item_to_use;
     this->action_type = type;
     this->actor = actor;
@@ -73,6 +74,7 @@ BattleAction::BattleAction(BattleActionActor actor,BattleActionType type, unsign
     this->speed = speed;
     this->switch_id = switch_id;
     this->mega_evolution = mega_evolution;
+    this->monster_to_act = monster_to_act;
     if(action_type == SWITCH)
         this->priority = 10;
     else if(action_type == USE_ITEM)
@@ -111,6 +113,10 @@ bool BattleAction::operator<=(const BattleAction& other) const {
         return true;
     else
         return (*this) < other;
+}
+
+Monster* BattleAction::getMonsterToAct()const{
+    return monster_to_act;
 }
 
 int BattleAction::getPriority()const {
@@ -450,14 +456,7 @@ void Battle::performTurn(){
     #endif
     BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);    
     // apply mega evolutions
-    if(player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega()){
-        player_active->megaEvolve();
-        player_action.setSpeed(player_active->getModifiedSpeed());
-    }
-    if(opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega()){
-        opponent_active->megaEvolve();
-        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
-    }
+    performMegaEvolutions(player_action,opponent_action);
     
     // 2: focus monsters
     if(player_action.getAttackId() == FOCUS_PUNCH_ID){
@@ -595,6 +594,14 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
     // MonsterTeam* user_team = getActorTeam(action.getActor());
     // MonsterTeam* target_team = getActorTeam(otherBattleActionActor(action.getActor()));
     // check if user is alive
+    if(active_user->isFainted()){
+        return;
+    }
+    // check that the user is the one who was ordered to complete the action
+    if(active_user->getMonster() != action.getMonsterToAct()){
+        // event_handler->displayMsg("Action not valid!");
+        return;
+    }
     
     // perform action
     BattleActionType atype = action.getActionType();
@@ -8914,5 +8921,51 @@ void Battle::checkMonsterLeavingAbilities(BattleActionActor actor){
             }
             default: break;
         }
+    }
+}
+
+void Battle::performMegaEvolutions(BattleAction& player_action, BattleAction& opponent_action){
+    bool player_megas = player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega();
+    bool opponent_megas = opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega();
+    // if(player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega()){
+    //     player_active->megaEvolve();
+    //     player_action.setSpeed(player_active->getModifiedSpeed());
+    //     applySwitchInAbilitiesEffects(PLAYER);
+    // }
+    // if(opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega()){
+    //     opponent_active->megaEvolve();
+    //     opponent_action.setSpeed(opponent_active->getModifiedSpeed());
+    //     applySwitchInAbilitiesEffects(OPPONENT);
+    // }
+    if(!player_megas && !opponent_megas)
+        return;
+    if(player_megas && !opponent_megas){
+        player_active->megaEvolve();
+        player_action.setSpeed(player_active->getModifiedSpeed());
+        applySwitchInAbilitiesEffects(PLAYER);
+        return;
+    }
+    if(!player_megas && opponent_megas){
+        opponent_active->megaEvolve();
+        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
+        applySwitchInAbilitiesEffects(OPPONENT);
+        return;
+    }
+    unsigned int player_speed = player_active->getModifiedSpeed();
+    unsigned int opponent_speed = opponent_active->getModifiedSpeed();
+    if(player_speed > opponent_speed || (player_speed == opponent_speed && RNG::coinFlip())){
+        player_active->megaEvolve();
+        player_action.setSpeed(player_active->getModifiedSpeed());
+        opponent_active->megaEvolve();
+        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
+        applySwitchInAbilitiesEffects(PLAYER);
+        applySwitchInAbilitiesEffects(OPPONENT);
+    }else{
+        opponent_active->megaEvolve();
+        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
+        player_active->megaEvolve();
+        player_action.setSpeed(player_active->getModifiedSpeed());
+        applySwitchInAbilitiesEffects(OPPONENT);
+        applySwitchInAbilitiesEffects(PLAYER);
     }
 }

@@ -1096,15 +1096,16 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
         // status restoring items
         switch(item_type){
             case ANTIDOTE:
-            case PECHA_BERRY:
+            case PECHA_BERRY:{
                 if(permanent_status == POISONED || permanent_status == BAD_POISON){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its poisoning!");
                 }
                 break;
+            }
             case AWAKENING:
-            case CHESTO_BERRY:
+            case CHESTO_BERRY:{
                 if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
                     permanent_status == SLEEP_3 || permanent_status == SLEEP_4){
                     permanent_status = NO_PERMANENT_CONDITION;
@@ -1112,48 +1113,55 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                     handler->displayMsg(getNickname()+" woke up!");
                 }
                 break;
+            }
             case PARALYZE_HEAL:
-            case CHERY_BERRY:
+            case CHERY_BERRY:{
                 if(permanent_status == PARALYSIS){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its paralysis!");
                 }
                 break;
+            }
             case BURN_HEAL:
-            case RAWST_BERRY:
+            case RAWST_BERRY:{
                 if(permanent_status == BURN){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its burn!");
                 }
                 break;
+            }
             case ICE_HEAL:
-            case ASPEAR_BERRY:
+            case ASPEAR_BERRY:{
                 if(permanent_status == FREEZE){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its freeze!");
                 }
                 break;
+            }
             case FULL_RESTORE:
             case FULL_HEAL:
-            case LUM_BERRY:
+            case LUM_BERRY:{
                 if(permanent_status != NO_PERMANENT_CONDITION){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its status condition!");
                 }
                 break;
+            }
             default:
                 break;
         }
         // PP Restoring items
         switch(item_type){
-            case LEPPA_BERRY:
-                if(data!=0)
+            case LEPPA_BERRY:{
+                Attack* attack_to_recover = Attack::getAttack(data);
+                if(data!=0){
                     recoverPP(data,10);
-                else{
+                    handler->displayMsg(getNickname()+"'s " + attack_to_recover->getName() + " recovered some PPs!");
+                }else{
                     // if no attack is specified, recover PP for the first attack available
                     for(int i=0;i<4;i++){
                         if(attack_ids[i].attack_id != 0){
@@ -1162,6 +1170,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                             unsigned int max_pp = getMaxPPForAttack(attack_id);
                             if(max_pp > current_pp){
                                 recoverPP(attack_id,10);
+                                handler->displayMsg(getNickname()+"'s " + attack_to_recover->getName() + " recovered some PPs!");
                                 result = true;
                                 break;
                             }
@@ -1170,6 +1179,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                 }
                 result=true;
                 break;
+            }
             default:break;
         }
         // friendship berries

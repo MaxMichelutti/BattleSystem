@@ -35,7 +35,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                     player_active->getModifiedSpeed(),
                     0,
                     NO_ITEM_TYPE,
-                    false);
+                    false,
+                    player_active->getMonster());
             }
             unsigned int attack_id = chooseAttack(player_active);
             if (attack_id == 0){
@@ -52,7 +53,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 NO_ITEM_TYPE,
-                mega_evolve);
+                mega_evolve,
+                player_active->getMonster());
         }else if (choice == 2){
             if (!player_active->canSwitchOut(opponent_active) && !player_active->hasHeldItem(SHED_SHELL)){
                 displayMsg("You cannot switch! " + player_active->getNickname() + " is trapped!");
@@ -72,7 +74,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 switch_id,
                 NO_ITEM_TYPE,
-                false);
+                false,
+                player_active->getMonster());
         }else if (choice == 3){
             if (bag->isEmpty()){
                 displayMsg("You have no items available to use!");
@@ -100,7 +103,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 item.second,
                 item.first,
-                false);
+                false,
+                player_active->getMonster());
         }else if(choice == 4){//run
             if(!is_wild_battle){
                 displayMsg("You cannot run away from a trainer battle!");
@@ -120,7 +124,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 NO_ITEM_TYPE,
-                false);
+                false,
+                player_active->getMonster());
         }else{
             displayMsg("Invalid choice. Please try again.");
             choice = 0;
@@ -187,6 +192,18 @@ unsigned int TextEventHandler::chooseTargetAttack(Battler*active,MonsterTeam*tea
             choice = 0;
             continue;
         }else{
+            //check if attack has max amount of pp
+            unsigned int maxPP;
+            if(target == 0){
+                maxPP = active->getMaxPPForAttack(choices[choice]);
+            }else{
+                maxPP = team->getMonster(target)->getMaxPPForAttack(choices[choice]);
+            }
+            if(maxPP <= attacks[choices[choice]]){
+                displayMsg("This attack already has the maximum amount of PP! Please choose a different attack.");
+                choice = 0;
+                continue;
+            }
             return choices[choice];
         }
     }

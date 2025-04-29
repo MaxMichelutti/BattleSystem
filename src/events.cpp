@@ -13,7 +13,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(CHARGING_SOLARBLADE))
         return BattleAction(
             actor,
@@ -23,7 +24,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(CHARGING_METEORBEAM))
         return BattleAction(
             actor,
@@ -33,7 +35,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(CHARGING_SKYATTACK))
         return BattleAction(
             actor,
@@ -43,7 +46,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(PETAL_DANCING))
         return BattleAction(
             actor,
@@ -53,7 +57,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(RAGING_FURING))
         return BattleAction(
             actor,
@@ -63,7 +68,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(THRASHING))
         return BattleAction(
             actor,
@@ -73,7 +79,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(OUTRAGING))
         return BattleAction(
             actor,
@@ -83,7 +90,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     if(active->hasVolatileCondition(FLYING_HIGH)){
         return BattleAction(
             actor,
@@ -93,7 +101,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(BOUNCING)){
         return BattleAction(
@@ -104,7 +113,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(ROLLINGOUT)){
         return BattleAction(
@@ -115,7 +125,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(UNDERGROUND)){
         return BattleAction(
@@ -126,7 +137,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(UNDERWATER)){
         return BattleAction(
@@ -137,7 +149,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(VANISHED)){
         return BattleAction(
@@ -148,7 +161,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(VANISHED_2)){
         return BattleAction(
@@ -159,7 +173,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(UPROARING)){
         return BattleAction(
@@ -170,7 +185,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(RECHARGING)){
         return BattleAction(
@@ -181,7 +197,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     if(active->hasVolatileCondition(TRUANTING)){
         return BattleAction(
@@ -192,7 +209,8 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             active->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active->getMonster());
     }
     //default BattleAction is ATTACK action
     return BattleAction();

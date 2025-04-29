@@ -2124,7 +2124,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);   
+            false,
+            active_monster->getMonster());   
     }
     if(skill==0){// unskilled opponenets never switch and always attack randomly
         return BattleAction(
@@ -2135,7 +2136,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }
     Choice * attack_choice = getBestAttackChoice(active_monster,monster_team,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
@@ -2150,7 +2152,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         active_monster->getModifiedSpeed(), 
         0,
         NO_ITEM_TYPE,
-        false);
+        false,
+        active_monster->getMonster());
     bool mega_evolution_choice = active_monster->canMegaEvolve() && !monster_team->hasMega();
     bool can_switch_out = active_monster->canSwitchOut(enemy_active) || 
         active_monster->hasHeldItem(SHED_SHELL);
@@ -2173,7 +2176,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             switch_id,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }else if(switch_choice == nullptr){
         unsigned int attack_id = attack_choice->choice_id;
         int attack_utility = attack_choice->utility;
@@ -2190,7 +2194,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 NO_ITEM_TYPE,
-                mega_evolution_choice);
+                mega_evolution_choice,
+                active_monster->getMonster());
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;
@@ -2202,7 +2207,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 item_id,
-                false);
+                false,
+                active_monster->getMonster());
         }
     }else if(attack_choice->utility >= switch_choice->utility || !can_switch_out){
         unsigned int attack_id = attack_choice->choice_id;
@@ -2220,7 +2226,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 NO_ITEM_TYPE,
-                mega_evolution_choice);
+                mega_evolution_choice,
+                active_monster->getMonster());
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;
@@ -2232,7 +2239,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 item_id,
-                false);
+                false,
+                active_monster->getMonster());
         }
     }else{
         unsigned int switch_id = switch_choice->choice_id;
@@ -2246,7 +2254,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             switch_id,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }
 }
 
