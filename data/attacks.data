@@ -4307,7 +4307,7 @@ ACCURACY:95
 EFFECT:17
 EFFECTTARGET:SELF
 # 462 LEAFAGE
-NAME:leafage
+NAME:Leafage
 DESCRIPTION:The user attacks by pelting the target with leaves.
 TYPE:GRASS
 PP:40

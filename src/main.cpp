@@ -8,6 +8,21 @@
 #include "player.h"
 #include "items.h"
 
+Battle * random_battle(){
+    MonsterTeam* user_team = new MonsterTeam();
+    MonsterTeam* opponent_team = new MonsterTeam();
+    TextEventHandler* handler = new TextEventHandler();
+    Bag * user_bag = new Bag();
+    Bag * opponent_bag = new Bag();
+    for(int i=0;i<6;i++){
+        Monster* monster1 = Monster::generateRandomMonster(RNG::getRandomInteger(1,531),50);
+        user_team->addMonster(monster1);
+        Monster* monster2 = Monster::generateRandomMonster(RNG::getRandomInteger(1,531),50);
+        opponent_team->addMonster(monster2);
+    }
+    return new Battle(1,handler,user_team,opponent_team,user_bag,opponent_bag);
+}
+
 int main(int argc, char** argv) {
     Player::createPlayer();
     Player* player = Player::getPlayer();
@@ -45,10 +60,12 @@ int main(int argc, char** argv) {
     user_bag->addItem(LEPPA_BERRY,5);
     Bag * opponent_bag = new Bag();
     opponent_bag->addItem(HYPER_POTION,1);
-    Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);
-    battle->setBattleGivesExp();
-    battle->startBattle();
+    // Battle* battle = new Battle(1,handler,player_team, opponent_team, user_bag, opponent_bag);
+    // battle->setBattleGivesExp();
+    // battle->startBattle();
     // Species::printAllSummaries();
     // Attack::printAllSummaries();
+    Battle * battle = random_battle();
+    battle->startBattle();
     return 0;
 }
