@@ -293,3 +293,5 @@
 293: switch stat changes of user with target
 294: judgement -> type depends on user form
 295: -1 def spdef speed user
+296: 1/3 recoil + paralyze opponent
+297: +2 speed +1 att user

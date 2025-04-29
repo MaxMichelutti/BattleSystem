@@ -5286,3 +5286,45 @@ TYPE:FIRE
 PP:15
 POWER:70
 CATEGORY:SPECIAL
+# 565 VOLT TACKLE
+NAME:Volt Tackle
+DESCRIPTION:The user electrifies itself and charges the target to inflict damage. This also damages the user quite a lot and may leave the target with paralysis.
+TYPE:ELECTRIC
+CATEGORY:PHYSICAL
+PP:15
+POWER:120
+CONTACT
+EFFECT:296
+EFFECTCHANCE:10
+# 566 SHIFT GEAR
+NAME:Shift Gear
+DESCRIPTION:The user rotates its gears, boosting its Attack stat and sharply boosting its Speed stat.
+TYPE:STEEL
+CATEGORY:STATUS
+PP:10
+EFFECT:297
+TARGET:SELF
+# 567 WATER PLEDGE
+NAME:Water Pledge
+DESCRIPTION:A column of water hits the target. When used with its fire counterpart, this move's power is boosted and a rainbow appears.
+TYPE:WATER
+% only effect in doubles
+CATEGORY:SPECIAL
+PP:10
+POWER:80
+# 568 FIRE PLEDGE
+NAME:Fire Pledge
+DESCRIPTION:A column of fire hits the target. When used with its grass counterpart, this move's power is boosted and a vast sea of fire appears.
+TYPE:FIRE
+% only effect in doubles
+CATEGORY:SPECIAL
+PP:10
+POWER:80
+# 569 GRASS PLEDGE
+NAME:Grass Pledge
+DESCRIPTION:A column of grass hits the target. When used with its water counterpart, this move's power is boosted and a vast swamp appears.
+TYPE:GRASS
+% only effect in doubles
+CATEGORY:SPECIAL
+PP:10
+POWER:80

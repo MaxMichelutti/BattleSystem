@@ -1783,7 +1783,7 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                     return;
                 break;
             }
-            case 20:case 30:case 51:{//recoil 1/3 damage dealt
+            case 20:case 30:case 51:case 296:{//recoil 1/3 damage dealt
                 unsigned int recoil_damage = max(actual_damage / 3,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
                 event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
@@ -2193,7 +2193,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(other_actor,changes,false);
             break;
         }
-        case 16:case 67:case 226:{ // paralyze opponent - paralysis
+        case 16:case 67:case 226:case 296:{ // paralyze opponent - paralysis
             if(active_target->isFainted())
                 return;
             if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
@@ -4896,6 +4896,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_user->isFainted())
                 return;
             StatCV changes = {{2,-1},{4,-1},{5,-1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 297:{
+            //+2 speed + 1 att user
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{5,2},{1,1}};
             changeStats(actor,changes,false);
             break;
         }
