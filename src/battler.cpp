@@ -1345,7 +1345,9 @@ unsigned int Battler::getModifiedAccuracy()const {
         modified_accuracy = accuracy * 3 / (-modifier + 3);
     }
     if(hasAbility(COMPOUND_EYES))
-        modified_accuracy *= 13 / 10;
+        modified_accuracy *= 1.3;
+    if(hasAbility(VICTORY_STAR))
+        modified_accuracy *= 1.1;
     if(hasHeldItem(WIDE_LENS))
         modified_accuracy *= 1.1;
     return modified_accuracy;

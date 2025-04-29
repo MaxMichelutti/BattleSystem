@@ -364,3 +364,5 @@ BAD_DREAMS
 Damages opposing Pokémon that are asleep.
 MULTITYPE
 Changes the Pokémon's type to match the plate it holds.
+VICTORY_STAR
+Boosts the accuracy of the Pokémon and its allies.

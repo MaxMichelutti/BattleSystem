@@ -5248,3 +5248,41 @@ PP:10
 CATEGORY:SPECIAL
 POWER:100
 EFFECTTARGET:SELF
+# 561 SEARING SHOT
+NAME:Searing Shot
+DESCRIPTION:The user torches everything around it in an inferno of scarlet flames. This may also leave those it hits with a burn.
+TYPE:FIRE
+CATEGORY:SPECIAL
+PP:5
+POWER:100
+EFFECT:14
+EFFECTCHANCE:30
+# 562 V CREATE
+NAME:V-create
+DESCRIPTION:The user emits a hot flame from its forehead and hurls itself at the target to inflict damage. This also lowers the user's Defense, Sp. Def, and Speed stats.
+TYPE:FIRE
+CATEGORY:PHYSICAL
+PP:5
+POWER:180
+ACCURACY:95
+CONTACT
+EFFECT:295
+# 563 CEASELESS EDGE
+NAME:Ceaseless Edge
+DESCRIPTION:The user slashes its shell blade at the target. Shell splinters left behind by this attack remain scattered under the target as spikes.
+TYPE:DARK
+PP:15
+CATEGORY:PHYSICAL
+ACCURACY:90
+CONTACT
+POWER:65
+SLICING
+EFFECT:159
+EFFECTTARGET:SELF
+# 564 FLAME BURST
+NAME:Flame Burst
+DESCRIPTION:The user attacks the target with a bursting flame. The bursting flame damages Pokémon next to the target as well.
+TYPE:FIRE
+PP:15
+POWER:70
+CATEGORY:SPECIAL

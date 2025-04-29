@@ -1945,35 +1945,40 @@ void Monster::interactWithKeyItem(ItemType item, EventHandler* handler){
         case ROTOM_CATALOG:{
             if(species_id==479){//rotom
                 unsigned int rotom_form_choice = handler->chooseRotomForm();
+                bool res = false;
+                unsigned int old_form = form_id;
                 if(rotom_form_choice == 1 && form_id != 0){
                     handler->displayMsg(getNickname()+" possessed the Light Bulb!");
                     form_id = 0;
-                    updateStats();
-                    return;
+                    res = true;
                 }else if(rotom_form_choice == 2 && form_id != 142){
                     handler->displayMsg(getNickname()+" possessed the Washing Machine!");
                     form_id = 142;
-                    updateStats();
-                    return;
+                    res=true;
                 }else if(rotom_form_choice == 3 && form_id != 143){
                     handler->displayMsg(getNickname()+" possessed the Microwave Oven!");
                     form_id = 143;
-                    updateStats();
-                    return;
+                    res=true;
                 }else if(rotom_form_choice == 4 && form_id != 144){
                     handler->displayMsg(getNickname()+" possessed the Refrigerator!");
                     form_id = 144;
-                    updateStats();
-                    return;
+                    res=true;
                 }else if(rotom_form_choice == 5 && form_id != 145){
                     handler->displayMsg(getNickname()+" possessed the Electric Fan!");
                     form_id = 145;
-                    updateStats();
-                    return;
+                    res=true;
                 }else if(rotom_form_choice == 6 && form_id != 146){
                     handler->displayMsg(getNickname()+" possessed the Lawn Mower!");
                     form_id = 146;
+                    res=true;
+                }
+                if(res){
                     updateStats();
+                    Species* spec = Species::getSpecies(species_id);
+                    unsigned int old_evo_attack = *(spec->getEvolutionLearnset(old_form).begin());
+                    unsigned int new_evo_attack = *(spec->getEvolutionLearnset(form_id).begin());
+                    forgetAttack(old_evo_attack);
+                    learnAttack(new_evo_attack);
                     return;
                 }
             }

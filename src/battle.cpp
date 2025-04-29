@@ -4851,7 +4851,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             //boost spatt spdef and heal status of user
             if(active_user->isFainted())
                 return;
-            StatCV changes = {{3,1},{2,1}};
+            StatCV changes = {{3,1},{4,1}};
             changeStats(actor,changes,false);
             active_user->clearPermanentStatus();
             break;
@@ -4889,6 +4889,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             active_target->setAccuracyModifier(accuracy_mod_user);
             active_target->setEvasionModifier(evasion_mod_user);
             event_handler->displayMsg(user_mon_name+" switched all changes in their stats with "+opponent_mon_name+"!");
+            break;
+        }
+        case 295:{
+            //-1 def spdef speed user
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{2,-1},{4,-1},{5,-1}};
+            changeStats(actor,changes,false);
             break;
         }
         default:break;

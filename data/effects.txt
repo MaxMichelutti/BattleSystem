@@ -292,3 +292,4 @@
 292: +1 spatt spdef user, heal special conditions user
 293: switch stat changes of user with target
 294: judgement -> type depends on user form
+295: -1 def spdef speed user
