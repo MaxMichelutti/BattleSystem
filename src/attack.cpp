@@ -215,6 +215,84 @@ Type Attack::getType(Battler* user, Field* field)const{
             }
             break;
         }
+        case 294:{
+            //type depends on plate
+            switch(user->getHeldItem()){
+                case FIST_PLATE:{
+                    attack_type = FIGHTING;
+                    break;
+                }
+                case SKY_PLATE:{
+                    attack_type = FLYING;
+                    break;
+                }
+                case TOXIC_PLATE:{
+                    attack_type = POISON;
+                    break;
+                }
+                case EARTH_PLATE:{
+                    attack_type = GROUND;
+                    break;
+                }
+                case STONE_PLATE:{
+                    attack_type = ROCK;
+                    break;
+                }
+                case INSECT_PLATE:{
+                    attack_type = BUG;
+                    break;
+                }
+                case SPOOKY_PLATE:{
+                    attack_type = GHOST;
+                    break;
+                }
+                case DRACO_PLATE:{
+                    attack_type = DRAGON;
+                    break;
+                }
+                case DREAD_PLATE:{
+                    attack_type = DARK;
+                    break;
+                }
+                case PIXIE_PLATE:{
+                    attack_type = FAIRY;
+                    break;
+                }
+                case FLAME_PLATE:{
+                    attack_type = FIRE;
+                    break;
+                }
+                case SPLASH_PLATE:{
+                    attack_type = WATER;
+                    break;
+                }
+                case ZAP_PLATE:{
+                    attack_type = ELECTRIC;
+                    break;
+                }
+                case MEADOW_PLATE:{
+                    attack_type = GRASS;
+                    break;
+                }
+                case MIND_PLATE:{
+                    attack_type = PSYCHIC;
+                    break;
+                }
+                case ICICLE_PLATE:{
+                    attack_type = ICE;
+                    break;
+                }
+                case IRON_PLATE:{
+                    attack_type = STEEL;
+                    break;
+                }
+                default:{
+                    attack_type = NORMAL;
+                    break;
+                }
+            }
+            break;
+        }
     }
     if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
         attack_type = ELECTRIC;

@@ -410,6 +410,21 @@ bool Monster::learnAttack(unsigned int attack_id) {
     return false;
 }
 
+bool Monster::learnAttackForced(unsigned int attack_id,unsigned int slot){
+    // cannot learn an attack if it already knows it
+    if (hasAttack(attack_id))
+        return false;
+    // fill the first empty slot with the attack
+    if(slot>3)
+        return false;
+    attack_ids[slot].attack_id = attack_id;
+    attack_ids[slot].current_pp = Attack::getAttack(attack_id)->getMaxPP();
+    packAttacks();
+            
+    // if no slots are empty, return false
+    return true;
+}
+
 bool Monster::forgetAttack(unsigned int attack_id) {
     // need to know the attack to forget
     if(!hasAttack(attack_id))

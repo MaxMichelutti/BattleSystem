@@ -17,23 +17,18 @@ int main(int argc, char** argv) {
     Species::loadSpecies();
     AbilityItem::initAbilities();
     ItemData::loadItems();
-    Monster* monster_p1 = Monster::generateRandomMonster(144,50,51);
-    // monster_p1->setHeldItem(KANGASKHANTITE);
-    // for(int i=0;i<100;i++){
-    //     monster_p1->forgetAttack(i);
-    // }
-    // monster_p1->learnAttack(MIMIC_ID);
-    // monster_p1->learnAttack(226);
-    // monster_p1->learnAttack(161);
-    // monster_p1->printSummary();
-    Monster* monster_p2 = Monster::generateRandomMonster(145,50,52);
-    // monster_p2->printSummary();
-    Monster* monster_p3 = Monster::generateRandomMonster(146,50,53);
-    // monster_p3->printSummary();
-    Monster* monster_o1 = Monster::generateRandomMonster(144,50);
-    // monster_o1->setHeldItem(PINSIRITE);
-    Monster* monster_o2 = Monster::generateRandomMonster(145,50);
-    Monster* monster_o3 = Monster::generateRandomMonster(146,50);
+    Monster* monster_p1 = Monster::generateRandomMonster(493,50);
+    monster_p1->setHeldItem(FLAME_PLATE);
+    monster_p1->learnAttackForced(560,1);
+    Monster* monster_p2 = Monster::generateRandomMonster(383,50);
+    monster_p2->setHeldItem(RED_ORB);
+    Monster* monster_p3 = Monster::generateRandomMonster(384,50);
+    monster_p3->learnAttackForced(DRAGON_ASCENT_ID,1);
+    Monster* monster_o1 = Monster::generateRandomMonster(351,50);
+    Monster* monster_o2 = Monster::generateRandomMonster(382,50);
+    monster_o2->setHeldItem(BLUE_ORB);
+    Monster* monster_o3 = Monster::generateRandomMonster(384,50);
+    monster_o3->learnAttackForced(DRAGON_ASCENT_ID,1);
     MonsterTeam* player_team = new MonsterTeam();
     player_team->addMonster(monster_p1);
     player_team->addMonster(monster_p2);

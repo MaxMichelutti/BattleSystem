@@ -102,6 +102,7 @@ class Monster{
     void changeFriendship(int amount);
     bool hasAttack(unsigned int attack_id)const;
     bool learnAttack(unsigned int attack_id);
+    bool learnAttackForced(unsigned int attack_id,unsigned int slot);
     bool forgetAttack(unsigned int attack_id);
     bool replaceAttack(unsigned int old_attack_id, unsigned int new_attack_id);
     void gainExperience(unsigned long exp,EventHandler* handler);

@@ -286,6 +286,7 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     last_attack_failed = false;
     had_flying_type = false;
     hits_taken = 0;
+    substituteHP = 0;
     resetDamageTakenThisTurn();
     is_mold_breaker_active = false;
     weight = monster->getWeight();
