@@ -1397,8 +1397,27 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             break;
         }
         case 170:{
-            // bad move dont use
-            total_utility -= 30;
+            // only use if ability is plus or minus, boosts defenses
+            if(cpu_active->hasAbility(PLUS) || cpu_active->hasAbility(MINUS)){
+                unsigned int defense_mod = cpu_active->getDefenseModifier();
+                unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+                total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+                total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            }else{
+                total_utility -= 30;
+            }
+            break;
+        }
+        case 303:{
+            // only use if ability is plus or minus, boosts attacks
+            if(cpu_active->hasAbility(PLUS) || cpu_active->hasAbility(MINUS)){
+                unsigned int attack_mod = cpu_active->getAttackModifier();
+                unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+                total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+                total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            }else{
+                total_utility -= 30;
+            }
             break;
         }
         case 171:
@@ -2148,6 +2167,14 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
             total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
             total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 302:{
+            //protects user from status moves, use with utility of 25 roughly once every 5 turns
+            if(RNG::getRandomInteger(1,5)==1)
+                total_utility += 25;
+            else
+                total_utility += 1;
             break;
         }
         default: break;

@@ -156,6 +156,7 @@ class Monster{
     void interactWithKeyItem(ItemType item, EventHandler* handler);
     bool tryZenMode();
     void resetZenMode();
+    void changeSeasonalForm();
 };
 
 #endif

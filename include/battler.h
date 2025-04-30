@@ -9,11 +9,13 @@
 #include <map>
 #include "field.h"
 #include "events.h"
+#include "team.h"
 
 class Field;
 class AttackData;
 class EventHandler;
 class Monster;
+class MonsterTeam;
 
 std::string cannotFallMsg(std::string nickname, std::string stat_name);
 std::string cannotRaiseMsg(std::string nickname, std::string stat_name); 
@@ -96,13 +98,14 @@ class Battler{
     bool had_flying_type;
     Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
     unsigned int substituteHP;
+    std::string illusion_nickname;
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
     unsigned int getModifiedDefenseInternal()const;
     unsigned int getModifiedSpecialDefenseInternal()const;
     public:
     Battler();
-    Battler(Monster* monster,Field*field,BattleActionActor actor, EventHandler*);
+    Battler(Monster* monster,MonsterTeam* team,Field*field,BattleActionActor actor, EventHandler*);
     ~Battler();
     Monster* getMonster()const;
     void setMonster(Monster* monster);

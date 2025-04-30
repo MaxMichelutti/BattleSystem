@@ -258,7 +258,7 @@ Battler::Battler() {
     monster = nullptr;
 }
 
-Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHandler* handler) {
+Battler::Battler(Monster* monster, MonsterTeam* team,Field*field,BattleActionActor actor,EventHandler* handler) {
     this->monster = monster;
     bad_poison_counter = 0;
     if(monster->getPermanentStatus() == BAD_POISON){
@@ -291,6 +291,16 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     is_mold_breaker_active = false;
     weight = monster->getWeight();
     height = monster->getHeight();
+    illusion_nickname = "";
+    if(hasAbility(ILLUSION)){
+        for(int i=team->getSize()-1;i>=1;i--){
+            if(team->getMonster(i)->isFainted()){
+                continue;
+            }
+            illusion_nickname = team->getMonster(i)->getNickname();
+            break;
+        }
+    }
 }
 
 void Battler::resetTypes(){
@@ -490,6 +500,10 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
         }
         case CHARGING_METEORBEAM:{
             handler->displayMsg(getNickname()+" is overflowing with space power!");
+            break;
+        }
+        case CRAFTY_SHIELD:{
+            handler->displayMsg(getNickname()+" protects itself from status moves!");
             break;
         }
         default:
@@ -1175,6 +1189,8 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(SLOW_START) && turns_in_battle<5)
         base_modified*=0.5;
+    if(hasAbility(DEFEATIST) && getCurrentHP() <= getMaxHP()/2)
+        base_modified*=0.5;
     // if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
     //     base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
@@ -1241,6 +1257,8 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     // }
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles special attack of pikachu
         base_modified*=2;
+    if(hasAbility(DEFEATIST) && getCurrentHP() <= getMaxHP()/2)
+        base_modified*=0.5;
     // if(hasHeldItem(CHOICE_SPECS))
     //     base_modified*=1.5;
     return base_modified;
@@ -1888,6 +1906,11 @@ std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType 
         }
         return {amount,true};
     }
+    //fade illusion
+    if(illusion_nickname != ""){
+        illusion_nickname = "";
+        handler->displayMsg(getNickname()+"'s Illusion faded!");
+    }
     unsigned int currentHP = monster->getCurrentHP();
     if(isAtFullHP() && hasAbility(MULTISCALE)){
         handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
@@ -2174,6 +2197,8 @@ unsigned int Battler::getLevel()const{
 }
 
 std::string Battler::getNickname()const{
+    if(illusion_nickname != "")
+        return illusion_nickname;
     if(monster->isMegaEvolved())
         return "M-"+monster->getNickname();
     if(monster->getFormId() == 123 || monster->getFormId() == 124)

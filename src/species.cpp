@@ -51,6 +51,8 @@ EvolutionMethod stringToEvolutionMethod(std::string evo_method){
         return HELD_ITEM_NIGHT;
     if(evo_method=="HAS_IN_TEAM")
         return HAS_IN_TEAM;
+    if(evo_method=="TRADE_WITH_SPECIES")
+        return TRADE_ITEM;
     // return LEVEL as default
     return LEVEL;
 }
@@ -105,6 +107,9 @@ std::string evolutionMethodToString(EvolutionMethod evo_method){
             return "HELD_ITEM_NIGHT";
         case HAS_IN_TEAM:
             return "HAS_IN_TEAM";
+        case TRADE_WITH_SPECIES:
+            return "TRADE_WITH_SPECIES";
+        // return LEVEL as default
         default:
             return "LEVEL";
     }

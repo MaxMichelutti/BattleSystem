@@ -89,22 +89,7 @@ bool isAbilityIgnorable(Ability ability){
 }
 
 bool isAbilityTraceable(Ability ability){
-    switch(ability){
-        case TRACE:
-        case IMPOSTOR:
-        case NEUTRALIZING_GAS:
-        case POWER_OF_ALCHEMY:
-        case PARENTAL_BOND:
-        case FORECAST:
-        case PRIMORDIAL_SEA:
-        case DESOLATE_LAND:
-        case DELTA_STREAM:
-        case MULTITYPE:
-        case ZEN_MODE:
-            return false;
-        default: return true;
-    }
-    return true;
+    return !abilityCannotBeCopied(ability);
 }
 
 bool doesAbilityIgnoreIntimidate(Ability ability){
@@ -133,6 +118,9 @@ bool abilityCannotBeCopied(Ability ability){
         case DELTA_STREAM:
         case MULTITYPE:
         case ZEN_MODE:
+        case WONDER_GUARD:
+        case FLOWER_GIFT:
+        case ILLUSION:
             return true;
         default: return false;
     }
@@ -148,6 +136,7 @@ bool abilityCannotBeChanged(Ability ability){
         case DELTA_STREAM:
         case MULTITYPE:
         case ZEN_MODE:
+        case ILLUSION:
             return true;
         default: return false;
     }
@@ -162,6 +151,7 @@ bool abilityCannotBeSuppressed(Ability ability){
         case DELTA_STREAM:
         case MULTITYPE:
         case ZEN_MODE:
+        case ILLUSION:
             return true;
         default: return false;
     }

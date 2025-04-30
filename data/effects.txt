@@ -299,3 +299,5 @@
 299: confusion opponent, can hit monsters that are flying, accuracy of 50 under sun
 300: force target to switch out to a random monster, also hits flying monsters
 301: +1 att def speed user
+302: protects the user from status moves, can be used consecutively without failing
+303: +1 ATT SPATT user iff ability is PLUS or MINUS

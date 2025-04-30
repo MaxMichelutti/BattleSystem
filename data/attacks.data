@@ -5355,3 +5355,69 @@ CATEGORY:STATUS
 PP:10
 EFFECT:301
 TARGET:SELF
+# 573 CRAFTY SHIELD
+NAME:Crafty Shield
+DESCRIPTION:The user protects itself and its allies from status moves with a mysterious power. This does not stop moves that do damage.
+TYPE:FAIRY
+CATEGORY:STATUS
+PP:10
+PRIORITY:3
+TARGET:SELF
+EFFECT:302
+# 574 NIGHT DAZE
+NAME:Night Daze
+DESCRIPTION:The user looses a pitch-black shock wave at the target to inflict damage. This may also lower the target's accuracy.
+TYPE:DARK
+CATEGORY:SPECIAL
+PP:10
+POWER:85
+ACCURACY:95
+EFFECT:15
+EFFECTCHANCE:40
+# 575 BITTER MALICE
+NAME:Bitter Malice
+DESCRIPTION:The user attacks the target with spine-chilling resentment. This also lowers the target’s Attack stat.
+TYPE:GHOST
+CATEGORY:SPECIAL
+PP:10
+POWER:75
+EFFECT:1
+# 576 TAIL SLAP
+NAME:Tail Slap
+DESCRIPTION:The user attacks by striking the target with its hard tail. This move hits two to five times in a row.
+TYPE:NORMAL
+CATEGORY:PHYSICAL
+CONTACT
+PP:10
+POWER:25
+ACCURACY:85
+EFFECT:36
+EFFECTTARGET:SELF
+# 577 ELECTROWEB
+NAME:Electroweb
+DESCRIPTION:The user captures opposing Pokémon in an electric net to inflict damage. This also lowers their Speed stats.
+TYPE:ELECTRIC
+CATEGORY:SPECIAL
+PP:15
+POWER:55
+ACCURACY:95
+EFFECT:122
+# 578 GEAR GRIND
+NAME:Gear Grind
+DESCRIPTION:The user attacks by throwing steel gears at the target twice in a row.
+TYPE:STEEL
+CATEGORY:PHYSICAL
+PP:15
+CONTACT
+EFFECT:75
+EFFECTTARGET:SELF
+POWER:50
+ACCURACY:85
+# 579 GEAR UP
+NAME:Gear Up
+DESCRIPTION:The user engages its gears to raise the Attack and Sp. Atk stats of ally Pokémon with the Plus or Minus Ability.
+TYPE:STEEL
+CATEGORY:STATUS
+TARGET:SELF
+EFFECT:303
+PP:20

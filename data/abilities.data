@@ -370,3 +370,13 @@ GORILLA_TACTICS
 Boosts the Pokémon's Attack stat but only allows the use of the first selected move
 ZEN_MODE
 Changes the Pokémon's shape when its HP drops to half or less.
+MUMMY
+Contact with the Pokémon changes the attacker's Ability to Mummy.
+WANDERING_SPIRIT
+The Pokémon exchanges Abilities with a Pokémon that hits it with a move that makes direct contact.
+DEFEATIST
+Halves the Pokémon's Attack and Sp. Atk stats when its HP drops to half or less.
+ILLUSION
+The Pokémon fools opponents by entering battle disguised as the last Pokémon in its Trainer's party.
+IRON_BARBS
+The Pokémon's iron barbs damage the attacker if it makes direct contact.

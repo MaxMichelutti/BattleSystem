@@ -1007,6 +1007,9 @@ void Monster::clearBattleData(){
         form_id = 0;
     }
     seen_opponents.clear();
+
+    //change form depending on season
+    changeSeasonalForm();
 }
 
 void Monster::transformInto(Monster* other){
@@ -2020,5 +2023,61 @@ void Monster::resetZenMode(){
     }else if(form_id == 179){
         form_id = 177;
         updateStats();
+    }
+}
+
+void Monster::changeSeasonalForm(){
+    switch(species_id){
+        case 585:{//deerling
+            switch(getSeason()){
+                case SPRING:{
+                    form_id = 0;
+                    break;
+                }
+                case SUMMER:{
+                    form_id = 183;
+                    break;
+                }
+                case FALL:{
+                    form_id = 184;
+                    break;
+                }
+                case WINTER:{
+                    form_id = 185;
+                    break;
+                }
+                default:{
+                    form_id = 0;
+                    break;
+                }
+            }
+            break;
+        }
+        case 586:{
+            switch(getSeason()){
+                case SPRING:{
+                    form_id = 0;
+                    break;
+                }
+                case SUMMER:{
+                    form_id = 186;
+                    break;
+                }
+                case FALL:{
+                    form_id = 187;
+                    break;
+                }
+                case WINTER:{
+                    form_id = 188;
+                    break;
+                }
+                default:{
+                    form_id = 0;
+                    break;
+                }
+            }
+            break;
+        }
+        default:break;
     }
 }

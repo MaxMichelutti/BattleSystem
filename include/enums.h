@@ -13,6 +13,13 @@ enum Weather{
     STRONG_WINDS
 };
 
+enum Season{
+    SPRING,
+    SUMMER,
+    FALL,
+    WINTER
+};
+
 enum Terrain{
     NO_TERRAIN,
     GRASSY_FIELD,
@@ -162,7 +169,8 @@ enum VolatileStatusCondition{
     VANISHED_2,
     HEAL_BLOCKED,
     MAGIC_COATED,
-    MAGMA_STORM
+    MAGMA_STORM,
+    CRAFTY_SHIELD
 };
 
 enum Gender{
@@ -272,7 +280,8 @@ enum EvolutionMethod{
     KNOW_ATTACK,
     HELD_ITEM_DAY,
     HELD_ITEM_NIGHT,
-    HAS_IN_TEAM
+    HAS_IN_TEAM,
+    TRADE_WITH_SPECIES
 };
 
 enum Ability{
@@ -463,7 +472,12 @@ enum Ability{
     MULTITYPE,
     VICTORY_STAR,
     GORILLA_TACTICS,
-    ZEN_MODE
+    ZEN_MODE,
+    MUMMY,
+    WANDERING_SPIRIT,
+    DEFEATIST,
+    ILLUSION,
+    IRON_BARBS
 };
 
 enum ItemCategory{

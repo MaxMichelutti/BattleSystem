@@ -207,8 +207,8 @@ void Battle::init(unsigned int cpu_skill, EventHandler* handler,
         std::cerr << "Error: Opponent team has no alive monster!" << std::endl;
         exit(NO_ALIVE_ERROR);
     }
-    player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,handler);
-    opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,handler);
+    player_active = new Battler(player_team->getActiveMonster(),player_team,field,PLAYER,handler);
+    opponent_active = new Battler(opponent_team->getActiveMonster(),opponent_team,field,OPPONENT,handler);
     field->setDefaultWeather(weather);
     field->setWeather(weather);
     field->setTerrain(terrain,-1);
@@ -2563,7 +2563,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 }
                 delete active_target;
                 target_team->swapRandomMonster();
-                active_target = new Battler(target_team->getActiveMonster(),field,other_actor,event_handler);
+                active_target = new Battler(target_team->getActiveMonster(),getActorTeam(other_actor),field,other_actor,event_handler);
                 resetOpponents();
                 if(actor == PLAYER){
                     opponent_active = active_target;
@@ -3036,13 +3036,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 if(actor == PLAYER){
                     unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
                     player_team->swapActiveMonster(new_active_index);
-                    player_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
+                    player_active = new Battler(player_team->getActiveMonster(),player_team,field,actor,event_handler);
                     active_user = player_active;
                     event_handler->displayMsg("Player switched in "+player_active->getNickname());
                 }else{
                     unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
                     opponent_team->swapActiveMonster(new_active_index);
-                    opponent_active = new Battler(player_team->getActiveMonster(),field,actor,event_handler);
+                    opponent_active = new Battler(player_team->getActiveMonster(),opponent_team,field,actor,event_handler);
                     active_user = opponent_active;
                     event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
                 }
@@ -3939,6 +3939,24 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 // if(res && active_user->hasAbility(CONTRARY))
                 //     tryEjectPack(actor);
                 StatCV changes = {{2,1},{4,1}};
+                changeStats(actor,changes,false);
+            }else{
+                event_handler->displayMsg("But it failed!");
+                active_user->setLastAttackFailed();
+            }
+            break;
+        }
+        case 303:{
+            // +1 ATT SPATT user iff ability is PLUS or MINUS
+            if(active_user->isFainted())
+                return;
+            if(active_user->hasAbility(PLUS) || 
+                active_user->hasAbility(MINUS)){
+                // bool res = active_user->changeDefenseModifier(+1);
+                // res = res || active_user->changeSpecialDefenseModifier(+1);
+                // if(res && active_user->hasAbility(CONTRARY))
+                //     tryEjectPack(actor);
+                StatCV changes = {{1,1},{3,1}};
                 changeStats(actor,changes,false);
             }else{
                 event_handler->displayMsg("But it failed!");
@@ -4924,6 +4942,13 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(actor,changes,false);
             break;
         }
+        case 302:{
+            //crafty shield
+            if(active_user->isFainted())
+                return;
+            active_user->addVolatileCondition(CRAFTY_SHIELD, 1);
+            break;
+        }
         default:break;
     }
 }
@@ -5027,7 +5052,7 @@ void Battle::performSwitch(BattleAction action){
         // event_handler->displayMsg("Player switched to monster " + std::to_string(action.getSwitchId()));
         delete player_active;
         player_team->swapActiveMonster(action.getSwitchId());
-        player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,event_handler);
+        player_active = new Battler(player_team->getActiveMonster(),player_team,field,PLAYER,event_handler);
         new_active_monster_name = player_active->getNickname();
         event_handler->displayMsg("Player switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }else{
@@ -5046,7 +5071,7 @@ void Battle::performSwitch(BattleAction action){
         old_active_monster_name = opponent_active->getNickname();
         delete opponent_active;
         opponent_team->swapActiveMonster(action.getSwitchId());
-        opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
+        opponent_active = new Battler(opponent_team->getActiveMonster(),opponent_team,field,OPPONENT,event_handler);
         new_active_monster_name = opponent_active->getNickname();
         event_handler->displayMsg("Opponent switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }
@@ -6550,6 +6575,10 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
     if(active_user->hasVolatileCondition(PROTECT)){
         active_user->removeVolatileCondition(PROTECT);
     }
+    // remove crafty shield
+    if(active_user->hasVolatileCondition(CRAFTY_SHIELD)){
+        active_user->removeVolatileCondition(CRAFTY_SHIELD);
+    }
     // remove spiky protect
     if(active_user->hasVolatileCondition(SPIKY_PROTECT)){
         active_user->removeVolatileCondition(SPIKY_PROTECT);
@@ -7319,6 +7348,37 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
             event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
             break;
         }
+        case IRON_BARBS:{
+            if(active_user->isFainted())
+                return false;
+            event_handler->displayMsg(opponent_mon_name+"'s Iron Barbs hurt "+user_mon_name+"!");
+            unsigned int rough_skin_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_rough_skin_damage = active_user->addDirectDamage(rough_skin_damage);
+            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            break;
+        }
+        case MUMMY:{
+            if(abilityCannotBeChanged(active_user->getAbility())){
+                break;
+            }
+            active_user->setAbility(MUMMY);
+            event_handler->displayMsg(user_mon_name+"'s ability was changed to Mummy!");
+            break;
+        }
+        case WANDERING_SPIRIT:{
+            Ability user_ability = active_user->getAbility();
+            if(abilityCannotBeChanged(user_ability) ||
+                abilityCannotBeCopied(user_ability) ||
+                user_ability==WANDERING_SPIRIT){
+                break;
+            }
+            active_user->setAbility(WANDERING_SPIRIT);
+            active_target->setAbility(user_ability);
+            event_handler->displayMsg(user_mon_name+"'s ability was changed to "+abilityToString(WANDERING_SPIRIT)+"!");
+            event_handler->displayMsg(opponent_mon_name+"'s ability was changed to "+abilityToString(user_ability)+"!");
+            applySwitchInAbilitiesEffects(active_target->getActor());
+            break;
+        }
         default: break;
     }
     
@@ -7817,6 +7877,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
     if(attack->getEffectId()==65 || attack->getEffectId()==264 || attack->getEffectId()==288){
         active_target->removeVolatileCondition(PROTECT);
         active_target->removeVolatileCondition(SPIKY_PROTECT);
+        active_target->removeVolatileCondition(QUICK_GUARD);
+        active_target->removeVolatileCondition(CRAFTY_SHIELD);
     }
     if((active_target->hasVolatileCondition(PROTECT) || 
         active_target->hasVolatileCondition(SPIKY_PROTECT))&& 
@@ -7848,6 +7910,22 @@ bool Battle::checkIfAttackFails(Attack* attack,
             unsigned int damage = max_hp / 2;
             unsigned int actual_damage = active_user->addDirectDamage(damage);
             event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage from recoil!"); 
+        }
+        return true;
+    }
+    if(active_target->hasVolatileCondition(CRAFTY_SHIELD) && 
+        attack->getTarget()==TARGET_OPPONENT &&
+        attack->getCategory() == STATUS){
+        event_handler->displayMsg(opponent_mon_name+" protected itself!");
+        decrementVolatiles(active_user);
+        active_user->setLastAttackHit();
+        if(attack->getEffectId()==100 || attack->getEffectId()==275){
+            //user dies
+            active_user->addDirectDamage(active_user->getMaxHP());
+        }
+        if(attack->getEffectId()==187){
+            //user dies
+            active_user->addVolatileCondition(RECHARGING,-1);
         }
         return true;
     }
@@ -8045,13 +8123,13 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
         unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
         player_team->swapActiveMonster(new_active_index);
         delete player_active;
-        player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,event_handler);
+        player_active = new Battler(player_team->getActiveMonster(),player_team,field,PLAYER,event_handler);
         event_handler->displayMsg("Player switched in "+player_active->getNickname());
     }else{
         unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
         opponent_team->swapActiveMonster(new_active_index);
         delete opponent_active;
-        opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
+        opponent_active = new Battler(opponent_team->getActiveMonster(),opponent_team,field,OPPONENT,event_handler);
         event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
     }
     checkMonsterLeavingAbilities(actor_switching_out);
