@@ -461,7 +461,9 @@ enum Ability{
     SLOW_START,
     BAD_DREAMS,
     MULTITYPE,
-    VICTORY_STAR
+    VICTORY_STAR,
+    GORILLA_TACTICS,
+    ZEN_MODE
 };
 
 enum ItemCategory{

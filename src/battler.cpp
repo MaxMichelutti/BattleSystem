@@ -3196,3 +3196,14 @@ bool Battler::changeFormSwitchIn(){
 void Battler::resetStats(){
     battle_stats = monster->getStats();
 }
+
+void Battler::checkZenMode(){
+    if(hasAbility(ZEN_MODE) && monster->tryZenMode()){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+        resetStats();
+        resetAbility();
+    }
+}

@@ -995,6 +995,8 @@ void Monster::clearBattleData(){
     if(isMegaEvolved()){
         cancelMega();
     }
+    //reset zen mode for darmanitan outside of battle
+    resetZenMode();
     if(species_id==351 && form_id != 0){
         //castform returns to its normal form
         form_id = 0;
@@ -1987,4 +1989,36 @@ void Monster::interactWithKeyItem(ItemType item, EventHandler* handler){
         default:break;
     }
     handler->displayMsg("Nothing happened.");
+}
+
+bool Monster::tryZenMode(){
+    if(damage<getMaxHP()/2)
+        return false;
+    if(species_id != 555)//only works with darmanitan
+        return false;
+    if(form_id == 178 || form_id == 179)//already zen mode
+        return false;
+    if(form_id == 0){
+        form_id = 178;
+        updateStats();
+        return true;
+    }else if(form_id==177){
+        form_id = 179;
+        updateStats();
+        return true;
+    }
+    return false;
+}
+void Monster::resetZenMode(){
+    if(species_id != 555)//only works with darmanitan
+        return;
+    if(form_id != 178 && form_id != 179)//not in zen mode
+        return;
+    if(form_id == 178){
+        form_id = 0;
+        updateStats();
+    }else if(form_id == 179){
+        form_id = 177;
+        updateStats();
+    }
 }

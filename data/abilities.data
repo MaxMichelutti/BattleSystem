@@ -366,3 +366,7 @@ MULTITYPE
 Changes the Pokémon's type to match the plate it holds.
 VICTORY_STAR
 Boosts the accuracy of the Pokémon and its allies.
+GORILLA_TACTICS
+Boosts the Pokémon's Attack stat but only allows the use of the first selected move
+ZEN_MODE
+Changes the Pokémon's shape when its HP drops to half or less.

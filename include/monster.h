@@ -154,6 +154,8 @@ class Monster{
     bool changeWeatherForm(Weather weather);
     bool changeFormSwitchIn();
     void interactWithKeyItem(ItemType item, EventHandler* handler);
+    bool tryZenMode();
+    void resetZenMode();
 };
 
 #endif

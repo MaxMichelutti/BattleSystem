@@ -98,7 +98,9 @@ bool isAbilityTraceable(Ability ability){
         case FORECAST:
         case PRIMORDIAL_SEA:
         case DESOLATE_LAND:
+        case DELTA_STREAM:
         case MULTITYPE:
+        case ZEN_MODE:
             return false;
         default: return true;
     }
@@ -130,6 +132,7 @@ bool abilityCannotBeCopied(Ability ability){
         case DESOLATE_LAND:
         case DELTA_STREAM:
         case MULTITYPE:
+        case ZEN_MODE:
             return true;
         default: return false;
     }
@@ -144,6 +147,7 @@ bool abilityCannotBeChanged(Ability ability){
         case DESOLATE_LAND:
         case DELTA_STREAM:
         case MULTITYPE:
+        case ZEN_MODE:
             return true;
         default: return false;
     }
@@ -157,6 +161,7 @@ bool abilityCannotBeSuppressed(Ability ability){
         case DESOLATE_LAND:
         case DELTA_STREAM:
         case MULTITYPE:
+        case ZEN_MODE:
             return true;
         default: return false;
     }

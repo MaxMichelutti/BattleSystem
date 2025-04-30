@@ -248,6 +248,7 @@ void Battle::startBattle(){
     unsigned int speed_opponent = opponent_active->getModifiedSpeed();
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
+    checkZenModes();
     #ifdef DEBUG
     std::cout<<"Applying enter battle effects"<<std::endl;
     std::cout.flush();
@@ -391,6 +392,8 @@ void Battle::incrementTurn(){
     }
     //check uproars
     checkUproars();
+    // check for form change due to zen mode
+    checkZenModes();
 }
 
 void Battle::checkUproars(){
@@ -9005,4 +9008,9 @@ void Battle::performMegaEvolutions(BattleAction& player_action, BattleAction& op
         applySwitchInAbilitiesEffects(OPPONENT);
         applySwitchInAbilitiesEffects(PLAYER);
     }
+}
+
+void Battle::checkZenModes(){
+    player_active->checkZenMode();
+    opponent_active->checkZenMode();
 }

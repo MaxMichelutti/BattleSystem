@@ -21,7 +21,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
             if (player_active->hasVolatileCondition(ENCORE) ||
                 ((player_active->hasHeldItem(CHOICE_BAND) || 
                     player_active->hasHeldItem(CHOICE_SCARF) ||
-                    player_active->hasHeldItem(CHOICE_SPECS)) && player_active->getLastAttackUsed() != 0)){
+                    player_active->hasHeldItem(CHOICE_SPECS) ||
+                    player_active->hasAbility(GORILLA_TACTICS)) && player_active->getLastAttackUsed() != 0)){
                 // force use of encored move or choice band repeating move
                 unsigned int attack_id = player_active->getLastAttackUsed();
                 Attack *attack = Attack::getAttack(attack_id);

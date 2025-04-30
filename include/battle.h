@@ -172,6 +172,7 @@ class Battle{
     void applyBattleActionModifiers(BattleAction& action, BattleAction& other_action);
     double computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
     void performMegaEvolutions(BattleAction& user_action, BattleAction& opponent_action);
+    void checkZenModes();
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);

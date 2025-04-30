@@ -2214,7 +2214,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
     if(active_monster->hasVolatileCondition(ENCORE) || (
         (active_monster->hasHeldItem(CHOICE_BAND) ||
         active_monster->hasHeldItem(CHOICE_SPECS) ||
-        active_monster->hasHeldItem(CHOICE_SCARF)) && active_monster->getLastAttackUsed() != 0
+        active_monster->hasHeldItem(CHOICE_SCARF) ||
+        active_monster->hasAbility(GORILLA_TACTICS)) && active_monster->getLastAttackUsed() != 0
     )){
         // force use of encored move
         unsigned int attack_id = active_monster->getLastAttackUsed();
