@@ -5174,7 +5174,7 @@ unsigned int Battle::computeDamage(unsigned int attack_id, BattleActionActor use
         attack_stat = physical_attack_stat;
         if(effect==257)//body press uses defense instead of attack of user
             attack_stat = user_monster->getModifiedDefense();
-        if(user_monster->hasHeldItem(CHOICE_BAND))
+        if(user_monster->hasHeldItem(CHOICE_BAND) || user_monster->hasAbility(GORILLA_TACTICS))
             attack_stat*=1.5;
         if(user_monster->hasAbility(HUGE_POWER) ||
             user_monster->hasAbility(PURE_POWER)){
