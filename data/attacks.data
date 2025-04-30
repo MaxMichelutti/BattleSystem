@@ -2995,7 +2995,7 @@ ACCURACY:90
 EFFECTTARGET:SELF
 EFFECT:75
 # 322 HIGH JUMP KICK
-NAME:High Kump Kick
+NAME:High Jump Kick
 DESCRIPTION:The target is attacked with a knee kick from a jump. If this move misses, the user takes damage instead.
 EFFECT:171
 EFFECTTARGET:SELF
