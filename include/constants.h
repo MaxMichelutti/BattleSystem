@@ -44,5 +44,6 @@ const std::string ITEMS_FILE = "data/items.data";
 const int SUCCESS = 0;
 const int FILE_ERROR = 1;
 const int DATA_ERROR = 2;
+const int NO_ALIVE_ERROR = 3;
 
 #endif

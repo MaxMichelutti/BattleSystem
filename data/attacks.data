@@ -5347,3 +5347,11 @@ POWER:100
 CATEGORY:SPECIAL
 EFFECT:76
 EFFECTCHANCE:50
+# 572 VICTORY DANCE
+NAME:Victory Dance
+DESCRIPTION:The user performs an intense dance to usher in victory, boosting its Attack, Defense, and Speed stats.
+TYPE:FIGHTING
+CATEGORY:STATUS
+PP:10
+EFFECT:301
+TARGET:SELF

@@ -2127,9 +2127,9 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             unsigned int defense_mod = cpu_active->getDefenseModifier();
             unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
             unsigned int speed_mod = cpu_active->getSpeedModifier();
-            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
-            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
-            total_utility -= 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - special_defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - speed_mod);
             break;
         }
         case 297:{
@@ -2140,7 +2140,16 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
             break;
         }
-
+        case 301:{
+            //+1 att def speed user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
         default: break;
     }
     // add field utility

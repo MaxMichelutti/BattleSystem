@@ -115,8 +115,9 @@ class Battle{
     bool is_wild_battle_over;
     std::set<Monster*> monsters_defeated_by_player;
     unsigned int runaway_attempts;
-
     unsigned int money;
+
+    void init(unsigned int cpu_skill, EventHandler* handler, MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag, Weather weather, Terrain terrain);
     void checkUproars();
     void incrementTurn();
     void performTurn();

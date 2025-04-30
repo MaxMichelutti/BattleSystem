@@ -180,40 +180,33 @@ Battle::Battle() {
 Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
         MonsterTeam* player_team, MonsterTeam* opponent_team,
         Bag * user_bag, Bag* opponent_bag) {
-    this->event_handler = handler;
-    this->cpu_ai = new CPUAI(cpu_skill);
-    this->player_team = new MonsterTeam(*player_team);
-    this->opponent_team = new MonsterTeam(*opponent_team);
-    field = new Field(this,handler);
-    player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,event_handler);
-    opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,event_handler);
-    player_active->setOpponent(opponent_active);
-    opponent_active->setOpponent(player_active);
-    turn = 0;
-    last_attack_used_id = 0;
-    rounds_used_this_turn = 0;
-    turn_of_opponent_last_kill = -2;
-    turn_of_player_last_kill = -2;
-    this->player_bag = user_bag;
-    this->opponent_bag = opponent_bag;
-    item_on_the_ground_player = NO_ITEM_TYPE;
-    item_on_the_ground_opponent = NO_ITEM_TYPE;
-    battle_gives_exp = false;
-    is_wild_battle = false;
-    caught_wild_monster = false;
-    is_wild_battle_over = false;
-    runaway_attempts = 0;
+    init(cpu_skill, handler, player_team, opponent_team, user_bag, opponent_bag,CLEAR,NO_TERRAIN);
 }
 
-Battle::Battle(unsigned int cpu_skill, EventHandler* handler, 
-        MonsterTeam* player_team, MonsterTeam* opponent_team, 
+Battle::Battle(unsigned int cpu_skill, EventHandler* handler,
+        MonsterTeam* player_team, MonsterTeam* opponent_team,
         Weather weather, Terrain terrain,
         Bag * user_bag, Bag* opponent_bag) {
+    init(cpu_skill, handler, player_team, opponent_team, user_bag, opponent_bag,weather,terrain);
+}
+
+void Battle::init(unsigned int cpu_skill, EventHandler* handler, 
+        MonsterTeam* player_team, MonsterTeam* opponent_team, 
+        Bag * user_bag, Bag* opponent_bag,
+        Weather weather, Terrain terrain) {
     this->event_handler = handler;
     this->cpu_ai = new CPUAI(cpu_skill);
     this->player_team = new MonsterTeam(*player_team);
     this->opponent_team = new MonsterTeam(*opponent_team);
     field = new Field(this,handler);
+    if(player_team->getActiveMonster() == nullptr){
+        std::cerr << "Error: Player team has no alive monster!" << std::endl;
+        exit(NO_ALIVE_ERROR);
+    }
+    if(opponent_team->getActiveMonster() == nullptr){
+        std::cerr << "Error: Opponent team has no alive monster!" << std::endl;
+        exit(NO_ALIVE_ERROR);
+    }
     player_active = new Battler(player_team->getActiveMonster(),field,PLAYER,handler);
     opponent_active = new Battler(opponent_team->getActiveMonster(),field,OPPONENT,handler);
     field->setDefaultWeather(weather);
@@ -4917,6 +4910,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(active_user->isFainted())
                 return;
             StatCV changes = {{5,2},{1,1}};
+            changeStats(actor,changes,false);
+            break;
+        }
+        case 301:{
+            //+1 att def speed user
+            if(active_user->isFainted())
+                return;
+            StatCV changes = {{1,1},{2,1},{5,1}};
             changeStats(actor,changes,false);
             break;
         }
