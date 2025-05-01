@@ -15,9 +15,9 @@ Battle * random_battle(){
     Bag * user_bag = new Bag();
     Bag * opponent_bag = new Bag();
     for(int i=0;i<6;i++){
-        Monster* monster1 = Monster::generateRandomMonster(RNG::getRandomInteger(1,555),50);
+        Monster* monster1 = Monster::generateRandomMonster(RNG::getRandomInteger(1,637),50);
         user_team->addMonster(monster1);
-        Monster* monster2 = Monster::generateRandomMonster(RNG::getRandomInteger(1,555),50);
+        Monster* monster2 = Monster::generateRandomMonster(RNG::getRandomInteger(1,637),50);
         opponent_team->addMonster(monster2);
     }
     return new Battle(1,handler,user_team,opponent_team,user_bag,opponent_bag);

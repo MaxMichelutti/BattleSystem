@@ -59,6 +59,7 @@ Monster::Monster(Monster* other){
     seen_opponents.clear();
     consumed_item = NO_ITEM_TYPE;
     ball_containing_monster = POKE_BALL;
+    friendship = other->getFriendship();
     updateStats();
 }
 
@@ -112,6 +113,9 @@ void Monster::init(unsigned int species_id, unsigned int level,unsigned int form
 
     //set random hidden power type
     hidden_power_type = static_cast<Type>(RNG::getRandomInteger(1,18));
+
+    //Set friendship
+    friendship = spec->getBaseFriendship(getFormId());
 }
 
 void Monster::init_gender(GenderRule rule){
