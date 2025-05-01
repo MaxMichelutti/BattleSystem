@@ -5460,3 +5460,22 @@ POWER:80
 CATEGORY:SPECIAL
 EFFECT:305
 EFFECTTARGET:SELF
+# 584 FIRE LASH
+NAME:Fire Lash
+DESCRIPTION:The user strikes the target with a burning lash. This also lowers the target's Defense stat.
+TYPE:FIRE
+CATEGORY:PHYSICAL
+CONTACT
+PP:15
+POWER:80
+EFFECT:22
+# 585 FIERY DANCE
+NAME:Fiery Dance
+DESCRIPTION:Cloaked in flames, the user attacks the target by dancing and flapping its wings. This may also boost the user's Sp. Atk stat.
+PP:10
+TYPE:FIRE
+EFFECTTARGET:SELF
+CATEGORY:SPECIAL
+POWER:80
+EFFECTCHANCE:50
+EFFECT:169
