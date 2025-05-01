@@ -560,6 +560,8 @@ void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_a
         // deactivate mold breaker
         active_user->deactivateMoldBreaker();
         other_active->deactivateMoldBreaker();
+        //change meloetta form
+        active_user->changeFormOnSuccessfulLastAttack();
     }else if(atype == SWITCH){
         if(active_user->isFainted()){
             return;
@@ -700,7 +702,9 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(other_action.getActionType()==SWITCH)// reset to false if opponent does not attack
         attack_after_target = false;
     // activate Mold Breaker on the target
-    if(active_user->hasAbility(MOLD_BREAKER))
+    if(active_user->hasAbility(MOLD_BREAKER) || 
+        active_user->hasAbility(TERAVOLT) ||
+        active_user->hasAbility(TURBOBLAZE))
         active_target->activateMoldBreaker();
     // activate truant to signal that next turn the user will not be able to attack
     if(active_user->hasAbility(TRUANT)){
@@ -765,9 +769,11 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // apply freeze
     if(active_user->isFrozen()){
         unsigned int random_number = RNG::getRandomInteger(1,100);
-        if(random_number > 20 && attack->getEffectId()!=253 && attack->getId()!=482 && attack->getId()!=520){//253: sacred fire immediately thaws user out
-            // 482: SCALD id
-            // 520: Scorching sands id
+        if(random_number > 20 && 
+            attack->getEffectId()!=253 && //253: sacred fire immediately thaws user out
+            attack->getEffectId()!=306 &&//306: fusion flare immediately thaws user out
+            attack->getId()!=482 && // 482: SCALD id
+            attack->getId()!=520){// 520: Scorching sands id
             event_handler->displayMsg(user_mon_name+" is frozen solid!");
             forgetMoveVolatiles(active_user);
             active_user->setLastAttackFailed();
@@ -1080,7 +1086,8 @@ bool Battle::checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool act
                 case 4:case 5:case 14:
                 case 16:case 61:case 67:
                 case 76:case 104:case 210:
-                case 222:case 232:{
+                case 222:case 232:case 308:
+                case 309:{
                     if(attack_accuracy > 50)
                         attack_accuracy = 50;
                     break;
@@ -2095,7 +2102,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             checkMonsterLeavingAbilities(other_actor);
             break;
         }
-        case 14:case 20:case 219:case 253:case 274:{//burn opponent
+        case 14:case 20:case 219:case 253:case 274:case 308:{//burn opponent
             if(active_target->isFainted())
                 return;
             if(effect==274 && !active_target->hasVolatileCondition(STAT_JUST_RAISED)){
@@ -2153,7 +2160,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             changeStats(other_actor,changes,false);
             break;
         }
-        case 16:case 67:case 226:case 296:{ // paralyze opponent - paralysis
+        case 16:case 67:case 226:case 296:case 309:{ // paralyze opponent - paralysis
             if(active_target->isFainted())
                 return;
             if(active_target->hasType(GRASS) && attack_type == GRASS && attack->getCategory() == STATUS){
@@ -4984,6 +4991,8 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
     active_user->removeVolatileCondition(CHARGING_SOLARBEAM);
     active_user->removeVolatileCondition(CHARGING_SOLARBLADE);
     active_user->removeVolatileCondition(CHARGING_SKYATTACK);
+    active_user->removeVolatileCondition(CHARGING_ICEBURN);
+    active_user->removeVolatileCondition(CHARGING_FREEZESHOCK);
     // METEOR BEAM is still charged until it completes
     // active_user->removeVolatileCondition(CHARGING_METEORBEAM);
     active_user->removeVolatileCondition(VANISHED);
@@ -5658,6 +5667,20 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
         case 277:{
             //power is doubled if opponent has used minimize
             if(active_target->hasUsedAttack(MINIMIZE_ID)){
+                base_power *= 2;
+            }
+            break;
+        }
+        case 306:{
+            //power is doubled if last attack used in battle was Fusion Bolt
+            if(last_attack_used_id == FUSION_BOLT_ID){
+                base_power *= 2;
+            }
+            break;
+        }
+        case 307:{
+            //power is doubled if last attack used in battle was Fusion Flare
+            if(last_attack_used_id == FUSION_FLARE_ID){
                 base_power *= 2;
             }
             break;
@@ -7830,6 +7853,38 @@ bool Battle::checkIfAttackFails(Attack* attack,
     }
     if(active_user->hasVolatileCondition(VANISHED_2)){
         active_user->removeVolatileCondition(VANISHED_2);
+    }
+    //charge ice burn
+    if(attack->getEffectId() == 308 && !active_user->hasVolatileCondition(CHARGING_ICEBURN)){// Ice Burn
+        active_user->addVolatileCondition(CHARGING_ICEBURN, 5);
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Ice Burn immediately!");
+            active_user->consumeHeldItem();
+        }else{
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(CHARGING_ICEBURN)){
+        active_user->removeVolatileCondition(CHARGING_ICEBURN);
+    }
+    //charge ice burn
+    if(attack->getEffectId() == 309 && !active_user->hasVolatileCondition(CHARGING_FREEZESHOCK)){// Freeze Shock
+        active_user->addVolatileCondition(CHARGING_FREEZESHOCK, 5);
+        if(active_user->hasHeldItem(POWER_HERB)){
+            event_handler->displayMsg(user_mon_name+"'s Power Herb allows "+user_mon_name+" to use Freeze Shock immediately!");
+            active_user->consumeHeldItem();
+        }else{
+            active_user->setLastAttackUsed(action.getAttackId());
+            last_attack_used_id = attack_id;
+            active_user->removeVolatileCondition(LASER_FOCUS);
+            return true;
+        }
+    }
+    if(active_user->hasVolatileCondition(CHARGING_FREEZESHOCK)){
+        active_user->removeVolatileCondition(CHARGING_FREEZESHOCK);
     }
     //charge dive
     if(attack->getEffectId() == 136 && !active_user->hasVolatileCondition(UNDERWATER)){// Dive

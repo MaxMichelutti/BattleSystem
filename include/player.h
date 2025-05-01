@@ -2,15 +2,18 @@
 #define __MONSTER_PLAYER_H__
 #include "common.h"
 #include "events.h"
+#include "monster.h"
 #include "bag.h"
 #include "team.h"
 #include <string>
 #include <iostream>
+#include <map>
 
 class Player;
 class MonsterTeam;
 class Bag;
 class EventHandler;
+class Monster;
 
 static Player* global_player;
 
@@ -20,6 +23,7 @@ class Player{
     Bag* bag;
     unsigned int money;
     EventHandler* event_handler;
+    std::map<Monster*,Monster*> fused_monsters;
     Player();
 
     public:
@@ -35,6 +39,8 @@ class Player{
     bool hasMoney(unsigned int money)const;
     EventHandler* getEventHandler()const;
     void setEventHandler(EventHandler* event_handler);
+    bool addFusedMonster(Monster* monster, Monster* fused_monster);
+    Monster* removeFusedMonster(Monster* monster);
 };
 
 #endif

@@ -381,3 +381,15 @@ unsigned int ItemData::getFlavour(unsigned int flavour_type)const{
         return 0;
     return flavour[flavour_type];
 }
+
+bool isDrive(ItemType item_type){
+    switch (item_type){
+        case DOUSE_DRIVE:
+        case SHOCK_DRIVE:
+        case BURN_DRIVE:
+        case CHILL_DRIVE:
+            return true;
+        default:
+            return false;
+    }
+}

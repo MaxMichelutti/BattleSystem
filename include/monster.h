@@ -153,10 +153,12 @@ class Monster{
     bool hasEvolutions()const;
     bool changeWeatherForm(Weather weather);
     bool changeFormSwitchIn();
-    void interactWithKeyItem(ItemType item, EventHandler* handler);
+    void interactWithKeyItem(ItemType item, EventHandler* handler, MonsterTeam * monster_team);
     bool tryZenMode();
     void resetZenMode();
     void changeSeasonalForm();
+    void changeAttackDependentForms();
+    bool changeFormOnUsedAttack(unsigned int attack_id);
 };
 
 #endif

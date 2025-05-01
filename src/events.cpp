@@ -176,6 +176,30 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
             false,
             active->getMonster());
     }
+    if(active->hasVolatileCondition(CHARGING_FREEZESHOCK)){
+        return BattleAction(
+            actor,
+            FREEZE_SHOCK,
+            595,
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false,
+            active->getMonster());
+    }
+    if(active->hasVolatileCondition(CHARGING_ICEBURN)){
+        return BattleAction(
+            actor,
+            ICE_BURN,
+            594,
+            0, 
+            active->getModifiedSpeed(), 
+            0,
+            NO_ITEM_TYPE,
+            false,
+            active->getMonster());
+    }
     if(active->hasVolatileCondition(UPROARING)){
         return BattleAction(
             actor,

@@ -293,6 +293,31 @@ Type Attack::getType(Battler* user, Field* field)const{
             }
             break;
         }
+        case 310:{
+            //techno blast type depends on held drive
+            switch(user->getHeldItem()){
+                case SHOCK_DRIVE:{
+                    attack_type = ELECTRIC;
+                    break;
+                }
+                case BURN_DRIVE:{
+                    attack_type = FIRE;
+                    break;
+                }
+                case CHILL_DRIVE:{
+                    attack_type = ICE;
+                    break;
+                }
+                case DOUSE_DRIVE:{
+                    attack_type = WATER;
+                    break;
+                }
+                default:{
+                    attack_type = NORMAL;
+                    break;
+                }
+            }
+        }
     }
     if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
         attack_type = ELECTRIC;

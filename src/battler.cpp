@@ -2917,6 +2917,8 @@ bool Battler::canStealItem()const{
         return false;//dialga cannot lose adamant crystal
     if(item == LUSTROUS_GLOBE && monster->getSpeciesId() == 484)
         return false;//palkia cannot lose lustrous globe
+    if(isDrive(item) && monster->getSpeciesId() == 649)
+        return false;//genesect cannot lose drives
     if(!canBeStolen(item))
         return false;
     if(hasAbility(STICKY_HOLD))
@@ -3248,5 +3250,16 @@ void Battler::checkZenMode(){
         height = monster->getHeight();
         resetStats();
         resetAbility();
+    }
+}
+
+void Battler::changeFormOnSuccessfulLastAttack(){
+    if(last_attack_failed)
+        return;
+    if(monster->getSpeciesId()==648 && //try meloetta
+        monster->changeFormOnUsedAttack(getLastAttackUsed())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
     }
 }

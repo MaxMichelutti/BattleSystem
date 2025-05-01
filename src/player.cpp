@@ -6,6 +6,7 @@ Player::Player(){
     bag = new Bag();
     money = 0;
     event_handler = nullptr;
+    fused_monsters.clear();
 }
 void Player::createPlayer(){
     if(global_player == nullptr){
@@ -57,4 +58,19 @@ void Player::setEventHandler(EventHandler* event_handler){
         exit(DATA_ERROR);
     }
     this->event_handler = event_handler;
+}
+bool Player::addFusedMonster(Monster* monster, Monster* fused_monster){
+    if(fused_monsters.find(monster) == fused_monsters.end()){
+        fused_monsters[monster] = fused_monster;
+        return true;
+    }
+    return false;
+}
+Monster* Player::removeFusedMonster(Monster* monster){
+    if(fused_monsters.find(monster) != fused_monsters.end()){
+        Monster* fused_monster = fused_monsters[monster];
+        fused_monsters.erase(monster);
+        return fused_monster;
+    }
+    return nullptr;
 }

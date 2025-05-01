@@ -407,10 +407,12 @@ bool Monster::learnAttack(unsigned int attack_id) {
             attack_ids[i].attack_id = attack_id;
             attack_ids[i].current_pp = Attack::getAttack(attack_id)->getMaxPP();
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
     // if no slots are empty, return false
+    changeAttackDependentForms();
     return false;
 }
 
@@ -424,6 +426,7 @@ bool Monster::learnAttackForced(unsigned int attack_id,unsigned int slot){
     attack_ids[slot].attack_id = attack_id;
     attack_ids[slot].current_pp = Attack::getAttack(attack_id)->getMaxPP();
     packAttacks();
+    changeAttackDependentForms();
             
     // if no slots are empty, return false
     return true;
@@ -442,9 +445,11 @@ bool Monster::forgetAttack(unsigned int attack_id) {
             attack_ids[i].attack_id = 0;
             attack_ids[i].current_pp = 0;
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
+    changeAttackDependentForms();
     // should never reach this point
     return true;
 }
@@ -461,9 +466,11 @@ bool Monster::replaceAttack(unsigned int old_attack_id, unsigned int new_attack_
             attack_ids[i].attack_id = new_attack_id;
             attack_ids[i].current_pp = Attack::getAttack(new_attack_id)->getMaxPP();
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
+    changeAttackDependentForms();
     return false;
 }
 
@@ -1901,11 +1908,56 @@ bool Monster::changeFormOnNewItem(){
             }
             break;
         }
+        case 649:{//gensect
+            switch(getHeldItem()){
+                case SHOCK_DRIVE:{
+                    if(form_id != 199){
+                        form_id = 199;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case BURN_DRIVE:{
+                    if(form_id != 200){
+                        form_id = 200;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case CHILL_DRIVE:{
+                    if(form_id != 201){
+                        form_id = 201;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DOUSE_DRIVE:{
+                    if(form_id != 202){
+                        form_id = 202;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                default:{
+                    if(form_id != 0){
+                        form_id = 0;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+            break;
+        }
     }
     return false;
 }
 
-void Monster::interactWithKeyItem(ItemType item, EventHandler* handler){
+void Monster::interactWithKeyItem(ItemType item, EventHandler* handler, MonsterTeam* team){
     ItemData* item_data = ItemData::getItemData(item);
     if(item_data == nullptr)
         return;
@@ -1990,6 +2042,91 @@ void Monster::interactWithKeyItem(ItemType item, EventHandler* handler){
                     learnAttack(new_evo_attack);
                     return;
                 }
+            }
+            break;
+        }
+        case REVEAL_GLASS:{
+            switch(species_id){
+                case 641:{//tornadus 
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 192;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                    }
+                    return;
+                }
+                case 642:{//thundurus
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 193;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                    }
+                    return;
+                }
+                case 645:{//landorus
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 194;
+                        return;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                        return;
+                    }
+                    return;
+                }
+                default:break;
+            }
+            break;
+        }
+        case DNA_SPLICERS:{
+            if(species_id!=646)//its not kyurem
+                break;
+            if(form_id == 0){//fuse Kyurem with reshiram or Zekrom
+                for(unsigned int j=0;j<team->getSize();j++){
+                    Monster* other = team->getMonster(j);
+                    Player * player = Player::getPlayer();
+                    if(other == this)
+                        continue;
+                    switch(other->getSpeciesId()){
+                        case 641:{//reshiram
+                            player->addFusedMonster(this,other);
+                            handler->displayMsg(getNickname()+" was fused with "+other->getNickname()+"!");
+                            form_id = 195;//white kyurem
+                            team->removeMonster(j);
+                            return;
+                        }
+                        case 642:{//zekrom
+                            player->addFusedMonster(this,other);
+                            handler->displayMsg(getNickname()+" was fused with "+other->getNickname()+"!");
+                            form_id = 196;//black kyurem
+                            team->removeMonster(j);
+                            return;
+                        }
+                        default:break;
+                    }
+                    handler->displayMsg(getNickname()+" cannot fuse with any Monster in your team!");
+                }
+            }else{//remove fusion with other monster
+                if(team->isFull()){
+                    handler->displayMsg(getNickname()+" cannot un-fuse, your team is full!");
+                    return;
+                }
+                Player * player = Player::getPlayer();
+                Monster * old_fused = player->removeFusedMonster(this);
+                if(old_fused == nullptr){//failsafe check
+                    handler->displayMsg(getNickname()+" cannot un-fuse, you are not fused!");
+                    return;
+                }
+                handler->displayMsg(getNickname()+" un-fused from "+old_fused->getNickname()+"!");
+                form_id = 0;
+                handler->displayMsg(old_fused->getNickname()+" was added back to your team!");
+                team->addMonster(old_fused);
+                return;
             }
             break;
         }
@@ -2084,4 +2221,36 @@ void Monster::changeSeasonalForm(){
         }
         default:break;
     }
+}
+
+void Monster::changeAttackDependentForms(){
+    switch(species_id){
+        case 647:{//keldeo
+            if(hasAttack(SECRET_SWORD_ID)){
+                form_id = 197;
+                updateStats();
+            }else{
+                form_id = 0;
+                updateStats();
+            }
+            break;
+        }
+        default:break;
+    }
+}
+
+bool Monster::changeFormOnUsedAttack(unsigned int attack_id){
+    if(species_id==648 && attack_id==RELIC_SONG_ID){
+        //if meloetta uses relic song
+        if(form_id == 0){
+            form_id = 198;
+            updateStats();
+            return true;
+        }else{
+            form_id = 0;
+            updateStats();
+            return true;
+        }
+    }
+    return false;
 }

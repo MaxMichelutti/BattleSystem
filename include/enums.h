@@ -77,6 +77,8 @@ enum BattleActionType{
     FLY,
     PHANTOM_FORCE,
     SHADOW_FORCE,
+    FREEZE_SHOCK,
+    ICE_BURN,
     ROLLOUT,
     DIG,
     DIVE,
@@ -112,6 +114,8 @@ enum VolatileStatusCondition{
     CHARGING_SOLARBLADE,
     CHARGING_SKYATTACK,
     CHARGING_METEORBEAM,
+    CHARGING_ICEBURN,
+    CHARGING_FREEZESHOCK,
     RECHARGING,
     GROUNDED,
     PETAL_DANCING,
@@ -479,7 +483,9 @@ enum Ability{
     DEFEATIST,
     ILLUSION,
     IRON_BARBS,
-    MIMICRY
+    MIMICRY,
+    TERAVOLT,
+    TURBOBLAZE
 };
 
 enum ItemCategory{
@@ -864,7 +870,13 @@ enum ItemType{
     LUSTROUS_GLOBE,
     GRACIDEA,
     METEORITE,
-    ROTOM_CATALOG
+    ROTOM_CATALOG,
+    REVEAL_GLASS,
+    DNA_SPLICERS,
+    SHOCK_DRIVE,
+    BURN_DRIVE,
+    CHILL_DRIVE,
+    DOUSE_DRIVE
 };
 
 #endif

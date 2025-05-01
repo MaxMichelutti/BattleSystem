@@ -26,6 +26,10 @@ const unsigned int PURSUIT_ID = 388;
 const unsigned int SKETCH_ID = 455;
 const unsigned int DRAGON_ASCENT_ID = 532;
 const unsigned int DOOM_DESIRE_ID = 535;
+const unsigned int FUSION_BOLT_ID = 591;
+const unsigned int FUSION_FLARE_ID = 589;
+const unsigned int SECRET_SWORD_ID = 596;
+const unsigned int RELIC_SONG_ID = 597;
 
 const unsigned int MAX_UNSIGNED = 4294967295;
 

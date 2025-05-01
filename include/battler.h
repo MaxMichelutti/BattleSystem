@@ -294,6 +294,7 @@ class Battler{
     void resetAbility();
     bool changeFormSwitchIn();
     void checkZenMode();
+    void changeFormOnSuccessfulLastAttack();
 };
 
 #endif

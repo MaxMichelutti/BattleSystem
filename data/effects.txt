@@ -303,3 +303,8 @@
 303: +1 ATT SPATT user iff ability is PLUS or MINUS
 304: snap trap
 305: increased crit ratio + 1 user speed
+306: power doubles if last move used in battle was Fusion Bolt + thaw out user
+307: power doubles if last move used in battle was Fusion Flare
+308: ice burn (also may burn target)
+309: freeze shock (also may paralyze target)
+310: type depends on user held drive

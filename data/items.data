@@ -1878,3 +1878,33 @@ NAME:Rotom Catalog
 CATEGORY:KEY
 DESCRIPTION:A catalog of devices that Rotom like. Use the catalog to have Rotom hop in and out of the various devices listed within.
 PRICE:10000
+# 365 REVEAL GLASS
+NAME:Reveal Glass
+CATEGORY:KEY
+DESCRIPTION:A mysterious looking glass that reveals the truth. It can return a Pokémon to its original shape.
+PRICE:10000
+# 366 DNA SPLICERS
+NAME:DNA Splicers
+CATEGORY:KEY
+DESCRIPTION:A splicer that fuses Kyurem and a certain Pokémon. They are said to have originally been one.
+PRICE:10000
+# 367 SHOCK DRIVE
+NAME:Shock Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Electric type.
+PRICE:10000
+# 368 BURN DRIVE
+NAME:Burn Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Fire type.
+PRICE:10000
+# 369 CHILL DRIVE
+NAME:Chill Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Ice type.
+PRICE:10000
+# 370 DOUSE DRIVE
+NAME:Douse Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Water type.
+PRICE:10000

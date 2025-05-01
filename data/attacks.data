@@ -5479,3 +5479,130 @@ CATEGORY:SPECIAL
 POWER:80
 EFFECTCHANCE:50
 EFFECT:169
+# 586 BLEAKWIND STORM
+NAME:Bleakwind Storm
+DESCRIPTION:The user attacks with savagely cold winds that cause both body and spirit to tremble. This may also lower the Speed stats of opposing Pokémon.
+TYPE:FLYING
+PP:10
+POWER:100
+ACCURACY:80
+CATEGORY:SPECIAL
+EFFECTCHANCE:30
+EFFECT:122
+# 587 WILDBOLT STORM
+NAME:Wildbolt Storm
+DESCRIPTION:The user summons a thunderous tempest and savagely attacks with lightning and wind. This may also leave opposing Pokémon with paralysis.
+TYPE:ELECTRIC
+PP:10
+POWER:100
+ACCURACY:80
+CATEGORY:SPECIAL
+EFFECT:16
+EFFECTCHANCE:20
+# 588 BLUE FLARE
+NAME:Blue Flare
+DESCRIPTION:The user attacks by engulfing the target in an intense, yet beautiful, blue flame. This may also leave the target with a burn.
+TYPE:FIRE
+CATEGORY:SPECIAL
+PP:5
+POWER:130
+ACCURACY:85
+EFFECT:14
+EFFECTCHANCE:20
+# 589 FUSION FLARE
+NAME:Fusion Flare
+DESCRIPTION:The user brings down a giant flame. This move's power is boosted when influenced by an enormous lightning bolt.
+TYPE:FIRE
+PP:5
+POWER:100
+CATEGORY:SPECIAL
+EFFECT:306
+EFFECTTARGET:SELF
+# 590 BOLT STRIKE
+NAME:Bolt Strike
+DESCRIPTION:The user surrounds itself with a great amount of electricity and charges the target. This may also leave the target with paralysis.
+TYPE:ELECTRIC
+CATEGORY:PHYSICAL
+CONTACT
+PP:5
+POWER:130
+ACCURACY:85
+EFFECT:16
+EFFECTCHANCE:20
+# 591 FUSION BOLT
+NAME:Fusion Bolt
+DESCRIPTION:The user throws down a giant lightning bolt. This move's power is boosted when influenced by an enormous flame.
+TYPE:ELECTRIC
+PP:5
+POWER:100
+CATEGORY:PHYSICAL
+EFFECT:307
+EFFECTTARGET:SELF
+# 592 SANDSEAR STORM
+NAME:Sandsear Storm
+DESCRIPTION:The user attacks by wrapping opposing Pokémon in fierce winds and searingly hot sand. This may also leave them with a burn.
+TYPE:GROUND
+PP:10
+POWER:100
+ACCURACY:80
+CATEGORY:SPECIAL
+EFFECT:14
+EFFECTCHANCE:20
+# 593 GLACIATE
+NAME:Glaciate
+DESCRIPTION:The user attacks by blowing freezing cold air at opposing Pokémon. This also lowers their Speed stats.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:10
+POWER:65
+ACCURACY:95
+EFFECT:122
+# 594 ICE BURN
+NAME:Ice Burn
+DESCRIPTION:The turn after using this move, the user surrounds the target with an ultracold, freezing wind to inflict damage. This may also leave the target with a burn.
+TYPE:ICE
+CATEGORY:SPECIAL
+PP:5
+POWER:140
+ACCURACY:90
+EFFECT:308
+EFFECTCHANCE:30
+# 595 FREEZE SHOCK
+NAME:Freeze Shock
+DESCRIPTION:The turn after using this move, the user hits the target with electrically charged ice to inflict damage. This may also leave the target with paralysis.
+TYPE:ICE
+CATEGORY:PHYSICAL
+PP:5
+POWER:140
+ACCURACY:90
+EFFECT:309
+EFFECTCHANCE:30
+# 596 SECRET SWORD
+NAME:Secret Sword
+DESCRIPTION:The user cuts with its long horn. The odd power contained in the horn deals physical damage to the target.
+TYPE:FIGHTING
+PP:10
+POWER:85
+CATEGORY:SPECIAL
+SLICING
+EFFECT:128
+EFFECTTARGET:SELF
+# 597 RELIC SONG
+NAME:Relic Song
+DESCRIPTION:The user sings an ancient song and attacks by appealing to the hearts of the listening opposing Pokémon. This may also induce sleep.
+TYPE:NORMAL
+CATEGORY:SPECIAL
+PP:10
+POWER:75
+EFFECT:5
+EFFECTCHANCE:10
+SOUND
+# 598 TECHNO BLAST
+NAME:Techno Blast
+DESCRIPTION:The user attacks by firing a beam of light at the target. This move's type changes depending on the kind of drive held by the user.
+TYPE:NORMAL
+PP:5
+POWER:120
+CATEGORY:SPECIAL
+EFFECT:310
+EFFECTTARGET:SELF
