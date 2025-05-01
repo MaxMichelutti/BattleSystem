@@ -34,6 +34,7 @@ bool isVolatileConditionClearedByRapidSpin(VolatileStatusCondition status) {
         case LEECH_SEED:
         case WRAP:
         case BIND:
+        case SNAP_TRAP:
         case FIRESPIN:
         case MAGMA_STORM:
         case INFESTED:
@@ -291,16 +292,8 @@ Battler::Battler(Monster* monster, MonsterTeam* team,Field*field,BattleActionAct
     is_mold_breaker_active = false;
     weight = monster->getWeight();
     height = monster->getHeight();
-    illusion_nickname = "";
-    if(hasAbility(ILLUSION)){
-        for(int i=team->getSize()-1;i>=1;i--){
-            if(team->getMonster(i)->isFainted()){
-                continue;
-            }
-            illusion_nickname = team->getMonster(i)->getNickname();
-            break;
-        }
-    }
+    illusion_monster = nullptr;
+    resetIllusion(team);
 }
 
 void Battler::resetTypes(){
@@ -311,7 +304,7 @@ void Battler::resetTypes(){
     }
 }
 
-void Battler::setMonster(Monster* monster){
+void Battler::setMonster(Monster* monster,MonsterTeam* team){
     mimicked_attack = nullptr;
     this->monster = monster;
     consecutive_protects_counter = 0;
@@ -348,6 +341,20 @@ void Battler::setMonster(Monster* monster){
     resetTypes();
     resetStats();
     resetAbility();
+    resetIllusion(team);
+}
+
+void Battler::resetIllusion(MonsterTeam* team){
+    illusion_monster = nullptr;
+    if(hasAbility(ILLUSION)){
+        for(int i=team->getSize()-1;i>=1;i--){
+            if(team->getMonster(i)->isFainted()){
+                continue;
+            }
+            illusion_monster = team->getMonster(i);
+            break;
+        }
+    }
 }
 
 Battler::~Battler() {
@@ -431,7 +438,11 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             break;
         }
         case BIND:{
-            handler->displayMsg(getNickname()+" is binded by the its opponent!");
+            handler->displayMsg(getNickname()+" is binded by its opponent!");
+            break;
+        }
+        case SNAP_TRAP:{
+            handler->displayMsg(getNickname()+" is trapped by its opponent!");
             break;
         }
         case LEECH_SEED:{
@@ -561,6 +572,10 @@ void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
         }
         case BIND:{
             handler->displayMsg(getNickname()+" is no longer binded!");
+            break;
+        }
+        case SNAP_TRAP:{
+            handler->displayMsg(getNickname()+" is no longer trapped!");
             break;
         }
         case LEECH_SEED:{
@@ -1460,6 +1475,8 @@ bool Battler::canSwitchOut(Battler* enemy)const {
         return false;
     if(hasVolatileCondition(BIND))
         return false;
+    if(hasVolatileCondition(SNAP_TRAP))
+        return false;
     if(hasVolatileCondition(FIRESPIN))
         return false;
     if(hasVolatileCondition(MAGMA_STORM))
@@ -1907,8 +1924,8 @@ std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType 
         return {amount,true};
     }
     //fade illusion
-    if(illusion_nickname != ""){
-        illusion_nickname = "";
+    if(illusion_monster != nullptr){
+        illusion_monster = nullptr;
         handler->displayMsg(getNickname()+"'s Illusion faded!");
     }
     unsigned int currentHP = monster->getCurrentHP();
@@ -2197,8 +2214,8 @@ unsigned int Battler::getLevel()const{
 }
 
 std::string Battler::getNickname()const{
-    if(illusion_nickname != "")
-        return illusion_nickname;
+    if(illusion_monster != nullptr && actor!=PLAYER)
+        return illusion_monster->getNickname();
     if(monster->isMegaEvolved())
         return "M-"+monster->getNickname();
     if(monster->getFormId() == 123 || monster->getFormId() == 124)
@@ -3169,6 +3186,7 @@ bool Battler::hasSubstitute()const{
 void Battler::setSubstituteHP(unsigned int amount){
     substituteHP = amount;
     removeVolatileCondition(FIRESPIN);
+    removeVolatileCondition(SNAP_TRAP);
     removeVolatileCondition(MAGMA_STORM);
     removeVolatileCondition(WRAP);
     removeVolatileCondition(BIND);

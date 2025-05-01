@@ -125,6 +125,7 @@ enum VolatileStatusCondition{
     FLYING_HIGH,
     WRAP,
     BIND,
+    SNAP_TRAP,
     FIRESPIN,
     SANDTOMB,
     ROLLINGOUT,
@@ -477,7 +478,8 @@ enum Ability{
     WANDERING_SPIRIT,
     DEFEATIST,
     ILLUSION,
-    IRON_BARBS
+    IRON_BARBS,
+    MIMICRY
 };
 
 enum ItemCategory{

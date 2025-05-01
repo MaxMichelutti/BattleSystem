@@ -163,7 +163,7 @@ class Battle{
     void givePlayerExperience(Monster* defeated_monster);
     void checkForExp();
     void tryToCatchWildMonster(ItemType item);
-    void consumeSeeds();
+    // void consumeSeeds();
     void performEscape(BattleAction action);
     bool tryEjectPack(BattleActionActor actor);
     void changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
@@ -173,6 +173,8 @@ class Battle{
     double computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
     void performMegaEvolutions(BattleAction& user_action, BattleAction& opponent_action);
     void checkZenModes();
+    bool onTerrainChange(BattleActionActor actor);
+    std::vector<Battler*> getBattlersSortedBySpeed();
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);
@@ -187,6 +189,7 @@ class Battle{
     void setWild();
     void setBattleGivesExp();
     void onWeatherChange(Weather weather);
+    void onTerrainChange();
     void forceSwitch(BattleActionActor actor);
 };
 

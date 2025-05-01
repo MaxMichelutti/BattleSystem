@@ -301,3 +301,5 @@
 301: +1 att def speed user
 302: protects the user from status moves, can be used consecutively without failing
 303: +1 ATT SPATT user iff ability is PLUS or MINUS
+304: snap trap
+305: increased crit ratio + 1 user speed

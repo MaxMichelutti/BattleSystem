@@ -244,8 +244,8 @@ void Battle::startBattle(){
     std::cout<<"Starting battle"<<std::endl;
     std::cout.flush();
     #endif
-    unsigned int speed_player = player_active->getModifiedSpeed();
-    unsigned int speed_opponent = opponent_active->getModifiedSpeed();
+    // unsigned int speed_player = player_active->getModifiedSpeed();
+    // unsigned int speed_opponent = opponent_active->getModifiedSpeed();
     player_active->addSeenOpponent(opponent_active->getMonster());
     resetOpponents();
     checkZenModes();
@@ -253,37 +253,18 @@ void Battle::startBattle(){
     std::cout<<"Applying enter battle effects"<<std::endl;
     std::cout.flush();
     #endif
-    if(speed_player == speed_opponent){
-        if(RNG::coinFlip()){
-            applySwitchInFormChange(PLAYER);
-            applySwitchInFormChange(OPPONENT);
-            applySwitchInAbilitiesEffects(PLAYER);
-            applySwitchInAbilitiesEffects(OPPONENT);
-            applySwitchInItemsEffects(PLAYER);
-            applySwitchInItemsEffects(OPPONENT);
-        }else{
-            applySwitchInFormChange(OPPONENT);
-            applySwitchInFormChange(PLAYER);
-            applySwitchInAbilitiesEffects(OPPONENT);
-            applySwitchInAbilitiesEffects(PLAYER);
-            applySwitchInItemsEffects(PLAYER);
-            applySwitchInItemsEffects(OPPONENT);
-        }
-    }else if(speed_player > speed_opponent){
-        applySwitchInFormChange(PLAYER);
-        applySwitchInFormChange(OPPONENT);
-        applySwitchInAbilitiesEffects(PLAYER);
-        applySwitchInAbilitiesEffects(OPPONENT);
-        applySwitchInItemsEffects(PLAYER);
-        applySwitchInItemsEffects(OPPONENT);
-    }else{
-        applySwitchInFormChange(OPPONENT);
-        applySwitchInFormChange(PLAYER);
-        applySwitchInAbilitiesEffects(OPPONENT);
-        applySwitchInAbilitiesEffects(PLAYER);
-        applySwitchInItemsEffects(PLAYER);
-        applySwitchInItemsEffects(OPPONENT);
-    }   
+    for(auto battler: getBattlersSortedBySpeed()){
+        applySwitchInFormChange(battler->getActor());
+    }
+    for(auto battler: getBattlersSortedBySpeed()){
+        onTerrainChange(battler->getActor());
+    }
+    for(auto battler: getBattlersSortedBySpeed()){
+        applySwitchInAbilitiesEffects(battler->getActor());
+    }
+    for(auto battler: getBattlersSortedBySpeed()){
+        applySwitchInItemsEffects(battler->getActor());
+    }
 
     while(!isOver()){
         performTurn();
@@ -308,36 +289,27 @@ void Battle::incrementTurn(){
     std::cout.flush();
     #endif
     // decrement disable effect
-    player_active->decrementDisabledTurns();
-    opponent_active->decrementDisabledTurns();
-    #ifdef DEBUG
-    std::cout<<"Leaving ground"<<std::endl;
-    std::cout.flush();
-    #endif
-    // remove roost grounding effect
-    player_active->leaveGround();
-    opponent_active->leaveGround();
-    // reset turn damage counters for battlers
-    player_active->resetDamageTakenThisTurn();
-    opponent_active->resetDamageTakenThisTurn();
-    // remobe charged 2 effect
-    player_active->removeVolatileCondition(CHARGED_2);
-    opponent_active->removeVolatileCondition(CHARGED_2);
-    // remove endure effects
-    player_active->removeVolatileCondition(ENDURE);
-    opponent_active->removeVolatileCondition(ENDURE);
-    // remove stat just dropped
-    player_active->removeVolatileCondition(STAT_JUST_DROPPED);
-    opponent_active->removeVolatileCondition(STAT_JUST_DROPPED);
-    // remove stat just raised
-    player_active->removeVolatileCondition(STAT_JUST_RAISED);
-    opponent_active->removeVolatileCondition(STAT_JUST_RAISED);
-    // remove focus
-    player_active->removeVolatileCondition(FOCUSED);
-    opponent_active->removeVolatileCondition(FOCUSED);
-    // remove magic coat
-    player_active->removeVolatileCondition(MAGIC_COATED);
-    opponent_active->removeVolatileCondition(MAGIC_COATED);
+    for(auto battler: getBattlersSortedBySpeed()){
+        battler->decrementDisabledTurns();
+        battler->leaveGround();
+        battler->removeVolatileCondition(CHARGED_2);
+        battler->removeVolatileCondition(ENDURE);
+        battler->removeVolatileCondition(STAT_JUST_DROPPED);
+        battler->removeVolatileCondition(STAT_JUST_RAISED);
+        battler->removeVolatileCondition(FOCUSED);
+        battler->removeVolatileCondition(MAGIC_COATED);   
+        //apply cud chew
+        if(battler->hasVolatileCondition(JUST_EATEN_BERRY)){
+            battler->decrementVolatileCondition(JUST_EATEN_BERRY);
+            if(!battler->hasVolatileCondition(JUST_EATEN_BERRY)&&
+                battler->hasAbility(CUD_CHEW)){
+                battler->useItem(battler->getConsumedItem(),0);
+            }
+        }
+        if(battler->hasVolatileCondition(HEAL_BLOCKED)){
+            battler->decrementVolatileCondition(HEAL_BLOCKED);
+        }
+    }
     // collect items on the ground
     if(player_active->hasAbility(PICKUP) && item_on_the_ground_player != NO_ITEM_TYPE && 
         !player_active->isFainted()){
@@ -367,28 +339,6 @@ void Battle::incrementTurn(){
         if(opponent_active->restoreBerry()){
             event_handler->displayMsg(opponent_active->getNickname() + " harvested a berry!");
         }
-    }
-    //apply cud chew
-    if(player_active->hasVolatileCondition(JUST_EATEN_BERRY)){
-        player_active->decrementVolatileCondition(JUST_EATEN_BERRY);
-        if(!player_active->hasVolatileCondition(JUST_EATEN_BERRY)&&
-            player_active->hasAbility(CUD_CHEW)){
-            player_active->useItem(player_active->getConsumedItem(),0);
-        }
-    }
-    if(opponent_active->hasVolatileCondition(JUST_EATEN_BERRY)){
-        opponent_active->decrementVolatileCondition(JUST_EATEN_BERRY);
-        if(!opponent_active->hasVolatileCondition(JUST_EATEN_BERRY)&&
-            opponent_active->hasAbility(CUD_CHEW)){
-            opponent_active->useItem(opponent_active->getConsumedItem(),0);
-        }
-    }
-    // decrement heal block
-    if(player_active->hasVolatileCondition(HEAL_BLOCKED)){
-        player_active->decrementVolatileCondition(HEAL_BLOCKED);
-    }
-    if(opponent_active->hasVolatileCondition(HEAL_BLOCKED)){
-        opponent_active->decrementVolatileCondition(HEAL_BLOCKED);
     }
     //check uproars
     checkUproars();
@@ -438,8 +388,9 @@ void Battle::performTurn(){
     #endif
     // 0: display battle situation
     event_handler->displayBattleSituation(player_active,player_team,opponent_active,opponent_team);
-    player_active->nextTurn();
-    opponent_active->nextTurn();
+    for(auto battler: getBattlersSortedBySpeed()){
+        battler->nextTurn();
+    }
     // 1: choose actions
     #ifdef DEBUG
     std::cout<<"Choosing action player "<<std::endl;
@@ -2576,6 +2527,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 removeVolatilesFromOpponentOfMonsterLeavingField(other_actor);
                 applySwitchInFormChange(other_actor);
+                if (onTerrainChange(other_actor))
+                    return;
                 if (applySwitchInAbilitiesEffects(other_actor))
                     return;
                 if (applySwitchInItemsEffects(other_actor))
@@ -2737,6 +2690,16 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 return;
             if(!active_target->hasVolatileCondition(BIND)){
                 active_target->addVolatileCondition(BIND, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
+            }
+            break;
+        }
+        case 304:{ // Snap Trap
+            if(active_target->isFainted())
+                return;
+            if(hits_substitute)
+                return;
+            if(!active_target->hasVolatileCondition(SNAP_TRAP)){
+                active_target->addVolatileCondition(SNAP_TRAP, active_user->hasHeldItem(GRIP_CLAW)?7:(RNG::coinFlip()?4:5));
             }
             break;
         }
@@ -3186,7 +3149,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_user->setLastAttackFailed();
             }else{
                 field->setTerrain(GRASSY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                consumeSeeds();
+                // consumeSeeds();
             }
             break;
         }
@@ -3604,7 +3567,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 event_handler->displayMsg("A sticky web slows down all Pokemon entering "+opponent_mon_name+"'s side!");
             }
         }
-        case 142:{
+        case 142:
+        case 305:{
             //+1 spd user
             // bool res = active_user->changeSpeedModifier(+1);
             // if(res && active_user->hasAbility(CONTRARY))
@@ -3734,7 +3698,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_user->setLastAttackFailed();
             }else{
                 field->setTerrain(ELECTRIC_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                consumeSeeds();
+                // consumeSeeds();
             }
             break;
         }
@@ -3745,7 +3709,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_user->setLastAttackFailed();
             }else{
                 field->setTerrain(PSYCHIC_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                consumeSeeds();
+                // consumeSeeds();
             }
             break;
         }
@@ -4102,16 +4066,18 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             if(actor==PLAYER){
                 unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
                 player_team->swapActiveMonster(new_active_index);
-                player_active->setMonster(player_team->getActiveMonster());
+                player_active->setMonster(player_team->getActiveMonster(),player_team);
             }else{
                 unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
                 opponent_team->swapActiveMonster(new_active_index);
-                opponent_active->setMonster(opponent_team->getActiveMonster());
+                opponent_active->setMonster(opponent_team->getActiveMonster(),opponent_team);
             }
             checkMonsterLeavingAbilities(actor);
             removeVolatilesFromOpponentOfMonsterLeavingField(actor);
             player_active->addSeenOpponent(opponent_active->getMonster());
             applySwitchInFormChange(actor);
+            if(onTerrainChange(actor))
+                return;
             if(applySwitchInAbilitiesEffects(actor))
                 return;
             if(applySwitchInItemsEffects(actor))
@@ -4459,7 +4425,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 active_user->setLastAttackFailed();
             }else{
                 field->setTerrain(MISTY_FIELD,active_user->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                consumeSeeds();
+                // consumeSeeds();
             }
             break;
         }
@@ -5083,6 +5049,8 @@ void Battle::performSwitch(BattleAction action){
     if(applySwitchInAbilitiesEffects(action.getActor()))
         return;
     if(applySwitchInItemsEffects(action.getActor()))
+        return;
+    if(onTerrainChange(action.getActor()))
         return;
     if(performEntryHazardCheck(action.getActor()))
         return;
@@ -6203,24 +6171,9 @@ double Battle::computePower(Attack*attack,BattleActionActor actor,bool attack_af
 }
 
 void Battle::applyPostDamage(){
-    unsigned int player_active_speed = player_active->getModifiedSpeed();
-    unsigned int opponent_active_speed = opponent_active->getModifiedSpeed();
     std::vector<BattleActionActor> actors;
-    if(player_active_speed > opponent_active_speed){
-        actors.push_back(PLAYER);
-        actors.push_back(OPPONENT);
-    }else if(player_active_speed < opponent_active_speed){
-        actors.push_back(OPPONENT);
-        actors.push_back(PLAYER);
-    }else{
-        if(RNG::coinFlip()){
-            actors.push_back(PLAYER);
-            actors.push_back(OPPONENT);
-        }else{
-            actors.push_back(OPPONENT);
-            actors.push_back(PLAYER);
-        }
-    }
+    for(auto battler: getBattlersSortedBySpeed())
+        actors.push_back(battler->getActor());
     // apply items
     for(auto actor: actors){
         applyItemPostDamage(actor);
@@ -6459,6 +6412,23 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             active_user->decrementVolatileCondition(BIND);
         }else{
             active_user->removeVolatileCondition(BIND);
+        }
+        if(active_user->isFainted()){return;}
+        //apply SNAP_TRAP
+        if(active_user->hasVolatileCondition(SNAP_TRAP) && !active_opponent->isFainted()){
+            event_handler->displayMsg(mon_name+" is hurt by Snap Trap!");
+            unsigned int st_damage;
+            if(active_opponent->hasHeldItem(BINDING_BAND))
+                st_damage = max(active_user->getMaxHP() / 6,1);
+            else
+                st_damage = max(active_user->getMaxHP() / 8,1);
+            unsigned int actual_st_damage = active_user->addDirectDamage(st_damage);
+            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_st_damage)+" Snap Trap damage!");
+            if(active_user->isFainted())
+                return;
+            active_user->decrementVolatileCondition(SNAP_TRAP);
+        }else{
+            active_user->removeVolatileCondition(SNAP_TRAP);
         }
         if(active_user->isFainted()){return;}
         //fire spin
@@ -7024,7 +6994,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
             if(field->getTerrain()!=MISTY_FIELD){
                 event_handler->displayMsg(user_name+"'s Misty Surge activates!");
                 field->setTerrain(MISTY_FIELD,user_active->hasHeldItem(TERRAIN_EXTENDER)?8:5);
-                consumeSeeds();
+                // consumeSeeds();
             }
             break;
         }
@@ -7059,71 +7029,106 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
     return false;
 }
 
-void Battle::consumeSeeds(){
-    std::vector<Battler*> battlers = {player_active, opponent_active};
+bool Battle::onTerrainChange(BattleActionActor actor){
+    Battler * user = getActorBattler(actor);
+    if(user->isFainted())
+        return false;
+    if(user->hasHeldItem(ELECTRIC_SEED) &&
+        field->getTerrain() == ELECTRIC_FIELD &&
+        user->isTouchingGround()){
+        StatCV changes;
+        if(user->getDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Electric Seed boosts its Def!");
+            user->consumeHeldItem();
+            changes.push_back({2,1});
+        }else if(user->getDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Electric Seed lowers its Def!");
+            user->consumeHeldItem();
+            changes.push_back({2,-1});
+        }
+        changeStats(user->getActor(), changes, false);
+    }
+    if(user->hasHeldItem(PSYCHIC_SEED) &&
+        field->getTerrain() == PSYCHIC_FIELD &&
+        user->isTouchingGround()){
+        StatCV changes;
+        if(user->getSpecialDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Psychic Seed boosts its Sp. Def!");
+            user->consumeHeldItem();
+            changes.push_back({4,1});
+        }else if(user->getSpecialDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Psychic Seed lowers its Sp. Def!");
+            user->consumeHeldItem();
+            changes.push_back({4,-1});
+        }
+        changeStats(user->getActor(), changes, false);
+    }
+    if(user->hasHeldItem(GRASSY_SEED) &&
+        field->getTerrain() == GRASSY_FIELD &&
+        user->isTouchingGround()){
+        StatCV changes;
+        if(user->getDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Grassy Seed boosts its Def!");
+            user->consumeHeldItem();
+            changes.push_back({2,1});
+        }else if(user->getDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Grassy Seed lowers its Def!");
+            user->consumeHeldItem();
+            changes.push_back({2,-1});
+        }
+        changeStats(user->getActor(), changes, false);
+    }
+    if(user->hasHeldItem(MISTY_SEED) &&
+        field->getTerrain() == MISTY_FIELD &&
+        user->isTouchingGround()){
+        StatCV changes;
+        if(user->getSpecialDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Misty Seed boosts its Sp. Def!");
+            user->consumeHeldItem();
+            changes.push_back({4,1});
+        }else if(user->getSpecialDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
+            event_handler->displayMsg(user->getNickname()+"'s Misty Seed lowers its Sp. Def!");
+            user->consumeHeldItem();
+            changes.push_back({4,-1});
+        }
+        changeStats(user->getActor(), changes, false);
+    }
+    if(user->hasAbility(MIMICRY)){
+        switch(field->getTerrain()){
+            case ELECTRIC_FIELD:{
+                user->clearTypes();
+                user->addType(ELECTRIC);
+                break;
+            } 
+            case PSYCHIC_FIELD:{
+                user->clearTypes();
+                user->addType(PSYCHIC);
+                break;
+            } 
+            case MISTY_FIELD:{
+                user->clearTypes();
+                user->addType(FAIRY);
+                break;
+            } 
+            case GRASSY_FIELD:{
+                user->clearTypes();
+                user->addType(GRASS);
+                break;
+            } 
+            case NO_TERRAIN:{
+                user->resetTypes();
+                break;
+            }
+            default:break;
+        }
+    }
+    return tryEjectPack(user->getActor());
+}
+
+void Battle::onTerrainChange(){
+    std::vector<Battler*> battlers = getBattlersSortedBySpeed();
     for(Battler* user: battlers){
-        if(user->isFainted())
-            continue;
-        if(user->hasHeldItem(ELECTRIC_SEED) &&
-            field->getTerrain() == ELECTRIC_FIELD &&
-            user->isTouchingGround()){
-            StatCV changes;
-            if(user->getDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Electric Seed boosts its Def!");
-                user->consumeHeldItem();
-                changes.push_back({2,1});
-            }else if(user->getDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Electric Seed lowers its Def!");
-                user->consumeHeldItem();
-                changes.push_back({2,-1});
-            }
-            changeStats(user->getActor(), changes, false);
-        }
-        if(user->hasHeldItem(PSYCHIC_SEED) &&
-            field->getTerrain() == PSYCHIC_FIELD &&
-            user->isTouchingGround()){
-            StatCV changes;
-            if(user->getSpecialDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Psychic Seed boosts its Sp. Def!");
-                user->consumeHeldItem();
-                changes.push_back({4,1});
-            }else if(user->getSpecialDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Psychic Seed lowers its Sp. Def!");
-                user->consumeHeldItem();
-                changes.push_back({4,-1});
-            }
-            changeStats(user->getActor(), changes, false);
-        }
-        if(user->hasHeldItem(GRASSY_SEED) &&
-            field->getTerrain() == GRASSY_FIELD &&
-            user->isTouchingGround()){
-            StatCV changes;
-            if(user->getDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Grassy Seed boosts its Def!");
-                user->consumeHeldItem();
-                changes.push_back({2,1});
-            }else if(user->getDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Grassy Seed lowers its Def!");
-                user->consumeHeldItem();
-                changes.push_back({2,-1});
-            }
-            changeStats(user->getActor(), changes, false);
-        }
-        if(user->hasHeldItem(MISTY_SEED) &&
-            field->getTerrain() == MISTY_FIELD &&
-            user->isTouchingGround()){
-            StatCV changes;
-            if(user->getSpecialDefenseModifier()!=MAX_MODIFIER && !user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Misty Seed boosts its Sp. Def!");
-                user->consumeHeldItem();
-                changes.push_back({4,1});
-            }else if(user->getSpecialDefenseModifier()!=MIN_MODIFIER && user->hasAbility(CONTRARY)){
-                event_handler->displayMsg(user->getNickname()+"'s Misty Seed lowers its Sp. Def!");
-                user->consumeHeldItem();
-                changes.push_back({4,-1});
-            }
-            changeStats(user->getActor(), changes, false);
-        }
+        onTerrainChange(user->getActor());
     }
 }
 
@@ -8103,6 +8108,7 @@ void Battle::removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor 
     opponent_active_monster->removeVolatileCondition(INFATUATION);
     opponent_active_monster->removeVolatileCondition(WRAP);
     opponent_active_monster->removeVolatileCondition(BIND);
+    opponent_active_monster->removeVolatileCondition(SNAP_TRAP);
     opponent_active_monster->removeVolatileCondition(IMPRISON);
     opponent_active_monster->removeVolatileCondition(UNNERVED);
 }
@@ -8137,6 +8143,8 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     player_active->addSeenOpponent(opponent_active->getMonster());
     removeVolatilesFromOpponentOfMonsterLeavingField(actor_switching_out);
     applySwitchInFormChange(actor_switching_out);
+    if(onTerrainChange(actor_switching_out))
+        return;
     if(applySwitchInAbilitiesEffects(actor_switching_out))
         return;
     if(applySwitchInItemsEffects(actor_switching_out))
@@ -8592,11 +8600,10 @@ void Battle::performEscape(BattleAction action){
 }
 
 bool Battle::applySwitchInItemsEffects(BattleActionActor actor){
-    // seeds
-    consumeSeeds();
     // room service
     checkRoomService();
-    return tryEjectPack(actor);
+    // seeds
+    return onTerrainChange(actor);
 }
 
 void Battle::applyItemPostDamage(BattleActionActor actor){
@@ -8839,7 +8846,8 @@ bool Battle::isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleA
         // lucky punch makes crits more likely for chansey
         crit_level+=2;
     }
-    if((effect_id == 17 || effect_id==197 || effect_id==232) 
+    if((effect_id == 17 || effect_id==197 || 
+        effect_id==232 || effect_id == 305) 
         && !active_user->hasAbility(SHEER_FORCE)){//moves with increased crit ratio, whose effect is denied by sheer force
         crit_level+=1;
     }
@@ -8977,8 +8985,10 @@ double Battle::computeEffectiveness(Attack* attack, BattleActionActor user_actor
 }
 
 void Battle::onWeatherChange(Weather new_weather){
-    player_active->onWeatherChange(new_weather);
-    opponent_active->onWeatherChange(new_weather);
+    auto battlers = getBattlersSortedBySpeed();
+    for(auto battler:battlers){
+        battler->onWeatherChange(new_weather);
+    }
 }
 
 void Battle::checkMonsterLeavingAbilities(BattleActionActor actor){
@@ -9089,6 +9099,20 @@ void Battle::performMegaEvolutions(BattleAction& player_action, BattleAction& op
 }
 
 void Battle::checkZenModes(){
-    player_active->checkZenMode();
-    opponent_active->checkZenMode();
+    for(auto battler: getBattlersSortedBySpeed())
+        battler->checkZenMode();
+}
+
+std::vector<Battler*> Battle::getBattlersSortedBySpeed(){
+    unsigned int player_speed = player_active->getModifiedSpeed();
+    unsigned int opponent_speed = opponent_active->getModifiedSpeed();
+    std::vector<Battler*> sorted_battlers;
+    if(player_speed > opponent_speed || (player_speed == opponent_speed && RNG::coinFlip())){
+        sorted_battlers.push_back(player_active);
+        sorted_battlers.push_back(opponent_active);
+    }else{
+        sorted_battlers.push_back(opponent_active);
+        sorted_battlers.push_back(player_active);
+    }
+    return sorted_battlers;
 }

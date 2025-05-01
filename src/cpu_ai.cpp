@@ -1896,7 +1896,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
         case 246:{
             //utility is multiplied by amount of non fainted monsters in the team
             unsigned int non_fainted = 0;
-            for(int i=0;i<cpu_team->getSize();i++){
+            for(unsigned int i=0;i<cpu_team->getSize();i++){
                 if(cpu_team->getMonster(i)->isFainted())
                     continue;
                 non_fainted++;
@@ -1944,7 +1944,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
         }
         case 252:{
             //heal from status whole team
-            for(int i=0;i<cpu_team->getSize();i++){
+            for(unsigned int i=0;i<cpu_team->getSize();i++){
                 Monster* cpu_monster = cpu_team->getMonster(i);
                 if(cpu_monster->isFainted())
                     continue;

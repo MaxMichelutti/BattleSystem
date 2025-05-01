@@ -98,17 +98,18 @@ class Battler{
     bool had_flying_type;
     Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
     unsigned int substituteHP;
-    std::string illusion_nickname;
+    Monster* illusion_monster;
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
     unsigned int getModifiedDefenseInternal()const;
     unsigned int getModifiedSpecialDefenseInternal()const;
+    void resetIllusion(MonsterTeam*team);
     public:
     Battler();
     Battler(Monster* monster,MonsterTeam* team,Field*field,BattleActionActor actor, EventHandler*);
     ~Battler();
     Monster* getMonster()const;
-    void setMonster(Monster* monster);
+    void setMonster(Monster* monster,MonsterTeam* team);
     void addVolatileCondition(VolatileStatusCondition condition, int duration);
     void removeVolatileCondition(VolatileStatusCondition condition);
     void decrementVolatileCondition(VolatileStatusCondition condition);

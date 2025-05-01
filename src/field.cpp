@@ -186,6 +186,7 @@ void Field::setTerrain(Terrain terrain, unsigned int length) {
                 break;
             default:break;
         }
+        battle->onTerrainChange();
     }
 }
 

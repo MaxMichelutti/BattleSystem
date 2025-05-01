@@ -5421,3 +5421,42 @@ CATEGORY:STATUS
 TARGET:SELF
 EFFECT:303
 PP:20
+# 580 WATER SHURIKEN
+NAME:Water Shuriken
+DESCRIPTION:The user hits the target with throwing stars two to five times in a row. This move always goes first.
+TYPE:WATER
+PP:20
+POWER:15
+CATEGORY:SPECIAL
+PRIORITY:1
+EFFECT:36
+EFFECTTARGET:SELF
+# 581 SNAP TRAP
+NAME:Snap Trap
+DESCRIPTION:The user snares the target in a snap trap that inflicts damage for four to five turns.
+TYPE:GRASS
+PP:15
+CATEGORY:PHYSICAL
+POWER:35
+CONTACT
+EFFECT:304
+EFFECTTARGET:SELF
+# 582 HEAD CHARGE
+NAME:Head Chanrge
+DESCRIPTION:The user charges its head into the target, using its powerful guard hair. This also damages the user a little.
+PP:15
+POWER:120
+CATEGORY:PHYSICAL
+TYPE:NORMAL
+CONTACT
+EFFECT:6
+EFFECTTARGET:SELF
+# 583 ESPER WING
+NAME:Esper Wing
+DESCRIPTION:The user slashes the target with aura-enriched wings. This also boosts the user's Speed stat. This move has a heightened chance of landing a critical hit.
+TYPE:PSYCHIC
+PP:10
+POWER:80
+CATEGORY:SPECIAL
+EFFECT:305
+EFFECTTARGET:SELF
