@@ -4633,6 +4633,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 break; 
             }
             active_user->addVolatileCondition(GRUDGED, -1);
+            break;
         }
         case 250:{
             //sketch
