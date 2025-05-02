@@ -1983,7 +1983,7 @@ std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType 
         if(hasSubstitute()){
             removeSubstitute();
         }
-        handler->displayMsg(getNickname()+" fainted!");
+        // handler->displayMsg(getNickname()+" fainted!");
         return {dmg,false};
     }
     
@@ -2063,7 +2063,7 @@ unsigned int Battler::addDirectDamage(unsigned int amount){
         if(hasSubstitute()){
             removeSubstitute();
         }
-        handler->displayMsg(getNickname()+" fainted!");
+        // handler->displayMsg(getNickname()+" fainted!");
         return dmg;
     }
     // berry check

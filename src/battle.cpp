@@ -226,6 +226,11 @@ void Battle::init(unsigned int cpu_skill, EventHandler* handler,
     caught_wild_monster = false;
     is_wild_battle_over = false;
     runaway_attempts = 0;
+    monsters_defeated_by_opponent = std::set<Monster*>();
+    monsters_defeated_by_player = std::set<Monster*>();
+    actions = std::map<Battler*,BattleAction>();
+    uproaring_monsters = std::set<Monster*>();
+    scheduled_futuresights = std::vector<ScheduledFutureSight>();
 }
 
 Battle::~Battle() {
@@ -3732,6 +3737,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 if(active_target->hasVolatileCondition(SMACKED_DOWN))
                     active_target->removeVolatileCondition(SMACKED_DOWN);
             }
+            break;
         }
         case 151:{
             //uproar
@@ -8413,15 +8419,19 @@ void Battle::givePlayerExperience(Monster* defeated_mon){
 }
 
 void Battle::checkForExp(){
-    if(player_active->isFainted())
+    if(player_active->isFainted()){
         checkMonsterLeavingAbilities(PLAYER);
-    if(opponent_active->isFainted())
+        if(monsters_defeated_by_opponent.find(player_active->getMonster()) == monsters_defeated_by_opponent.end())
+            event_handler->displayMsg(player_active->getNickname()+" fainted!");
+        monsters_defeated_by_opponent.insert(player_active->getMonster());
+    }
+    if(opponent_active->isFainted()){
         checkMonsterLeavingAbilities(OPPONENT);
-    if(opponent_active->isFainted() && 
-        battle_gives_exp && 
-        monsters_defeated_by_player.find(opponent_active->getMonster()) == monsters_defeated_by_player.end()){
+        if(monsters_defeated_by_player.find(opponent_active->getMonster()) == monsters_defeated_by_player.end())
+            event_handler->displayMsg(opponent_active->getNickname()+" fainted!");
         monsters_defeated_by_player.insert(opponent_active->getMonster());
-        givePlayerExperience(opponent_active->getMonster());
+        if(battle_gives_exp)
+            givePlayerExperience(opponent_active->getMonster());
     }
 }
 

@@ -114,6 +114,7 @@ class Battle{
     bool caught_wild_monster;
     bool is_wild_battle_over;
     std::set<Monster*> monsters_defeated_by_player;
+    std::set<Monster*> monsters_defeated_by_opponent;
     unsigned int runaway_attempts;
     unsigned int money;
     std::map<Battler*,BattleAction> actions;
