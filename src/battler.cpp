@@ -2234,6 +2234,7 @@ unsigned int Battler::getTurnsInBattle()const{
 }
 
 void Battler::nextTurn(){
+    resetDamageTakenThisTurn();
     turns_in_battle++;
 }
 
