@@ -8428,6 +8428,7 @@ void Battle::tryToCatchWildMonster(ItemType ball_used){
     if(ball_data==nullptr || ball_data->getCategory()!=BALL)
         return;
     event_handler->displayMsg("Player throws a "+ball_data->getName()+"!");
+    player_bag->removeItem(ball_used);
     Battler* active_user = getActorBattler(PLAYER);
     Battler* active_target = getActorBattler(OPPONENT);
     unsigned int form = active_target->getMonster()->getFormId();
