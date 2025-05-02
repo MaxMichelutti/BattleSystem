@@ -3559,6 +3559,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 field->setFieldEffect(STEALTH_ROCKS, -1, other_actor);
                 event_handler->displayMsg("Pointed rocks float in the air at "+opponent_mon_name+"'s side!");
             }
+            break;
         }
         case 221:{
             //sticky web
@@ -3569,6 +3570,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 field->setFieldEffect(STICKY_WEB, -1, other_actor);
                 event_handler->displayMsg("A sticky web slows down all Pokemon entering "+opponent_mon_name+"'s side!");
             }
+            break;
         }
         case 142:
         case 305:{
