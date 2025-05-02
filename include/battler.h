@@ -9,11 +9,13 @@
 #include <map>
 #include "field.h"
 #include "events.h"
+#include "team.h"
 
 class Field;
 class AttackData;
 class EventHandler;
 class Monster;
+class MonsterTeam;
 
 std::string cannotFallMsg(std::string nickname, std::string stat_name);
 std::string cannotRaiseMsg(std::string nickname, std::string stat_name); 
@@ -96,16 +98,18 @@ class Battler{
     bool had_flying_type;
     Stats battle_stats;//HP FROM THESE STATS MUST NEVER BE USED!!!
     unsigned int substituteHP;
+    Monster* illusion_monster;
 
     void displayStatModifyResult(bool result,int amount,std::string stat_name);
     unsigned int getModifiedDefenseInternal()const;
     unsigned int getModifiedSpecialDefenseInternal()const;
+    void resetIllusion(MonsterTeam*team);
     public:
     Battler();
-    Battler(Monster* monster,Field*field,BattleActionActor actor, EventHandler*);
+    Battler(Monster* monster,MonsterTeam* team,Field*field,BattleActionActor actor, EventHandler*);
     ~Battler();
     Monster* getMonster()const;
-    void setMonster(Monster* monster);
+    void setMonster(Monster* monster,MonsterTeam* team);
     void addVolatileCondition(VolatileStatusCondition condition, int duration);
     void removeVolatileCondition(VolatileStatusCondition condition);
     void decrementVolatileCondition(VolatileStatusCondition condition);
@@ -284,6 +288,13 @@ class Battler{
     bool hasSubstitute()const;
     void setSubstituteHP(unsigned int amount);
     void removeSubstitute();
+    void onWeatherChange(Weather new_weather);
+    void resetTypes();
+    void resetStats();
+    void resetAbility();
+    bool changeFormSwitchIn();
+    void checkZenMode();
+    void changeFormOnSuccessfulLastAttack();
 };
 
 #endif

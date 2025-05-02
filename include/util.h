@@ -4,6 +4,7 @@
 #include <sstream>
 #include <chrono>
 #include <ctime>
+#include "enums.h"
 
 template <typename T> T max_template(T a, T b) {
     return a > b ? a : b;
@@ -26,5 +27,6 @@ double baseDamage(unsigned int level, unsigned int base_power, unsigned int atta
 
 bool isDay();
 bool isNight();
+Season getSeason();
 
 #endif

@@ -35,13 +35,14 @@ unsigned int CPUAI::getSkill()const{
     return skill;
 }
 
-int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Battler* enemy_active, Field* field)const{
+int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,MonsterTeam * cpu_team,Battler* enemy_active, Field* field)const{
     Attack* attack = Attack::getAttack(attack_id);
     unsigned int effect = attack->getEffectId();
     // if(cpu_active->isFainted()){
     //     return -10000;
     // }
     unsigned int accuracy = attack->getAccuracy();
+    Type attack_type = attack->getType(enemy_active,field);
     if(accuracy==ALWAYS_HITS)
         accuracy = 100;
     int total_utility = 10;
@@ -215,10 +216,20 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 power = 20;
             break;
         }
+        case 259:{
+            // power depends on target hp percent
+            power = 100 * enemy_active->getCurrentHP() / (double)enemy_active->getMaxHP();
+            break;
+        }
+        case 289:{
+            // power depends on target hp percent
+            power = 120 * enemy_active->getCurrentHP() / (double)enemy_active->getMaxHP();
+            break;
+        }
     }
     if(power != 0){
         bool can_hit_ghosts = cpu_active->hasAbility(SCRAPPY);
-        float effectiveness = getTypeEffectiveness(attack->getType(), 
+        float effectiveness = getTypeEffectiveness(attack_type, 
             enemy_active->getTypes(),enemy_active->isTouchingGround(),
             can_hit_ghosts,effect == 196);
         unsigned int dmg = baseDamage(cpu_active->getLevel(),power,
@@ -245,6 +256,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
     int actual_stat_zero = 0 - MIN_MODIFIER;
     if(attack->getCategory() == STATUS)
         total_utility = 0;
+    if(attack->isSoundBased() && cpu_active->hasVolatileCondition(THROAT_CHOPPED))
+        return -50;
     switch(effect){
         case 1:{
             // -1 att opponent
@@ -320,21 +333,26 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 50;
             else
                 total_utility += 100;
-            if(field->getWeather() == SUN)
+            if(field->getWeather() == SUN || field->getWeather()==EXTREME_SUN)
                 total_utility *= 1.2;
             else if(field->getWeather()!=CLEAR)
                 total_utility *= 0.5;
             break;
         }
-        case 13:{
-            // ability of opp becomes insomnia
-            if(enemy_active->hasAbility(INSOMNIA))
+        case 13:case 281:{
+            // ability of opp becomes insomnia/simple
+            Ability target_ability;
+            if(effect==13)
+                target_ability = INSOMNIA;
+            else if(effect==281)
+                target_ability = SIMPLE;
+            if(enemy_active->hasAbility(target_ability) || abilityCannotBeChanged(enemy_active->getAbility()))
                 total_utility -= 10;
             else
                 total_utility += 10;
             break;
         }
-        case 14:{
+        case 14:case 308:{
             // burn opp
             if(enemy_active->canBeBurned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -349,14 +367,14 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 3 * effect_prob_mult * (actual_stat_zero + accuracy_mod);
             break;
         }
-        case 16:case 67:{
+        case 16:case 67:case 309:{
             // paralysis
             if(enemy_active->canBeParalyzed() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
                 field->getTerrain()!=MISTY_FIELD){
                 total_utility += 50 * effect_prob_mult;
             }
-            if(effect==67 && field->getWeather() == RAIN){
+            if(effect==67 && (field->getWeather() == RAIN || field->getWeather()==HEAVY_RAIN)){
                 total_utility *= 1.5;
             }
             break;
@@ -381,6 +399,24 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             }
             break;
         }
+        case 287:{
+            // magma storm
+            if(enemy_active->hasVolatileCondition(MAGMA_STORM)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
+        case 304:{
+            // snap trap
+            if(enemy_active->hasVolatileCondition(SNAP_TRAP)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
         case 220:{
             // infestation
             if(enemy_active->hasVolatileCondition(INFESTED)){
@@ -396,6 +432,16 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
                 field->getTerrain()!=MISTY_FIELD){
                 total_utility += 60 * effect_prob_mult;
+            }
+            total_utility *= 0.9;
+            break;
+        }
+        case 296:{
+            // recoil and paralyze opp
+            if(enemy_active->canBeParalyzed() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                field->getTerrain()!=MISTY_FIELD){
+                total_utility += 50 * effect_prob_mult;
             }
             total_utility *= 0.9;
             break;
@@ -433,7 +479,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
             break;
         }
-        case 25:case 174:{
+        case 25:case 174:case 299:{
             // confusion
             if(!enemy_active->hasVolatileCondition(CONFUSION) &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -446,7 +492,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             }
             break;
         }
-        case 26:{
+        case 26:
+        case 268:{
             // protect
             if(cpu_active->getConsecutiveProtects() > 0)
                 total_utility -= 10;
@@ -456,7 +503,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 27:{
             // set rain weather
-            if(field->getWeather() == RAIN)
+            if(field->getWeather() == RAIN || field->weatherCannotChange())
                 total_utility -= 10;
             else
                 total_utility += 90;
@@ -489,7 +536,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_defense_mod);
             break;
         }
-        case 32:case 123:case 124:case 185:case 231:case 235:{
+        case 32:case 123:case 124:case 185:
+        case 231:case 235:case 284:case 300:{
             // involves switching
             auto enemy_types = enemy_active->getTypes();
             float effectiveness = 1;
@@ -670,7 +718,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 58:{
             // suppress ability
-            if(enemy_active->isAbilitySuppressed())
+            if(enemy_active->isAbilitySuppressed() || abilityCannotBeSuppressed(enemy_active->getAbility()))
                 total_utility -= 10;
             else
                 total_utility += 50 * effect_prob_mult;
@@ -771,7 +819,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 72:{
             //sandstorm
-            if(field->getWeather() == SANDSTORM)
+            if(field->getWeather() == SANDSTORM || field->weatherCannotChange())
                 total_utility -= 10;
             else
                 total_utility += 90;
@@ -793,8 +841,10 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 25;
             break;
         }
-        case 76:{
+        case 76:case 298:{
             //bad poison
+            if(effect==298 && cpu_active->hasType(POISON))
+                effect_prob_mult = 1.1;
             // poison opp
             if(enemy_active->canBeBadlyPoisoned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -837,7 +887,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 50;
             break;
         }
-        case 83:{
+        case 83:case 291:{
             // heal 25% user
             unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
             if(HP_percent >= 50)
@@ -967,7 +1017,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 50;
             break;
         }
-        case 100:{
+        case 100:
+        case 275:{
             // user faints after use
             unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
             if(HP_percent >= 50)
@@ -978,6 +1029,8 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility *= 1.1;
             else
                 total_utility *= 3.0;
+            if(effect==275 && field->getTerrain()==MISTY_FIELD)
+                total_utility *= 1.5;
             break;
         }
         case 101:{
@@ -1101,7 +1154,9 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 127:{
             //copy target ability
-            if(cpu_active->hasAbility(enemy_active->getAbility()) || enemy_active->hasAbility(NO_ABILITY))
+            if(cpu_active->hasAbility(enemy_active->getAbility()) || 
+                enemy_active->hasAbility(NO_ABILITY) ||
+                abilityCannotBeCopied(enemy_active->getAbility()))
                 total_utility -= 10;
             else
                 total_utility += 50;
@@ -1160,7 +1215,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility += 50;
             break;
         }
-        case 142:{
+        case 142:case 305:{
             //+1 speed user
             unsigned int speed_mod = cpu_active->getSpeedModifier();
             total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
@@ -1240,7 +1295,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 153:{
             //start snowstorm weather
-            if(field->getWeather() == SNOWSTORM)
+            if(field->getWeather() == SNOWSTORM  || field->weatherCannotChange())
                 total_utility -= 10;
             else
                 total_utility += 80;
@@ -1351,11 +1406,31 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             break;
         }
         case 170:{
-            // bad move dont use
-            total_utility -= 30;
+            // only use if ability is plus or minus, boosts defenses
+            if(cpu_active->hasAbility(PLUS) || cpu_active->hasAbility(MINUS)){
+                unsigned int defense_mod = cpu_active->getDefenseModifier();
+                unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+                total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+                total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            }else{
+                total_utility -= 30;
+            }
             break;
         }
-        case 171:{
+        case 303:{
+            // only use if ability is plus or minus, boosts attacks
+            if(cpu_active->hasAbility(PLUS) || cpu_active->hasAbility(MINUS)){
+                unsigned int attack_mod = cpu_active->getAttackModifier();
+                unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+                total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+                total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            }else{
+                total_utility -= 30;
+            }
+            break;
+        }
+        case 171:
+        case 277:{
             // risk taking big recoil
             total_utility *= 0.7;
             break;
@@ -1377,8 +1452,9 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
             total_utility = 30;
             break;
         }
-        case 177:{
-            //reset stat changes
+        case 177: case 293:{
+            //177: reset stat changes
+            //293: switch changes with opponent
             unsigned int enemy_boosts = 0;
             if(enemy_active->getAttackModifier() > 0)
                 enemy_boosts++;
@@ -1493,7 +1569,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
         }
         case 188:{
             //set sunny weather
-            if(field->getWeather() == SUN)
+            if(field->getWeather() == SUN || field->weatherCannotChange())
                 total_utility -= 10;
             else
                 total_utility += 50;
@@ -1826,7 +1902,314 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Batt
                 total_utility -= 10;
             break;
         }
+        case 246:{
+            //utility is multiplied by amount of non fainted monsters in the team
+            unsigned int non_fainted = 0;
+            for(unsigned int i=0;i<cpu_team->getSize();i++){
+                if(cpu_team->getMonster(i)->isFainted())
+                    continue;
+                non_fainted++;
+            }
+            total_utility *= non_fainted;
+            break;
+        }
+        case 247:{
+            //-1 att opponent + heal
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility -= 5;
+            else if(HP_percent >= 25)
+                total_utility += 15;
+            else if(HP_percent >= 10)
+                total_utility += 25;
+            else
+                total_utility += 40;
+            break;
+        }
+        case 248:{
+            //grudge
+            if(cpu_active->hasVolatileCondition(GRUDGED))
+                total_utility -= 10;
+            else
+                total_utility += 25;
+            break;
+        }
+        case 249:{
+            //present, avoid it if possible
+            total_utility = 7;
+            break;
+        }
+        case 250:{
+            //sketch, avoid it if possible
+            total_utility = 7;
+            break;
+        }
+        case 251:{
+            //hits trice
+            total_utility *= 3;
+            break;
+        }
+        case 252:{
+            //heal from status whole team
+            for(unsigned int i=0;i<cpu_team->getSize();i++){
+                Monster* cpu_monster = cpu_team->getMonster(i);
+                if(cpu_monster->isFainted())
+                    continue;
+                else if(cpu_monster->getPermanentStatus() != NO_PERMANENT_CONDITION)
+                    total_utility += 20;
+            }
+            break;
+        }
+        case 253:{
+            //burn + automaticaly thaw user out
+            if(cpu_active->canBeBurned() &&
+                (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
+                field->getTerrain()!=MISTY_FIELD){
+                total_utility += 60 * effect_prob_mult;
+            }
+            if(cpu_active->isFrozen())
+                total_utility += 100;
+            break;
+        }
+        case 254:{
+            //power doubles in non clea weather
+            if(field->getWeather() != CLEAR)
+                total_utility *= 2;
+            break;
+        }
+        case 255:{
+            //create a substitute and switch out
+            if(!cpu_team->hasAliveBackup() || !cpu_active->canSwitchOut(enemy_active)){
+                total_utility -= 50;
+                break;
+            }
+            if(cpu_active->getCurrentHP() < cpu_active->getMaxHP()/2)
+                total_utility -= 50;
+            else if(cpu_active->getCurrentHP() < cpu_active->getMaxHP()*3.0/4)
+                total_utility += 10;
+            else
+                total_utility += 70;
+            break;
+        }
+        case 256:{
+            //substitute
+            if(cpu_active->getCurrentHP() < cpu_active->getMaxHP()/4)
+                total_utility -= 10;
+            else if(cpu_active->getCurrentHP() < cpu_active->getMaxHP()/2)
+                total_utility += 20;
+            else
+                total_utility += 80;
+            break;
+        }
+        case 257:{
+            //power doubles if user is par, brn, or psn
+            if(cpu_active->isPoisoned())
+                total_utility *= 2;
+            else if(cpu_active->isBurned())
+                total_utility *= 2;
+            else if(cpu_active->isParalyzed())
+                total_utility *= 2;
+            break;
+        }
+        case 260:{
+            //clear terrain
+            if(field->getTerrain() != NO_TERRAIN)
+                total_utility += 20;
+            break;
+        }
+        case 262:{
+            //start hail
+            if(field->getWeather() == HAIL || field->weatherCannotChange())
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 265:{
+            //user gives its ability to target
+            if(enemy_active->hasAbility(cpu_active->getAbility()) || abilityCannotBeChanged(enemy_active->getAbility()))
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 266:{
+            //stronger under psychic terrain
+            if(field->getTerrain() == PSYCHIC_FIELD)
+                total_utility *= 1.5/1.3;
+            break;
+        }
+        case 267:{
+            //target gets heal block
+            if(enemy_active->hasVolatileCondition(HEAL_BLOCKED))
+                total_utility -= 10;
+            else
+                total_utility += 10;
+            break;
+        }
+        case 271:{
+            //magic room
+            if(field->hasFullFieldEffect(MAGIC_ROOM))
+                total_utility -= 10;
+            else
+                total_utility += 40;
+            break;
+        }
+        case 272:{
+            //user and target swap abilities
+            if(cpu_active->hasAbility(enemy_active->getAbility()) || 
+                abilityCannotBeChanged(cpu_active->getAbility()) ||
+                abilityCannotBeCopied(enemy_active->getAbility()))
+                total_utility -= 10;
+            else
+                total_utility += 10;
+            break;
+        }
+        case 273:{
+            //psychic terrain
+            if(field->getTerrain() == PSYCHIC_FIELD)
+                total_utility -= 10;
+            else
+                total_utility += 50;
+            break;
+        }
+        case 276:{
+            //user dies if under 50% and takes 1/2 recoil otherwise
+            unsigned int HP_percent = cpu_active->getCurrentHP() * 100 / cpu_active->getMaxHP();
+            if(HP_percent >= 50)
+                total_utility *= 0.6;
+            else
+                total_utility = -90;
+            break;
+        }
+        case 278:{
+            //meteor beam: raise user spatt and attack one turn after
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            break;
+        }
+        case 279:{
+            //bad attack, avoid it
+            total_utility -= 30;
+            break;
+        }
+        case 280:{
+            //fails if target does not hold an item
+            if(!enemy_active->hasHeldItem())
+                total_utility = -10; //attack is going to fail
+            break;
+        }
+        case 282:{
+            //raise def of all grass types
+            if(cpu_active->hasType(GRASS)){
+                //+1 def user
+                unsigned int defense_mod = cpu_active->getDefenseModifier();
+                total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            }
+            if(enemy_active->hasType(GRASS)){
+                //+1 def enemy
+                unsigned int defense_mod = enemy_active->getDefenseModifier();
+                total_utility -= 5 * effect_prob_mult * (actual_stat_zero + defense_mod);
+            }
+            break;
+        }
+        case 283:{
+            //reflect enemy attack
+            // 25% for a +30 utility
+            if(RNG::oneFourth())
+                total_utility += 30;
+            break;
+        }
+        case 285:{
+            //-1 att spatt spd opponent
+            if(!enemy_active->isPoisoned())
+                break;
+            unsigned int attack_mod = enemy_active->getAttackModifier();
+            unsigned int special_attack_mod = enemy_active->getSpecialAttackModifier();
+            unsigned int speed_mod = enemy_active->getSpeedModifier();
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + special_attack_mod);
+            total_utility += 5 * effect_prob_mult * (actual_stat_zero + speed_mod);
+            break;
+        }
+        case 290:{
+            //user dies -> avoid at all costs
+            total_utility = -187;
+            break;
+        }
+        case 292:{
+            //+1 spatt spdef user
+            unsigned int special_attack_mod = cpu_active->getSpecialAttackModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            total_utility += 5 * (actual_stat_zero - special_attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
+            //heal status
+            if(cpu_active->hasPermanentStatus())
+                total_utility += 20;
+            break;
+        }
+        case 295:{
+            //-1 def spdef speed user
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - special_defense_mod);
+            total_utility -= 5 * effect_prob_mult * (actual_stat_zero - speed_mod);
+            break;
+        }
+        case 297:{
+            //+2 spd +1 att user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 10 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 301:{
+            //+1 att def speed user
+            unsigned int attack_mod = cpu_active->getAttackModifier();
+            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            unsigned int speed_mod = cpu_active->getSpeedModifier();
+            total_utility += 5 * (actual_stat_zero - attack_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;
+            break;
+        }
+        case 302:{
+            //protects user from status moves, use with utility of 25 roughly once every 5 turns
+            if(RNG::getRandomInteger(1,5)==1)
+                total_utility += 25;
+            else
+                total_utility += 1;
+            break;
+        }
         default: break;
+    }
+    // add field utility
+    if(attack->getCategory()!=STATUS){
+        if(field->getTerrain() == PSYCHIC_FIELD && attack_type==PSYCHIC)
+            total_utility *= 1.3;
+        else if(field->getTerrain() == GRASSY_FIELD && attack_type==GRASS)
+            total_utility *= 1.3;
+        else if(field->getTerrain() == MISTY_FIELD && attack_type==DRAGON)
+            total_utility *= 0.5;
+        else if(field->getTerrain() == ELECTRIC_FIELD && attack_type==ELECTRIC)
+            total_utility *= 1.3;
+        if((field->getWeather() == RAIN || field->getWeather()==HEAVY_RAIN) && attack_type==WATER)
+            total_utility *= 1.5;
+        else if((field->getWeather() == SUN || field->getWeather()==EXTREME_SUN) && attack_type==FIRE)
+            total_utility *= 1.5;
+        if(field->getWeather() == RAIN && attack_type==FIRE)
+            total_utility *= 0.5;
+        else if(field->getWeather() == SUN && attack_type==WATER)
+            total_utility *= 0.5;
+        if(field->getWeather()==EXTREME_SUN && attack_type==WATER)
+            total_utility = -10;
+        else if(field->getWeather()==HEAVY_RAIN && attack_type==FIRE)
+            total_utility = -10;
     }
     total_utility *= accuracy / 90.0;
     // add some randomicity to the utility
@@ -1867,7 +2250,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
     if(active_monster->hasVolatileCondition(ENCORE) || (
         (active_monster->hasHeldItem(CHOICE_BAND) ||
         active_monster->hasHeldItem(CHOICE_SPECS) ||
-        active_monster->hasHeldItem(CHOICE_SCARF)) && active_monster->getLastAttackUsed() != 0
+        active_monster->hasHeldItem(CHOICE_SCARF) ||
+        active_monster->hasAbility(GORILLA_TACTICS)) && active_monster->getLastAttackUsed() != 0
     )){
         // force use of encored move
         unsigned int attack_id = active_monster->getLastAttackUsed();
@@ -1882,7 +2266,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);   
+            false,
+            active_monster->getMonster());   
     }
     if(skill==0){// unskilled opponenets never switch and always attack randomly
         return BattleAction(
@@ -1893,9 +2278,10 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             0,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }
-    Choice * attack_choice = getBestAttackChoice(active_monster,enemy_active,field);
+    Choice * attack_choice = getBestAttackChoice(active_monster,monster_team,enemy_active,field);
     Choice * switch_choice = getBestSwitchChoice(active_monster,monster_team,enemy_active,field);
     Choice * item_choice = getBestItemChoice(active_monster,bag);
     if(switch_choice != nullptr && active_monster->hasVolatileCondition(PERISH_SONG))
@@ -1908,7 +2294,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
         active_monster->getModifiedSpeed(), 
         0,
         NO_ITEM_TYPE,
-        false);
+        false,
+        active_monster->getMonster());
     bool mega_evolution_choice = active_monster->canMegaEvolve() && !monster_team->hasMega();
     bool can_switch_out = active_monster->canSwitchOut(enemy_active) || 
         active_monster->hasHeldItem(SHED_SHELL);
@@ -1931,7 +2318,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             switch_id,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }else if(switch_choice == nullptr){
         unsigned int attack_id = attack_choice->choice_id;
         int attack_utility = attack_choice->utility;
@@ -1948,7 +2336,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 NO_ITEM_TYPE,
-                mega_evolution_choice);
+                mega_evolution_choice,
+                active_monster->getMonster());
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;
@@ -1960,7 +2349,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 item_id,
-                false);
+                false,
+                active_monster->getMonster());
         }
     }else if(attack_choice->utility >= switch_choice->utility || !can_switch_out){
         unsigned int attack_id = attack_choice->choice_id;
@@ -1978,7 +2368,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 NO_ITEM_TYPE,
-                mega_evolution_choice);
+                mega_evolution_choice,
+                active_monster->getMonster());
         }else{
             ItemType item_id = item_choice->item;
             delete item_choice;
@@ -1990,7 +2381,8 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
                 active_monster->getModifiedSpeed(), 
                 0,
                 item_id,
-                false);
+                false,
+                active_monster->getMonster());
         }
     }else{
         unsigned int switch_id = switch_choice->choice_id;
@@ -2004,11 +2396,12 @@ BattleAction CPUAI::chooseAction(Battler* active_monster,MonsterTeam* monster_te
             active_monster->getModifiedSpeed(), 
             switch_id,
             NO_ITEM_TYPE,
-            false);
+            false,
+            active_monster->getMonster());
     }
 }
 
-Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Field*field)const{
+Choice* CPUAI::getBestAttackChoice(Battler* active_user,MonsterTeam*cpu_team,Battler*active_target,Field*field)const{
     auto choices = active_user->getAttacks();
     if(choices.empty()){
         return nullptr;
@@ -2028,7 +2421,7 @@ Choice* CPUAI::getBestAttackChoice(Battler* active_user,Battler*active_target,Fi
         Attack* attack = Attack::getAttack(attack_id);
         if(attack->getCategory() == STATUS && active_user->hasVolatileCondition(TAUNTED))//cannot use status moves when taunted
             continue;
-        int utility = computeAttackUtility(attack_id,active_user,active_target,field);
+        int utility = computeAttackUtility(attack_id,active_user,cpu_team,active_target,field);
         if(utility > best_utility){
             best_choice_id = attack_id;
             best_utility = utility;
@@ -2061,7 +2454,7 @@ Choice* CPUAI::getBestSwitchChoice(Battler*active_user,MonsterTeam*user_team,Bat
             unsigned int curr_pps = attack.second;
             if(attack_id == 0){continue;}
             if(curr_pps == 0){continue;}
-            int attack_utility = computeAttackUtility(attack_id,active_user,active_target,field);
+            int attack_utility = computeAttackUtility(attack_id,active_user,user_team,active_target,field);
             if(attack_utility > curr_utility){
                 curr_utility = attack_utility * 0.5;
             }

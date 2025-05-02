@@ -9,12 +9,15 @@
 #include "common.h"
 #include "events.h"
 #include "player.h"
+#include "constants.h"
+#include "team.h"
 #include <vector>
 #include <string>
 #include <iostream>
 
 class EventHandler;
 class Player;
+class MonsterTeam;
 
 class AttackData{
     public:
@@ -67,6 +70,7 @@ class Monster{
     Monster(unsigned int species_id, unsigned int level,unsigned int form_id);
     Monster(Monster* other);
     ~Monster();
+    bool changeFormOnNewItem();
     unsigned int getSpeciesId()const;
     Stats getStats()const;
     EVs getEffort()const;
@@ -98,6 +102,7 @@ class Monster{
     void changeFriendship(int amount);
     bool hasAttack(unsigned int attack_id)const;
     bool learnAttack(unsigned int attack_id);
+    bool learnAttackForced(unsigned int attack_id,unsigned int slot);
     bool forgetAttack(unsigned int attack_id);
     bool replaceAttack(unsigned int old_attack_id, unsigned int new_attack_id);
     void gainExperience(unsigned long exp,EventHandler* handler);
@@ -105,8 +110,8 @@ class Monster{
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level);
     static Monster* generateRandomMonster(unsigned int species_id, unsigned int level,unsigned int form_id);
     void printSummary()const;
-    bool canEvolve()const;
-    void evolve();
+    bool canEvolve(MonsterTeam* monster_team)const;
+    void evolve(MonsterTeam* monster_team);
     void heal();
     bool isFainted()const;
     bool hasPP(unsigned int attack_id)const;
@@ -129,8 +134,8 @@ class Monster{
     bool itemWouldHaveEffect(ItemType item)const;
     bool hasHeldItem()const;
     ItemType getHeldItem()const;
-    ItemType setHeldItem(ItemType item);
-    ItemType removeHeldItem();
+    std::pair<ItemType,bool> setHeldItem(ItemType item);
+    std::pair<ItemType,bool> removeHeldItem();
     bool dislikesBerry(ItemType item)const;
     bool likesBerry(ItemType item)const;
     // bool hasMaxedEVs()const;
@@ -146,7 +151,14 @@ class Monster{
     bool isPastEvoLevel()const;
     void setBall(ItemType ball);
     bool hasEvolutions()const;
-    
+    bool changeWeatherForm(Weather weather);
+    bool changeFormSwitchIn();
+    void interactWithKeyItem(ItemType item, EventHandler* handler, MonsterTeam * monster_team);
+    bool tryZenMode();
+    void resetZenMode();
+    void changeSeasonalForm();
+    void changeAttackDependentForms();
+    bool changeFormOnUsedAttack(unsigned int attack_id);
 };
 
 #endif

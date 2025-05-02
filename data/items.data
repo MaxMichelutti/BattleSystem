@@ -533,13 +533,11 @@ CATEGORY:EVOLUTION
 PRICE:3000
 # 97 DEEP SEA SCALE
 NAME:Deep Sea Scale
-% boosts Clamperl
 DESCRIPTION:An item to be held by Clamperl. This scale shines with a faint pink and boosts Clamperl's Sp. Def stat.
 CATEGORY:EVOLUTION
 PRICE:2000
 # 98 DEEP SEA TOOTH
 NAME:Deep Se Tooth
-% boosts Clamperl
 DESCRIPTION:An item to be held by Clamperl. This fang gleams a sharp silver and boosts Clamperl's Sp. Atk stat.
 CATEGORY:EVOLUTION
 PRICE:2000
@@ -1765,3 +1763,148 @@ NAME:Shell Bell
 CATEGORY:HELD
 DESCRIPTION:An item to be held by a Pokémon. The holder restores a little HP to itself every time it inflicts damage with an attack.
 PRICE:20000
+# 342 BLUE ORB
+NAME:Blue Orb
+CATEGORY:MEGA_STONE
+DESCRIPTION:A shiny blue orb that is said to have a legend tied to it. It's known to have a deep connection with the Hoenn region.
+PRICE:10000
+# 343 RED ORB
+NAME:Red Orb
+CATEGORY:MEGA_STONE
+DESCRIPTION:A shiny red orb that is said to have a legend tied to it. It's known to have a deep connection with the Hoenn region.
+PRICE:10000
+# 344 HELIX FOSSIL
+NAME:Helix Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It might be a piece of a seashell.
+PRICE:7000
+# 345 DOME FOSSIL
+NAME:Dome Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It could be a shell or carapace.
+PRICE:7000
+# 346 OLD AMBER
+NAME:Old Amber
+CATEGORY:FOSSIL
+DESCRIPTION:A piece of amber that still contains the genetic material of a prehistoric Pokémon. It's clear with a tawny, reddish tint.
+PRICE:10000
+# 347 ROOT FOSSIL
+NAME:Root Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It looks as if it could be part of a plant's root.
+PRICE:7000
+# 348 CLAW FOSSIL
+NAME:Claw Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It appears to be a fragment of a claw.
+PRICE:7000
+# 349 SKULL FOSSIL
+NAME:Skull Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It appears as though it's part of a head.
+PRICE:7000
+# 350 ARMOR FOSSIL
+NAME:Armor Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It looks to be from some kind of protective collar.
+PRICE:7000
+# 351 COVER FOSSIL
+NAME:Cover Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived in the sea. It appears as though it could be part of a creature's back.
+PRICE:7000
+# 352 PLUME FOSSIL
+NAME:Plume Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon said to be an ancestor to modern bird Pokémon. It looks as if it could have come from part of some creature's wing.
+PRICE:7000
+# 353 JAW FOSSIL
+NAME:Jaw Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on the land. It looks as if it could be a piece of a large jaw.
+PRICE:7000
+# 354 SAIL FOSSIL
+NAME:Sail Fossil
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil from a prehistoric Pokémon that once lived on land. It looks like the impression from a skin sail.
+PRICE:7000
+# 355 FOSSILIZED BIRD
+NAME:Fossilized Bird
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once soared through the sky. What it looked like is a mystery.
+PRICE:7000
+# 356 FOSSILIZED FISH
+NAME:Fossilized Fish
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once lived in the sea. What it looked like is a mystery.
+PRICE:7000
+# 357 FOSSILIZED DRAKE
+NAME:Fossilized Drake
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once roamed the land. What it looked like is a mystery.
+PRICE:7000
+# 358 FOSSILIZED DINO
+NAME:Fossilized Dino
+CATEGORY:FOSSIL
+DESCRIPTION:A fossil piece left behind by a prehistoric Pokémon that once lived in the sea. What it looked like is a mystery.
+PRICE:7000
+# 359 GRISEOUS CORE
+NAME:Griseous Core
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Giratina. This large, glowing gem wells with power and allows the Pokémon to change form.
+PRICE:10000
+# 360 ADAMANT CRYSTAL
+NAME:Adamant Crystal
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Dialga. This large, glowing gem wells with power and allows the Pokémon to change form.
+PRICE:10000
+# 361 LUSTROUS GLOBE
+NAME:Lustrous Globe
+CATEGORY:HELD
+DESCRIPTION:An item to be held by Palkia. This large, glowing orb wells with power and allows the Pokémon to change form.
+PRICE:10000
+# 362 GRACIDEA
+NAME:Gracidea
+CATEGORY:KEY
+DESCRIPTION:A flower sometimes bundled into a bouquet to be given as an expression of gratitude on special occasions, such as birthdays and anniversaries.
+PRICE:10000
+# 363 METEORITE
+NAME:Meteorite
+CATEGORY:KEY
+DESCRIPTION:A rock that fell to earth from space. It’s slightly warm to the touch. It allows a certain species of Pokémon to change forms.
+PRICE:10000
+# 364 ROTOM CATALOG
+NAME:Rotom Catalog
+CATEGORY:KEY
+DESCRIPTION:A catalog of devices that Rotom like. Use the catalog to have Rotom hop in and out of the various devices listed within.
+PRICE:10000
+# 365 REVEAL GLASS
+NAME:Reveal Glass
+CATEGORY:KEY
+DESCRIPTION:A mysterious looking glass that reveals the truth. It can return a Pokémon to its original shape.
+PRICE:10000
+# 366 DNA SPLICERS
+NAME:DNA Splicers
+CATEGORY:KEY
+DESCRIPTION:A splicer that fuses Kyurem and a certain Pokémon. They are said to have originally been one.
+PRICE:10000
+# 367 SHOCK DRIVE
+NAME:Shock Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Electric type.
+PRICE:10000
+# 368 BURN DRIVE
+NAME:Burn Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Fire type.
+PRICE:10000
+# 369 CHILL DRIVE
+NAME:Chill Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Ice type.
+PRICE:10000
+# 370 DOUSE DRIVE
+NAME:Douse Drive
+CATEGORY:HELD
+DESCRIPTION:A cassette to be held by Genesect. It changes Genesect's Techno Blast move so it becomes Water type.
+PRICE:10000

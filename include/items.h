@@ -14,6 +14,7 @@ ItemCategory StringToItemCategory(std::string category);
 bool canBeStolen(ItemType item_type);
 unsigned int flingPower(ItemType item_type);
 bool canItemBeConsumed(ItemType item_type);
+bool isDrive(ItemType item_type);
 
 class ItemData;
 static std::unordered_map<ItemType,ItemData*>  itemTypeMap;

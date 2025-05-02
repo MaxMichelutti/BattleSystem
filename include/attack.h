@@ -51,6 +51,7 @@ class Attack{
     bool is_sketchable;
     bool is_wind;
     bool is_biting;
+    bool is_slicing;
     public:
     Attack();
     Attack(unsigned int index, std::map<std::string,std::string> data);
@@ -81,6 +82,7 @@ class Attack{
     bool canBeCopycat()const;
     bool isBiting()const;
     bool isWind()const;
+    bool isSlicing()const;
     static Attack* getAttack(unsigned int attack_id);
     static Attack* getRandomMetronomeAttack();
     void printSummary()const;

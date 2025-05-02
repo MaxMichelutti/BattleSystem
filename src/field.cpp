@@ -53,9 +53,10 @@ Field::Field() {
     turns_to_clear_terrain = 0;
 }
 
-Field::Field(EventHandler* event_handler) {
+Field::Field(Battle * battle,EventHandler* event_handler) {
     weather = CLEAR;
     default_weather = CLEAR;
+    this->battle = battle;
     terrain = NO_TERRAIN;
     turns_to_clear_weather = 0;
     turns_to_clear_terrain = 0;
@@ -65,12 +66,12 @@ Field::~Field() {
     
 }
 
-Field::Field(Weather weather, Terrain terrain) {
-    this->weather = weather;
-    this->terrain = terrain;
-    turns_to_clear_weather = 0;
-    turns_to_clear_terrain = 0;
-}
+// Field::Field(Weather weather, Terrain terrain) {
+//     this->weather = weather;
+//     this->terrain = terrain;
+//     turns_to_clear_weather = 0;
+//     turns_to_clear_terrain = 0;
+// }
 
 Weather Field::getWeather()const {
     return weather;
@@ -109,34 +110,57 @@ void Field::setWeather(Weather new_weather){
 
 void Field::displayWeatherChange(){
     switch(weather){
-        case RAIN:
+        case RAIN:{
             event_handler->displayMsg("It started to rain!");
             break;
-        case SUN:
+        }
+        case HEAVY_RAIN:{
+            event_handler->displayMsg("It's pouring with rain!");
+            break;
+        }
+        case SUN:{
             event_handler->displayMsg("The sun is shining harshly!");
             break;
-        case HAIL:
+        }
+        case EXTREME_SUN:{
+            event_handler->displayMsg("The sun is blazing!");
+            break;
+        }
+        case HAIL:{
             event_handler->displayMsg("Hail started to fall!");
             break;
-        case SANDSTORM:
+        }
+        case SANDSTORM:{
             event_handler->displayMsg("A sandstorm started!");
             break;
-        case SNOWSTORM:
+        }
+        case SNOWSTORM:{
             event_handler->displayMsg("Snow started to fall!");
             break;
-        case CLEAR:
+        }
+        case CLEAR:{
             event_handler->displayMsg("The weather cleared!");
             break;
+        }
+        case STRONG_WINDS:{
+            event_handler->displayMsg("Strong winds started to blow!");
+            break;
+        }
         default:break;
     }
 }
 
+bool Field::weatherCannotChange()const{
+    return weather==HEAVY_RAIN || weather==EXTREME_SUN || weather == STRONG_WINDS;
+}
+
 void Field::setWeather(Weather new_weather, unsigned int length) {
-    if(new_weather == weather)
+    if(new_weather == this->weather)
         return;
     this->weather = new_weather;
     turns_to_clear_weather = length;
     displayWeatherChange();
+    battle->onWeatherChange(new_weather);
 }
 
 void Field::setTerrain(Terrain terrain) {
@@ -162,6 +186,7 @@ void Field::setTerrain(Terrain terrain, unsigned int length) {
                 break;
             default:break;
         }
+        battle->onTerrainChange();
     }
 }
 
@@ -243,9 +268,11 @@ void Field::nextTurnWeather() {
         else{
             switch(weather){
                 case RAIN:
+                case HEAVY_RAIN:
                     event_handler->displayMsg("Rain continues to fall!");
                     break;
                 case SUN:
+                case EXTREME_SUN:
                     event_handler->displayMsg("The sun continues to shine harshly!");
                     break;
                 case HAIL:
@@ -256,6 +283,9 @@ void Field::nextTurnWeather() {
                     break;
                 case SNOWSTORM:
                     event_handler->displayMsg("Snow continues to fall!");
+                    break;
+                case STRONG_WINDS:
+                    event_handler->displayMsg("Strong winds continue to blow!");
                     break;
                 default:break;
             }
@@ -331,6 +361,7 @@ void Field::clearWeather() {
     if(weather != default_weather){
         weather = default_weather;
         displayWeatherChange();
+        battle->onWeatherChange(weather);
     }
 }
 

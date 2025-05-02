@@ -66,3 +66,21 @@ bool isNight(){
     int hour = getHour();
     return (hour < 6 || hour >= 18);
 }
+
+Season getSeason(){
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+    int month = std::localtime(&now_time)->tm_mon + 1;//1: Jan... 12: Dec
+    switch(month%4){
+        case 1:
+            return SPRING;
+        case 2:
+            return SUMMER;
+        case 3:
+            return FALL;
+        case 0:
+            return WINTER;
+        default:
+            return WINTER;
+    }
+}

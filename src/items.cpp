@@ -154,6 +154,8 @@ bool canBeStolen(ItemType item_type){
         return false;
     if(item_data->getCategory() == BALL)
         return false;
+    if(item_data->getCategory() == KEY_ITEM)
+        return false;
     switch (item_type){
         default:
             return true;
@@ -251,6 +253,7 @@ unsigned int flingPower(ItemType item_type){
         case SPELL_TAG:
         case TWISTED_SPOON:
         case SHELL_BELL:
+        case LIFE_ORB:
             return 30;
         case LUCKY_PUNCH:
         case ICY_ROCK:
@@ -270,6 +273,9 @@ unsigned int flingPower(ItemType item_type){
         case ADAMANT_ORB:
         case LUSTROUS_ORB:
         case GRISEOUS_ORB:
+        case ADAMANT_CRYSTAL:
+        case LUSTROUS_GLOBE:
+        case GRISEOUS_CORE:
             return 60;
         case POWER_ANKLET:
         case POWER_BELT:
@@ -338,6 +344,9 @@ bool canItemBeConsumed(ItemType item_type){
     if(item_data->getCategory() == BERRY){
         return true;
     }
+    if(item_data->getCategory() == GEM){
+        return true;
+    }
     switch(item_type){
         case ELECTRIC_SEED:
         case GRASSY_SEED:
@@ -361,24 +370,6 @@ bool canItemBeConsumed(ItemType item_type){
         case SNOWBALL:
         case WEAKNESS_POLICY:
         case ADRENALINE_ORB:
-        case FIRE_GEM:
-        case WATER_GEM:
-        case ELECTRIC_GEM:
-        case GRASS_GEM:
-        case ICE_GEM:
-        case FIGHTING_GEM:
-        case POISON_GEM:
-        case GROUND_GEM:
-        case FLYING_GEM:
-        case PSYCHIC_GEM:
-        case BUG_GEM:
-        case ROCK_GEM:
-        case GHOST_GEM:
-        case DRAGON_GEM:
-        case DARK_GEM:
-        case FAIRY_GEM:
-        case NORMAL_GEM:
-        case STEEL_GEM:
             return true;
         default:
             return false;
@@ -389,4 +380,16 @@ unsigned int ItemData::getFlavour(unsigned int flavour_type)const{
     if(flavour_type > 5)
         return 0;
     return flavour[flavour_type];
+}
+
+bool isDrive(ItemType item_type){
+    switch (item_type){
+        case DOUSE_DRIVE:
+        case SHOCK_DRIVE:
+        case BURN_DRIVE:
+        case CHILL_DRIVE:
+            return true;
+        default:
+            return false;
+    }
 }

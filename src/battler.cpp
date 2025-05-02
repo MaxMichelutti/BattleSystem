@@ -34,7 +34,9 @@ bool isVolatileConditionClearedByRapidSpin(VolatileStatusCondition status) {
         case LEECH_SEED:
         case WRAP:
         case BIND:
+        case SNAP_TRAP:
         case FIRESPIN:
+        case MAGMA_STORM:
         case INFESTED:
         case SANDTOMB:
         case WHIRLPOOL:
@@ -257,7 +259,7 @@ Battler::Battler() {
     monster = nullptr;
 }
 
-Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHandler* handler) {
+Battler::Battler(Monster* monster, MonsterTeam* team,Field*field,BattleActionActor actor,EventHandler* handler) {
     this->monster = monster;
     bad_poison_counter = 0;
     if(monster->getPermanentStatus() == BAD_POISON){
@@ -266,10 +268,8 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     this->battler_ability = monster->getAbility();
     this->actor = actor;
     this->field = field;
-    this->types.insert(monster->getType1());
-    if(monster->getType2()!=NO_TYPE){
-        this->types.insert(monster->getType2());
-    }
+    resetTypes();
+    resetStats();
     this->handler = handler;
     consecutive_protects_counter=0;
     bad_poison_counter=0;
@@ -287,14 +287,24 @@ Battler::Battler(Monster* monster, Field*field,BattleActionActor actor,EventHand
     last_attack_failed = false;
     had_flying_type = false;
     hits_taken = 0;
+    substituteHP = 0;
     resetDamageTakenThisTurn();
     is_mold_breaker_active = false;
     weight = monster->getWeight();
     height = monster->getHeight();
-    battle_stats = monster->getStats();
+    illusion_monster = nullptr;
+    resetIllusion(team);
 }
 
-void Battler::setMonster(Monster* monster){
+void Battler::resetTypes(){
+    types.clear();
+    types.insert(monster->getType1());
+    if(monster->getType2()!=NO_TYPE){
+        this->types.insert(monster->getType2());
+    }
+}
+
+void Battler::setMonster(Monster* monster,MonsterTeam* team){
     mimicked_attack = nullptr;
     this->monster = monster;
     consecutive_protects_counter = 0;
@@ -303,7 +313,7 @@ void Battler::setMonster(Monster* monster){
     attacks_used.clear();
     stockpiles = 0;
     bad_poison_counter = 0;
-    has_ability_neutralized = false;
+    has_ability_suppressed = false;
     disabled_attack_id = 0;
     disabled_turns_left = 0;
     turns_in_battle = 0;
@@ -312,11 +322,11 @@ void Battler::setMonster(Monster* monster){
     had_held_item = false;
     weight = monster->getWeight();
     height = monster->getHeight();
-    battle_stats = monster->getStats();
     // substituteHP = 0;//switching removes the substitute
     resetDamageTakenThisTurn();
     removeVolatileCondition(INFATUATION);
     removeVolatileCondition(PROTECT);
+    removeVolatileCondition(SPIKY_PROTECT);
     removeVolatileCondition(CHARGED);
     removeVolatileCondition(CHARGED_2);
     removeVolatileCondition(ENCORE);
@@ -328,7 +338,23 @@ void Battler::setMonster(Monster* monster){
     removeVolatileCondition(THROAT_CHOPPED);
     removeVolatileCondition(RECHARGING);
     removeVolatileCondition(TRUANTING);
+    resetTypes();
+    resetStats();
+    resetAbility();
+    resetIllusion(team);
+}
 
+void Battler::resetIllusion(MonsterTeam* team){
+    illusion_monster = nullptr;
+    if(hasAbility(ILLUSION)){
+        for(int i=team->getSize()-1;i>=1;i--){
+            if(team->getMonster(i)->isFainted()){
+                continue;
+            }
+            illusion_monster = team->getMonster(i);
+            break;
+        }
+    }
 }
 
 Battler::~Battler() {
@@ -391,6 +417,10 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" is trapped in a vortex of fire!");
             break;
         }
+        case MAGMA_STORM:{
+            handler->displayMsg(getNickname()+" is trapped in a mealstorm of fire!");
+            break;
+        }
         case INFESTED:{
             handler->displayMsg(getNickname()+" is infested!");
             break;
@@ -408,7 +438,11 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             break;
         }
         case BIND:{
-            handler->displayMsg(getNickname()+" is binded by the its opponent!");
+            handler->displayMsg(getNickname()+" is binded by its opponent!");
+            break;
+        }
+        case SNAP_TRAP:{
+            handler->displayMsg(getNickname()+" is trapped by its opponent!");
             break;
         }
         case LEECH_SEED:{
@@ -432,6 +466,7 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" is taunted!");
             break;
         }
+        case SPIKY_PROTECT:
         case PROTECT:{
             handler->displayMsg(getNickname()+" protects itself!");
             break;
@@ -445,8 +480,14 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" collects power from the sun!");
             break;
         }
-        case VANISHED:{
+        case VANISHED:
+        case VANISHED_2:{
             handler->displayMsg(getNickname()+" vanished!");
+            break;
+        }
+        case CHARGING_ICEBURN:
+        case CHARGING_FREEZESHOCK:{
+            handler->displayMsg(getNickname()+" bacame cloaked in a freezing light!");
             break;
         }
         case DROWSY:{
@@ -473,6 +514,14 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" plants its roots on the ground!");
             break;
         }
+        case CHARGING_METEORBEAM:{
+            handler->displayMsg(getNickname()+" is overflowing with space power!");
+            break;
+        }
+        case CRAFTY_SHIELD:{
+            handler->displayMsg(getNickname()+" protects itself from status moves!");
+            break;
+        }
         default:
             break;
     }
@@ -492,41 +541,60 @@ void Battler::removeVolatileCondition(VolatileStatusCondition condition) {
         return;
     volatile_conditions.erase(condition);
     switch(condition){
-        case GROUNDED:
+        case GROUNDED:{
             if(monster->hasType(FLYING)){
                 handler->displayMsg(getNickname()+" tries to take flight!");
             }
             break;
-        case INFATUATION:
+        }
+        case INFATUATION:{
             handler->displayMsg(getNickname()+" is no longer infatuated!");
             break;
-        case FIRESPIN:
+        }
+        case FIRESPIN:{
             handler->displayMsg(getNickname()+" is no longer trapped in a vortex of fire!");
             break;
-        case INFESTED:
+        }
+        case MAGMA_STORM:{
+            handler->displayMsg(getNickname()+" is no longer trapped in a mealstorm of fire!");
+            break;
+        }
+        case INFESTED:{
             handler->displayMsg(getNickname()+" is no longer infested!");
             break;
-        case WHIRLPOOL:
+        }
+        case WHIRLPOOL:{
             handler->displayMsg(getNickname()+" is no longer trapped in a whirlpool of water!");
             break;
-        case SANDTOMB:
+        }
+        case SANDTOMB:{
             handler->displayMsg(getNickname()+" is no longer trapped in a vortex of sand!");
             break;
-        case WRAP:
+        }
+        case WRAP:{
             handler->displayMsg(getNickname()+" is no longer trapped in a wrap!");
             break;
-        case BIND:
+        }
+        case BIND:{
             handler->displayMsg(getNickname()+" is no longer binded!");
             break;
-        case LEECH_SEED:
+        }
+        case SNAP_TRAP:{
+            handler->displayMsg(getNickname()+" is no longer trapped!");
+            break;
+        }
+        case LEECH_SEED:{
             handler->displayMsg(getNickname()+" is no longer seeded!");
             break;
-        case TAUNTED:
+        }
+        case TAUNTED:{
             handler->displayMsg(getNickname()+" is no longer taunted!");
             break;
-        case CONFUSION:
+        }
+        case CONFUSION:{
             handler->displayMsg(getNickname()+" snapped out of confusion!");
             break;
+        }
         default:
             break;
     }
@@ -596,7 +664,7 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
     if(actor==PLAYER){
         name = "Player's ";
     }else{
-        name = "opponent's ";
+        name = "Opponent's ";
     }
     name += getNickname();
     if(!res){
@@ -619,11 +687,13 @@ bool Battler::changeAttackModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -654,6 +724,9 @@ bool Battler::changeAttackModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -662,10 +735,15 @@ bool Battler::changeAttackModifier(int amount) {
 bool Battler::changeAttackModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeAtk(amount);
     displayStatModifyResult(res,amount,"Attack");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -679,12 +757,14 @@ bool Battler::changeDefenseModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     std::string name = getNickname();
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(name+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -715,6 +795,9 @@ bool Battler::changeDefenseModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -723,10 +806,15 @@ bool Battler::changeDefenseModifier(int amount) {
 bool Battler::changeDefenseModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeDef(amount);
     displayStatModifyResult(res,amount,"Defense");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -740,11 +828,13 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -771,6 +861,9 @@ bool Battler::changeSpecialAttackModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -780,10 +873,15 @@ bool Battler::changeSpecialAttackModifier(int amount) {
 bool Battler::changeSpecialAttackModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res= stat_modifiers.changeSpatk(amount);
     displayStatModifyResult(res,amount,"Special Attack");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -797,11 +895,13 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -828,6 +928,9 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -836,10 +939,15 @@ bool Battler::changeSpecialDefenseModifier(int amount) {
 bool Battler::changeSpecialDefenseModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res= stat_modifiers.changeSpdef(amount);
     displayStatModifyResult(res,amount,"Special Defense");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -853,11 +961,13 @@ bool Battler::changeSpeedModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -884,6 +994,9 @@ bool Battler::changeSpeedModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -892,10 +1005,15 @@ bool Battler::changeSpeedModifier(int amount) {
 bool Battler::changeSpeedModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeSpd(amount);
     displayStatModifyResult(res,amount,"Speed");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -909,11 +1027,13 @@ bool Battler::changeAccuracyModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -949,6 +1069,9 @@ bool Battler::changeAccuracyModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -957,10 +1080,15 @@ bool Battler::changeAccuracyModifier(int amount) {
 bool Battler::changeAccuracyModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeAccuracy(amount);
     displayStatModifyResult(res,amount,"Accuracy");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -974,11 +1102,13 @@ bool Battler::changeEvasionModifier(int amount) {
     // }
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     if(field->hasFieldEffect(MIST,actor) && amount<0){
         handler->displayMsg(getNickname()+"'s stat changes are prevented by Mist!");
         return false;
     }
-    if(hasAbility(CLEAR_BODY) && amount < 0){
+    if((hasAbility(CLEAR_BODY) || hasAbility(WHITE_SMOKE)) && amount < 0){
         handler->displayMsg(getNickname()+"'s Clear Body prevents Stat reductions!");
         return false;
     }
@@ -1005,6 +1135,9 @@ bool Battler::changeEvasionModifier(int amount) {
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
     }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     return res;
@@ -1013,10 +1146,15 @@ bool Battler::changeEvasionModifier(int amount) {
 bool Battler::changeEvasionModifierForced(int amount) {
     if(hasAbility(CONTRARY))
         amount = -amount;
+    if(hasAbility(SIMPLE))
+        amount *= 2;
     bool res = stat_modifiers.changeEvasion(amount);
     displayStatModifyResult(res,amount,"Evasion");
     if(res && amount<0){
         addVolatileCondition(STAT_JUST_DROPPED,1);
+    }
+    if(res && amount>0){
+        addVolatileCondition(STAT_JUST_RAISED,1);
     }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
@@ -1067,6 +1205,12 @@ unsigned int Battler::getModifiedAttack()const {
         base_modified*=1.5;
     if(hasAbility(GUTS) && hasPermanentStatus())
         base_modified*=1.5;
+    if(hasAbility(FLOWER_GIFT) && (field->getWeather() == SUN || field->getWeather() == EXTREME_SUN))
+        base_modified*=1.5;
+    if(hasAbility(SLOW_START) && turns_in_battle<5)
+        base_modified*=0.5;
+    if(hasAbility(DEFEATIST) && getCurrentHP() <= getMaxHP()/2)
+        base_modified*=0.5;
     // if(hasAbility(HUGE_POWER))//huge power doubles attack in battle
     //     base_modified*=2;
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles attack of pikachu
@@ -1093,6 +1237,10 @@ unsigned int Battler::getModifiedSpecialDefense()const{
 }
 
 unsigned int Battler::getModifiedDefenseInternal()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedDefenseInternal() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_defense = battle_stats.getDef();
     unsigned int base_modified = base_defense;
     int modifier = getDefenseModifier();
@@ -1112,6 +1260,10 @@ unsigned int Battler::getModifiedDefenseInternal()const {
 }
 
 unsigned int Battler::getModifiedSpecialAttack()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedSpecialAttack() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_special_attack = battle_stats.getSpatk();
     unsigned int base_modified = base_special_attack;
     int modifier = getSpecialAttackModifier();
@@ -1125,6 +1277,8 @@ unsigned int Battler::getModifiedSpecialAttack()const {
     // }
     if(hasHeldItem(LIGHT_BALL) && monster->getSpeciesId()==25)//light ball doubles special attack of pikachu
         base_modified*=2;
+    if(hasAbility(DEFEATIST) && getCurrentHP() <= getMaxHP()/2)
+        base_modified*=0.5;
     // if(hasHeldItem(CHOICE_SPECS))
     //     base_modified*=1.5;
     return base_modified;
@@ -1142,16 +1296,24 @@ unsigned int Battler::getModifiedSpecialDefenseInternal()const {
     if(field->getWeather() == SANDSTORM && hasType(ROCK)){
         base_modified = base_modified * 1.5;
     }
+    if(hasAbility(FLOWER_GIFT) && (field->getWeather() == SUN || field->getWeather() == EXTREME_SUN))
+        base_modified*=1.5;
     if(hasHeldItem(ASSULT_VEST))
         base_modified = base_modified * 1.5;
     if(hasHeldItem(EVIOLITE) && monster->hasEvolutions())
         base_modified = base_modified * 1.5;
     if(hasHeldItem(METAL_POWDER)&& monster->getSpeciesId()==132 && !monster->isTransformed())//metal powder oncreases defense of ditto
         base_modified*=1.5;
+    if((hasHeldItem(DEEP_SEA_TOOTH) || hasHeldItem(DEEP_SEA_SCALE)) && monster->getSpeciesId()==366)//deep sea tooth doubles special defense of clamperl
+        base_modified*=2;
     return base_modified;
 }
 
 unsigned int Battler::getModifiedSpeed()const {
+    #ifdef DEBUG
+    std::cout<<"getModifiedSpeed() called"<<std::endl;
+    std::cout.flush();
+    #endif
     unsigned int base_speed = battle_stats.getSpdef();
     unsigned int base_modified = base_speed;
     int modifier = getSpeedModifier();
@@ -1183,6 +1345,9 @@ unsigned int Battler::getModifiedSpeed()const {
     }
     if(hasAbility(SURGE_SURFER) && field->getTerrain()==ELECTRIC_FIELD){// SURGE SURFER
         base_modified = base_modified * 2;
+    }
+    if(hasAbility(SLOW_START) && turns_in_battle<5){
+        base_modified*=0.5;
     }
     if(field->getWeather()==SANDSTORM && hasAbility(SAND_RUSH)){//Sand rush doubles speed under sandstorm
         base_modified = base_modified * 2;
@@ -1218,7 +1383,9 @@ unsigned int Battler::getModifiedAccuracy()const {
         modified_accuracy = accuracy * 3 / (-modifier + 3);
     }
     if(hasAbility(COMPOUND_EYES))
-        modified_accuracy *= 13 / 10;
+        modified_accuracy *= 1.3;
+    if(hasAbility(VICTORY_STAR))
+        modified_accuracy *= 1.1;
     if(hasHeldItem(WIDE_LENS))
         modified_accuracy *= 1.1;
     return modified_accuracy;
@@ -1243,11 +1410,17 @@ void Battler::resetAllStatChanges(){
 }
 
 Ability Battler::getAbility()const {
-    if(hasHeldItem(ABILITY_SHIELD))
-        return battler_ability;
-    if(has_ability_neutralized)
+    #ifdef DEBUG
+    std::cout<<"getAbility() called"<<std::endl;
+    std::cout.flush();
+    #endif
+    if(isFainted())
         return NO_ABILITY;
-    if(has_ability_suppressed)
+    if(monster->getHeldItem() == ABILITY_SHIELD && battler_ability != KLUTZ)
+        return battler_ability;
+    if(has_ability_neutralized && !abilityCannotBeSuppressed(battler_ability))
+        return NO_ABILITY;
+    if(has_ability_suppressed && !abilityCannotBeSuppressed(battler_ability))
         return NO_ABILITY;
     if(is_mold_breaker_active && isAbilityIgnorable(battler_ability))
         return NO_ABILITY;
@@ -1255,6 +1428,10 @@ Ability Battler::getAbility()const {
 }
 
 bool Battler::hasAbility(Ability ability)const{
+    #ifdef DEBUG
+    std::cout<<"hasAbility() called"<<std::endl;
+    std::cout.flush();
+    #endif
     return getAbility() == ability;
 }
 
@@ -1303,7 +1480,11 @@ bool Battler::canSwitchOut(Battler* enemy)const {
         return false;
     if(hasVolatileCondition(BIND))
         return false;
+    if(hasVolatileCondition(SNAP_TRAP))
+        return false;
     if(hasVolatileCondition(FIRESPIN))
+        return false;
+    if(hasVolatileCondition(MAGMA_STORM))
         return false;
     if(hasVolatileCondition(INFESTED))
         return false;
@@ -1747,6 +1928,11 @@ std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType 
         }
         return {amount,true};
     }
+    //fade illusion
+    if(illusion_monster != nullptr){
+        illusion_monster = nullptr;
+        handler->displayMsg(getNickname()+"'s Illusion faded!");
+    }
     unsigned int currentHP = monster->getCurrentHP();
     if(isAtFullHP() && hasAbility(MULTISCALE)){
         handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
@@ -2022,6 +2208,8 @@ unsigned int Battler::getMaxHP()const{
 }
 
 unsigned int Battler::removeDamage(unsigned int amount){
+    if(hasVolatileCondition(HEAL_BLOCKED))
+        return 0;
     unsigned int dmg = monster->removeDamage(amount);
     return dmg;
 }
@@ -2031,8 +2219,13 @@ unsigned int Battler::getLevel()const{
 }
 
 std::string Battler::getNickname()const{
+    if(illusion_monster != nullptr && actor!=PLAYER)
+        return illusion_monster->getNickname();
     if(monster->isMegaEvolved())
         return "M-"+monster->getNickname();
+    if(monster->getFormId() == 123 || monster->getFormId() == 124)
+    //Archeo groudon and Archoe Kyogre
+        return "A-"+monster->getNickname();
     return monster->getNickname();
 }
 
@@ -2352,13 +2545,25 @@ bool Battler::hasHeldItem()const{
     return monster->hasHeldItem();
 }
 ItemType Battler::getHeldItem()const{
+    if(hasAbility(KLUTZ))
+        return NO_ITEM_TYPE;
+    if(field->hasFullFieldEffect(MAGIC_ROOM))
+        return NO_ITEM_TYPE;
     return monster->getHeldItem();
 }
 ItemType Battler::getConsumedItem()const{
     return monster->getConsumedItem();
 }
 bool Battler::hasHeldItem(ItemType item)const{
+    #ifdef DEBUG
+    std::cout<<"hasHeldItem() called"<<std::endl;
+    std::cout.flush();
+    #endif
     if(item == NO_ITEM_TYPE)
+        return false;
+    if(hasAbility(KLUTZ))
+        return false;
+    if(field->hasFullFieldEffect(MAGIC_ROOM))
         return false;
     if(!hasHeldItem())
         return false;
@@ -2367,10 +2572,24 @@ bool Battler::hasHeldItem(ItemType item)const{
         return true;
     return false;
 }
+
+void Battler::resetAbility(){
+    battler_ability = monster->getAbility();
+}
+
 ItemType Battler::setHeldItem(ItemType item){
     if(item != NO_ITEM_TYPE)
         had_held_item = false;
-    ItemType old_item = monster->setHeldItem(item);
+    auto res = monster->setHeldItem(item);
+    ItemType old_item = res.first;
+    if(res.second){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
+        resetAbility();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+    }
     if(canConsumeWhiteHerb())
         consumeHeldItem();
     if((hasDiabledAttack() || hasVolatileCondition(INFATUATION) ||
@@ -2381,11 +2600,20 @@ ItemType Battler::setHeldItem(ItemType item){
     return old_item;
 }
 ItemType Battler::removeHeldItem(){
-    ItemType res = monster->removeHeldItem();
-    if(res != NO_ITEM_TYPE){
+    auto res = monster->removeHeldItem();
+    ItemType old_item = res.first;
+    if(res.second){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
+        resetAbility();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+    }
+    if(old_item != NO_ITEM_TYPE){
         had_held_item = true;
     }
-    return res;
+    return old_item;
 }
 
 bool Battler::useItem(ItemType item_type,unsigned int data){
@@ -2682,7 +2910,20 @@ bool Battler::hasConsumedItem()const{
 }
 
 bool Battler::canStealItem()const{
-    ItemType item = getHeldItem();
+    ItemType item = monster->getHeldItem();
+    //if monster is arceus cannot steal plates
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data != nullptr && item_data->getCategory() == PLATE && 
+        monster->getSpeciesId() == 493)
+        return false;//arceus cannot lose plates
+    if(item == GRISEOUS_CORE && monster->getSpeciesId() == 487)
+        return false;//giratina cannot lose griseous core
+    if(item == ADAMANT_CRYSTAL && monster->getSpeciesId() == 483)
+        return false;//dialga cannot lose adamant crystal
+    if(item == LUSTROUS_GLOBE && monster->getSpeciesId() == 484)
+        return false;//palkia cannot lose lustrous globe
+    if(isDrive(item) && monster->getSpeciesId() == 649)
+        return false;//genesect cannot lose drives
     if(!canBeStolen(item))
         return false;
     if(hasAbility(STICKY_HOLD))
@@ -2703,8 +2944,10 @@ bool Battler::consumeHeldItem(){
             handler->displayMsg(getNickname()+" consumed its "+item_data->getName()+"!");
         monster->setConsumedItem(item);
         removeHeldItem();
-        useItem(item,0);
         had_held_item = true;
+        if(field->hasFullFieldEffect(MAGIC_ROOM))
+            return true;
+        useItem(item,0);
         return true;
     }
     return false;
@@ -2715,6 +2958,10 @@ void Battler::consumeItem(ItemType item){
         return;
     if(!canItemBeConsumed(item))
         return;
+    if(field->hasFullFieldEffect(MAGIC_ROOM)){
+        monster->removeHeldItem();
+        return;
+    }
     useItem(item,0);
     monster->setConsumedItem(item);
     had_held_item = true;
@@ -2875,11 +3122,8 @@ bool Battler::megaEvolve(){
         battler_ability = monster->getAbility();
         weight = monster->getWeight();
         height = monster->getHeight();
-        types.clear();
-        types.insert(monster->getType1());
-        if(monster->getType2()!=NO_TYPE){
-            types.insert(monster->getType2());
-        }
+        resetTypes();
+        resetStats();
         return true;
     }
     return false;
@@ -2949,6 +3193,8 @@ bool Battler::hasSubstitute()const{
 void Battler::setSubstituteHP(unsigned int amount){
     substituteHP = amount;
     removeVolatileCondition(FIRESPIN);
+    removeVolatileCondition(SNAP_TRAP);
+    removeVolatileCondition(MAGMA_STORM);
     removeVolatileCondition(WRAP);
     removeVolatileCondition(BIND);
     removeVolatileCondition(SANDTOMB);
@@ -2960,5 +3206,65 @@ void Battler::removeSubstitute(){
     if(substituteHP > 0){
         handler->displayMsg(getNickname()+"'s substitute faded!");
         substituteHP = 0;
+    }
+}
+
+void Battler::onWeatherChange(Weather new_weather){
+    if(monster->getSpeciesId()==351 && monster->changeWeatherForm(new_weather)){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+    }   
+    if(monster->getSpeciesId()==421 && monster->changeWeatherForm(new_weather)){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+    }   
+}
+
+bool Battler::changeFormSwitchIn(){
+    if(monster->getSpeciesId()==351 && monster->changeWeatherForm(field->getWeather())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        return true;
+    }
+    if(monster->getSpeciesId()==421 && monster->changeWeatherForm(field->getWeather())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        return true;
+    } 
+    if(monster->changeFormSwitchIn()){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+        resetStats();
+        resetAbility();
+        return true;
+    }
+    return false;
+}
+
+void Battler::resetStats(){
+    battle_stats = monster->getStats();
+}
+
+void Battler::checkZenMode(){
+    if(hasAbility(ZEN_MODE) && monster->tryZenMode()){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        weight = monster->getWeight();
+        height = monster->getHeight();
+        resetStats();
+        resetAbility();
+    }
+}
+
+void Battler::changeFormOnSuccessfulLastAttack(){
+    if(last_attack_failed)
+        return;
+    if(monster->getSpeciesId()==648 && //try meloetta
+        monster->changeFormOnUsedAttack(getLastAttackUsed())){
+        handler->displayMsg(getNickname()+" changed its form!");
+        resetTypes();
+        resetStats();
     }
 }

@@ -1,7 +1,7 @@
 #ifndef __CONST_MON_H__
 #define __CONST_MON_H__
 
-//#define DEBUG
+// #define DEBUG
 
 #include <string>
 
@@ -24,6 +24,12 @@ const unsigned int DEFENSE_CURL_ID = 126;
 const unsigned int FOCUS_PUNCH_ID = 330;
 const unsigned int PURSUIT_ID = 388;
 const unsigned int SKETCH_ID = 455;
+const unsigned int DRAGON_ASCENT_ID = 532;
+const unsigned int DOOM_DESIRE_ID = 535;
+const unsigned int FUSION_BOLT_ID = 591;
+const unsigned int FUSION_FLARE_ID = 589;
+const unsigned int SECRET_SWORD_ID = 596;
+const unsigned int RELIC_SONG_ID = 597;
 
 const unsigned int MAX_UNSIGNED = 4294967295;
 
@@ -42,5 +48,6 @@ const std::string ITEMS_FILE = "data/items.data";
 const int SUCCESS = 0;
 const int FILE_ERROR = 1;
 const int DATA_ERROR = 2;
+const int NO_ALIVE_ERROR = 3;
 
 #endif

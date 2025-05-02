@@ -149,8 +149,8 @@ class Species{
     static void printAllSummaries();
     void addAlternateFormId(unsigned int id);
     unsigned int getFormIdOfKind(FormKind form_kind)const;
-    bool canMegaEvolve(unsigned int curr_form, ItemType mega_item)const;
-    unsigned int getMegaForm(unsigned int curr_form, ItemType mega_item)const;
+    bool canMegaEvolve(unsigned int curr_form, ItemType mega_item, bool knows_dragon_ascent)const;
+    unsigned int getMegaForm(unsigned int curr_form, ItemType mega_item, bool knows_dragon_ascent)const;
     unsigned int getNonMegaForm(unsigned int curr_form)const;
     bool hasForm(unsigned int form_id)const;
 };

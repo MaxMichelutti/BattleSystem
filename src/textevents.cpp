@@ -21,7 +21,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
             if (player_active->hasVolatileCondition(ENCORE) ||
                 ((player_active->hasHeldItem(CHOICE_BAND) || 
                     player_active->hasHeldItem(CHOICE_SCARF) ||
-                    player_active->hasHeldItem(CHOICE_SPECS)) && player_active->getLastAttackUsed() != 0)){
+                    player_active->hasHeldItem(CHOICE_SPECS) ||
+                    player_active->hasAbility(GORILLA_TACTICS)) && player_active->getLastAttackUsed() != 0)){
                 // force use of encored move or choice band repeating move
                 unsigned int attack_id = player_active->getLastAttackUsed();
                 Attack *attack = Attack::getAttack(attack_id);
@@ -35,7 +36,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                     player_active->getModifiedSpeed(),
                     0,
                     NO_ITEM_TYPE,
-                    false);
+                    false,
+                    player_active->getMonster());
             }
             unsigned int attack_id = chooseAttack(player_active);
             if (attack_id == 0){
@@ -52,7 +54,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 NO_ITEM_TYPE,
-                mega_evolve);
+                mega_evolve,
+                player_active->getMonster());
         }else if (choice == 2){
             if (!player_active->canSwitchOut(opponent_active) && !player_active->hasHeldItem(SHED_SHELL)){
                 displayMsg("You cannot switch! " + player_active->getNickname() + " is trapped!");
@@ -72,7 +75,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 switch_id,
                 NO_ITEM_TYPE,
-                false);
+                false,
+                player_active->getMonster());
         }else if (choice == 3){
             if (bag->isEmpty()){
                 displayMsg("You have no items available to use!");
@@ -100,7 +104,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 item.second,
                 item.first,
-                false);
+                false,
+                player_active->getMonster());
         }else if(choice == 4){//run
             if(!is_wild_battle){
                 displayMsg("You cannot run away from a trainer battle!");
@@ -120,7 +125,8 @@ BattleAction TextEventHandler::chooseAction(Battler *player_active, MonsterTeam 
                 player_active->getModifiedSpeed(),
                 0,
                 NO_ITEM_TYPE,
-                false);
+                false,
+                player_active->getMonster());
         }else{
             displayMsg("Invalid choice. Please try again.");
             choice = 0;
@@ -187,6 +193,18 @@ unsigned int TextEventHandler::chooseTargetAttack(Battler*active,MonsterTeam*tea
             choice = 0;
             continue;
         }else{
+            //check if attack has max amount of pp
+            unsigned int maxPP;
+            if(target == 0){
+                maxPP = active->getMaxPPForAttack(choices[choice]);
+            }else{
+                maxPP = team->getMonster(target)->getMaxPPForAttack(choices[choice]);
+            }
+            if(maxPP <= attacks[choices[choice]]){
+                displayMsg("This attack already has the maximum amount of PP! Please choose a different attack.");
+                choice = 0;
+                continue;
+            }
             return choices[choice];
         }
     }
@@ -587,6 +605,27 @@ bool TextEventHandler::chooseWetherToMegaEvolve(Battler* active,MonsterTeam*team
         }else{
             displayMsg("Invalid choice. Please enter 'y' or 'n'.");
             continue;
+        }
+    }
+}
+
+unsigned int TextEventHandler::chooseRotomForm(){
+    unsigned int choice = 0;
+    while (true){
+        displayMsg("Choose the appliance where Rotom should enter:");
+        displayMsg("1. Light Bulb");
+        displayMsg("2. Microwave Oven");
+        displayMsg("3. Washing Machine");
+        displayMsg("4. Refrigerator");
+        displayMsg("5. Electric Fan");
+        displayMsg("6. Lawn Mower");
+        displayMsgNoEndl("Enter your choice: ");
+        choice = getNumberFromCin();
+        if (choice < 1 || choice > 6){
+            displayMsg("Invalid choice. Please try again.");
+            continue;
+        }else{
+            return choice;
         }
     }
 }

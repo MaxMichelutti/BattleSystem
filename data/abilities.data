@@ -320,3 +320,69 @@ STRONG_JAW
 The Pokémon's strong jaw boosts the power of its biting moves.
 ROUGH_SKIN
 The Pokémon's rough skin damages attackers that make direct contact with it.
+SIMPLE
+Doubles the effects of the Pokémon's stat changes.
+SOLID_ROCK
+Reduces the power of supereffective attacks that hit the Pokémon. 
+WHITE_SMOKE
+The Pokémon is protected by its white smoke, which prevents other Pokémon from lowering its stats.
+TOXIC_BOOST
+Powers up physical moves when the Pokémon is poisoned.
+STORM_DRAIN
+The Pokémon draws in all Water-type moves. Instead of taking damage from them, its Sp. Atk stat is boosted.
+FORECAST
+The Pokémon transforms with the weather to change its type to Water, Fire, or Ice.
+COLOR_CHANGE
+The Pokémon's type becomes the type of the move used on it.
+PROTEAN
+Changes the Pokémon's type to the type of the move it's about to use. This works only once each time the Pokémon enters battle.
+REFRIGERATE
+Normal-type moves become Ice-type moves. The power of those moves is boosted a little.
+PRIMORDIAL_SEA
+The Pokémon changes the weather to nullify Fire-type attacks.
+DESOLATE_LAND
+The Pokémon changes the weather to nullify Water-type attacks.
+DELTA_STREAM
+The Pokémon changes the weather so that no moves are super effective against the Flying type.
+AIR_LOCK
+Eliminates the effects of weather.
+FLOWER_GIFT
+Boosts the Attack and Sp. Def stats of the Pokémon and its allies in harsh sunlight.
+FLARE_BOOST
+Powers up special moves when the Pokémon is burned.
+KLUTZ
+The Pokémon can't use any held items.
+HEATPROOF
+The Pokémon's heatproof body halves the damage taken from Fire-type moves.
+MOTOR_DRIVE
+The Pokémon takes no damage when hit by Electric-type moves. Instead, its Speed stat is boosted.
+SHARPNESS
+Powers up slicing moves.
+SLOW_START
+For five turns, the Pokémon's Attack and Speed stats are halved.
+BAD_DREAMS
+Damages opposing Pokémon that are asleep.
+MULTITYPE
+Changes the Pokémon's type to match the plate it holds.
+VICTORY_STAR
+Boosts the accuracy of the Pokémon and its allies.
+GORILLA_TACTICS
+Boosts the Pokémon's Attack stat but only allows the use of the first selected move
+ZEN_MODE
+Changes the Pokémon's shape when its HP drops to half or less.
+MUMMY
+Contact with the Pokémon changes the attacker's Ability to Mummy.
+WANDERING_SPIRIT
+The Pokémon exchanges Abilities with a Pokémon that hits it with a move that makes direct contact.
+DEFEATIST
+Halves the Pokémon's Attack and Sp. Atk stats when its HP drops to half or less.
+ILLUSION
+The Pokémon fools opponents by entering battle disguised as the last Pokémon in its Trainer's party.
+IRON_BARBS
+The Pokémon's iron barbs damage the attacker if it makes direct contact.
+MIMICRY
+Changes the Pokémon's type depending on the terrain.
+TERAVOLT
+The Pokémon's moves are unimpeded by the Ability of the target.
+TURBOBLAZE
+The Pokémon's moves are unimpeded by the Ability of the target.

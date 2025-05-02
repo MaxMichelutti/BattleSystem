@@ -134,6 +134,7 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
     is_sketchable = (data.find("no_sketch") == data.end());
     is_wind = (data.find("wind") != data.end());
     is_biting = (data.find("biting") != data.end());
+    is_slicing = (data.find("slicing") != data.end());
     if(target==TARGET_SELF){
         accuracy = ALWAYS_HITS;
         effect_target = TARGET_SELF;
@@ -142,6 +143,10 @@ Attack::Attack(unsigned int index, std::map<std::string,std::string> data) {
 
 unsigned int Attack::getId()const {
     return id;
+}
+
+bool Attack::isSlicing()const {
+    return is_slicing;
 }
 
 Type Attack::getType()const {
@@ -210,9 +215,114 @@ Type Attack::getType(Battler* user, Field* field)const{
             }
             break;
         }
+        case 294:{
+            //type depends on plate
+            switch(user->getHeldItem()){
+                case FIST_PLATE:{
+                    attack_type = FIGHTING;
+                    break;
+                }
+                case SKY_PLATE:{
+                    attack_type = FLYING;
+                    break;
+                }
+                case TOXIC_PLATE:{
+                    attack_type = POISON;
+                    break;
+                }
+                case EARTH_PLATE:{
+                    attack_type = GROUND;
+                    break;
+                }
+                case STONE_PLATE:{
+                    attack_type = ROCK;
+                    break;
+                }
+                case INSECT_PLATE:{
+                    attack_type = BUG;
+                    break;
+                }
+                case SPOOKY_PLATE:{
+                    attack_type = GHOST;
+                    break;
+                }
+                case DRACO_PLATE:{
+                    attack_type = DRAGON;
+                    break;
+                }
+                case DREAD_PLATE:{
+                    attack_type = DARK;
+                    break;
+                }
+                case PIXIE_PLATE:{
+                    attack_type = FAIRY;
+                    break;
+                }
+                case FLAME_PLATE:{
+                    attack_type = FIRE;
+                    break;
+                }
+                case SPLASH_PLATE:{
+                    attack_type = WATER;
+                    break;
+                }
+                case ZAP_PLATE:{
+                    attack_type = ELECTRIC;
+                    break;
+                }
+                case MEADOW_PLATE:{
+                    attack_type = GRASS;
+                    break;
+                }
+                case MIND_PLATE:{
+                    attack_type = PSYCHIC;
+                    break;
+                }
+                case ICICLE_PLATE:{
+                    attack_type = ICE;
+                    break;
+                }
+                case IRON_PLATE:{
+                    attack_type = STEEL;
+                    break;
+                }
+                default:{
+                    attack_type = NORMAL;
+                    break;
+                }
+            }
+            break;
+        }
+        case 310:{
+            //techno blast type depends on held drive
+            switch(user->getHeldItem()){
+                case SHOCK_DRIVE:{
+                    attack_type = ELECTRIC;
+                    break;
+                }
+                case BURN_DRIVE:{
+                    attack_type = FIRE;
+                    break;
+                }
+                case CHILL_DRIVE:{
+                    attack_type = ICE;
+                    break;
+                }
+                case DOUSE_DRIVE:{
+                    attack_type = WATER;
+                    break;
+                }
+                default:{
+                    attack_type = NORMAL;
+                    break;
+                }
+            }
+        }
     }
     if(user->hasAbility(GALVANIZE) && attack_type==NORMAL)
         attack_type = ELECTRIC;
+    if(user->hasAbility(REFRIGERATE) && attack_type==NORMAL)
+        attack_type = ICE;
     if(user->hasAbility(AERILATE) && attack_type==NORMAL)
         attack_type = FLYING;
     if(user->hasAbility(PIXILATE) && attack_type==NORMAL)
@@ -360,6 +470,8 @@ void Attack::loadAttacks(){
             parsed_data["pulse"] = "true";
         }else if(line.rfind("WIND",0)==0){
             parsed_data["wind"] = "true";
+        }else if(line.rfind("SLICING",0)==0){
+            parsed_data["slicing"] = "true";
         }else if(line.rfind("REFLECTABLE",0)==0){
             parsed_data["reflectable"] = "true";
         }else if(line.rfind("BITING",0)==0){

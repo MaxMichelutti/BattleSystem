@@ -27,9 +27,11 @@ bool isAbilityIgnorable(Ability ability){
     switch(ability){
         case BATTLE_ARMOR:
         case CLEAR_BODY:
+        case WHITE_SMOKE:
         case DRY_SKIN:
         case DAMP:
         case FILTER:
+        case SOLID_ROCK:
         case FLASH_FIRE:
         case HYPER_CUTTER:
         case INNER_FOCUS:
@@ -43,6 +45,7 @@ bool isAbilityIgnorable(Ability ability){
         case OWN_TEMPO:
         case SAND_VEIL:
         case SHELL_ARMOR:
+        case SIMPLE:
         case SHIELD_DUST:
         case SOUNDPROOF:
         case STURDY:
@@ -50,6 +53,7 @@ bool isAbilityIgnorable(Ability ability){
         case THICK_FAT:
         case UNAWARE:
         case VITAL_SPIRIT:
+        case VOLT_ABSORB:
         case WATER_ABSORB:
         case WATER_VEIL:
         case BIG_PECKS:
@@ -67,6 +71,17 @@ bool isAbilityIgnorable(Ability ability){
         case SUCTION_CUPS:
         case LIGHT_METAL:
         case WONDER_GUARD:
+        case FLOWER_GIFT:
+        case STICKY_HOLD:
+        case MOTOR_DRIVE:
+        case STORM_DRAIN:
+        case HEAVY_METAL:
+        case TELEPATHY:
+        case FUR_COAT:
+        case PASTEL_VEIL:
+        case WIND_RIDER:
+        case CONTRARY:
+        case HEATPROOF:
             return true;
         default:return false;
     }        
@@ -74,16 +89,7 @@ bool isAbilityIgnorable(Ability ability){
 }
 
 bool isAbilityTraceable(Ability ability){
-    switch(ability){
-        case TRACE:
-        case IMPOSTOR:
-        case NEUTRALIZING_GAS:
-        case POWER_OF_ALCHEMY:
-        case PARENTAL_BOND:
-            return false;
-        default: return true;
-    }
-    return true;
+    return !abilityCannotBeCopied(ability);
 }
 
 bool doesAbilityIgnoreIntimidate(Ability ability){
@@ -106,6 +112,15 @@ bool abilityCannotBeCopied(Ability ability){
         case NEUTRALIZING_GAS:
         case POWER_OF_ALCHEMY:
         case PARENTAL_BOND:
+        case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
+        case MULTITYPE:
+        case ZEN_MODE:
+        case WONDER_GUARD:
+        case FLOWER_GIFT:
+        case ILLUSION:
             return true;
         default: return false;
     }
@@ -115,6 +130,13 @@ bool abilityCannotBeCopied(Ability ability){
 bool abilityCannotBeChanged(Ability ability){
     switch(ability){
         case TRUANT:
+        case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
+        case MULTITYPE:
+        case ZEN_MODE:
+        case ILLUSION:
             return true;
         default: return false;
     }
@@ -123,6 +145,14 @@ bool abilityCannotBeChanged(Ability ability){
 
 bool abilityCannotBeSuppressed(Ability ability){
     switch(ability){
+        case FORECAST:
+        case PRIMORDIAL_SEA:
+        case DESOLATE_LAND:
+        case DELTA_STREAM:
+        case MULTITYPE:
+        case ZEN_MODE:
+        case ILLUSION:
+            return true;
         default: return false;
     }
     return false;

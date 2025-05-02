@@ -2,11 +2,13 @@
 #define __FIELD_H___
 
 #include "common.h"
+#include "battle.h"
 #include "events.h"
 #include <map>
 #include <set>
 
 class EventHandler;
+class Battle;
 
 std::string terrainToString(Terrain terrain);
 
@@ -20,6 +22,7 @@ class Field{
     Weather default_weather;
     Terrain terrain;
     EventHandler* event_handler;
+    Battle* battle;
     std::map<FieldEffect,unsigned int> field_effect_player;
     std::map<FieldEffect,unsigned int> field_effect_opponent;
     std::map<FieldEffect,unsigned int> full_field_effects;
@@ -28,9 +31,9 @@ class Field{
     void displayWeatherChange();
     public:
     Field();
-    Field(EventHandler* event_handler);
+    Field(Battle* battle,EventHandler* event_handler);
     ~Field();
-    Field(Weather weather, Terrain terrain);
+    // Field(Weather weather, Terrain terrain);
     Weather getWeather()const;
     Terrain getTerrain()const;
     std::set<FieldEffect> getFieldEffects(BattleActionActor)const;
@@ -60,7 +63,7 @@ class Field{
     bool hasFieldEffectsSuchThat(bool (*func)(FieldEffect), BattleActionActor)const;
     void decrementFieldEffect(FieldEffect field_effect, BattleActionActor actor);
     void setDefaultWeather(Weather weather);
-    
+    bool weatherCannotChange()const;
 };
 
 #endif

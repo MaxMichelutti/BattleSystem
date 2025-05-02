@@ -35,6 +35,7 @@ class TextEventHandler : public EventHandler {
     void displayMsg(const std::string& msg);
     void displayMsgNoEndl(const std::string& msg);
     void displayBattleSituation(Battler*,MonsterTeam*,Battler*,MonsterTeam*);
+    unsigned int chooseRotomForm();
 };
 
 

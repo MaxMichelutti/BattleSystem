@@ -172,9 +172,43 @@ static std::unordered_map<std::string,Ability> strToAbility = {
     {"WONDER_GUARD",WONDER_GUARD},
     {"NORMALIZE",NORMALIZE},
     {"STALL",STALL},
-    {"PURE POWER",PURE_POWER},
+    {"PURE_POWER",PURE_POWER},
     {"STRONG_JAW",STRONG_JAW},
-    {"ROUGH_SKIN",ROUGH_SKIN}
+    {"ROUGH_SKIN",ROUGH_SKIN},
+    {"SIMPLE",SIMPLE},
+    {"SOLID_ROCK",SOLID_ROCK},
+    {"WHITE_SMOKE",WHITE_SMOKE},
+    {"HEAVY_METAL",HEAVY_METAL},
+    {"TOXIC_BOOST",TOXIC_BOOST},
+    {"STORM_DRAIN",STORM_DRAIN},
+    {"FORECAST",FORECAST},
+    {"COLOR_CHANGE",COLOR_CHANGE},
+    {"PROTEAN",PROTEAN},
+    {"REFRIGERATE",REFRIGERATE},
+    {"PRIMORDIAL_SEA",PRIMORDIAL_SEA},
+    {"DESOLATE_LAND",DESOLATE_LAND},
+    {"DELTA_STREAM",DELTA_STREAM},
+    {"AIR_LOCK",AIR_LOCK},
+    {"FLOWER_GIFT",FLOWER_GIFT},
+    {"FLARE_BOOST",FLARE_BOOST},
+    {"KLUTZ",KLUTZ},
+    {"HEATPROOF",HEATPROOF},
+    {"MOTOR_DRIVE",MOTOR_DRIVE},
+    {"SHARPNESS",SHARPNESS},
+    {"SLOW_START",SLOW_START},
+    {"BAD_DREAMS",BAD_DREAMS},
+    {"MULTITYPE",MULTITYPE},
+    {"VICTORY_STAR",VICTORY_STAR},
+    {"GORILLA_TACTICS",GORILLA_TACTICS},
+    {"ZEN_MODE",ZEN_MODE},
+    {"MUMMY",MUMMY},
+    {"WANDERING_SPIRIT",WANDERING_SPIRIT},
+    {"DEFEATIST",DEFEATIST},
+    {"ILLUSION",ILLUSION},
+    {"IRON_BARBS",IRON_BARBS},
+    {"MIMICRY",MIMICRY},
+    {"TERAVOLT",TERAVOLT},
+    {"TURBOBLAZE",TURBOBLAZE}
 };
 
 std::string abilityToString(Ability);
@@ -184,6 +218,7 @@ bool isAbilityTraceable(Ability ability);
 bool doesAbilityIgnoreIntimidate(Ability ability);
 bool abilityCannotBeCopied(Ability ability);
 bool abilityCannotBeChanged(Ability ability);
+bool abilityCannotBeSuppressed(Ability ability);
 
 class AbilityItem{
     private:

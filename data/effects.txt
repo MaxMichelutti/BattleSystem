@@ -1,11 +1,11 @@
 1: -1 ATK Opponent
 2: +1 ATK +1 SPATK User
-3: Seed Opponent
-4: Poison Opponent
-5: Sleep Opponent
+3: seed Opponent
+4: poison Opponent
+5: sleep Opponent
 6: recoil 1/4 Damage User
 7: -2 Evasiveness Opponent
-8: Heal 50% User, 66% under sun, 25% under rain/sandstorm/snow
+8: heal 50% User, 66% under sun, 25% under rain/sandstorm/snow
 9: locks the user into SOLAR_BEAM charging
 10: locks the user into Petal Dancing
 11: User loses 1/4 of its HP (STRUGGLE)
@@ -127,7 +127,7 @@
 127: user copies target ability
 128: use defense instead of spdef for damage calc
 129: +1 DEF SPDEF user
-130: future sight
+130: future sight/doom desire
 131: power doubles if user has been hit this turn
 132: +1 ATT DEF user
 133: -2 SPATT user
@@ -263,3 +263,48 @@
 263: solar blade
 264: phantom force
 265: user gives its ability to target
+266: gains bigger boost then usual under Psychic Terrain
+267: target gets heal blocked for 2 turns
+268: user protects itself, if attcker makes contact with protection, attacker takes 1/8 of its maxHP damage
+269: if stats were dropped power is doubled
+270: confuse target if its stats were raised this turn
+271: magic room
+272: user and target swap abilities
+273: set up psychic terrain
+274: burn the target if it had stat boosted this turn
+275: user faints, under misty terrain move is boosted 1.5x
+276: user takes 50% of its own health in recoil
+277: if attack misses, user takes 50% maxHP recoil + minimize bonus
+278: meteor beam
+279: fails if the target is not performing an action with priority between +1 and +3, if it hits it causes the target to flinch
+280: fails if target does not hold an item, displays custom message when attacking
+281: change target ability in simple
+282: raises def of all GRASS types on the field, except the ones in semi invulnerable states
+283: gives user effect of reflecting status moves for the rest of the turn
+284: -1 att spatt opponent, user switches out always
+285: -1 att spatt spd of target only if target is poisoned
+286: ignore defense and evasion stat changes from opponent
+287: magma storm
+288: shadow force
+289: power depends on target HP percent times 120
+290: user dies, pokemon switching in is fully healed AND recovers all PPs of all its attacks
+291: heals 25% damage and restore status
+292: +1 spatt spdef user, heal special conditions user
+293: switch stat changes of user with target
+294: judgement -> type depends on user form
+295: -1 def spdef speed user
+296: 1/3 recoil + paralyze opponent
+297: +2 speed +1 att user
+298: bad poison opponent, never miss if used buìy a poison type
+299: confusion opponent, can hit monsters that are flying, accuracy of 50 under sun
+300: force target to switch out to a random monster, also hits flying monsters
+301: +1 att def speed user
+302: protects the user from status moves, can be used consecutively without failing
+303: +1 ATT SPATT user iff ability is PLUS or MINUS
+304: snap trap
+305: increased crit ratio + 1 user speed
+306: power doubles if last move used in battle was Fusion Bolt + thaw out user
+307: power doubles if last move used in battle was Fusion Flare
+308: ice burn (also may burn target)
+309: freeze shock (also may paralyze target)
+310: type depends on user held drive

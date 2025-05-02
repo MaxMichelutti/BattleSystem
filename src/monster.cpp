@@ -59,6 +59,7 @@ Monster::Monster(Monster* other){
     seen_opponents.clear();
     consumed_item = NO_ITEM_TYPE;
     ball_containing_monster = POKE_BALL;
+    friendship = other->getFriendship();
     updateStats();
 }
 
@@ -112,6 +113,9 @@ void Monster::init(unsigned int species_id, unsigned int level,unsigned int form
 
     //set random hidden power type
     hidden_power_type = static_cast<Type>(RNG::getRandomInteger(1,18));
+
+    //Set friendship
+    friendship = spec->getBaseFriendship(getFormId());
 }
 
 void Monster::init_gender(GenderRule rule){
@@ -403,11 +407,29 @@ bool Monster::learnAttack(unsigned int attack_id) {
             attack_ids[i].attack_id = attack_id;
             attack_ids[i].current_pp = Attack::getAttack(attack_id)->getMaxPP();
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
     // if no slots are empty, return false
+    changeAttackDependentForms();
     return false;
+}
+
+bool Monster::learnAttackForced(unsigned int attack_id,unsigned int slot){
+    // cannot learn an attack if it already knows it
+    if (hasAttack(attack_id))
+        return false;
+    // fill the first empty slot with the attack
+    if(slot>3)
+        return false;
+    attack_ids[slot].attack_id = attack_id;
+    attack_ids[slot].current_pp = Attack::getAttack(attack_id)->getMaxPP();
+    packAttacks();
+    changeAttackDependentForms();
+            
+    // if no slots are empty, return false
+    return true;
 }
 
 bool Monster::forgetAttack(unsigned int attack_id) {
@@ -423,9 +445,11 @@ bool Monster::forgetAttack(unsigned int attack_id) {
             attack_ids[i].attack_id = 0;
             attack_ids[i].current_pp = 0;
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
+    changeAttackDependentForms();
     // should never reach this point
     return true;
 }
@@ -442,9 +466,11 @@ bool Monster::replaceAttack(unsigned int old_attack_id, unsigned int new_attack_
             attack_ids[i].attack_id = new_attack_id;
             attack_ids[i].current_pp = Attack::getAttack(new_attack_id)->getMaxPP();
             packAttacks();
+            changeAttackDependentForms();
             return true;
         }
     }
+    changeAttackDependentForms();
     return false;
 }
 
@@ -473,6 +499,8 @@ Monster* Monster::generateRandomMonster(unsigned int species_id,unsigned int lev
 }
 
 unsigned int Monster::getFormId()const{
+    if(transformation != nullptr)
+        return transformation->getFormId();
     return form_id;
 }
 
@@ -542,7 +570,7 @@ Type Monster::getHiddenPowerType()const{
     return hidden_power_type;
 }
 
-bool Monster::canEvolve()const{
+bool Monster::canEvolve(MonsterTeam* monster_team)const{
     Species* spec = Species::getSpecies(species_id);
     for(const Evolution &evo: spec->getEvolutions(getFormId())){
         switch(evo.getEvolutionMethod()){
@@ -573,6 +601,16 @@ bool Monster::canEvolve()const{
                     return true;
                 break;
             }
+            case LEVEL_MALE:{
+                if(level >= evo.getMethodCondition() && gender==MALE)
+                    return true;
+                break;
+            }
+            case LEVEL_FEMALE:{
+                if(level >= evo.getMethodCondition() && gender==FEMALE)
+                    return true;
+                break;
+            }
             case LEVEL_EQUAL_ATK_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk())
                     return true;
@@ -593,6 +631,29 @@ bool Monster::canEvolve()const{
                     return true;
                 break;
             }
+            case KNOW_ATTACK:{
+                if(hasAttack(evo.getMethodCondition()))
+                    return true;
+                break;
+            }
+            case HELD_ITEM_DAY:{
+                if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isDay())
+                    return true;
+                break;
+            }
+            case HELD_ITEM_NIGHT:{
+                if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isNight())
+                    return true;
+                break;
+            }
+            case HAS_IN_TEAM:{
+                for(unsigned int i=0;i<monster_team->getSize();i++){
+                    Monster* monster = monster_team->getMonster(i);
+                    if(monster->getSpeciesId() == evo.getMethodCondition())
+                        return true;
+                }
+                break;
+            }
             default: break;
         }
     }
@@ -604,8 +665,8 @@ bool Monster::hasEvolutions()const{
     return spec->getEvolutions(getFormId()).size() > 0;
 }
 
-void Monster::evolve(){
-    if(!canEvolve())
+void Monster::evolve(MonsterTeam* monster_team){
+    if(!canEvolve(monster_team))
         return;
     Species* spec = Species::getSpecies(species_id);
     bool already_flipped = false;
@@ -613,6 +674,20 @@ void Monster::evolve(){
         switch(evo.getEvolutionMethod()){
             case LEVEL:{
                 if(level >= evo.getMethodCondition()){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_MALE:{
+                if(level >= evo.getMethodCondition() && gender==MALE){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case LEVEL_FEMALE:{
+                if(level >= evo.getMethodCondition() && gender==FEMALE){
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
@@ -648,6 +723,13 @@ void Monster::evolve(){
             }
             case LEVEL_EQUAL_ATK_DEF:{
                 if(level >= evo.getMethodCondition() && stats.getDef() == stats.getAtk()){
+                    completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                    return;
+                }
+                break;
+            }
+            case KNOW_ATTACK:{
+                if(hasAttack(evo.getMethodCondition())){
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
                 }
@@ -703,6 +785,9 @@ void Monster::evolve(){
                         cloned_nincada->setHeldItem(NO_ITEM_TYPE);
                         cloned_nincada->transformation = nullptr;
                         cloned_nincada->mega_ability = NO_ABILITY;
+                        cloned_nincada->form_id = 0;
+                        cloned_nincada->damage = 0;
+                        cloned_nincada->setPermanentStatus(NO_PERMANENT_CONDITION);
                         cloned_nincada->is_mega = false;
                         cloned_nincada->evolveIntoShedinja();
                         team->addMonster(cloned_nincada);
@@ -710,6 +795,32 @@ void Monster::evolve(){
                     // then evolve into Ninjask
                     completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
                     return;
+                }
+                case HELD_ITEM_DAY:{
+                    if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isDay()){
+                        removeHeldItem();
+                        completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                        return;
+                    }
+                    break;
+                }
+                case HELD_ITEM_NIGHT:{
+                    if(getHeldItem() == static_cast<ItemType>(evo.getMethodCondition()) && isNight()){
+                        removeHeldItem();
+                        completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                        return;
+                    }
+                    break;
+                }
+                case HAS_IN_TEAM:{
+                    for(unsigned int i=0;i<monster_team->getSize();i++){
+                        Monster* monster = monster_team->getMonster(i);
+                        if(monster->getSpeciesId() == evo.getMethodCondition()){
+                            completeEvolution(evo.getTargetSpeciesId(),evo.getTargetFormId());
+                            return;
+                        }
+                    }
+                    break;
                 }
                 break;
             }
@@ -895,7 +1006,21 @@ void Monster::clearBattleData(){
     if(isMegaEvolved()){
         cancelMega();
     }
+    //reset zen mode for darmanitan outside of battle
+    resetZenMode();
+    if(species_id==351 && form_id != 0){
+        //castform returns to its normal form
+        form_id = 0;
+        updateStats();
+    }
+    if(species_id==421 && form_id != 0){
+        //cherrim returns to its normal form
+        form_id = 0;
+    }
     seen_opponents.clear();
+
+    //change form depending on season
+    changeSeasonalForm();
 }
 
 void Monster::transformInto(Monster* other){
@@ -987,15 +1112,16 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
         // status restoring items
         switch(item_type){
             case ANTIDOTE:
-            case PECHA_BERRY:
+            case PECHA_BERRY:{
                 if(permanent_status == POISONED || permanent_status == BAD_POISON){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its poisoning!");
                 }
                 break;
+            }
             case AWAKENING:
-            case CHESTO_BERRY:
+            case CHESTO_BERRY:{
                 if(permanent_status == SLEEP_1 || permanent_status == SLEEP_2 || 
                     permanent_status == SLEEP_3 || permanent_status == SLEEP_4){
                     permanent_status = NO_PERMANENT_CONDITION;
@@ -1003,48 +1129,55 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                     handler->displayMsg(getNickname()+" woke up!");
                 }
                 break;
+            }
             case PARALYZE_HEAL:
-            case CHERY_BERRY:
+            case CHERY_BERRY:{
                 if(permanent_status == PARALYSIS){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its paralysis!");
                 }
                 break;
+            }
             case BURN_HEAL:
-            case RAWST_BERRY:
+            case RAWST_BERRY:{
                 if(permanent_status == BURN){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its burn!");
                 }
                 break;
+            }
             case ICE_HEAL:
-            case ASPEAR_BERRY:
+            case ASPEAR_BERRY:{
                 if(permanent_status == FREEZE){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its freeze!");
                 }
                 break;
+            }
             case FULL_RESTORE:
             case FULL_HEAL:
-            case LUM_BERRY:
+            case LUM_BERRY:{
                 if(permanent_status != NO_PERMANENT_CONDITION){
                     permanent_status = NO_PERMANENT_CONDITION;
                     result = true;
                     handler->displayMsg(getNickname()+" was cured of its status condition!");
                 }
                 break;
+            }
             default:
                 break;
         }
         // PP Restoring items
         switch(item_type){
-            case LEPPA_BERRY:
-                if(data!=0)
+            case LEPPA_BERRY:{
+                Attack* attack_to_recover = Attack::getAttack(data);
+                if(data!=0){
                     recoverPP(data,10);
-                else{
+                    handler->displayMsg(getNickname()+"'s " + attack_to_recover->getName() + " recovered some PPs!");
+                }else{
                     // if no attack is specified, recover PP for the first attack available
                     for(int i=0;i<4;i++){
                         if(attack_ids[i].attack_id != 0){
@@ -1053,6 +1186,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                             unsigned int max_pp = getMaxPPForAttack(attack_id);
                             if(max_pp > current_pp){
                                 recoverPP(attack_id,10);
+                                handler->displayMsg(getNickname()+"'s " + attack_to_recover->getName() + " recovered some PPs!");
                                 result = true;
                                 break;
                             }
@@ -1061,6 +1195,7 @@ bool Monster::useItem(ItemType item_type, EventHandler* handler, unsigned int da
                 }
                 result=true;
                 break;
+            }
             default:break;
         }
         // friendship berries
@@ -1292,15 +1427,19 @@ bool Monster::hasHeldItem()const{
 ItemType Monster::getHeldItem()const{
     return held_item;
 }
-ItemType Monster::setHeldItem(ItemType item){
+std::pair<ItemType,bool> Monster::setHeldItem(ItemType item){
     ItemType old_held_item = getHeldItem();
     held_item = item;
-    return old_held_item;
+    bool res = changeFormOnNewItem();
+    return {old_held_item,res};
 }
-ItemType Monster::removeHeldItem(){
+std::pair<ItemType,bool> Monster::removeHeldItem(){
+    if(!hasHeldItem())
+        return {NO_ITEM_TYPE,false};
     ItemType old_held_item = getHeldItem();
     held_item = NO_ITEM_TYPE;
-    return old_held_item;
+    bool res = changeFormOnNewItem();
+    return {old_held_item,res};
 }
 
 bool Monster::dislikesBerry(ItemType item)const{
@@ -1424,7 +1563,7 @@ bool Monster::canMegaEvolve()const{
     if(is_mega)
         return false;
     Species* spec = Species::getSpecies(species_id);
-    return spec->canMegaEvolve(getFormId(),getHeldItem());
+    return spec->canMegaEvolve(getFormId(),getHeldItem(),hasAttack(DRAGON_ASCENT_ID));
 }
 
 bool Monster::megaEvolve(){
@@ -1433,7 +1572,7 @@ bool Monster::megaEvolve(){
     Species* spec = Species::getSpecies(species_id);
     // if(!spec->canMegaEvolve(getFormId(),getHeldItem()))
     //     return false;
-    unsigned int new_form_id = spec->getMegaForm(getFormId(),getHeldItem());
+    unsigned int new_form_id = spec->getMegaForm(getFormId(),getHeldItem(),hasAttack(DRAGON_ASCENT_ID));
     if(new_form_id == getFormId() || new_form_id == 0)
         return false;
     form_id = new_form_id;
@@ -1488,4 +1627,630 @@ void Monster::setBall(ItemType ball){
     if(item_data->getCategory() != BALL)
         return;
     ball_containing_monster = ball;
+}
+
+bool Monster::changeFormSwitchIn(){
+    if(species_id==382 && getHeldItem() == BLUE_ORB){
+        //Kyogre
+        if(form_id == 0){
+            form_id = 123;
+            updateStats();
+            Species* spec = Species::getSpecies(species_id);
+            mega_ability = spec->getAbility1(form_id); 
+            return true;
+        }
+    }
+    if(species_id==383 && getHeldItem() == RED_ORB){
+        //Groudon
+        if(form_id == 0){
+            form_id = 124;
+            updateStats();
+            Species* spec = Species::getSpecies(species_id);
+            mega_ability = spec->getAbility1(form_id); 
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Monster::changeWeatherForm(Weather weather){
+    //returns true if the form was actually changed
+    if(species_id==351){//castform
+        switch(weather){
+            case RAIN:
+            case HEAVY_RAIN:{
+                if(form_id == 114)
+                    return false;
+                form_id = 114;
+                return true;
+            }
+            case SUN:
+            case EXTREME_SUN:{
+                if(form_id == 113)
+                    return false;
+                form_id = 114;
+                return true;
+            }
+            case SNOWSTORM:
+            case HAIL:{
+                if(form_id == 115)
+                    return false;
+                form_id = 115;
+                return true;
+            }
+            default:{
+                if(form_id == 0)
+                    return false;
+                form_id = 0;
+                return true;
+            }
+        }
+    }else if(species_id==421){//cherrim
+        switch(weather){
+            case SUN:
+            case EXTREME_SUN:{
+                if(form_id == 133)
+                    return false;
+                form_id = 133;
+                return true;
+            }
+            default:{
+                if(form_id == 0)
+                    return false;
+                form_id = 0;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Monster::changeFormOnNewItem(){
+    switch(species_id){
+        case 483:{//dialga
+            if(form_id==0 && getHeldItem()==ADAMANT_CRYSTAL){
+                form_id = 147;
+                updateStats();
+                return true;
+            }else if(form_id==147 && getHeldItem()!=ADAMANT_CRYSTAL){
+                form_id = 0;
+                updateStats();
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 484:{//palkia
+            if(form_id==0 && getHeldItem()==LUSTROUS_GLOBE){
+                form_id = 148;
+                updateStats();
+                return true;
+            }else if(form_id==148 && getHeldItem()!=LUSTROUS_GLOBE){
+                form_id = 0;
+                updateStats();
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 487:{//giratina
+            if(form_id==0 && getHeldItem()==GRISEOUS_CORE){
+                form_id = 149;
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return true;
+            }else if(form_id==149 && getHeldItem()!=GRISEOUS_CORE){
+                form_id = 0;
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return true;
+            }else{
+                return false;
+            }
+            break;
+        }
+        case 493:{//arceus
+            switch(getHeldItem()){
+                case FIST_PLATE:{
+                    if(form_id != 151){
+                        form_id = 151;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SKY_PLATE:{
+                    if(form_id != 152){
+                        form_id = 152;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case TOXIC_PLATE:{
+                    if(form_id != 153){
+                        form_id = 153;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case EARTH_PLATE:{
+                    if(form_id != 154){
+                        form_id = 154;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case STONE_PLATE:{
+                    if(form_id != 155){
+                        form_id = 155;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case INSECT_PLATE:{
+                    if(form_id != 156){
+                        form_id = 156;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SPOOKY_PLATE:{
+                    if(form_id != 157){
+                        form_id = 157;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case IRON_PLATE:{
+                    if(form_id != 158){
+                        form_id = 158;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case FLAME_PLATE:{
+                    if(form_id != 159){
+                        form_id = 159;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case SPLASH_PLATE:{
+                    if(form_id != 160){
+                        form_id = 160;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case MEADOW_PLATE:{
+                    if(form_id != 161){
+                        form_id = 161;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case ZAP_PLATE:{
+                    if(form_id != 162){
+                        form_id = 162;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case MIND_PLATE:{
+                    if(form_id != 163){
+                        form_id = 163;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case ICICLE_PLATE:{
+                    if(form_id != 164){
+                        form_id = 164;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DRACO_PLATE:{
+                    if(form_id != 165){
+                        form_id = 165;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DREAD_PLATE:{
+                    if(form_id != 166){
+                        form_id = 166;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case PIXIE_PLATE:{
+                    if(form_id != 167){
+                        form_id = 167;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                default:{
+                    if(form_id != 0){
+                        form_id = 0;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+            break;
+        }
+        case 649:{//gensect
+            switch(getHeldItem()){
+                case SHOCK_DRIVE:{
+                    if(form_id != 199){
+                        form_id = 199;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case BURN_DRIVE:{
+                    if(form_id != 200){
+                        form_id = 200;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case CHILL_DRIVE:{
+                    if(form_id != 201){
+                        form_id = 201;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                case DOUSE_DRIVE:{
+                    if(form_id != 202){
+                        form_id = 202;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+                default:{
+                    if(form_id != 0){
+                        form_id = 0;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return false;
+}
+
+void Monster::interactWithKeyItem(ItemType item, EventHandler* handler, MonsterTeam* team){
+    ItemData* item_data = ItemData::getItemData(item);
+    if(item_data == nullptr)
+        return;
+    if(item_data->getCategory() != KEY_ITEM)
+        return;
+    switch(item){
+        case GRACIDEA:{
+            if(species_id==492){//shaymin
+                if(form_id==0){
+                    handler->displayMsg(getNickname()+" transformed into its Sky Forme!");
+                    form_id = 150;
+                }else{
+                    handler->displayMsg(getNickname()+" transformed into its Land Forme!");
+                    form_id = 0;
+                }
+                updateStats();
+                Species* spec = Species::getSpecies(species_id);
+                if(has_hidden_ability)
+                    ability = spec->getHiddenAbility(form_id);
+                else
+                    ability = spec->getAbility1(form_id);
+                return;
+            }
+            break;
+        }
+        case METEORITE:{
+            if(species_id==386){//deoxys
+                if(form_id==0){
+                    handler->displayMsg(getNickname()+" transformed into its Attack Forme!");
+                    form_id = 126;
+                }else if(form_id==126){
+                    handler->displayMsg(getNickname()+" transformed into its Defense Forme!");
+                    form_id = 127;
+                }else if(form_id==127){
+                    handler->displayMsg(getNickname()+" transformed into its Speed Forme!");
+                    form_id = 128;
+                }else{
+                    handler->displayMsg(getNickname()+" transformed into its Normal Forme!");
+                    form_id = 0;
+                }
+                updateStats();
+                return;
+            }
+            break;
+        }
+        case ROTOM_CATALOG:{
+            if(species_id==479){//rotom
+                unsigned int rotom_form_choice = handler->chooseRotomForm();
+                bool res = false;
+                unsigned int old_form = form_id;
+                if(rotom_form_choice == 1 && form_id != 0){
+                    handler->displayMsg(getNickname()+" possessed the Light Bulb!");
+                    form_id = 0;
+                    res = true;
+                }else if(rotom_form_choice == 2 && form_id != 142){
+                    handler->displayMsg(getNickname()+" possessed the Washing Machine!");
+                    form_id = 142;
+                    res=true;
+                }else if(rotom_form_choice == 3 && form_id != 143){
+                    handler->displayMsg(getNickname()+" possessed the Microwave Oven!");
+                    form_id = 143;
+                    res=true;
+                }else if(rotom_form_choice == 4 && form_id != 144){
+                    handler->displayMsg(getNickname()+" possessed the Refrigerator!");
+                    form_id = 144;
+                    res=true;
+                }else if(rotom_form_choice == 5 && form_id != 145){
+                    handler->displayMsg(getNickname()+" possessed the Electric Fan!");
+                    form_id = 145;
+                    res=true;
+                }else if(rotom_form_choice == 6 && form_id != 146){
+                    handler->displayMsg(getNickname()+" possessed the Lawn Mower!");
+                    form_id = 146;
+                    res=true;
+                }
+                if(res){
+                    updateStats();
+                    Species* spec = Species::getSpecies(species_id);
+                    unsigned int old_evo_attack = *(spec->getEvolutionLearnset(old_form).begin());
+                    unsigned int new_evo_attack = *(spec->getEvolutionLearnset(form_id).begin());
+                    forgetAttack(old_evo_attack);
+                    learnAttack(new_evo_attack);
+                    return;
+                }
+            }
+            break;
+        }
+        case REVEAL_GLASS:{
+            switch(species_id){
+                case 641:{//tornadus 
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 192;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                    }
+                    return;
+                }
+                case 642:{//thundurus
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 193;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                    }
+                    return;
+                }
+                case 645:{//landorus
+                    if(form_id == 0){
+                        handler->displayMsg(getNickname()+" transformed into its Therian Forme!");
+                        form_id = 194;
+                        return;
+                    }else{
+                        handler->displayMsg(getNickname()+" transformed into its Incarnate Forme!");
+                        form_id = 0;
+                        return;
+                    }
+                    return;
+                }
+                default:break;
+            }
+            break;
+        }
+        case DNA_SPLICERS:{
+            if(species_id!=646)//its not kyurem
+                break;
+            if(form_id == 0){//fuse Kyurem with reshiram or Zekrom
+                for(unsigned int j=0;j<team->getSize();j++){
+                    Monster* other = team->getMonster(j);
+                    Player * player = Player::getPlayer();
+                    if(other == this)
+                        continue;
+                    switch(other->getSpeciesId()){
+                        case 641:{//reshiram
+                            player->addFusedMonster(this,other);
+                            handler->displayMsg(getNickname()+" was fused with "+other->getNickname()+"!");
+                            form_id = 195;//white kyurem
+                            team->removeMonster(j);
+                            return;
+                        }
+                        case 642:{//zekrom
+                            player->addFusedMonster(this,other);
+                            handler->displayMsg(getNickname()+" was fused with "+other->getNickname()+"!");
+                            form_id = 196;//black kyurem
+                            team->removeMonster(j);
+                            return;
+                        }
+                        default:break;
+                    }
+                    handler->displayMsg(getNickname()+" cannot fuse with any Monster in your team!");
+                }
+            }else{//remove fusion with other monster
+                if(team->isFull()){
+                    handler->displayMsg(getNickname()+" cannot un-fuse, your team is full!");
+                    return;
+                }
+                Player * player = Player::getPlayer();
+                Monster * old_fused = player->removeFusedMonster(this);
+                if(old_fused == nullptr){//failsafe check
+                    handler->displayMsg(getNickname()+" cannot un-fuse, you are not fused!");
+                    return;
+                }
+                handler->displayMsg(getNickname()+" un-fused from "+old_fused->getNickname()+"!");
+                form_id = 0;
+                handler->displayMsg(old_fused->getNickname()+" was added back to your team!");
+                team->addMonster(old_fused);
+                return;
+            }
+            break;
+        }
+        default:break;
+    }
+    handler->displayMsg("Nothing happened.");
+}
+
+bool Monster::tryZenMode(){
+    if(damage<getMaxHP()/2)
+        return false;
+    if(species_id != 555)//only works with darmanitan
+        return false;
+    if(form_id == 178 || form_id == 179)//already zen mode
+        return false;
+    if(form_id == 0){
+        form_id = 178;
+        updateStats();
+        return true;
+    }else if(form_id==177){
+        form_id = 179;
+        updateStats();
+        return true;
+    }
+    return false;
+}
+void Monster::resetZenMode(){
+    if(species_id != 555)//only works with darmanitan
+        return;
+    if(form_id != 178 && form_id != 179)//not in zen mode
+        return;
+    if(form_id == 178){
+        form_id = 0;
+        updateStats();
+    }else if(form_id == 179){
+        form_id = 177;
+        updateStats();
+    }
+}
+
+void Monster::changeSeasonalForm(){
+    switch(species_id){
+        case 585:{//deerling
+            switch(getSeason()){
+                case SPRING:{
+                    form_id = 0;
+                    break;
+                }
+                case SUMMER:{
+                    form_id = 183;
+                    break;
+                }
+                case FALL:{
+                    form_id = 184;
+                    break;
+                }
+                case WINTER:{
+                    form_id = 185;
+                    break;
+                }
+                default:{
+                    form_id = 0;
+                    break;
+                }
+            }
+            break;
+        }
+        case 586:{
+            switch(getSeason()){
+                case SPRING:{
+                    form_id = 0;
+                    break;
+                }
+                case SUMMER:{
+                    form_id = 186;
+                    break;
+                }
+                case FALL:{
+                    form_id = 187;
+                    break;
+                }
+                case WINTER:{
+                    form_id = 188;
+                    break;
+                }
+                default:{
+                    form_id = 0;
+                    break;
+                }
+            }
+            break;
+        }
+        default:break;
+    }
+}
+
+void Monster::changeAttackDependentForms(){
+    switch(species_id){
+        case 647:{//keldeo
+            if(hasAttack(SECRET_SWORD_ID)){
+                form_id = 197;
+                updateStats();
+            }else{
+                form_id = 0;
+                updateStats();
+            }
+            break;
+        }
+        default:break;
+    }
+}
+
+bool Monster::changeFormOnUsedAttack(unsigned int attack_id){
+    if(species_id==648 && attack_id==RELIC_SONG_ID){
+        //if meloetta uses relic song
+        if(form_id == 0){
+            form_id = 198;
+            updateStats();
+            return true;
+        }else{
+            form_id = 0;
+            updateStats();
+            return true;
+        }
+    }
+    return false;
 }
