@@ -352,7 +352,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility += 10;
             break;
         }
-        case 14:{
+        case 14:case 308:{
             // burn opp
             if(enemy_active->canBeBurned() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -367,7 +367,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             total_utility += 3 * effect_prob_mult * (actual_stat_zero + accuracy_mod);
             break;
         }
-        case 16:case 67:{
+        case 16:case 67:case 309:{
             // paralysis
             if(enemy_active->canBeParalyzed() &&
                 (!field->hasFieldEffect(SAFEGUARD,PLAYER) || cpu_active->hasAbility(INFILTRATOR)) &&
@@ -402,6 +402,15 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
         case 287:{
             // magma storm
             if(enemy_active->hasVolatileCondition(MAGMA_STORM)){
+                total_utility -= 10;
+            }else{
+                total_utility += 25;
+            }
+            break;
+        }
+        case 304:{
+            // snap trap
+            if(enemy_active->hasVolatileCondition(SNAP_TRAP)){
                 total_utility -= 10;
             }else{
                 total_utility += 25;
@@ -1206,7 +1215,7 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
                 total_utility += 50;
             break;
         }
-        case 142:{
+        case 142:case 305:{
             //+1 speed user
             unsigned int speed_mod = cpu_active->getSpeedModifier();
             total_utility += 5 * (actual_stat_zero - speed_mod) * effect_prob_mult;

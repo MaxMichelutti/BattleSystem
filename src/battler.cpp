@@ -485,6 +485,11 @@ void Battler::addVolatileCondition(VolatileStatusCondition condition, int durati
             handler->displayMsg(getNickname()+" vanished!");
             break;
         }
+        case CHARGING_ICEBURN:
+        case CHARGING_FREEZESHOCK:{
+            handler->displayMsg(getNickname()+" bacame cloaked in a freezing light!");
+            break;
+        }
         case DROWSY:{
             handler->displayMsg(getNickname()+" is drowsy!");
             break;
