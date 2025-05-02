@@ -1938,24 +1938,24 @@ std::pair<unsigned int,bool> Battler::addDamage(unsigned int amount, AttackType 
         handler->displayMsg(getNickname()+"'s Multiscale reduces the damage!");
         amount = max(1,amount / 2);
     }
-    if(currentHP != 1 && 
+    if(isAtFullHP() && 
         currentHP < amount &&
         hasAbility(STURDY)){
         handler->displayMsg(getNickname()+" endures the hit!");
         amount = currentHP - 1;
-    }else if(currentHP != 1 && 
+    }else if(currentHP != 1 &&
         currentHP < amount &&
         hasHeldItem(FOCUS_BAND) &&
         RNG::getRandomInteger(1,10)==1){
         handler->displayMsg(getNickname()+"'s endures the it thanks to its Focus Band!");
         amount = currentHP - 1;
-    }else if(currentHP != 1 && 
+    }else if(isAtFullHP() && 
         currentHP < amount &&
         hasHeldItem(FOCUS_SASH)){
         consumeHeldItem();
         handler->displayMsg(getNickname()+"'s endures the it thanks to its Focus Sash!");
         amount = currentHP - 1;
-    }else if(//currentHP != 1 &&
+    }else if(currentHP != 1 &&
         currentHP < amount &&
         hasVolatileCondition(ENDURE)){
         handler->displayMsg(getNickname()+" endures the hit!");
