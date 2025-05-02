@@ -116,6 +116,7 @@ class Battle{
     std::set<Monster*> monsters_defeated_by_player;
     unsigned int runaway_attempts;
     unsigned int money;
+    std::map<Battler*,BattleAction> actions;
 
     void init(unsigned int cpu_skill, EventHandler* handler, MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag, Weather weather, Terrain terrain);
     void checkUproars();
@@ -132,7 +133,7 @@ class Battle{
     void applyTerrainPostDamage(BattleActionActor actor);
     void applyAbilityPostDamage(BattleActionActor actor);
     void applyItemPostDamage(BattleActionActor actor);
-    bool applySwitchInAbilitiesEffects(BattleActionActor actor);
+    bool applySwitchInAbilitiesEffects(Battler* user_active);
     bool applySwitchInItemsEffects(BattleActionActor actor);
     void applySwitchInFormChange(BattleActionActor actor);
     void applyAttackEffect(Attack* attack,BattleActionActor actor, BattleActionActor other_actor, bool hits_substitute);
@@ -171,7 +172,7 @@ class Battle{
     bool isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
     void applyBattleActionModifiers(BattleAction& action, BattleAction& other_action);
     double computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
-    void performMegaEvolutions(BattleAction& user_action, BattleAction& opponent_action);
+    void performMegaEvolutions();
     void checkZenModes();
     bool onTerrainChange(BattleActionActor actor);
     std::vector<Battler*> getBattlersSortedBySpeed();
