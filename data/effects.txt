@@ -126,7 +126,7 @@
 126: heal 50% of HP user
 127: user copies target ability
 128: use defense instead of spdef for damage calc
-129: +1 DEF SPDEF user
+129: +1 SPATT SPDEF user
 130: future sight/doom desire
 131: power doubles if user has been hit this turn
 132: +1 ATT DEF user

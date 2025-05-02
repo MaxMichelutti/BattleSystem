@@ -3477,14 +3477,14 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             break;
         }
         case 129:{
-            //+1 def spdef user
+            //+1 spatt spdef user
             // bool res = active_user->changeDefenseModifier(+1);
             // res = res || active_user->changeSpecialDefenseModifier(+1);
             // if(res && active_user->hasAbility(CONTRARY))
             //     tryEjectPack(actor);
             if(active_user->isFainted())
                 return;
-            StatCV changes = {{2,1},{4,1}};
+            StatCV changes = {{3,1},{4,1}};
             changeStats(actor,changes,false);
             break;
         }

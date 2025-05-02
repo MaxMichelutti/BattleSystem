@@ -1163,10 +1163,10 @@ int CPUAI::computeAttackUtility(unsigned int attack_id, Battler* cpu_active,Mons
             break;
         }
         case 129:{
-            //+1 def spdef user
-            unsigned int defense_mod = cpu_active->getDefenseModifier();
+            //+1 spatt spdef user
+            unsigned int spatt_mod = cpu_active->getSpecialAttackModifier();
             unsigned int special_defense_mod = cpu_active->getSpecialDefenseModifier();
-            total_utility += 5 * (actual_stat_zero - defense_mod) * effect_prob_mult;
+            total_utility += 5 * (actual_stat_zero - spatt_mod) * effect_prob_mult;
             total_utility += 5 * (actual_stat_zero - special_defense_mod) * effect_prob_mult;
             break;
         }
