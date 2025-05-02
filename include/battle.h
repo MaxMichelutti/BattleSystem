@@ -170,7 +170,7 @@ class Battle{
     void changeStats(BattleActionActor actor,StatCV& changes,bool forced);//true if eject pack activated
     void checkRoomService();
     bool isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
-    void applyBattleActionModifiers(BattleAction& action, BattleAction& other_action);
+    void applyBattleActionModifiers();
     double computeEffectiveness(Attack* attack, BattleActionActor user_actor, BattleActionActor target_actor);
     void performMegaEvolutions();
     void checkZenModes();

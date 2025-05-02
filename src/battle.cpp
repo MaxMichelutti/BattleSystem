@@ -409,8 +409,7 @@ void Battle::performTurn(){
         opponent_active->addVolatileCondition(FOCUSED,5);
     }
     // 2.1 modify actions
-    applyBattleActionModifiers(player_action,opponent_action);
-    applyBattleActionModifiers(opponent_action,player_action);
+    applyBattleActionModifiers();
     
     // 3: sort actions by priority
     #ifdef DEBUG
@@ -8942,57 +8941,62 @@ bool Battle::isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleA
 
 
 
-void Battle::applyBattleActionModifiers(BattleAction& action, BattleAction& other_action){
-    Battler* user_active = getActorBattler(action.getActor());
-    // Battler* opponent_active = getActorBattler(other_action.getActor());
-    if(action.getActionType()==SWITCH){
-        user_active->addVolatileCondition(SWITCHING_OUT,5);
-        if(other_action.getAttackId()==PURSUIT_ID)
-            other_action.setPriority(11);
-    }
-    // check prankster modifications
-    if(player_active->hasAbility(PRANKSTER) && isAttackingActionType(action.getActionType())){
-        Attack* attack = Attack::getAttack(action.getAttackId());
-        if(attack->getCategory() == STATUS){
-            action.setPriority(action.getPriority() + 1);
+void Battle::applyBattleActionModifiers(){
+    for(Battler* user_active: getBattlersSortedBySpeed()){
+        BattleAction& action = actions[user_active];
+        BattleAction other_action = actions[getActorBattler(otherBattleActionActor(action.getActor()))];
+        // Battler* opponent_active = getActorBattler(other_action.getActor());
+        if(action.getActionType()==SWITCH){
+            user_active->addVolatileCondition(SWITCHING_OUT,5);
+            if(other_action.getAttackId()==PURSUIT_ID)
+                other_action.setPriority(11);
+        }
+        // check prankster modifications
+        if(user_active->hasAbility(PRANKSTER) && isAttackingActionType(action.getActionType())){
+            Attack* attack = Attack::getAttack(action.getAttackId());
+            if(attack->getCategory() == STATUS){
+                action.setPriority(action.getPriority() + 1);
+            }
+        }
+        // check grassy glide priority
+        if(isAttackingActionType(action.getActionType())){
+            Attack* attack = Attack::getAttack(action.getAttackId());
+            if(attack->getEffectId()==261 && field->getTerrain()==GRASSY_FIELD && 
+                user_active->isTouchingGround()){
+                action.setPriority(action.getPriority() + 1);
+            }
+        }
+        // apply trick room
+        if(field->hasFullFieldEffect(TRICK_ROOM)){
+            action.setSpeed(MAX_UNSIGNED - action.getSpeed());
+        }
+        // apply action speed mods
+        user_active->tryEatStartOfTurnBerry();
+        if(user_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
+            //quick draw gives 30% chance to the user to act first in its priority bracket
+            user_active->addVolatileCondition(MOVING_FIRST,1);
+        }
+        if(user_active->hasHeldItem(QUICK_CLAW) && RNG::getRandomInteger(1,10)<3){
+            //quick claw gives 20% chance to the user to act first in its priority bracket
+            user_active->addVolatileCondition(MOVING_FIRST,1);
+        }
+        //apply moving first condition
+        if(user_active->hasVolatileCondition(MOVING_FIRST)){
+            user_active->removeVolatileCondition(MOVING_FIRST);
+            action.setSpeed(MAX_UNSIGNED);
+        }
+        // check for lagging tail and full incense
+        if(user_active->hasHeldItem(LAGGING_TAIL) || user_active->hasHeldItem(FULL_INCENSE))
+            user_active->addVolatileCondition(MOVING_LAST,1);
+        if(user_active->hasAbility(STALL))
+            user_active->addVolatileCondition(MOVING_LAST,1);
+        // apply moving last condition
+        if(user_active->hasVolatileCondition(MOVING_LAST)){
+            user_active->removeVolatileCondition(MOVING_LAST);
+            action.setSpeed(0);
         }
     }
-    // check grassy glide priority
-    if(isAttackingActionType(action.getActionType())){
-        Attack* attack = Attack::getAttack(action.getAttackId());
-        if(attack->getEffectId()==261 && field->getTerrain()==GRASSY_FIELD && user_active->isTouchingGround()){
-            action.setPriority(action.getPriority() + 1);
-        }
-    }
-    // apply trick room
-    if(field->hasFullFieldEffect(TRICK_ROOM)){
-        action.setSpeed(MAX_UNSIGNED - action.getSpeed());
-    }
-    // apply action speed mods
-    user_active->tryEatStartOfTurnBerry();
-    if(user_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
-        //quick draw gives 30% chance to the user to act first in its priority bracket
-        user_active->addVolatileCondition(MOVING_FIRST,1);
-    }
-    if(user_active->hasHeldItem(QUICK_CLAW) && RNG::getRandomInteger(1,10)<3){
-        //quick claw gives 20% chance to the user to act first in its priority bracket
-        user_active->addVolatileCondition(MOVING_FIRST,1);
-    }
-    //apply moving first condition
-    if(user_active->hasVolatileCondition(MOVING_FIRST)){
-        user_active->removeVolatileCondition(MOVING_FIRST);
-        action.setSpeed(MAX_UNSIGNED);
-    }
-    // check for lagging tail and full incense
-    if(user_active->hasHeldItem(LAGGING_TAIL) || user_active->hasHeldItem(FULL_INCENSE))
-        user_active->addVolatileCondition(MOVING_LAST,1);
-    if(user_active->hasAbility(STALL))
-        user_active->addVolatileCondition(MOVING_LAST,1);
-    // apply moving last condition
-    if(user_active->hasVolatileCondition(MOVING_LAST)){
-        user_active->removeVolatileCondition(MOVING_LAST);
-        action.setSpeed(0);
-    }
+    
 }
 
 
