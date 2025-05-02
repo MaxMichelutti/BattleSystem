@@ -825,7 +825,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
                 unsigned int damage = max(int(baseDamage(
                     level, 40, attack_stat, defense_stat)),1);
                 unsigned int actual_damage = active_user->addDirectDamage(damage);
-                event_handler->displayMsg(user_mon_name+" dealt "+std::to_string(actual_damage)+" damage to itself!");
+                // event_handler->displayMsg(user_mon_name+" dealt "+std::to_string(actual_damage)+" damage to itself!");
+                event_handler->displayDmgDealt(actual_damage,active_user,"recoil");
                 return;
             }
         }
@@ -958,7 +959,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max_hp / 2;
             unsigned int actual_damage = active_user->addDirectDamage(damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage from recoil!"); 
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage from recoil!"); 
+            event_handler->displayDmgDealt(actual_damage,active_user,"recoil");
             if(active_user->isFainted()){
                 return;
             }
@@ -1261,7 +1263,8 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 unsigned int max_hp = active_user->getMaxHP();
                 unsigned int damage = max_hp / 2;
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" damage from recoil!"); 
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" damage from recoil!"); 
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
             }
             return {0,active_target->hasSubstitute()};
         }
@@ -1349,8 +1352,10 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
             active_target->tryEatLowHPBerry();    
             if(!actual_damage.second)        
                 total_actual_damage += actual_damage.first;
-            if(number_of_hits>1 && actual_damage.first>0 && !actual_damage.second)
-                event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage.first)+" damage!");
+            if(number_of_hits>1 && actual_damage.first>0 && !actual_damage.second){
+                // event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage.first)+" damage!");
+                event_handler->displayDmgDealt(actual_damage.first,active_target);
+            }
             
             bool makes_contact = false;
             if(attack->makesContact() || 
@@ -1405,8 +1410,10 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
         // print action result
         if(number_of_hits>1)
             event_handler->displayMsg(opponent_mon_name+" was hit "+std::to_string(actual_hits)+" times!");
-        else if(actual_damage.first>0 && !actual_damage.second) // number_of hits == 1
-            event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage.first)+" damage!");
+        else if(actual_damage.first>0 && !actual_damage.second){ // number_of hits == 1
+            // event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(actual_damage.first)+" damage!");
+            event_handler->displayDmgDealt(actual_damage.first,active_target);
+        }
         //active_user->setLastAttackUsed(attack->getId());
         last_attack_used_id = attack->getId();
 
@@ -1479,7 +1486,8 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
                 event_handler->displayMsg(opponent_mon_name+"'s Aftermath triggers!");
                 unsigned int aftermath_damage = active_user->getMaxHP() / 4;
                 unsigned int actual_aftermath_damage = active_user->addDirectDamage(aftermath_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_aftermath_damage)+" damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_aftermath_damage)+" damage!");
+                event_handler->displayDmgDealt(actual_aftermath_damage,active_user,opponent_mon_name+"'s Aftermath");
             }
             if(!active_user->isFainted() && active_user->hasAbility(MOXIE) && active_user->getAttackModifier()!=MAX_MODIFIER && !user_changed){
                 // moxie increases attack by 1 when a target is KOed by a user's attack
@@ -1737,7 +1745,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                 if(effect==229)//recoil 1/2 damage dealt
                     recoil_damage = max(actual_damage / 2,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
                 if(active_user->isFainted()){
                     return;
                 }
@@ -1746,7 +1755,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
             case 11:{ // Struggle
                 unsigned int recoil_damage = max(active_user->getMaxHP() / 4,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
                 if(active_user->isFainted())
                     return;
                 break;
@@ -1754,7 +1764,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
             case 20:case 30:case 51:case 296:{//recoil 1/3 damage dealt
                 unsigned int recoil_damage = max(actual_damage / 3,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
                 if(active_user->isFainted())
                     return;
                 break;
@@ -1769,9 +1780,10 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                         event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
                 }else{
                     unsigned int actual_damage_amount = active_user->addDirectDamage(heal_amount);
-                    event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
+                    // event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
                     if(actual_damage_amount>0)
-                        event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                        // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                        event_handler->displayDmgDealt(actual_damage_amount,active_user,opponent_mon_name+"'s Liquid Ooze");
                     if(active_user->isFainted())
                         return;
                 }
@@ -1786,7 +1798,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                 // 1/2 user HP recoil
                 unsigned int recoil_damage = max(active_user->getMaxHP() / 2,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
                 if(active_user->isFainted())
                     return;
                 break;
@@ -1795,7 +1808,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                 //recoil 50% user health
                 unsigned int recoil_damage = max(active_user->getMaxHP() / 2,1);
                 unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" recoil damage!");
+                event_handler->displayDmgDealt(actual_recoil_damage,active_user,"recoil");
                 if(active_user->isFainted())
                     return;
                 break;
@@ -1811,7 +1825,8 @@ void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionA
                 break;
             unsigned int recoil_damage = max(active_user->getMaxHP() / 10,1);
             unsigned int actual_recoil_damage = active_user->addDirectDamage(recoil_damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" damage from Life Orb!");
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_recoil_damage)+" damage from Life Orb!");
+            event_handler->displayDmgDealt(actual_recoil_damage,active_user,"its Life Orb");
             if(active_user->isFainted())
                 return;
             break;
@@ -1860,9 +1875,11 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                         event_handler->displayMsg(user_mon_name+" healed "+std::to_string(actual_heal_amount)+" HP!");
                 }else{
                     unsigned int actual_damage_amount = active_user->addDirectDamage(heal_amount);
-                    event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
-                    if(actual_damage_amount>0)
-                        event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                    // event_handler->displayMsg(opponent_mon_name+"'s Liquid Ooze triggers!");
+                    if(actual_damage_amount>0){
+                        // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage_amount)+" damage!");
+                        event_handler->displayDmgDealt(actual_damage_amount,active_user,opponent_mon_name+"'s Liquid Ooze");
+                    }
                     if(active_user->isFainted())
                         return;
                 }
@@ -3001,7 +3018,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 // faint active user
                 unsigned int maxHP_old = active_user->getMaxHP();
                 unsigned int actual_damage = active_user->addDirectDamage(maxHP_old);
-                event_handler->displayMsg(user_mon_name+" inflicted to itself "+std::to_string(actual_damage)+" damage!");
+                // event_handler->displayMsg(user_mon_name+" inflicted to itself "+std::to_string(actual_damage)+" damage!");
+                checkForExp();
                 delete active_user;
                 field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor);
                 if(actor == PLAYER){
@@ -3621,7 +3639,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                     return;
                 unsigned int maxHP = active_user->getMaxHP();
                 unsigned int actual_damage = active_user->addDirectDamage(maxHP / 2);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage to send a curse to its opponent!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage to send a curse to its opponent!");
+                event_handler->displayMsg(user_mon_name+" lost "+std::to_string(actual_damage)+" HP to send a curse to "+opponent_mon_name+"!");
                 if(active_target->hasVolatileCondition(CURSED)){
                     event_handler->displayMsg("But it failed!");
                     active_user->setLastAttackFailed();
@@ -4551,7 +4570,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             event_handler->displayMsg(user_mon_name+" and "+opponent_mon_name+" share their HP!");
             if(old_hp_user > new_hp_user){
                 user_amount = active_user->addDirectDamage(old_hp_user - new_hp_user);
-                event_handler->displayMsg(user_mon_name+" took "+std::to_string(user_amount)+" damage!");
+                // event_handler->displayMsg(user_mon_name+" took "+std::to_string(user_amount)+" damage!");
+                event_handler->displayDmgDealt(user_amount,active_user);
             }else if(old_hp_user < new_hp_user){
                 user_amount = active_user->removeDamage(new_hp_user - old_hp_user);
                 if(user_amount > 0)
@@ -4559,7 +4579,8 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             }
             if(old_hp_target > new_hp_target){
                 target_amount = active_target->addDirectDamage(old_hp_target - new_hp_target);
-                event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(target_amount)+" damage!");
+                // event_handler->displayMsg(opponent_mon_name+" took "+std::to_string(target_amount)+" damage!");
+                event_handler->displayDmgDealt(target_amount,active_target);
             }else if(old_hp_target < new_hp_target){
                 target_amount = active_target->removeDamage(new_hp_target - old_hp_target);
                 if(target_amount > 0)
@@ -6320,7 +6341,8 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
         case BURN:{
             unsigned int burn_damage = max(active_user->getMaxHP() / 16,1);
             unsigned int actual_burn_damage = active_user->addDirectDamage(burn_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_burn_damage)+" burn damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_burn_damage)+" burn damage!");
+            event_handler->displayDmgDealt(actual_burn_damage,active_user,"its Burn");
             if(active_user->isFainted())
                 return;
             break;
@@ -6331,11 +6353,12 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
                 unsigned int actual_heal = active_user->removeDamage(active_user->getMaxHP()/8);
                 if(actual_heal>0)
                     event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_heal)+" HP!");
-                return;
+                break;
             }
             unsigned int psn_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_psn_damage = active_user->addDirectDamage(psn_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_psn_damage)+" poison damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_psn_damage)+" poison damage!");
+            event_handler->displayDmgDealt(actual_psn_damage,active_user,"Poison");
             if(active_user->isFainted())
                 return;
             break;
@@ -6346,11 +6369,12 @@ void Battle::applyPermanentStatusPostDamage(BattleActionActor actor){
                 unsigned int actual_heal = active_user->removeDamage(active_user->getMaxHP()/8);
                 if(actual_heal>0)
                     event_handler->displayMsg(mon_name+" healed "+std::to_string(actual_heal)+" HP!");
-                return;
+                break;
             }
             unsigned int badpsn_damage = max(active_user->getMaxHP() * active_user->getBadPoisonCounter() / 16,1);
             unsigned int actual_badpsn_damage = active_user->addDirectDamage(badpsn_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_badpsn_damage)+" poison damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_badpsn_damage)+" poison damage!");
+            event_handler->displayDmgDealt(actual_badpsn_damage,active_user,"Poison");
             if(active_user->isFainted())
                 return;
             active_user->increaseBadPoisonCounter();
@@ -6397,12 +6421,14 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
                 leech_seed_damage *= 1.3;
             }
             unsigned int actual_leech_seed_damage = active_user->addDirectDamage(leech_seed_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_leech_seed_damage)+" leech seed damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_leech_seed_damage)+" leech seed damage!");
+            event_handler->displayDmgDealt(actual_leech_seed_damage,active_user,"its seeds");
             if(active_user->hasAbility(LIQUID_OOZE)){// if user has liquid ooze, user takes dmg instead of recovering health
-                event_handler->displayMsg(opponent_name+" is hurt by Liquid Ooze!");
+                // event_handler->displayMsg(opponent_name+" is hurt by Liquid Ooze!");
                 unsigned int liquid_ooze_damage = actual_leech_seed_damage;
                 unsigned int actual_liquid_ooze_damage = active_opponent->addDirectDamage(liquid_ooze_damage);
-                event_handler->displayMsg(opponent_name+" took "+std::to_string(actual_liquid_ooze_damage)+" Liquid Ooze damage!");
+                // event_handler->displayMsg(opponent_name+" took "+std::to_string(actual_liquid_ooze_damage)+" Liquid Ooze damage!");
+                event_handler->displayDmgDealt(actual_liquid_ooze_damage,active_opponent,mon_name+"'s Liquid Ooze");
             }
             else{
                 unsigned int actual_heal_amount = active_opponent->removeDamage(actual_leech_seed_damage);
@@ -6422,7 +6448,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 wrap_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_wrap_damage = active_user->addDirectDamage(wrap_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_wrap_damage)+" Wrap damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_wrap_damage)+" Wrap damage!");
+            event_handler->displayDmgDealt(actual_wrap_damage,active_user,"Wrap");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(WRAP);
@@ -6439,7 +6466,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 bind_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_bind_damage = active_user->addDirectDamage(bind_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_bind_damage)+" Bind damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_bind_damage)+" Bind damage!");
+            event_handler->displayDmgDealt(actual_bind_damage,active_user,"Bind");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(BIND);
@@ -6456,7 +6484,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 st_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_st_damage = active_user->addDirectDamage(st_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_st_damage)+" Snap Trap damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_st_damage)+" Snap Trap damage!");
+            event_handler->displayDmgDealt(actual_st_damage,active_user,"Snap Trap");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(SNAP_TRAP);
@@ -6473,7 +6502,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 fire_spin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" fire spin damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" fire spin damage!");
+            event_handler->displayDmgDealt(actual_fire_spin_damage,active_user,"Fire Spin");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(FIRESPIN);
@@ -6488,7 +6518,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 fire_spin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_fire_spin_damage = active_user->addDirectDamage(fire_spin_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" damage from the fire!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_fire_spin_damage)+" damage from the fire!");
+            event_handler->displayDmgDealt(actual_fire_spin_damage,active_user,"Magma Storm");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(MAGMA_STORM);
@@ -6503,7 +6534,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 infestation_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_infestation_damage = active_user->addDirectDamage(infestation_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_infestation_damage)+" infestation damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_infestation_damage)+" infestation damage!");
+            event_handler->displayDmgDealt(actual_infestation_damage,active_user,"Infestation");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(INFESTED);
@@ -6518,7 +6550,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 whirlpool_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_whirlpool_damage = active_user->addDirectDamage(whirlpool_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_whirlpool_damage)+" Whirlpool damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_whirlpool_damage)+" Whirlpool damage!");
+            event_handler->displayDmgDealt(actual_whirlpool_damage,active_user,"Whirlpool");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(WHIRLPOOL);
@@ -6533,7 +6566,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             else
                 sand_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_sand_damage = active_user->addDirectDamage(sand_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_sand_damage)+" sand tomb damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_sand_damage)+" sand tomb damage!");
+            event_handler->displayDmgDealt(actual_sand_damage,active_user,"Sand Tomb");
             if(active_user->isFainted())
                 return;
             active_user->decrementVolatileCondition(SANDTOMB);
@@ -6544,7 +6578,8 @@ void Battle::applyVolatileStatusPostDamage(BattleActionActor actor){
             event_handler->displayMsg(mon_name+" is hurt by the curse!");
             unsigned int curse_damage = max(active_user->getMaxHP() / 4,1);
             unsigned int actual_curse_damage = active_user->addDirectDamage(curse_damage);
-            event_handler->displayMsg(mon_name+" took "+std::to_string(actual_curse_damage)+" curse damage!");
+            // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_curse_damage)+" curse damage!");
+            event_handler->displayDmgDealt(actual_curse_damage,active_user,"the Curse");
             if(active_user->isFainted())
                 return;
         }
@@ -6640,7 +6675,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
                 event_handler->displayMsg(mon_name+" is buffeted by the sandstorm!");
                 unsigned int sandstorm_damage = max(active_user->getMaxHP() / 16,1);
                 unsigned int actual_sandstorm_damage = active_user->addDirectDamage(sandstorm_damage);
-                event_handler->displayMsg(mon_name+" took "+std::to_string(actual_sandstorm_damage)+" sandstorm damage!");
+                // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_sandstorm_damage)+" sandstorm damage!");
+                event_handler->displayDmgDealt(actual_sandstorm_damage,active_user,"the Sandstorm");
                 if(active_user->isFainted())
                     return;
             }
@@ -6658,7 +6694,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
                 event_handler->displayMsg(mon_name+" is buffeted by the hail!");
                 unsigned int hail_damage = max(active_user->getMaxHP() / 16,1);
                 unsigned int actual_hail_damage = active_user->addDirectDamage(hail_damage);
-                event_handler->displayMsg(mon_name+" took "+std::to_string(actual_hail_damage)+" hail damage!");
+                // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_hail_damage)+" hail damage!");
+                event_handler->displayDmgDealt(actual_hail_damage,active_user,"the Hail");
                 if(active_user->isFainted())
                     return;
             }
@@ -6693,7 +6730,8 @@ void Battle::applyWeatherPostDamage(BattleActionActor actor){
                 event_handler->displayMsg(mon_name+" is losing HP due to "+ability_name+"!");
                 unsigned int solar_power_damage = max(active_user->getMaxHP()+7 / 8,1);
                 unsigned int actual_solar_power_damage = active_user->addDirectDamage(solar_power_damage);
-                event_handler->displayMsg(mon_name+" took "+std::to_string(actual_solar_power_damage)+" "+ability_name+" damage!");
+                // event_handler->displayMsg(mon_name+" took "+std::to_string(actual_solar_power_damage)+" "+ability_name+" damage!");
+                event_handler->displayDmgDealt(actual_solar_power_damage,active_user,ability_name);
                 if(active_user->isFainted())
                     return;
             }
@@ -6795,7 +6833,8 @@ bool Battle::performEntryHazardCheck(BattleActionActor actor){
         unsigned int actual_spikes_damage = active_battler->addDirectDamage(spikes_damage);
         if(actual_spikes_damage > 0){
             std::string battler_name = getActorBattlerName(actor);
-            event_handler->displayMsg(battler_name+" took "+std::to_string(actual_spikes_damage)+" damage from the Spikes!");
+            // event_handler->displayMsg(battler_name+" took "+std::to_string(actual_spikes_damage)+" damage from the Spikes!");
+            event_handler->displayDmgDealt(actual_spikes_damage,active_battler,"Spikes");
         }
     }
     if(active_battler->isFainted())
@@ -6818,14 +6857,15 @@ bool Battle::performEntryHazardCheck(BattleActionActor actor){
         unsigned int actual_stealth_rock_damage = active_battler->addDirectDamage(stealth_rock_damage);
         if(actual_stealth_rock_damage > 0){
             std::string battler_name = getActorBattlerName(actor);
-            event_handler->displayMsg(battler_name+" took "+std::to_string(actual_stealth_rock_damage)+" damage from the Stealth Rocks!");
+            // event_handler->displayMsg(battler_name+" took "+std::to_string(actual_stealth_rock_damage)+" damage from the Stealth Rocks!");
+            event_handler->displayDmgDealt(actual_stealth_rock_damage,active_battler,"Stealth Rocks");
         }
     }
     if(active_battler->isFainted())
         return false;
     // sticky web
     if(field->hasFieldEffect(STICKY_WEB,actor)){
-        event_handler->displayMsg(getActorBattlerName(actor)+" is slowed by the sticky web!");
+        event_handler->displayMsg(getActorBattlerName(actor)+" is slowed by sticky web!");
         // active_battler->changeSpeedModifier(-1);
         StatCV changes = {{5,1}};
         changeStats(actor, changes, false);
@@ -7247,7 +7287,8 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
         event_handler->displayMsg(opponent_mon_name+"'s Rocky Helmet hurts "+user_mon_name+"!");
         unsigned int rocky_helmet_damage = max(active_user->getMaxHP() / 6,1);
         unsigned int actual_rocky_helmet_damage = active_user->addDirectDamage(rocky_helmet_damage);
-        event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rocky_helmet_damage)+" damage from "+opponent_mon_name+"'s Rocky Helmet!");
+        // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rocky_helmet_damage)+" damage from "+opponent_mon_name+"'s Rocky Helmet!");
+        event_handler->displayDmgDealt(actual_rocky_helmet_damage,active_user,opponent_mon_name+"'s Rocky Helmet");
     }
     if(active_user->isFainted())
         return false;
@@ -7383,7 +7424,8 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
             event_handler->displayMsg(opponent_mon_name+"'s Rough Skin hurts "+user_mon_name+"!");
             unsigned int rough_skin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_rough_skin_damage = active_user->addDirectDamage(rough_skin_damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            event_handler->displayDmgDealt(actual_rough_skin_damage,active_user,opponent_mon_name+"'s Rough Skin");
             break;
         }
         case IRON_BARBS:{
@@ -7392,7 +7434,8 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
             event_handler->displayMsg(opponent_mon_name+"'s Iron Barbs hurt "+user_mon_name+"!");
             unsigned int rough_skin_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_rough_skin_damage = active_user->addDirectDamage(rough_skin_damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_rough_skin_damage)+" damage from "+opponent_mon_name+"'s Rough Skin!");
+            event_handler->displayDmgDealt(actual_rough_skin_damage,active_user,opponent_mon_name+"'s Iron Barbs");
             break;
         }
         case MUMMY:{
@@ -7962,7 +8005,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
             event_handler->displayMsg(opponent_mon_name+"'s Spiky Shield hurt "+user_mon_name+"!");
             unsigned int spiky_protect_damage = max(active_user->getMaxHP() / 8,1);
             unsigned int actual_spiky_protect_damage = active_user->addDirectDamage(spiky_protect_damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_spiky_protect_damage)+" damage from "+opponent_mon_name+"'s Spiky Shield!");
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_spiky_protect_damage)+" damage from "+opponent_mon_name+"'s Spiky Shield!");
+            event_handler->displayDmgDealt(actual_spiky_protect_damage,active_user,opponent_mon_name+"'s Spiky Shield");
         }
         decrementVolatiles(active_user);
         active_user->setLastAttackHit();
@@ -7979,7 +8023,8 @@ bool Battle::checkIfAttackFails(Attack* attack,
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max_hp / 2;
             unsigned int actual_damage = active_user->addDirectDamage(damage);
-            event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage from recoil!"); 
+            // event_handler->displayMsg(user_mon_name+" took "+std::to_string(actual_damage)+" damage from recoil!"); 
+            event_handler->displayDmgDealt(actual_damage,active_user,"recoil");
         }
         return true;
     }
@@ -8287,8 +8332,10 @@ void Battle::applyScheduledFutureSights(){
             if(actual_damage.first > 0 && effectiveness < 0.9){
                 event_handler->displayMsg(target_name+" was hit not very effectively!");
             }
-            if(!actual_damage.second)
-                event_handler->displayMsg(target_name+" took "+std::to_string(actual_damage.first)+" damage!");
+            if(!actual_damage.second){
+                // event_handler->displayMsg(target_name+" took "+std::to_string(actual_damage.first)+" damage!");
+                event_handler->displayDmgDealt(actual_damage.first,target_active);
+            }
         }
 
     }
@@ -8336,7 +8383,8 @@ void Battle::applyAbilityPostDamage(BattleActionActor actor){
             if(active_target->isAsleep()){
                 unsigned int bad_dreams_dmg = max(1,active_target->getMaxHP()/8);
                 unsigned int actual_bad_dreams_dmg = active_target->addDirectDamage(bad_dreams_dmg);
-                event_handler->displayMsg(active_target->getNickname()+" took "+std::to_string(actual_bad_dreams_dmg)+" damage from Bad Dreams!");
+                // event_handler->displayMsg(active_target->getNickname()+" took "+std::to_string(actual_bad_dreams_dmg)+" damage from Bad Dreams!");
+                event_handler->displayDmgDealt(actual_bad_dreams_dmg,active_target,user_name+"'s Bad Dreams");
             }
             break;
         }
@@ -8706,7 +8754,8 @@ void Battle::applyItemPostDamage(BattleActionActor actor){
             unsigned int max_hp = active_user->getMaxHP();
             unsigned int damage = max(max_hp / 8,1);
             unsigned int actual_damage = active_user->addDirectDamage(damage);
-            event_handler->displayMsg(active_user->getNickname()+" took "+std::to_string(actual_damage)+" damage from the Sticky Barb!");
+            // event_handler->displayMsg(active_user->getNickname()+" took "+std::to_string(actual_damage)+" damage from the Sticky Barb!");
+            event_handler->displayDmgDealt(actual_damage,active_user,"its Sticky Barb");
             break;
         }
         case LEFTOVERS:{
@@ -8728,7 +8777,8 @@ void Battle::applyItemPostDamage(BattleActionActor actor){
                 unsigned int max_hp = active_user->getMaxHP();
                 unsigned int damage = max(max_hp / 8,1);
                 unsigned int actual_damage = active_user->addDirectDamage(damage);
-                event_handler->displayMsg(active_user->getNickname()+" took "+std::to_string(actual_damage)+" damage from the Sticky Barb!");
+                // event_handler->displayMsg(active_user->getNickname()+" took "+std::to_string(actual_damage)+" damage from the Sticky Barb!");
+                event_handler->displayDmgDealt(actual_damage,active_user,"its Black Sludge");
             }else{
                 //same as leftovers
                 unsigned int max_hp = active_user->getMaxHP();

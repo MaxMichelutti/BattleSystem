@@ -629,3 +629,13 @@ unsigned int TextEventHandler::chooseRotomForm(){
         }
     }
 }
+
+void TextEventHandler::displayDmgDealt(unsigned int dmg, Battler* target){
+    std::string msg = target->getNickname() + " took " + std::to_string(dmg) + " damage!";
+    std::cout << msg << std::endl;
+}
+
+void TextEventHandler::displayDmgDealt(unsigned int dmg, Battler* target,std::string reason){
+    std::string msg = target->getNickname() + " took " + std::to_string(dmg) + " damage from " + reason+ "!";
+    std::cout << msg << std::endl;
+}

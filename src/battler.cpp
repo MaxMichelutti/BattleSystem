@@ -2021,7 +2021,8 @@ void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness
             addVolatileCondition(JUST_EATEN_BERRY,2);
             unsigned int dmg = max(1,attacker->getMaxHP()/8);
             unsigned int actual_dmg = attacker->addDirectDamage(dmg);
-            handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
+            // handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
+            handler->displayDmgDealt(actual_dmg,attacker,getNickname()+"'s "+item_data->getName());
             break;
         }
         case JABOCA_BERRY:{
@@ -2037,7 +2038,8 @@ void Battler::tryEatAfterGettingHitBerry(AttackType category,float effectiveness
             addVolatileCondition(JUST_EATEN_BERRY,2);
             unsigned int dmg = attacker->getMaxHP()/8;
             unsigned int actual_dmg = attacker->addDirectDamage(dmg);
-            handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
+            // handler->displayMsg(attacker->getNickname()+" took "+std::to_string(actual_dmg)+" damage thanks to "+getNickname()+"'s "+item_data->getName()+"!");
+            handler->displayDmgDealt(actual_dmg,attacker,getNickname()+"'s "+item_data->getName());
             break;
         }
         case KEE_BERRY:{
