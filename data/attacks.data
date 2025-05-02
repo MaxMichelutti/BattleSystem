@@ -2220,7 +2220,7 @@ CONTACT
 TYPE:FIGHTING
 EFFECT:122
 # 238 KNOCK OFF
-NAME:Knocf Off
+NAME:Knock Off
 DESCRIPTION:The user slaps down the target's held item, and that item can't be used in that battle. The move does more damage if the target has a held item.
 PP:20
 POWER:65
