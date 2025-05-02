@@ -1392,7 +1392,7 @@ PP:35
 POWER:10
 CONTACT
 # 149 COPYCAT
-NAME:COPYCAT
+NAME:Copycat
 DESCRIPTION:The user mimics the move used immediately before it. The move fails if no other move has been used yet.
 PP:20
 EFFECT:80

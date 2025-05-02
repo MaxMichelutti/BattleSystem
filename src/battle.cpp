@@ -852,7 +852,7 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
 
     event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
     active_user->setLastAttackUsed(attack_id);
-    if(attack->getEffectId() != 80){// I need to preserve this value if copycat is being ised
+    if(attack->getEffectId() != 80){// I need to preserve this value if copycat is being used
         last_attack_used_id = attack_id;
     }
     if(action.getActionType() == ATTACK && attack_id != STRUGGLE_ID){
@@ -899,16 +899,16 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // copycat changes move
     if(attack->getEffectId() == 80){
         // event_handler->displayMsg(user_mon_name+" uses "+attack->getName()+"!");
-        Attack* attack = Attack::getAttack(last_attack_used_id);
-        if(attack==nullptr || !attack->canBeCopycat()){
+        Attack* copied_attack = Attack::getAttack(last_attack_used_id);
+        if(copied_attack==nullptr || !copied_attack->canBeCopycat()){
             event_handler->displayMsg("But it failed!");
             decrementVolatiles(active_user);
             active_user->removeVolatileCondition(LASER_FOCUS);
             return;
         }else{
             attack_id = last_attack_used_id;
-            attack = Attack::getAttack(last_attack_used_id);
-            event_handler->displayMsg(user_mon_name+" copies "+attack->getName()+"!");
+            attack = copied_attack;
+            event_handler->displayMsg(user_mon_name+" copies "+copied_attack->getName()+"!");
         }
     }
     // metronome changes move
