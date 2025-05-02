@@ -664,7 +664,7 @@ void Battler::displayStatModifyResult(bool res,int amount,std::string stat_name)
     if(actor==PLAYER){
         name = "Player's ";
     }else{
-        name = "opponent's ";
+        name = "Opponent's ";
     }
     name += getNickname();
     if(!res){

@@ -260,7 +260,7 @@ void Battle::startBattle(){
         onTerrainChange(battler->getActor());
     }
     for(auto battler: getBattlersSortedBySpeed()){
-        applySwitchInAbilitiesEffects(battler->getActor());
+        applySwitchInAbilitiesEffects(battler);
     }
     for(auto battler: getBattlersSortedBySpeed()){
         applySwitchInItemsEffects(battler->getActor());
@@ -309,6 +309,13 @@ void Battle::incrementTurn(){
         if(battler->hasVolatileCondition(HEAL_BLOCKED)){
             battler->decrementVolatileCondition(HEAL_BLOCKED);
         }
+        //apply harvest
+        if(battler->hasAbility(HARVEST) && RNG::coinFlip() && 
+            !battler->isFainted()){
+            if(battler->restoreBerry()){
+                event_handler->displayMsg(battler->getNickname() + " harvested a berry!");
+            }
+        }
     }
     // collect items on the ground
     if(player_active->hasAbility(PICKUP) && item_on_the_ground_player != NO_ITEM_TYPE && 
@@ -327,19 +334,6 @@ void Battle::incrementTurn(){
         }
     }
     item_on_the_ground_opponent = NO_ITEM_TYPE;
-    // apply harvest
-    if(player_active->hasAbility(HARVEST) && RNG::coinFlip() && 
-        !player_active->isFainted()){
-        if(player_active->restoreBerry()){
-            event_handler->displayMsg(player_active->getNickname() + " harvested a berry!");
-        }
-    }
-    if(opponent_active->hasAbility(HARVEST) && RNG::coinFlip() && 
-        !opponent_active->isFainted()){
-        if(opponent_active->restoreBerry()){
-            event_handler->displayMsg(opponent_active->getNickname() + " harvested a berry!");
-        }
-    }
     //check uproars
     checkUproars();
     // check for form change due to zen mode
@@ -397,13 +391,15 @@ void Battle::performTurn(){
     std::cout.flush();
     #endif
     BattleAction player_action = event_handler->chooseAction(player_active,player_team,opponent_active,field,player_bag,is_wild_battle);
+    actions[player_active] = player_action;
     #ifdef DEBUG
     std::cout<<"Choosing action CPU "<<std::endl;
     std::cout.flush();
     #endif
     BattleAction opponent_action = cpu_ai->chooseAction(opponent_active,opponent_team,player_active,field,opponent_bag);    
+    actions[opponent_active] = opponent_action;
     // apply mega evolutions
-    performMegaEvolutions(player_action,opponent_action);
+    performMegaEvolutions();
     
     // 2: focus monsters
     if(player_action.getAttackId() == FOCUS_PUNCH_ID){
@@ -413,8 +409,7 @@ void Battle::performTurn(){
         opponent_active->addVolatileCondition(FOCUSED,5);
     }
     // 2.1 modify actions
-    applyBattleActionModifiers(player_action,opponent_action);
-    applyBattleActionModifiers(opponent_action,player_action);
+    applyBattleActionModifiers();
     
     // 3: sort actions by priority
     #ifdef DEBUG
@@ -715,7 +710,8 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     if(active_user->hasVolatileCondition(DESTINY_BOND))
         active_user->removeVolatileCondition(DESTINY_BOND);
     // remove protects if move is not protect
-    if(attack->getEffectId() != 26){
+    if(attack->getEffectId() != 26 && 
+        attack->getEffectId() != 268){
         active_user->resetConsecutiveProtect();
     }
     //reset charged if move is electric type
@@ -2536,7 +2532,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 applySwitchInFormChange(other_actor);
                 if (onTerrainChange(other_actor))
                     return;
-                if (applySwitchInAbilitiesEffects(other_actor))
+                if (applySwitchInAbilitiesEffects(active_target))
                     return;
                 if (applySwitchInItemsEffects(other_actor))
                     return;
@@ -3033,7 +3029,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 event_handler->displayMsg(user_mon_name+" was fully healed!");
                 player_active->addSeenOpponent(opponent_active->getMonster());
                 applySwitchInFormChange(actor);
-                if(applySwitchInAbilitiesEffects(actor))
+                if(applySwitchInAbilitiesEffects(active_user))
                     return;
                 if(applySwitchInItemsEffects(actor))
                     return;
@@ -4074,10 +4070,12 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
                 unsigned int new_active_index = event_handler->chooseSwitchForced(player_team);
                 player_team->swapActiveMonster(new_active_index);
                 player_active->setMonster(player_team->getActiveMonster(),player_team);
+                active_target = player_active;
             }else{
                 unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
                 opponent_team->swapActiveMonster(new_active_index);
                 opponent_active->setMonster(opponent_team->getActiveMonster(),opponent_team);
+                active_target = opponent_active;
             }
             checkMonsterLeavingAbilities(actor);
             removeVolatilesFromOpponentOfMonsterLeavingField(actor);
@@ -4085,7 +4083,7 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             applySwitchInFormChange(actor);
             if(onTerrainChange(actor))
                 return;
-            if(applySwitchInAbilitiesEffects(actor))
+            if(applySwitchInAbilitiesEffects(active_target))
                 return;
             if(applySwitchInItemsEffects(actor))
                 return;
@@ -4804,10 +4802,10 @@ void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,BattleActi
             event_handler->displayMsg(user_mon_name+" switched abilities with "+opponent_mon_name+"!");
             // apply new ability effects of user
             applySwitchInFormChange(actor);
-            bool res1 = applySwitchInAbilitiesEffects(actor);
+            bool res1 = applySwitchInAbilitiesEffects(active_user);
             // apply new ability effects of target
             applySwitchInFormChange(other_actor);
-            bool res2 = applySwitchInAbilitiesEffects(other_actor);
+            bool res2 = applySwitchInAbilitiesEffects(active_target);
             if(res1 || res2){
                 return;
             }
@@ -5008,6 +5006,7 @@ void Battle::forgetMoveVolatiles(Battler* active_user){
 void Battle::performSwitch(BattleAction action){
     std::string old_active_monster_name;
     std::string new_active_monster_name;
+    Battler* new_active_monster;
     if(action.getActor() == PLAYER){
         if(player_active->isFainted())
             return;
@@ -5029,6 +5028,7 @@ void Battle::performSwitch(BattleAction action){
         player_team->swapActiveMonster(action.getSwitchId());
         player_active = new Battler(player_team->getActiveMonster(),player_team,field,PLAYER,event_handler);
         new_active_monster_name = player_active->getNickname();
+        new_active_monster = player_active;
         event_handler->displayMsg("Player switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }else{
         if(opponent_active->isFainted())
@@ -5048,6 +5048,7 @@ void Battle::performSwitch(BattleAction action){
         opponent_team->swapActiveMonster(action.getSwitchId());
         opponent_active = new Battler(opponent_team->getActiveMonster(),opponent_team,field,OPPONENT,event_handler);
         new_active_monster_name = opponent_active->getNickname();
+        new_active_monster = opponent_active;
         event_handler->displayMsg("Opponent switched out " + old_active_monster_name + " and sent " + new_active_monster_name);
     }
     checkMonsterLeavingAbilities(action.getActor());
@@ -5055,7 +5056,7 @@ void Battle::performSwitch(BattleAction action){
     resetOpponents();
     removeVolatilesFromOpponentOfMonsterLeavingField(action.getActor());
     applySwitchInFormChange(action.getActor());
-    if(applySwitchInAbilitiesEffects(action.getActor()))
+    if(applySwitchInAbilitiesEffects(new_active_monster))
         return;
     if(applySwitchInItemsEffects(action.getActor()))
         return;
@@ -6823,11 +6824,11 @@ bool Battle::performEntryHazardCheck(BattleActionActor actor){
     return tryEjectPack(actor);
 }
 
-bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
-    Battler * user_active = getActorBattler(actor);
-    Battler * target_active = getActorBattler(otherBattleActionActor(actor));
-    std::string user_name = getActorBattlerName(actor);
-    std::string other_name = getActorBattlerName(otherBattleActionActor(actor));
+bool Battle::applySwitchInAbilitiesEffects(Battler* user){
+    Battler * user_active = user;
+    Battler * target_active = getActorBattler(otherBattleActionActor(user->getActor()));
+    std::string user_name = getActorBattlerName(user->getActor());
+    std::string other_name = getActorBattlerName(otherBattleActionActor(user->getActor()));
     if(user_active->isFainted())
         return false;
 
@@ -6835,7 +6836,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
     
     if(user_ability== POWER_OF_ALCHEMY){
         //copy a traceable ability from a dead teammate
-        MonsterTeam * user_team = getActorTeam(actor);
+        MonsterTeam * user_team = getActorTeam(user->getActor());
         auto monsters = user_team->getMonsters();
         Ability final_choice = NO_ABILITY;
         for(Monster* mon: monsters){
@@ -6870,14 +6871,14 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                 //     tryEjectPack(otherBattleActionActor(actor));
                 // }
                 StatCV changes = {{0,-1}};
-                changeStats(otherBattleActionActor(actor), changes, false);
+                changeStats(target_active->getActor(), changes, false);
                 if(target_active->hasHeldItem(ADRENALINE_ORB)){
                     int modifier = target_active->getSpeedModifier();
                     if(!((modifier==MAX_MODIFIER && !target_active->hasAbility(CONTRARY))||
                         (modifier==MIN_MODIFIER && target_active->hasAbility(CONTRARY)))){
                         target_active->consumeHeldItem();
                         StatCV changes = {{5,1}};
-                        changeStats(otherBattleActionActor(actor), changes, false);
+                        changeStats(target_active->getActor(), changes, false);
                     }
                 }
             }
@@ -6994,7 +6995,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
                     // user_active->changeAttackModifier(1);
                     changes.push_back({1,1});
                 }
-                changeStats(actor, changes, false);
+                changeStats(user->getActor(), changes, false);
             }
             break;
         }
@@ -7045,7 +7046,7 @@ bool Battle::applySwitchInAbilitiesEffects(BattleActionActor actor){
         event_handler->displayMsg(user_name+" is nervous and won't eat berries!");
     }
     // check for EJECT PACK
-    if(tryEjectPack(actor)){
+    if(tryEjectPack(user->getActor())){
         return true;
     }
     
@@ -7404,7 +7405,7 @@ bool Battle::applyContactEffects(Attack * attack, BattleActionActor actor, bool 
             active_target->setAbility(user_ability);
             event_handler->displayMsg(user_mon_name+"'s ability was changed to "+abilityToString(WANDERING_SPIRIT)+"!");
             event_handler->displayMsg(opponent_mon_name+"'s ability was changed to "+abilityToString(user_ability)+"!");
-            applySwitchInAbilitiesEffects(active_target->getActor());
+            applySwitchInAbilitiesEffects(active_target);
             break;
         }
         default: break;
@@ -8170,6 +8171,7 @@ void Battle::removeVolatilesFromOpponentOfMonsterLeavingField(BattleActionActor 
 
 void Battle::forceSwitch(BattleActionActor actor_switching_out){
     Battler* old_active = getActorBattler(actor_switching_out);
+    Battler* new_active;
     unsigned int old_active_maxHP = old_active->getMaxHP();
     field->clearFieldEffectsSuchThat(&isFieldEffectTrapping,actor_switching_out);
     if(old_active->hasAbility(REGENERATOR) && !old_active->isFainted()){
@@ -8185,12 +8187,14 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
         player_team->swapActiveMonster(new_active_index);
         delete player_active;
         player_active = new Battler(player_team->getActiveMonster(),player_team,field,PLAYER,event_handler);
+        new_active = player_active;
         event_handler->displayMsg("Player switched in "+player_active->getNickname());
     }else{
         unsigned int new_active_index = cpu_ai->chooseSwitch(opponent_active,opponent_team,player_active,field);
         opponent_team->swapActiveMonster(new_active_index);
         delete opponent_active;
         opponent_active = new Battler(opponent_team->getActiveMonster(),opponent_team,field,OPPONENT,event_handler);
+        new_active = opponent_active;
         event_handler->displayMsg("Opponent switched in "+opponent_active->getNickname());
     }
     checkMonsterLeavingAbilities(actor_switching_out);
@@ -8200,7 +8204,7 @@ void Battle::forceSwitch(BattleActionActor actor_switching_out){
     applySwitchInFormChange(actor_switching_out);
     if(onTerrainChange(actor_switching_out))
         return;
-    if(applySwitchInAbilitiesEffects(actor_switching_out))
+    if(applySwitchInAbilitiesEffects(new_active))
         return;
     if(applySwitchInItemsEffects(actor_switching_out))
         return;
@@ -8347,7 +8351,7 @@ void Battle::addMoney(unsigned int money){
 void Battle::setWild(){
     if(opponent_team->getSize()>1){
         //error: cannot have wild battles with teams of size > 1
-        event_handler->displayMsg("Error: cannot have wild battles with teams of size > 1");
+        event_handler->displayMsg("Error: cannot have wild battles against teams of size > 1");
         exit(1);
     }
     is_wild_battle = true;
@@ -8937,57 +8941,62 @@ bool Battle::isCriticalHit(Attack* attack, BattleActionActor user_actor, BattleA
 
 
 
-void Battle::applyBattleActionModifiers(BattleAction& action, BattleAction& other_action){
-    Battler* user_active = getActorBattler(action.getActor());
-    // Battler* opponent_active = getActorBattler(other_action.getActor());
-    if(action.getActionType()==SWITCH){
-        user_active->addVolatileCondition(SWITCHING_OUT,5);
-        if(other_action.getAttackId()==PURSUIT_ID)
-            other_action.setPriority(11);
-    }
-    // check prankster modifications
-    if(player_active->hasAbility(PRANKSTER) && isAttackingActionType(action.getActionType())){
-        Attack* attack = Attack::getAttack(action.getAttackId());
-        if(attack->getCategory() == STATUS){
-            action.setPriority(action.getPriority() + 1);
+void Battle::applyBattleActionModifiers(){
+    for(Battler* user_active: getBattlersSortedBySpeed()){
+        BattleAction& action = actions[user_active];
+        BattleAction other_action = actions[getActorBattler(otherBattleActionActor(action.getActor()))];
+        // Battler* opponent_active = getActorBattler(other_action.getActor());
+        if(action.getActionType()==SWITCH){
+            user_active->addVolatileCondition(SWITCHING_OUT,5);
+            if(other_action.getAttackId()==PURSUIT_ID)
+                other_action.setPriority(11);
+        }
+        // check prankster modifications
+        if(user_active->hasAbility(PRANKSTER) && isAttackingActionType(action.getActionType())){
+            Attack* attack = Attack::getAttack(action.getAttackId());
+            if(attack->getCategory() == STATUS){
+                action.setPriority(action.getPriority() + 1);
+            }
+        }
+        // check grassy glide priority
+        if(isAttackingActionType(action.getActionType())){
+            Attack* attack = Attack::getAttack(action.getAttackId());
+            if(attack->getEffectId()==261 && field->getTerrain()==GRASSY_FIELD && 
+                user_active->isTouchingGround()){
+                action.setPriority(action.getPriority() + 1);
+            }
+        }
+        // apply trick room
+        if(field->hasFullFieldEffect(TRICK_ROOM)){
+            action.setSpeed(MAX_UNSIGNED - action.getSpeed());
+        }
+        // apply action speed mods
+        user_active->tryEatStartOfTurnBerry();
+        if(user_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
+            //quick draw gives 30% chance to the user to act first in its priority bracket
+            user_active->addVolatileCondition(MOVING_FIRST,1);
+        }
+        if(user_active->hasHeldItem(QUICK_CLAW) && RNG::getRandomInteger(1,10)<3){
+            //quick claw gives 20% chance to the user to act first in its priority bracket
+            user_active->addVolatileCondition(MOVING_FIRST,1);
+        }
+        //apply moving first condition
+        if(user_active->hasVolatileCondition(MOVING_FIRST)){
+            user_active->removeVolatileCondition(MOVING_FIRST);
+            action.setSpeed(MAX_UNSIGNED);
+        }
+        // check for lagging tail and full incense
+        if(user_active->hasHeldItem(LAGGING_TAIL) || user_active->hasHeldItem(FULL_INCENSE))
+            user_active->addVolatileCondition(MOVING_LAST,1);
+        if(user_active->hasAbility(STALL))
+            user_active->addVolatileCondition(MOVING_LAST,1);
+        // apply moving last condition
+        if(user_active->hasVolatileCondition(MOVING_LAST)){
+            user_active->removeVolatileCondition(MOVING_LAST);
+            action.setSpeed(0);
         }
     }
-    // check grassy glide priority
-    if(isAttackingActionType(action.getActionType())){
-        Attack* attack = Attack::getAttack(action.getAttackId());
-        if(attack->getEffectId()==261 && field->getTerrain()==GRASSY_FIELD && user_active->isTouchingGround()){
-            action.setPriority(action.getPriority() + 1);
-        }
-    }
-    // apply trick room
-    if(field->hasFullFieldEffect(TRICK_ROOM)){
-        action.setSpeed(MAX_UNSIGNED - action.getSpeed());
-    }
-    // apply action speed mods
-    user_active->tryEatStartOfTurnBerry();
-    if(user_active->hasAbility(QUICK_DRAW) && RNG::getRandomInteger(1,10)<4){
-        //quick draw gives 30% chance to the user to act first in its priority bracket
-        user_active->addVolatileCondition(MOVING_FIRST,1);
-    }
-    if(user_active->hasHeldItem(QUICK_CLAW) && RNG::getRandomInteger(1,10)<3){
-        //quick claw gives 20% chance to the user to act first in its priority bracket
-        user_active->addVolatileCondition(MOVING_FIRST,1);
-    }
-    //apply moving first condition
-    if(user_active->hasVolatileCondition(MOVING_FIRST)){
-        user_active->removeVolatileCondition(MOVING_FIRST);
-        action.setSpeed(MAX_UNSIGNED);
-    }
-    // check for lagging tail and full incense
-    if(user_active->hasHeldItem(LAGGING_TAIL) || user_active->hasHeldItem(FULL_INCENSE))
-        user_active->addVolatileCondition(MOVING_LAST,1);
-    if(user_active->hasAbility(STALL))
-        user_active->addVolatileCondition(MOVING_LAST,1);
-    // apply moving last condition
-    if(user_active->hasVolatileCondition(MOVING_LAST)){
-        user_active->removeVolatileCondition(MOVING_LAST);
-        action.setSpeed(0);
-    }
+    
 }
 
 
@@ -9107,49 +9116,32 @@ void Battle::checkMonsterLeavingAbilities(BattleActionActor actor){
     }
 }
 
-void Battle::performMegaEvolutions(BattleAction& player_action, BattleAction& opponent_action){
-    bool player_megas = player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega();
-    bool opponent_megas = opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega();
-    // if(player_action.isMega() && player_active->canMegaEvolve() && !player_team->hasMega()){
-    //     player_active->megaEvolve();
-    //     player_action.setSpeed(player_active->getModifiedSpeed());
-    //     applySwitchInAbilitiesEffects(PLAYER);
-    // }
-    // if(opponent_action.isMega() && opponent_active->canMegaEvolve() && !opponent_team->hasMega()){
-    //     opponent_active->megaEvolve();
-    //     opponent_action.setSpeed(opponent_active->getModifiedSpeed());
-    //     applySwitchInAbilitiesEffects(OPPONENT);
-    // }
-    if(!player_megas && !opponent_megas)
-        return;
-    if(player_megas && !opponent_megas){
-        player_active->megaEvolve();
-        player_action.setSpeed(player_active->getModifiedSpeed());
-        applySwitchInAbilitiesEffects(PLAYER);
-        return;
+void Battle::performMegaEvolutions(){
+    std::set<Battler*> battler_megas;
+    for(Battler* battler: getBattlersSortedBySpeed()){
+        if(battler->isFainted())
+            continue;
+        MonsterTeam * team = getActorTeam(battler->getActor());
+        if(actions[battler].isMega() && battler->canMegaEvolve() && !team->hasMega()){
+            //check if battler megas already contains a Monster on the same team that megas
+            // if so, do not allow the other one to mega evolve
+            bool already_other_mega = false;
+            for(Battler* battler2: battler_megas){
+                if(battler2->getActor() == battler->getActor()){
+                    already_other_mega = true;
+                    break;
+                }
+            }
+            if(!already_other_mega)
+                battler_megas.insert(battler);
+        }
     }
-    if(!player_megas && opponent_megas){
-        opponent_active->megaEvolve();
-        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
-        applySwitchInAbilitiesEffects(OPPONENT);
-        return;
+    for(Battler* battler: battler_megas){
+        battler->megaEvolve();
+        actions[battler].setSpeed(battler->getModifiedSpeed());
     }
-    unsigned int player_speed = player_active->getModifiedSpeed();
-    unsigned int opponent_speed = opponent_active->getModifiedSpeed();
-    if(player_speed > opponent_speed || (player_speed == opponent_speed && RNG::coinFlip())){
-        player_active->megaEvolve();
-        player_action.setSpeed(player_active->getModifiedSpeed());
-        opponent_active->megaEvolve();
-        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
-        applySwitchInAbilitiesEffects(PLAYER);
-        applySwitchInAbilitiesEffects(OPPONENT);
-    }else{
-        opponent_active->megaEvolve();
-        opponent_action.setSpeed(opponent_active->getModifiedSpeed());
-        player_active->megaEvolve();
-        player_action.setSpeed(player_active->getModifiedSpeed());
-        applySwitchInAbilitiesEffects(OPPONENT);
-        applySwitchInAbilitiesEffects(PLAYER);
+    for(Battler* battler: battler_megas){
+        applySwitchInAbilitiesEffects(battler);
     }
 }
 
