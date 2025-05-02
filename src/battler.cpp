@@ -294,6 +294,9 @@ Battler::Battler(Monster* monster, MonsterTeam* team,Field*field,BattleActionAct
     height = monster->getHeight();
     illusion_monster = nullptr;
     resetIllusion(team);
+    if(getPermanentStatus() == BAD_POISON){
+        bad_poison_counter = 1;
+    }
 }
 
 void Battler::resetTypes(){
@@ -342,6 +345,9 @@ void Battler::setMonster(Monster* monster,MonsterTeam* team){
     resetStats();
     resetAbility();
     resetIllusion(team);
+    if(getPermanentStatus() == BAD_POISON){
+        bad_poison_counter = 1;
+    }
 }
 
 void Battler::resetIllusion(MonsterTeam* team){
