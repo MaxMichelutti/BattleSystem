@@ -421,32 +421,9 @@ void Battle::performTurn(){
     std::cout<<"Computing action order "<<std::endl;
     std::cout.flush();
     #endif
-    std::vector<Battler*> sorted_actions = getBattlersSortedByAction();
-    // if (actions[player_active] == actions[opponent_active]){// they are equal in speed and priority
-    //     if(RNG::coinFlip()){
-    //         opponent_action.setOrder(1);
-    //         sorted_actions.push_back(opponent_action);
-    //         player_action.setOrder(2);
-    //         sorted_actions.push_back(player_action);
-    //     }else{
-    //         player_action.setOrder(1);
-    //         sorted_actions.push_back(player_action);
-    //         opponent_action.setOrder(2);
-    //         sorted_actions.push_back(opponent_action);
-    //     }
-    // }else if(player_action > opponent_action){
-    //     player_action.setOrder(1);
-    //     actions.push_back(player_action);
-    //     opponent_action.setOrder(2);
-    //     actions.push_back(opponent_action);
-    // }else{
-    //     opponent_action.setOrder(1);
-    //     actions.push_back(opponent_action);
-    //     player_action.setOrder(2);
-    //     actions.push_back(player_action);
-    // }
+    std::vector<Battler*> sorted_battlers = getBattlersSortedByAction();
     int count = 1;
-    for(auto battler: sorted_actions){
+    for(auto battler: sorted_battlers){
         actions[battler].setOrder(count++);
     }
     #ifdef DEBUG
@@ -456,7 +433,7 @@ void Battle::performTurn(){
     // 4: perform actions
     bool player_was_changed = false;
     bool opponent_was_changed = false;
-    for(auto action_battler: sorted_actions){
+    for(auto action_battler: sorted_battlers){
         BattleAction action = actions[action_battler];
         //skip acxtions that were assigned to a different monster
         if(action.getActor()==PLAYER && player_was_changed){
@@ -465,7 +442,7 @@ void Battle::performTurn(){
         if(action.getActor()==OPPONENT && opponent_was_changed){
             continue;
         }
-        performAction(action, sorted_actions);
+        performAction(action, sorted_battlers);
         checkForExp();
         if(isOver()){
             return;
@@ -479,6 +456,7 @@ void Battle::performTurn(){
         if(opponent_active->isFainted()){
             removeVolatilesFromOpponentOfMonsterLeavingField(OPPONENT);
             checkMonsterLeavingAbilities(OPPONENT);
+            checkForExp();
         }
         if(tryEjectPack(PLAYER))
             player_was_changed = true;
@@ -1655,75 +1633,6 @@ std::pair<unsigned int,bool> Battle::applyDamage(Attack* attack,BattleActionActo
     }
     return {total_actual_damage,actual_damage.second};
 }
-
-// void Battle::applyAttackEffect(Attack* attack,BattleActionActor actor,unsigned int actual_dmg,bool hits_substitute){
-//     // apply move effects
-//     Battler* active_user = getActorBattler(actor);
-//     BattleActionActor other_actor = otherBattleActionActor(actor);
-//     Battler* active_target = getActorBattler(other_actor);
-//     std::string opponent_mon_name = getActorBattlerName(other_actor);
-//     if(active_target->hasAbility(MAGIC_BOUNCE) && attack->isReflectable()){
-//         event_handler->displayMsg(opponent_mon_name+" bounces the attack back!");
-//         active_target = getActorBattler(actor);
-//         opponent_mon_name = getActorBattlerName(actor);
-//     }
-//     std::string user_mon_name = getActorBattlerName(actor);
-//     MonsterTeam* user_team = getActorTeam(actor);
-//     MonsterTeam* target_team = getActorTeam(other_actor);
-//     unsigned int effect = attack->getEffectId();
-//     unsigned int effect_chance = attack->getEffectChance();
-//     if(hits_substitute && attack->getEffectTarget() == TARGET_OPPONENT && !attack->isSoundBased()){
-//         // hitting substitute blocks effects
-//         return;
-//     }
-//     Type attack_type = attack->getType(active_user,field);
-//     bool effect_is_applied=true;
-//     if (effect_chance!=ALWAYS_HITS){
-//         if(active_user->hasAbility(SERENE_GRACE))//serene grace doubles up likelihood of applying effects
-//             effect_chance*= 2;
-//         unsigned int random = RNG::getRandomInteger(1,100);
-//         if(random > effect_chance){
-//             effect_is_applied = false;
-//         }
-//     }
-//     // covert cloak prevents secondary effects
-//     if(active_user->hasHeldItem(COVERT_CLOAK) && 
-//         attack->getCategory() != STATUS &&
-//         attack->getEffectTarget() == TARGET_OPPONENT){
-//         effect_is_applied = false;
-//     }
-//     // SHIELD DUST PROTECTS OPPONENT FROM SECONDARY EFFECTS
-//     if(active_target->hasAbility(SHIELD_DUST) && 
-//         attack->getCategory() != STATUS &&
-//         attack->getEffectTarget() == TARGET_OPPONENT){
-//         effect_is_applied = false;
-//     }
-//     // SHEER FORCE PREVENTS INFLICTING SECONDARY EFFECTS TO OPPONENT
-//     if(active_user->hasAbility(SHEER_FORCE) &&
-//         attack->getCategory() != STATUS &&
-//         attack->getEffectTarget() == TARGET_OPPONENT){
-//         effect_is_applied = false;
-//     }
-//     // SOUNDPROOF PREVENTS SOUND BASED MOVES EFFECTS
-//     if(active_target->hasAbility(SOUNDPROOF) && 
-//         attack->isSoundBased() &&
-//         attack->getEffectTarget() == TARGET_OPPONENT){
-//         effect_is_applied = false;
-//     }
-//     // OVERCOAT PREVENTS POWDER BASED MOVES EFFECTS
-//     if((active_target->hasAbility(OVERCOAT) || active_target->hasHeldItem(SAFETY_GOGGLES)) && 
-//         attack->isPowder() &&
-//         attack->getEffectTarget() == TARGET_OPPONENT){
-//         effect_is_applied = false;
-//     }
-//     //GROUND TYPES ARE IMMUNE TO THUNDER WAVE
-//     if(attack->getId()==115 && 
-//         active_target->hasType(GROUND) &&
-//         !active_target->hasHeldItem(RING_TARGET)){
-//         event_handler->displayMsg("It does not affect "+opponent_mon_name+"!");
-//         active_user->setLastAttackFailed();
-//         return;
-//     }
 
 void Battle::applyRecoil(Attack* attack,unsigned int actual_damage,BattleActionActor actor){
     Battler* active_user = getActorBattler(actor);
@@ -9234,15 +9143,47 @@ std::vector<Battler*> Battle::getBattlersSortedBySpeed(){
 }
 
 std::vector<Battler*> Battle::getBattlersSortedByAction(){
-    std::vector<Battler*> sorted_battlers;
+    // priority - speed
+    struct PrioritySpeedCmp{
+        bool operator()(const std::pair<int,unsigned int>& a,const std::pair<int,unsigned int>& b)const{
+            if(a.first == b.first)
+                return a.second < b.second;
+            return a.first < b.first;
+        }
+    };
+    std::map<std::pair<int,unsigned int>,std::vector<Battler*>,PrioritySpeedCmp> buckets_actions;
     for(auto action: actions){
         Battler* battler = action.first;
         if(battler->isFainted())
             continue;
-        sorted_battlers.push_back(battler);
+        int priority = action.second.getPriority();
+        unsigned int speed = action.second.getSpeed();
+        std::pair<int,unsigned int> key = {priority,speed};
+        if(buckets_actions.find(key) == buckets_actions.end()){
+            buckets_actions[key] = std::vector<Battler*>();
+            buckets_actions[key].push_back(action.first);
+        }else{
+            buckets_actions[key].push_back(action.first);
+        }
     }
-    std::sort(sorted_battlers.begin(),sorted_battlers.end(),[this](Battler* a,Battler* b){
-        return actions[a] > actions[b];
-    });
+    std::vector<Battler*> sorted_battlers;
+    for(auto it = buckets_actions.rbegin(); it != buckets_actions.rend(); ++it){
+        std::vector<Battler*> bucket = it->second;
+        while(!bucket.empty()){
+            unsigned int random_index = RNG::getRandomInteger(0,bucket.size()-1);
+            Battler* acting_battler = bucket[random_index];
+            bucket.erase(bucket.begin() + random_index);
+            if(acting_battler->isFainted())
+                continue;
+            sorted_battlers.push_back(acting_battler);
+        }
+    }
+    #ifdef DEBUG
+    for(auto battler: sorted_battlers){
+        BattleAction action = actions[battler];
+        std::cout<< "Battler: "<<battler->getNickname()<<" Speed: "<<action.getSpeed()<<" Priority: "<<action.getPriority()<<std::endl;
+    }
+    std::cout.flush();
+    #endif
     return sorted_battlers;
 }

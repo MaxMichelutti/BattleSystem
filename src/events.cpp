@@ -74,7 +74,7 @@ BattleAction forcedAction(BattleActionActor actor, Battler* active, Field* field
         return BattleAction(
             actor,
             THRASH,
-            209, 
+            210, 
             0, 
             active->getModifiedSpeed(), 
             0,
