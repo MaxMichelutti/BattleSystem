@@ -12,6 +12,7 @@
 #include "items.h"
 #include "bag.h"
 #include "monster.h"
+#include <algorithm>
 
 class CPUAI;
 class EventHandler;
@@ -150,8 +151,8 @@ class Battle{
     std::pair<unsigned int,bool> applyDamage(Attack*,BattleActionActor, bool moves_after_target, double effectiveness, bool acts_second);//returns the actual damage dealt
     bool checkIfMoveMisses(Attack* attack, BattleActionActor actor, bool acts_second);//true if move results in miss
     double computePower(Attack* attack, BattleActionActor actor, bool moves_after_target,unsigned int beat_up_index);
-    void performAction(BattleAction action, std::vector<BattleAction>& all_actions);
-    void performAttack(BattleAction action, std::vector<BattleAction>& all_actions);
+    void performAction(BattleAction action, std::vector<Battler*>& all_actions);
+    void performAttack(BattleAction action, std::vector<Battler*>& all_actions);
     void performSwitch(BattleAction action);
     void performUseItem(BattleAction action);
     void performRechargeTurn(BattleAction action);
@@ -165,6 +166,7 @@ class Battle{
     void givePlayerExperience(Monster* defeated_monster);
     void checkForExp();
     void tryToCatchWildMonster(ItemType item);
+    
     // void consumeSeeds();
     void performEscape(BattleAction action);
     bool tryEjectPack(BattleActionActor actor);
@@ -177,6 +179,7 @@ class Battle{
     void checkZenModes();
     bool onTerrainChange(BattleActionActor actor);
     std::vector<Battler*> getBattlersSortedBySpeed();
+    std::vector<Battler*> getBattlersSortedByAction();
     public:
     Battle();
     Battle(unsigned int cpu_skill, EventHandler* handler,MonsterTeam* player_team, MonsterTeam* opponent_team, Bag * user_bag, Bag* opponent_bag);

@@ -421,38 +421,43 @@ void Battle::performTurn(){
     std::cout<<"Computing action order "<<std::endl;
     std::cout.flush();
     #endif
-    std::vector<BattleAction> actions;
-    if (player_action == opponent_action){// they are equal in speed and priority
-        if(RNG::coinFlip()){
-            opponent_action.setOrder(1);
-            actions.push_back(opponent_action);
-            player_action.setOrder(2);
-            actions.push_back(player_action);
-        }else{
-            player_action.setOrder(1);
-            actions.push_back(player_action);
-            opponent_action.setOrder(2);
-            actions.push_back(opponent_action);
-        }
-    }else if(player_action > opponent_action){
-        player_action.setOrder(1);
-        actions.push_back(player_action);
-        opponent_action.setOrder(2);
-        actions.push_back(opponent_action);
-    }else{
-        opponent_action.setOrder(1);
-        actions.push_back(opponent_action);
-        player_action.setOrder(2);
-        actions.push_back(player_action);
+    std::vector<Battler*> sorted_actions = getBattlersSortedByAction();
+    // if (actions[player_active] == actions[opponent_active]){// they are equal in speed and priority
+    //     if(RNG::coinFlip()){
+    //         opponent_action.setOrder(1);
+    //         sorted_actions.push_back(opponent_action);
+    //         player_action.setOrder(2);
+    //         sorted_actions.push_back(player_action);
+    //     }else{
+    //         player_action.setOrder(1);
+    //         sorted_actions.push_back(player_action);
+    //         opponent_action.setOrder(2);
+    //         sorted_actions.push_back(opponent_action);
+    //     }
+    // }else if(player_action > opponent_action){
+    //     player_action.setOrder(1);
+    //     actions.push_back(player_action);
+    //     opponent_action.setOrder(2);
+    //     actions.push_back(opponent_action);
+    // }else{
+    //     opponent_action.setOrder(1);
+    //     actions.push_back(opponent_action);
+    //     player_action.setOrder(2);
+    //     actions.push_back(player_action);
+    // }
+    int count = 1;
+    for(auto battler: sorted_actions){
+        actions[battler].setOrder(count++);
     }
     #ifdef DEBUG
-    std::cout<<"Perfrming actions "<<std::endl;
+    std::cout<<"Performing actions "<<std::endl;
     std::cout.flush();
     #endif
     // 4: perform actions
     bool player_was_changed = false;
     bool opponent_was_changed = false;
-    for(auto action: actions){
+    for(auto action_battler: sorted_actions){
+        BattleAction action = actions[action_battler];
         //skip acxtions that were assigned to a different monster
         if(action.getActor()==PLAYER && player_was_changed){
             continue;
@@ -460,7 +465,7 @@ void Battle::performTurn(){
         if(action.getActor()==OPPONENT && opponent_was_changed){
             continue;
         }
-        performAction(action, actions);
+        performAction(action, sorted_actions);
         checkForExp();
         if(isOver()){
             return;
@@ -535,7 +540,7 @@ void Battle::performTurn(){
     #endif
 }
 
-void Battle::performAction(BattleAction action, std::vector<BattleAction>& all_actions){
+void Battle::performAction(BattleAction action, std::vector<Battler*>& all_actions){
     Battler* active_user = getActorBattler(action.getActor());
     Battler* other_active = getActorBattler(otherBattleActionActor(action.getActor()));
     // MonsterTeam* user_team = getActorTeam(action.getActor());
@@ -662,7 +667,7 @@ void Battle::performRechargeTurn(BattleAction action){
     event_handler->displayMsg(user_mon_name+" is recharging!");
 }
 
-void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_actions){
+void Battle::performAttack(BattleAction action, std::vector<Battler*>& all_actions){
     Attack* attack = Attack::getAttack(action.getAttackId());
     BattleActionActor actor = action.getActor();
     Battler* active_user = getActorBattler(actor);
@@ -678,18 +683,18 @@ void Battle::performAttack(BattleAction action, std::vector<BattleAction>& all_a
     // get opponent action to check for sucker punch
     BattleAction other_action;
     if(action.getActor() == PLAYER){
-        for(auto action: all_actions){
-            if(action.getActor() == OPPONENT){
-                other_action = action;
+        for(Battler* action_battler: all_actions){
+            if(action_battler->getActor() == OPPONENT){
+                other_action = actions[active_target];
                 break;
             }
         }
         user_player_name = "Player";
         opponents_player_name = "Opponent";
     }else{
-        for(auto action: all_actions){
-            if(action.getActor() == PLAYER){
-                other_action = action;
+        for(Battler* action_battler: all_actions){
+            if(action_battler->getActor() == PLAYER){
+                other_action = actions[active_target];
                 break;
             }
         }
@@ -9225,5 +9230,19 @@ std::vector<Battler*> Battle::getBattlersSortedBySpeed(){
         sorted_battlers.push_back(opponent_active);
         sorted_battlers.push_back(player_active);
     }
+    return sorted_battlers;
+}
+
+std::vector<Battler*> Battle::getBattlersSortedByAction(){
+    std::vector<Battler*> sorted_battlers;
+    for(auto action: actions){
+        Battler* battler = action.first;
+        if(battler->isFainted())
+            continue;
+        sorted_battlers.push_back(battler);
+    }
+    std::sort(sorted_battlers.begin(),sorted_battlers.end(),[this](Battler* a,Battler* b){
+        return actions[a] > actions[b];
+    });
     return sorted_battlers;
 }
